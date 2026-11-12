@@ -835,7 +835,7 @@ export const ADMIN_OPS: Record<string, Op> = {
         if (!has)
           return invalid(
             `The provider "${p}" is not configured in this installation.`,
-            'Set a key or address in Admin › Meaning search (or RSC_BRAIN_OPENAI_KEY or RSC_BRAIN_OLLAMA_URL for the server), then try again.',
+            'Set a key or address in Admin › Meaning search (or OBSY_BRAIN_OPENAI_KEY or OBSY_BRAIN_OLLAMA_URL for the server), then try again.',
           )
         if (c.body.accept !== true) {
           return {
@@ -1046,7 +1046,7 @@ export const ADMIN_OPS: Record<string, Op> = {
             409,
             'backups_not_set_up',
             'This installation has no folder for its copies.',
-            'Set RSC_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain.',
+            'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain.',
           )
         if (f.running)
           return err(

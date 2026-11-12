@@ -85,7 +85,7 @@ describe('when the daily copy runs', () => {
     )
   })
 
-  it('RSC_BRAIN_BACKUP_AT is HH:MM; anything else is refused with the way out', () => {
+  it('OBSY_BRAIN_BACKUP_AT is HH:MM; anything else is refused with the way out', () => {
     assert.equal(parseBackupAt('03:00'), '03:00')
     assert.equal(parseBackupAt('23:59'), '23:59')
     for (const bad of ['3:00', '24:00', '12:60', '03:00:00', 'noon', '']) {

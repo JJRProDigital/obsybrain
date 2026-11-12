@@ -253,7 +253,7 @@ function openSeed(secret: string | undefined, sealed: string): string {
       409,
       'installation_secret_changed',
       'The second factor of this account cannot be checked: the installation secret changed.',
-      'Ask the administration to put back the previous RSC_BRAIN_SECRET, or to reset your second factor.',
+      'Ask the administration to put back the previous OBSY_BRAIN_SECRET, or to reset your second factor.',
     )
   }
 }

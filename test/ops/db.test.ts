@@ -71,7 +71,7 @@ function run(
 ): Promise<{ code: number; out: string; err: string }> {
   return new Promise((resolve) => {
     const p = spawn(process.execPath, [CLI, ...args], {
-      env: { ...process.env, RSC_BRAIN_DATABASE_URL: '', ...env },
+      env: { ...process.env, OBSY_BRAIN_DATABASE_URL: '', ...env },
     })
     let out = ''
     let err = ''
@@ -768,9 +768,9 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
       )
       assert.equal(nothing.code, 0, nothing.err)
       assert.match(nothing.out, /^Nothing to remove: /)
-      // check reads the standard input only when asked (--db-url-file -); otherwise RSC_BRAIN_DATABASE_URL.
+      // check reads the standard input only when asked (--db-url-file -); otherwise OBSY_BRAIN_DATABASE_URL.
       const fromEnv = await run(['db', 'check', '--json'], 'postgres://nobody@127.0.0.1:1/x', {
-        RSC_BRAIN_DATABASE_URL: PG_URL as string,
+        OBSY_BRAIN_DATABASE_URL: PG_URL as string,
       })
       assert.equal(fromEnv.code, 0, fromEnv.err)
       const fromStdin = await run(['db', 'check', '--db-url-file', '-', '--json'], PG_URL)

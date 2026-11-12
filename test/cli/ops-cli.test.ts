@@ -71,7 +71,7 @@ describe('rsc-brain key id and restore options (no database needed)', () => {
     await writeFile(join(dir, 'key'), `${SOURCE_KEY}\n`, { mode: 0o600 })
   })
   after(async () => rm(dir, { recursive: true, force: true }))
-  const env = { RSC_BRAIN_DATABASE_URL: 'postgres://nowhere/x', RSC_BRAIN_SECRET: TARGET_KEY }
+  const env = { OBSY_BRAIN_DATABASE_URL: 'postgres://nowhere/x', OBSY_BRAIN_SECRET: TARGET_KEY }
 
   it('key id: the id of this installation key, of a key in a file, or of one on the standard input', async () => {
     const own = await run(['key', 'id'], env)
@@ -108,10 +108,10 @@ describe('rsc-brain key id and restore options (no database needed)', () => {
     assert.match(b.err, /--confirm/)
   })
 
-  it('key reseal without --from-file and without RSC_BRAIN_SECRET: exit 2 saying where the key in use comes from', async () => {
-    const r = await run(['key', 'reseal'], { ...env, RSC_BRAIN_SECRET: '' }, `${NEW_KEY}\n`)
+  it('key reseal without --from-file and without OBSY_BRAIN_SECRET: exit 2 saying where the key in use comes from', async () => {
+    const r = await run(['key', 'reseal'], { ...env, OBSY_BRAIN_SECRET: '' }, `${NEW_KEY}\n`)
     assert.equal(r.code, 2)
-    assert.match(r.err, /RSC_BRAIN_SECRET/)
+    assert.match(r.err, /OBSY_BRAIN_SECRET/)
     noKeyIn(r)
   })
 
@@ -164,7 +164,7 @@ describe('rsc-brain restore and key reseal', { skip: skipPg }, () => {
     copy = join(dir, 'source', info.file)
     await migrate(target.db)
     await target.db.query("UPDATE installation SET name = 'Target', setup_done_at = now()")
-    env = { RSC_BRAIN_DATABASE_URL: target.url, RSC_BRAIN_SECRET: TARGET_KEY, RSC_BRAIN_BACKUPS: copies }
+    env = { OBSY_BRAIN_DATABASE_URL: target.url, OBSY_BRAIN_SECRET: TARGET_KEY, OBSY_BRAIN_BACKUPS: copies }
   })
   after(async () => {
     await source.drop()
@@ -273,7 +273,7 @@ describe('rsc-brain restore and key reseal', { skip: skipPg }, () => {
     try {
       const r = await run(
         ['restore', '--file', copy, '--key-file', keyFile(SOURCE_KEY), '--confirm', 'Source'],
-        { ...env, RSC_BRAIN_DATABASE_URL: empty.url },
+        { ...env, OBSY_BRAIN_DATABASE_URL: empty.url },
       )
       assert.equal(r.code, 0, r.err)
       assert.equal((await empty.db.one('SELECT name FROM installation'))?.name, 'Source')
@@ -290,7 +290,7 @@ describe('rsc-brain restore and key reseal', { skip: skipPg }, () => {
     )
     assert.equal(r.code, 1, r.out + r.err)
     assert.match(r.err, new RegExp(keyId(SOURCE_KEY)))
-    assert.doesNotMatch(r.out + r.err, /Set RSC_BRAIN_SECRET/)
+    assert.doesNotMatch(r.out + r.err, /Set OBSY_BRAIN_SECRET/)
     noKeyIn(r)
     assert.deepEqual(await state(target.db), before)
   })
@@ -313,23 +313,23 @@ describe('rsc-brain restore and key reseal', { skip: skipPg }, () => {
     assert.equal(same.code, 2)
   })
 
-  // The launcher's `key rotate` (plan §3.8, T042): the key in use is the service's own (RSC_BRAIN_SECRET), the new
+  // The launcher's `key rotate` (plan §3.8, T042): the key in use is the service's own (OBSY_BRAIN_SECRET), the new
   // one arrives on the standard input; neither is ever on a command line.
-  it('key reseal for a rotation: the key in use from RSC_BRAIN_SECRET, the new one on the standard input', async () => {
-    const r = await run(['key', 'reseal'], { ...env, RSC_BRAIN_SECRET: NEW_KEY }, `${ROTATED_KEY}\n`)
+  it('key reseal for a rotation: the key in use from OBSY_BRAIN_SECRET, the new one on the standard input', async () => {
+    const r = await run(['key', 'reseal'], { ...env, OBSY_BRAIN_SECRET: NEW_KEY }, `${ROTATED_KEY}\n`)
     assert.equal(r.code, 0, r.err)
     noKeyIn(r)
     assert.match(r.out, new RegExp(`key id ${keyId(NEW_KEY)} to key id ${keyId(ROTATED_KEY)}`))
     const inst = await target.db.one<{ mail: { password: string } }>('SELECT mail FROM installation')
     assert.equal(unseal(ROTATED_KEY, String(inst?.mail.password), 'mail.password'), MAIL_PW)
-    const empty = await run(['key', 'reseal'], { ...env, RSC_BRAIN_SECRET: ROTATED_KEY }, '')
+    const empty = await run(['key', 'reseal'], { ...env, OBSY_BRAIN_SECRET: ROTATED_KEY }, '')
     assert.equal(empty.code, 2, 'no new key given')
   })
 
   // The rollback of an update (plan §3.9): the launcher restores the pre-update copy with --keep-keys and no name to
   // type (the copy must be this installation's, made before an update, with its key: stricter than the name).
   it('--keep-keys needs no --confirm: the pre-update copy of this installation comes back, keys kept', async () => {
-    const own = { ...env, RSC_BRAIN_SECRET: ROTATED_KEY }
+    const own = { ...env, OBSY_BRAIN_SECRET: ROTATED_KEY }
     await maintenance.on(target.db, new Date(), { reason: 'update' })
     const info = await backup.create(target.db, {
       dir: join(dir, 'pre'),

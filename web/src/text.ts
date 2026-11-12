@@ -1157,7 +1157,7 @@ export const T = {
       'A copy holds everything: brains, accounts, settings, audit. It is encrypted with the installation key and kept in the folder of the copies.',
     backupsOff: 'No folder for copies is set, so rsc-brain makes no copies.',
     backupsOffHow:
-      'Set RSC_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain. Until then, back up the PostgreSQL database with your usual tools.',
+      'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain. Until then, back up the PostgreSQL database with your usual tools.',
     schedule: 'Schedule',
     scheduleText: (at: string, tz: string, keep: number) =>
       `Every day at ${at} (${tz}), keeping the newest ${keep} daily copies. Copies made by hand or before an update or a restore are kept until you remove them on the machine.`,

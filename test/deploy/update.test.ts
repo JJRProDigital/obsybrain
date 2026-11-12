@@ -81,8 +81,8 @@ let BASE = ''
 let SYSBIN = ''
 let FAKEBIN = ''
 // The shell that runs the launcher: this system's sh, or another one to try the same tests with
-// (RSC_BRAIN_TEST_SHELL=/usr/bin/dash node --test test/deploy/update.test.ts).
-const shell = () => process.env.RSC_BRAIN_TEST_SHELL ?? join(SYSBIN, 'sh')
+// (OBSY_BRAIN_TEST_SHELL=/usr/bin/dash node --test test/deploy/update.test.ts).
+const shell = () => process.env.OBSY_BRAIN_TEST_SHELL ?? join(SYSBIN, 'sh')
 before(() => {
   BASE = mkdtempSync(join(tmpdir(), 'rscb-update-'))
   SYSBIN = join(BASE, 'sysbin')
@@ -140,9 +140,9 @@ const environment = (c: Case, tty: string, env: Record<string, string> = {}) => 
   FAKE_STDIN: c.stdin,
   FAKE_STATE: c.state,
   FAKE_IMAGE_VERSIONS: VERSIONS,
-  RSC_BRAIN_TTY: tty,
+  OBSY_BRAIN_TTY: tty,
   // The launcher waits up to 2 minutes for the service to answer; here, 2 seconds.
-  RSC_BRAIN_TEST_WAIT: '2',
+  OBSY_BRAIN_TEST_WAIT: '2',
   ...env,
 })
 const launch = (c: Case, args: string[], o: { env?: Record<string, string>; answers?: string } = {}): Run => {
@@ -234,10 +234,10 @@ describe('the launcher: update (CA6 with a fake docker)', () => {
     assert.deepEqual(r.images.slice(-2), ['run rsc-brain:next', 'up rsc-brain:next'])
     assert.equal(at(r.calls, / rsc-brain restore /), -1, 'nothing to roll back')
     const after = readEnv(c.dir)
-    assert.equal(after.RSC_BRAIN_IMAGE, 'rsc-brain:next')
+    assert.equal(after.OBSY_BRAIN_IMAGE, 'rsc-brain:next')
     assert.deepEqual(
-      { ...after, RSC_BRAIN_IMAGE: '' },
-      { ...before, RSC_BRAIN_IMAGE: '' },
+      { ...after, OBSY_BRAIN_IMAGE: '' },
+      { ...before, OBSY_BRAIN_IMAGE: '' },
       'only the image changes',
     )
     assert.equal(statSync(join(c.dir, '.env')).mode & 0o777, 0o600)
@@ -245,7 +245,7 @@ describe('the launcher: update (CA6 with a fake docker)', () => {
     assert.ok(r.stdout.includes(PRE), 'names the copy made before')
     assert.equal(existsSync(join(c.dir, '.rsc-brain', 'lock')), false)
     // No key on a command line, ever.
-    assert.equal(r.calls.join('\n').includes(before.RSC_BRAIN_SECRET as string), false)
+    assert.equal(r.calls.join('\n').includes(before.OBSY_BRAIN_SECRET as string), false)
   })
 
   it('--json prints only the summary: from, to, the image and the copy made before', async () => {
@@ -278,7 +278,7 @@ describe('the launcher: update (CA6 with a fake docker)', () => {
       /^build -t rsc-brain:v0\.2\.0 /,
       / rsc-brain maintenance on --reason update$/,
     ])
-    assert.equal(readEnv(c.dir).RSC_BRAIN_IMAGE, 'rsc-brain:v0.2.0')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:v0.2.0')
     // The compose file of the new version is the installation's now.
     assert.match(readFileSync(join(c.dir, 'compose.yaml'), 'utf8'), /# v0\.2\.0\n$/)
   })
@@ -325,7 +325,7 @@ describe('the launcher: update (CA6 with a fake docker)', () => {
     const no = launch(c, ['update', '--dir', c.dir, '--image', 'rsc-brain:next'], { answers: 'n\n' })
     assert.equal(no.code, 1, no.stderr)
     for (const r of [none, no]) assert.equal(at(r.calls, / maintenance /), -1)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_IMAGE, 'rsc-brain:test')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:test')
   })
 
   it('the pre-update copy fails: maintenance off again, nothing else done, exit 1', async () => {
@@ -335,7 +335,7 @@ describe('the launcher: update (CA6 with a fake docker)', () => {
     inOrder(r.calls, [/ maintenance on /, / backup --reason pre-update/, / maintenance off$/])
     assert.equal(at(r.calls, / stop app| migrate/), -1)
     assert.match(r.stderr, /Nothing was changed/)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_IMAGE, 'rsc-brain:test')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:test')
   })
 
   it('maintenance cannot go on: nothing done, exit 1', async () => {
@@ -378,7 +378,7 @@ describe('the launcher: an update that fails goes back (CA7 with a fake docker)'
     assert.equal(r.images.at(-1), 'up rsc-brain:test', 'the old one started')
     assert.equal(readFileSync(join(c.dir, '.env'), 'utf8'), before, 'the settings are as they were')
     // The failure, for the web: the service's last lines, without the key.
-    const key = readEnv(c.dir).RSC_BRAIN_SECRET as string
+    const key = readEnv(c.dir).OBSY_BRAIN_SECRET as string
     assert.match(r.piped, /<<< update record\n/)
     assert.equal(r.piped.includes(key), false)
     assert.match(r.stderr, /went back to 0\.1\.0/)
@@ -432,11 +432,11 @@ describe('the launcher: key rotate (spec C10)', () => {
   const env = { FAKE_KEY_ID_BY_KEY: '1' }
   it('stops, reseals with the new key on the standard input, keeps the old one in a file of its own, starts again', async () => {
     const c = await installed(env)
-    const old = readEnv(c.dir).RSC_BRAIN_SECRET as string
+    const old = readEnv(c.dir).OBSY_BRAIN_SECRET as string
     const r = launch(c, ['key', 'rotate', '--yes', '--json', '--dir', c.dir], { env })
     assert.equal(r.code, 0, r.stderr)
     const s = JSON.parse(r.stdout)
-    const now = readEnv(c.dir).RSC_BRAIN_SECRET as string
+    const now = readEnv(c.dir).OBSY_BRAIN_SECRET as string
     assert.notEqual(now, old)
     assert.ok(now.length >= 64)
     assert.equal(s.installationKey, now)
@@ -464,7 +464,7 @@ describe('the launcher: key rotate (spec C10)', () => {
     const c = await installed(env)
     const r = launch(c, ['key', 'rotate', '--yes', '--dir', c.dir], { env })
     assert.equal(r.code, 0, r.stderr)
-    const now = readEnv(c.dir).RSC_BRAIN_SECRET as string
+    const now = readEnv(c.dir).OBSY_BRAIN_SECRET as string
     assert.equal((r.stdout + r.stderr).includes(now), false)
     assert.match(r.stdout, /key show/)
     assert.match(r.stdout + r.stderr, /installation-key-id\d+\.txt/)
@@ -628,13 +628,13 @@ describe('the launcher: a signal in the tail of a good update', () => {
       / exec -T app rsc-brain maintenance off$/,
       / exec -T app rsc-brain update record --ok --from 0\.1\.0 --to 0\.2\.0$/,
     ])
-    assert.equal(readEnv(c.dir).RSC_BRAIN_IMAGE, 'rsc-brain:next', 'the new version stays')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:next', 'the new version stays')
   }
   for (const at_ of ['update-confirmed', 'update-journal-gone', 'update-maintenance-off']) {
     it(`a Ctrl-C at ${at_} ends the update: no rollback, maintenance off, recorded`, async () => {
       const c = await installed()
       const r = launch(c, update(c, '--image', 'rsc-brain:next'), {
-        env: { RSC_BRAIN_TEST_STOP_AT: at_, RSC_BRAIN_TEST_STOP_SIGNAL: 'INT' },
+        env: { OBSY_BRAIN_TEST_STOP_AT: at_, OBSY_BRAIN_TEST_STOP_SIGNAL: 'INT' },
       })
       ended(c, r)
     })
@@ -661,7 +661,7 @@ describe('the launcher: a signal in the tail of a good update', () => {
     it(`${what} that hangs is ended at the bound, said, and the update goes on as good`, async () => {
       const c = await installed()
       const r = launch(c, update(c, '--image', 'rsc-brain:next'), {
-        env: { [hang]: '1', RSC_BRAIN_TEST_TAIL_WAIT: '1' },
+        env: { [hang]: '1', OBSY_BRAIN_TEST_TAIL_WAIT: '1' },
       })
       assert.equal(r.code, 0, r.stderr)
       assert.match(r.stderr, said)
@@ -693,7 +693,7 @@ describe('the launcher: a signal in the tail of a good update', () => {
     }
     const p = spawn(shell(), [LAUNCHER, ...update(c, '--image', 'rsc-brain:next')], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: environment(c, c.tty, { FAKE_MAINT_OFF_FORK: '1', RSC_BRAIN_TEST_TAIL_WAIT: '1' }),
+      env: environment(c, c.tty, { FAKE_MAINT_OFF_FORK: '1', OBSY_BRAIN_TEST_TAIL_WAIT: '1' }),
     })
     let stderr = ''
     p.stderr.on('data', (d) => {
@@ -735,8 +735,8 @@ describe('the launcher: a signal in the tail of a good update', () => {
         PATH: `${gitBin}:${FAKEBIN}:${SYSBIN}`,
         FAKE_IMAGES: 'rsc-brain:test',
         FAKE_IMAGE_VERSIONS: `${VERSIONS} rsc-brain:v0.2.0=0.2.0`,
-        RSC_BRAIN_TEST_STOP_AT: 'update-previous-gone',
-        RSC_BRAIN_TEST_STOP_SIGNAL: 'INT',
+        OBSY_BRAIN_TEST_STOP_AT: 'update-previous-gone',
+        OBSY_BRAIN_TEST_STOP_SIGNAL: 'INT',
       },
     })
     assert.equal(r.code, 0, r.stderr)
@@ -751,7 +751,7 @@ describe('the launcher: a signal in the tail of a good update', () => {
   it('a Ctrl-C once the tail is done ends the launcher by the signal', async () => {
     const c = await installed()
     const r = launch(c, update(c, '--image', 'rsc-brain:next'), {
-      env: { RSC_BRAIN_TEST_STOP_AT: 'update-signals-back', RSC_BRAIN_TEST_STOP_SIGNAL: 'INT' },
+      env: { OBSY_BRAIN_TEST_STOP_AT: 'update-signals-back', OBSY_BRAIN_TEST_STOP_SIGNAL: 'INT' },
     })
     assert.equal(r.code, null, `ended by the signal, not by itself\n${r.stderr}`)
     assert.ok(at(r.calls, / update record --ok /) >= 0, 'the tail was done')
@@ -790,7 +790,7 @@ describe('the launcher: an update killed after the switch is taken back by the n
       { marker: `${during}-started`, signal: 'SIGKILL' },
     ])
     assert.equal(r.signal, 'SIGKILL', r.stderr)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_IMAGE, 'rsc-brain:next', 'killed after the switch')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:next', 'killed after the switch')
     return { c, before }
   }
   const tookBack = (c: Case, r: Run, before: string) => {
@@ -902,7 +902,7 @@ describe('the launcher: a key rotation that was interrupted (review of PR #36)',
   const env = { FAKE_KEY_ID_BY_KEY: '1' }
   const sealed = (c: Case) => readFileSync(join(c.state, 'sealed'), 'utf8').trim()
   const rotatedKey = (c: Case) =>
-    /^RSC_BRAIN_SECRET='(.*)'$/m.exec(
+    /^OBSY_BRAIN_SECRET='(.*)'$/m.exec(
       readFileSync(join(c.dir, '.rsc-brain', 'env.rotated'), 'utf8'),
     )?.[1] as string
   // Killed outright while it stops the service (before the reseal), or once the reseal has written.
@@ -923,7 +923,7 @@ describe('the launcher: a key rotation that was interrupted (review of PR #36)',
     const r = launch(c, ['key', 'rotate', '--yes', '--json', '--dir', c.dir], { env })
     assert.equal(r.code, 0, r.stderr)
     assert.match(r.stderr, /interrupted/)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_SECRET, pending, '.env holds the key the data is sealed with')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_SECRET, pending, '.env holds the key the data is sealed with')
     assert.equal(sealed(c), pending)
     assert.equal(JSON.parse(r.stdout).installationKey, pending)
     assert.equal(exists(c, 'env.rotated'), false)
@@ -936,7 +936,7 @@ describe('the launcher: a key rotation that was interrupted (review of PR #36)',
     const pending = rotatedKey(c)
     const r = launch(c, ['key', 'rotate', '--yes', '--dir', c.dir], { env })
     assert.equal(r.code, 0, r.stderr)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_SECRET, pending)
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_SECRET, pending)
     assert.equal(sealed(c), pending)
   })
 
@@ -946,10 +946,10 @@ describe('the launcher: a key rotation that was interrupted (review of PR #36)',
       env: { ...env, FAKE_RESEAL_FAIL_AFTER_COMMIT: '1' },
     })
     assert.equal(r.code, 1, r.stderr)
-    const kept = [readEnv(c.dir).RSC_BRAIN_SECRET]
+    const kept = [readEnv(c.dir).OBSY_BRAIN_SECRET]
     if (exists(c, 'env.rotated')) kept.push(rotatedKey(c))
     assert.ok(kept.includes(sealed(c)), 'the key the data is sealed with is still on disk')
-    assert.equal(sealed(c), readEnv(c.dir).RSC_BRAIN_SECRET, 'and it is the one in .env')
+    assert.equal(sealed(c), readEnv(c.dir).OBSY_BRAIN_SECRET, 'and it is the one in .env')
   })
 
   it('with a rotation left halfway, install, update, backup and restore refuse and say how to finish it; status warns', async () => {
@@ -1046,8 +1046,8 @@ describe('the launcher: no secret on a command line (review of PR #36)', () => {
     assert.equal(r.code, 4, r.stderr)
     const log = readFileSync(join(c.dir, 'last-failure.log'), 'utf8')
     assert.match(log, /\[redacted\]/)
-    assert.equal(log.includes(e.RSC_BRAIN_SECRET as string), false)
-    noSecrets(c, [e.RSC_BRAIN_SECRET as string, e.POSTGRES_PASSWORD as string])
+    assert.equal(log.includes(e.OBSY_BRAIN_SECRET as string), false)
+    noSecrets(c, [e.OBSY_BRAIN_SECRET as string, e.POSTGRES_PASSWORD as string])
   })
 
   it('key rotate writes the new key into .env without naming it to sed', async () => {
@@ -1058,13 +1058,13 @@ describe('the launcher: no secret on a command line (review of PR #36)', () => {
     })
     assert.equal(r.code, 0, r.stderr)
     const now = readEnv(c.dir)
-    assert.notEqual(now.RSC_BRAIN_SECRET, old.RSC_BRAIN_SECRET)
+    assert.notEqual(now.OBSY_BRAIN_SECRET, old.OBSY_BRAIN_SECRET)
     assert.deepEqual(
-      { ...now, RSC_BRAIN_SECRET: '' },
-      { ...old, RSC_BRAIN_SECRET: '' },
+      { ...now, OBSY_BRAIN_SECRET: '' },
+      { ...old, OBSY_BRAIN_SECRET: '' },
       'only the key changed',
     )
-    noSecrets(c, [old.RSC_BRAIN_SECRET as string, now.RSC_BRAIN_SECRET as string])
+    noSecrets(c, [old.OBSY_BRAIN_SECRET as string, now.OBSY_BRAIN_SECRET as string])
   })
 })
 
@@ -1094,7 +1094,7 @@ describe('the launcher: second review of PR #36', () => {
     const c = await installed()
     const before = readFileSync(join(c.dir, '.env'), 'utf8')
     const r = launch(c, update(c, '--image', 'rsc-brain:next'), {
-      env: { RSC_BRAIN_TEST_STOP_AT: 'update-journal', RSC_BRAIN_TEST_STOP_SIGNAL: 'INT' },
+      env: { OBSY_BRAIN_TEST_STOP_AT: 'update-journal', OBSY_BRAIN_TEST_STOP_SIGNAL: 'INT' },
     })
     assert.equal(r.code, 1, r.stderr)
     assert.match(r.stderr, /Interrupted\.[\s\S]*Nothing was changed/)
@@ -1174,7 +1174,7 @@ describe('the launcher: second review of PR #36', () => {
   it('a second Ctrl-C during the reseal of a key rotation does not stop it halfway', async () => {
     const env = { FAKE_KEY_ID_BY_KEY: '1' }
     const c = await installed(env)
-    const old = readEnv(c.dir).RSC_BRAIN_SECRET
+    const old = readEnv(c.dir).OBSY_BRAIN_SECRET
     const r = await launchStopped(
       c,
       ['key', 'rotate', '--yes', '--dir', c.dir],
@@ -1183,8 +1183,8 @@ describe('the launcher: second review of PR #36', () => {
     )
     assert.equal(r.signal, null, `killed by ${r.signal}: ${r.stderr}`)
     assert.equal(r.code, 0, r.stderr)
-    assert.notEqual(readEnv(c.dir).RSC_BRAIN_SECRET, old)
-    assert.equal(readFileSync(join(c.state, 'sealed'), 'utf8').trim(), readEnv(c.dir).RSC_BRAIN_SECRET)
+    assert.notEqual(readEnv(c.dir).OBSY_BRAIN_SECRET, old)
+    assert.equal(readFileSync(join(c.state, 'sealed'), 'utf8').trim(), readEnv(c.dir).OBSY_BRAIN_SECRET)
     assert.equal(exists(c, 'env.rotated'), false)
   })
 
@@ -1359,7 +1359,7 @@ describe('the launcher: update --check', () => {
     writeFileSync(join(state, 'lock', 'owner'), '999999 nowhere')
     writeFileSync(
       join(state, 'update.pending'),
-      `RSC_BRAIN_UPDATE_FROM='0.1.0'\nRSC_BRAIN_UPDATE_TO='0.2.0'\nRSC_BRAIN_UPDATE_COPY='${PRE}'\n`,
+      `OBSY_BRAIN_UPDATE_FROM='0.1.0'\nOBSY_BRAIN_UPDATE_TO='0.2.0'\nOBSY_BRAIN_UPDATE_COPY='${PRE}'\n`,
     )
     const tmp = join(c.state, 'tmp')
     mkdirSync(tmp)
@@ -1591,7 +1591,7 @@ describe('the launcher: update --check, the review of PR #41', () => {
     mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
     const host = spawnSync('uname', ['-n'], { encoding: 'utf8' }).stdout.trim()
     writeFileSync(join(c.dir, '.rsc-brain', 'lock', 'owner'), `${process.pid} ${host}`)
-    writeFileSync(join(c.dir, '.rsc-brain', 'update.pending'), `RSC_BRAIN_UPDATE_COPY='${PRE}'\n`)
+    writeFileSync(join(c.dir, '.rsc-brain', 'update.pending'), `OBSY_BRAIN_UPDATE_COPY='${PRE}'\n`)
     const r = check(c, env, '--json')
     assert.equal(r.code, 3, r.stderr)
     assert.equal(JSON.parse(r.stdout).error, 'updating')
@@ -1604,7 +1604,7 @@ describe('the launcher: update --check, the review of PR #41', () => {
     const env = fakeGit(c, { tags: ['v0.2.0'] })
     rmSync(join(c.state, 'up'))
     mkdirSync(join(c.dir, '.rsc-brain'), { recursive: true })
-    writeFileSync(join(c.dir, '.rsc-brain', 'update.pending'), `RSC_BRAIN_UPDATE_COPY='${PRE}'\n`)
+    writeFileSync(join(c.dir, '.rsc-brain', 'update.pending'), `OBSY_BRAIN_UPDATE_COPY='${PRE}'\n`)
     const r = check(c, env, '--json')
     assert.equal(r.code, 3, r.stderr)
     assert.equal(JSON.parse(r.stdout).error, 'updating')
@@ -1638,7 +1638,7 @@ describe('the launcher: update --check, the review of PR #41', () => {
     const r = launch(c, [...base, '--repo', shouting])
     assert.equal(r.code, 0, r.stderr)
     assert.equal(readFileSync(join(c.dir, '.env'), 'utf8').includes(SECRET), false)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_REPO_URL, 'HTTPS://github.com/acme/private.git')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_REPO_URL, 'HTTPS://github.com/acme/private.git')
     const ssh = fresh()
     const r2 = launch(ssh, [
       'install',
@@ -1654,7 +1654,7 @@ describe('the launcher: update --check, the review of PR #41', () => {
       `SSH://git:${SECRET}@example.com/x.git`,
     ])
     assert.equal(r2.code, 0, r2.stderr)
-    assert.equal(readEnv(ssh.dir).RSC_BRAIN_REPO_URL, 'SSH://git@example.com/x.git')
+    assert.equal(readEnv(ssh.dir).OBSY_BRAIN_REPO_URL, 'SSH://git@example.com/x.git')
     const failed = check(c, fakeGit(c, { fail: 'fatal: not found' }), '--repo', shouting)
     assert.match(failed.stderr, /HTTPS:\/\/github\.com\/acme\/private\.git/)
     assert.equal(failed.stderr.includes(SECRET), false)
@@ -1791,7 +1791,7 @@ describe('the launcher: update --check, the review of PR #41', () => {
         given,
       ])
       assert.equal(r.code, 0, r.stderr)
-      assert.equal(readEnv(c.dir).RSC_BRAIN_REPO_URL, kept)
+      assert.equal(readEnv(c.dir).OBSY_BRAIN_REPO_URL, kept)
       const failed = check(c, fakeGit(c, { fail: 'fatal: not found' }), '--repo', given)
       assert.equal(failed.code, 3)
       assert.ok(failed.stderr.includes(`: ${kept} does not answer`), failed.stderr)
@@ -1822,13 +1822,13 @@ describe('the launcher: update --check, the review of PR #41', () => {
 })
 
 describe('the launcher: where the versions are asked', () => {
-  it('install writes RSC_BRAIN_REPO_URL, without credentials; reinstalling keeps it, off included; compose hands it over', async () => {
+  it('install writes OBSY_BRAIN_REPO_URL, without credentials; reinstalling keeps it, off included; compose hands it over', async () => {
     const plain = await installed()
-    assert.equal(readEnv(plain.dir).RSC_BRAIN_REPO_URL, 'https://github.com/ericrisco/rsc-brain.git')
+    assert.equal(readEnv(plain.dir).OBSY_BRAIN_REPO_URL, 'https://github.com/ericrisco/rsc-brain.git')
     const compose = readFileSync(join(plain.dir, 'compose.yaml'), 'utf8')
     assert.ok(
       // biome-ignore lint/suspicious/noTemplateCurlyInString: the syntax of compose
-      compose.includes('RSC_BRAIN_REPO_URL: ${RSC_BRAIN_REPO_URL-https://github.com/ericrisco/rsc-brain}'),
+      compose.includes('OBSY_BRAIN_REPO_URL: ${OBSY_BRAIN_REPO_URL-https://github.com/ericrisco/rsc-brain}'),
     )
 
     const c = fresh()
@@ -1837,15 +1837,15 @@ describe('the launcher: where the versions are asked', () => {
     const args = ['install', '--local', '--yes', '--dir', c.dir, '--port', port, '--image', 'rsc-brain:test']
     const r = launch(c, [...args, '--repo', `https://user:${secret}@github.com/acme/private.git`])
     assert.equal(r.code, 0, r.stderr)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_REPO_URL, 'https://github.com/acme/private.git')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_REPO_URL, 'https://github.com/acme/private.git')
     assert.equal(readFileSync(join(c.dir, '.env'), 'utf8').includes(secret), false)
     assert.equal(launch(c, args).code, 0)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_REPO_URL, 'https://github.com/acme/private.git')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_REPO_URL, 'https://github.com/acme/private.git')
 
     const env = readFileSync(join(c.dir, '.env'), 'utf8')
-    writeFileSync(join(c.dir, '.env'), env.replace(/^RSC_BRAIN_REPO_URL=.*$/m, "RSC_BRAIN_REPO_URL=''"))
+    writeFileSync(join(c.dir, '.env'), env.replace(/^OBSY_BRAIN_REPO_URL=.*$/m, "OBSY_BRAIN_REPO_URL=''"))
     assert.equal(launch(c, args).code, 0)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_REPO_URL, '')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_REPO_URL, '')
   })
 
   it('--check and update ask the repository of the installation, unless --repo says otherwise; off only silences the web', async () => {
@@ -1867,7 +1867,7 @@ describe('the launcher: where the versions are asked', () => {
     assert.equal(up.code, 0, up.stderr)
     assert.ok(up.calls.some((l) => /^git .*ls-remote .*mine\.git/.test(l)))
     const text = readFileSync(join(c.dir, '.env'), 'utf8')
-    writeFileSync(join(c.dir, '.env'), text.replace(/^RSC_BRAIN_REPO_URL=.*$/m, "RSC_BRAIN_REPO_URL=''"))
+    writeFileSync(join(c.dir, '.env'), text.replace(/^OBSY_BRAIN_REPO_URL=.*$/m, "OBSY_BRAIN_REPO_URL=''"))
     assert.ok(check(c, env).calls.some((l) => /^git .*ls-remote .*ericrisco\/rsc-brain/.test(l)))
   })
 
@@ -1901,7 +1901,7 @@ describe('the launcher: the stand-in door', () => {
     assert.match(door, /profiles: \[door\]/)
     assert.match(door, /image: caddy:2\.11\.7-alpine@sha256:/)
     assert.match(door, /restart: "no"/)
-    assert.match(door, /"\$\{RSC_BRAIN_PUBLISH:\?run rsc-brain\.sh install\}:8090"/)
+    assert.match(door, /"\$\{OBSY_BRAIN_PUBLISH:\?run rsc-brain\.sh install\}:8090"/)
     assert.match(door, /aliases:\n\s+- app\n/)
     assert.match(door, /\.\/door\.Caddyfile:\/etc\/caddy\/Caddyfile:ro/)
     assert.match(door, /\.\/\.rsc-brain\/door:\/door:ro/)
@@ -2010,7 +2010,7 @@ describe('the launcher: the stand-in door', () => {
   it('a launcher killed with the door up: the next one takes it down before starting anything', async () => {
     const c = await installed()
     const killed = launch(c, update(c, '--image', 'rsc-brain:broken'), {
-      env: { RSC_BRAIN_TEST_STOP_AT: 'door-up' },
+      env: { OBSY_BRAIN_TEST_STOP_AT: 'door-up' },
     })
     assert.notEqual(killed.code, 0)
     assert.ok(existsSync(join(c.state, 'door')), 'it was up')
@@ -2149,7 +2149,7 @@ describe('the launcher: folders of the web that Docker made for root (closing re
     rootOwned(c, 'report', 'request')
     const r = launch(c, update(c, '--image', 'rsc-brain:next'))
     assert.equal(r.code, 0, r.stderr)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_IMAGE, 'rsc-brain:next')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:next')
     assert.equal(at(r.calls, / restore /), -1)
     assert.match(r.stderr, /sudo chown -R \d+:\d+ "[^"]*\/update"/)
     assert.match(r.stderr, /web/i)

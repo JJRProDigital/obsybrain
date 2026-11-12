@@ -14,7 +14,7 @@ function run(
 ): Promise<{ code: number; out: string; err: string }> {
   return new Promise((resolve) => {
     const p = spawn(process.execPath, [CLI, ...args], {
-      env: { ...process.env, RSC_BRAIN_DATABASE_URL: url, ...env },
+      env: { ...process.env, OBSY_BRAIN_DATABASE_URL: url, ...env },
     })
     let out = ''
     let err = ''
@@ -86,19 +86,19 @@ describe('rsc-brain setup --from-env (companion mode)', { skip: skipPg }, () => 
   it('review: names what is missing; prepares once and prints the service key as JSON; then refuses', async () => {
     const t = await freshDatabase()
     try {
-      const missing = await run(t.url, ['setup', '--from-env'], { RSC_BRAIN_SETUP_URL: '' })
+      const missing = await run(t.url, ['setup', '--from-env'], { OBSY_BRAIN_SETUP_URL: '' })
       assert.equal(missing.code, 2)
-      assert.match(missing.err, /RSC_BRAIN_SETUP_URL.*RSC_BRAIN_ADMIN_PASSWORD/)
+      assert.match(missing.err, /OBSY_BRAIN_SETUP_URL.*OBSY_BRAIN_ADMIN_PASSWORD/)
       const env = {
-        RSC_BRAIN_SETUP_URL: 'http://localhost:8090',
-        RSC_BRAIN_ADMIN_NAME: 'Eric',
-        RSC_BRAIN_ADMIN_EMAIL: 'eric@example.com',
-        RSC_BRAIN_ADMIN_PASSWORD: 'a long enough password',
+        OBSY_BRAIN_SETUP_URL: 'http://localhost:8090',
+        OBSY_BRAIN_ADMIN_NAME: 'Eric',
+        OBSY_BRAIN_ADMIN_EMAIL: 'eric@example.com',
+        OBSY_BRAIN_ADMIN_PASSWORD: 'a long enough password',
       }
       // A failure in the service account leaves nothing set up, so it can be run again.
       const bad = await run(t.url, ['setup', '--from-env'], {
         ...env,
-        RSC_BRAIN_SERVICE_NAME: 'x'.repeat(81),
+        OBSY_BRAIN_SERVICE_NAME: 'x'.repeat(81),
       })
       assert.equal(bad.code, 1)
       assert.equal((await t.db.one('SELECT setup_done_at FROM installation'))?.setup_done_at, null)

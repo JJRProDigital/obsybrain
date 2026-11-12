@@ -63,11 +63,11 @@ export type AppDeps = {
   // Where the log goes (src/core/log.ts: closed fields, never content); standard output by default.
   log?: Log
   meaning?: Providers
-  // The installation secret (RSC_BRAIN_SECRET) that seals what the server must read back.
+  // The installation secret (OBSY_BRAIN_SECRET) that seals what the server must read back.
   secret?: string | undefined
   // Addresses of proxies in front of Brain whose X-Forwarded-* headers are believed.
   trustedProxies?: string[]
-  // RSC_BRAIN_LOCAL_ONLY: the container's gateway, whose plain requests count as this machine (src/http/conn.ts).
+  // OBSY_BRAIN_LOCAL_ONLY: the container's gateway, whose plain requests count as this machine (src/http/conn.ts).
   localGateways?: string[]
   // Replaces SMTP (tests); the server sends with the mail settings of the installation.
   mailTransport?: Outbox['transport']
@@ -77,7 +77,7 @@ export type AppDeps = {
   events?: Partial<EventTimings>
   // The folder of the built web (dist/web next to the server); false serves no web at all.
   web?: string | false
-  // Where the copies go (RSC_BRAIN_BACKUPS): Admin › Backups & system shows the free space there.
+  // Where the copies go (OBSY_BRAIN_BACKUPS): Admin › Backups & system shows the free space there.
   backups?: string | undefined
   // The copies of this process (serve builds them with the daily copy; spec B7).
   copies?: Copies
@@ -87,7 +87,7 @@ export type AppDeps = {
   update?: UpdateConfig
   // Where exports are prepared before they are sent (a private folder of the system's temporary space).
   exportDir?: string
-  // The invitation mails one service account may have sent in an hour (RSC_BRAIN_SERVICE_INVITES_PER_HOUR).
+  // The invitation mails one service account may have sent in an hour (OBSY_BRAIN_SERVICE_INVITES_PER_HOUR).
   serviceInvitesPerHour?: number
   // Companion mode (plan F1 §3.1): installed by rsc-factory and set up by it with the one-time key.
   companion?: CompanionConfig | null

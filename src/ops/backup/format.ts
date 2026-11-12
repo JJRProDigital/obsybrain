@@ -51,12 +51,12 @@ export type HeaderInput = Omit<Header, 'format' | 'product' | 'keyId' | 'kdf'>
 // The id of an installation key, short enough to read aloud. It is a fingerprint keyed by the key itself, so
 // whoever has a copy can test a guess of the key against it (one scrypt per guess): it protects nothing that the
 // key's own length and randomness do not. The installer generates a long random key, and copies refuse a key
-// shorter than RSC_BRAIN_SECRET may be (strongKey).
+// shorter than OBSY_BRAIN_SECRET may be (strongKey).
 export function keyId(secret: string): string {
   return keyedHash(secret, KEY_ID_LABEL).slice(0, 12)
 }
 
-// At least 32 characters, measured as RSC_BRAIN_SECRET is measured at start (config.ts): the one rule there is.
+// At least 32 characters, measured as OBSY_BRAIN_SECRET is measured at start (config.ts): the one rule there is.
 // Whether the key is random is not checked here (no test of that is reliable); the installer generates it.
 export function strongKey(secret: string): boolean {
   return secret.length >= 32
@@ -66,7 +66,7 @@ export const weakKey = () =>
   new AppError(
     409,
     'weak_installation_key',
-    'The installation key is too short to protect a copy (RSC_BRAIN_SECRET needs at least 32 characters).',
+    'The installation key is too short to protect a copy (OBSY_BRAIN_SECRET needs at least 32 characters).',
     'Rotate to a long random key (the installer generates one: openssl rand -base64 48), then make a copy again.',
   )
 

@@ -76,10 +76,10 @@ describe('CA17: the logs of a day of use', { skip: skipPg }, () => {
     const p = spawn(process.execPath, [CLI, 'serve'], {
       env: {
         ...process.env,
-        RSC_BRAIN_DATABASE_URL: t.url,
-        RSC_BRAIN_RELEASES_URL: '',
-        RSC_BRAIN_PORT: String(port),
-        RSC_BRAIN_SECRET: CANARY.secret,
+        OBSY_BRAIN_DATABASE_URL: t.url,
+        OBSY_BRAIN_RELEASES_URL: '',
+        OBSY_BRAIN_PORT: String(port),
+        OBSY_BRAIN_SECRET: CANARY.secret,
       },
     })
     let out = ''

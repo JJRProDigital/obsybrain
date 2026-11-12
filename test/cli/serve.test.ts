@@ -53,9 +53,9 @@ describe('rsc-brain serve', { skip: skipPg }, () => {
       // No request to the list of releases from a test.
       env: {
         ...process.env,
-        RSC_BRAIN_DATABASE_URL: t.url,
-        RSC_BRAIN_PORT: String(port),
-        RSC_BRAIN_RELEASES_URL: '',
+        OBSY_BRAIN_DATABASE_URL: t.url,
+        OBSY_BRAIN_PORT: String(port),
+        OBSY_BRAIN_RELEASES_URL: '',
       },
     })
     const exited = new Promise<number | null>((r) => p.on('exit', (code) => r(code)))

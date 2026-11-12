@@ -1,6 +1,6 @@
 // «This machine only» behind containers (spec B7 C19, plan §3.8, risk 7). B4's rule: a password only over an
 // encrypted connection or from this machine. In a container, a browser on the same machine reaches the service
-// through the container's gateway, never from 127.0.0.1. With RSC_BRAIN_LOCAL_ONLY=1 (the launcher sets it only
+// through the container's gateway, never from 127.0.0.1. With OBSY_BRAIN_LOCAL_ONLY=1 (the launcher sets it only
 // when the port is published on 127.0.0.1 alone, and the service refuses to start otherwise), a request that comes
 // straight from that gateway, through no proxy, counts as this machine. Anything else does not: another address,
 // any forwarded header, the flag off.
@@ -25,7 +25,7 @@ const passwordAccepted = (r: IncomingMessage, o: Parameters<typeof connOf>[1]) =
   }
 }
 
-describe('RSC_BRAIN_LOCAL_ONLY: a password over http from the container gateway', () => {
+describe('OBSY_BRAIN_LOCAL_ONLY: a password over http from the container gateway', () => {
   it('with the flag, a request straight from the gateway counts as this machine and may use a password', () => {
     const c = connOf(req(GATEWAY), { trusted: [], localGateways: [GATEWAY] })
     assert.deepEqual([c.local, c.encrypted, c.ip], [true, false, GATEWAY])
@@ -125,8 +125,8 @@ describe('the container gateway', () => {
   })
 })
 
-describe('RSC_BRAIN_LOCAL_ONLY in the settings', () => {
-  const base = { RSC_BRAIN_DATABASE_URL: 'postgres://x@localhost/x' }
+describe('OBSY_BRAIN_LOCAL_ONLY in the settings', () => {
+  const base = { OBSY_BRAIN_DATABASE_URL: 'postgres://x@localhost/x' }
 
   it('is off by default', () => {
     assert.equal(readConfig(base).localOnly, false)
@@ -135,7 +135,7 @@ describe('RSC_BRAIN_LOCAL_ONLY in the settings', () => {
   it('is on with 1 only when the port is published on this machine alone', () => {
     for (const publish of ['127.0.0.1:8090', '[::1]:8090']) {
       assert.equal(
-        readConfig({ ...base, RSC_BRAIN_LOCAL_ONLY: '1', RSC_BRAIN_PUBLISH: publish }).localOnly,
+        readConfig({ ...base, OBSY_BRAIN_LOCAL_ONLY: '1', OBSY_BRAIN_PUBLISH: publish }).localOnly,
         true,
         publish,
       )
@@ -155,15 +155,15 @@ describe('RSC_BRAIN_LOCAL_ONLY in the settings', () => {
     ]) {
       const env = {
         ...base,
-        RSC_BRAIN_LOCAL_ONLY: '1',
-        ...(publish === undefined ? {} : { RSC_BRAIN_PUBLISH: publish }),
+        OBSY_BRAIN_LOCAL_ONLY: '1',
+        ...(publish === undefined ? {} : { OBSY_BRAIN_PUBLISH: publish }),
       }
-      assert.throws(() => readConfig(env), /RSC_BRAIN_LOCAL_ONLY.*127\.0\.0\.1/s, String(publish))
+      assert.throws(() => readConfig(env), /OBSY_BRAIN_LOCAL_ONLY.*127\.0\.0\.1/s, String(publish))
     }
     assert.throws(
-      () => readConfig({ ...base, RSC_BRAIN_LOCAL_ONLY: 'yes' }),
-      /RSC_BRAIN_LOCAL_ONLY must be 1 or 0/,
+      () => readConfig({ ...base, OBSY_BRAIN_LOCAL_ONLY: 'yes' }),
+      /OBSY_BRAIN_LOCAL_ONLY must be 1 or 0/,
     )
-    assert.equal(readConfig({ ...base, RSC_BRAIN_LOCAL_ONLY: '0' }).localOnly, false)
+    assert.equal(readConfig({ ...base, OBSY_BRAIN_LOCAL_ONLY: '0' }).localOnly, false)
   })
 })

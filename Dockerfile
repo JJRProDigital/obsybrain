@@ -28,9 +28,9 @@ RUN npm run build && chmod -R a+rX dist migrations package.json LICENSE
 
 FROM node:25.9.0-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4
 ENV NODE_ENV=production \
-    RSC_BRAIN_HOST=0.0.0.0 \
-    RSC_BRAIN_PORT=8090 \
-    RSC_BRAIN_BACKUPS=/backups
+    OBSY_BRAIN_HOST=0.0.0.0 \
+    OBSY_BRAIN_PORT=8090 \
+    OBSY_BRAIN_BACKUPS=/backups
 WORKDIR /app
 COPY --from=deps /app/node_modules node_modules
 COPY --from=build /app/dist dist
@@ -45,5 +45,5 @@ VOLUME ["/backups"]
 EXPOSE 8090
 # Healthy when the service answers and its database does (GET /v1/health is 503 otherwise).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD wget -q -O /dev/null "http://127.0.0.1:${RSC_BRAIN_PORT}/v1/health" || exit 1
+  CMD wget -q -O /dev/null "http://127.0.0.1:${OBSY_BRAIN_PORT}/v1/health" || exit 1
 CMD ["rsc-brain", "serve"]

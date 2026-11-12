@@ -23,7 +23,7 @@ company's record.
   revision, a reason and an undo, and what agents write cites its sources.
 - **Your data stays yours.** Self-hosted, MIT licensed, on PostgreSQL. No model runs on the server and none of your
   data is sent anywhere unless you turn it on. The only call out by default is a daily check for a new version,
-  and an empty `RSC_BRAIN_REPO_URL` stops it.
+  and an empty `OBSY_BRAIN_REPO_URL` stops it.
 
 ## How it works
 
@@ -213,7 +213,7 @@ A published version is a `vX.Y.Z` tag of the repository. `update --check` (with 
 `installed`, `latest`, `newer`, `notes`) asks with this machine's own access, so it also works on a private
 repository, stops nothing and writes nothing in the installation; it exits with 3 when it cannot say. The
 web asks once a day, without credentials: on a private repository Administration › Backups & system says
-«Could not check for a new version» and gives that command. It asks `RSC_BRAIN_REPO_URL` in `.env`, which
+«Could not check for a new version» and gives that command. It asks `OBSY_BRAIN_REPO_URL` in `.env`, which
 `install --repo` sets without credentials; empty, the web never asks.
 
 The new version is fetched and built while the one installed keeps serving. Then rsc-brain goes
@@ -340,7 +340,7 @@ It only removes what it made: its containers, network and volumes, and its own f
 
 Your own additions to the containers go in `compose.override.yaml` next to `compose.yaml`; the
 launcher keeps and loads it. Change settings by running `install` again, never by editing `.env` or
-`compose.yaml`: the published port and `RSC_BRAIN_PUBLISH` must stay one value.
+`compose.yaml`: the published port and `OBSY_BRAIN_PUBLISH` must stay one value.
 
 ## Development
 
@@ -352,15 +352,15 @@ npx playwright install chromium   # once, for the browser tests of the web
 npm run verify      # lint, types, build, tests, the web in a browser, audit
 ```
 
-`scripts/verify.sh` runs the tests against a real PostgreSQL: the server in `RSC_BRAIN_PG_URL`, or,
+`scripts/verify.sh` runs the tests against a real PostgreSQL: the server in `OBSY_BRAIN_PG_URL`, or,
 when the PostgreSQL binaries are installed, a throwaway local cluster in `.pg-test/` (port 55432)
 that it starts for you (`npm run pg:stop` stops it). Without either, the PostgreSQL tests are
 skipped, as in CI.
 
 `npm run test:install` builds the container image and runs it with Docker (local only; skipped
-without `RSC_BRAIN_INSTALL_TESTS=1`, and always in CI).
+without `OBSY_BRAIN_INSTALL_TESTS=1`, and always in CI).
 
-`node scripts/bench-search.ts` (with `RSC_BRAIN_PG_URL`) loads 10 000 pages and 100 000 entries into a
+`node scripts/bench-search.ts` (with `OBSY_BRAIN_PG_URL`) loads 10 000 pages and 100 000 entries into a
 throwaway database and times 100 varied searches; 95 % must answer in under a second.
 
 ## The web
@@ -376,7 +376,7 @@ forwards the API to 4100).
 
 The tests of the web run in Chromium. `npm run test:web` uses a fixture of the API (no database; each of
 its answers is checked against the API description), as CI does. `npm run test:e2e` runs against the
-real server and the PostgreSQL in `RSC_BRAIN_PG_URL`; `verify.sh` runs it when that PostgreSQL answers
+real server and the PostgreSQL in `OBSY_BRAIN_PG_URL`; `verify.sh` runs it when that PostgreSQL answers
 and says why it skipped it otherwise. `node test/web/fixture/main.ts` starts the fixture on port 4173 to
 walk the web by hand: open `/__fixture/use?preset=signed-in` (or `fresh`, `signed-out`, `insecure`).
 
@@ -389,8 +389,8 @@ ports»): an installation on one of them answers `curl` but not the web, the bri
 Off by default; search by words works without it. The server offers a provider when its setting is
 present, and the administration turns it on in the web, accepting that text is sent to the provider:
 
-- `RSC_BRAIN_OPENAI_KEY` — OpenAI, model `text-embedding-3-small`;
-- `RSC_BRAIN_OLLAMA_URL` — a local Ollama, model `nomic-embed-text`.
+- `OBSY_BRAIN_OPENAI_KEY` — OpenAI, model `text-embedding-3-small`;
+- `OBSY_BRAIN_OLLAMA_URL` — a local Ollama, model `nomic-embed-text`.
 
 A curator can exclude a brain: its vectors are deleted and nothing more of it is sent.
 
@@ -427,7 +427,7 @@ ranking.
 - Service accounts (such as RSC Factory) get a main key, and may hold two at once to rotate without
   a cut. With it they mint short keys, one per job.
 - Mail is optional. Set the sending account in the web. Its password is stored sealed with
-  `RSC_BRAIN_SECRET`. The mail log keeps who, what kind, when and how it ended, never the content.
+  `OBSY_BRAIN_SECRET`. The mail log keeps who, what kind, when and how it ended, never the content.
 
 ## Writing to the wiki directly
 
@@ -518,10 +518,10 @@ works, never save secrets, close with a summary.
   can read (`~/.config/rsc-brain/<agent>.token`, mode 600), never on a command line. Each agent has a
   variable of its own, loaded from that file, so two agents never overwrite one token, and a shared
   `.mcp.json` never holds it: Claude Code `.mcp.json`
-  (`"Authorization": "Bearer ${RSC_BRAIN_TOKEN_CLAUDE_CODE}"`), Codex `~/.codex/config.toml`
-  (`url` + `bearer_token_env_var = "RSC_BRAIN_TOKEN_CODEX"`), OpenCode `opencode.json`
-  (`{env:RSC_BRAIN_TOKEN_OPENCODE}`), Cursor `.cursor/mcp.json` (`${env:RSC_BRAIN_TOKEN_CURSOR}`).
-  Other agents use `RSC_BRAIN_TOKEN` and `~/.config/rsc-brain/token`, the bridge's. The kit only
+  (`"Authorization": "Bearer ${OBSY_BRAIN_TOKEN_CLAUDE_CODE}"`), Codex `~/.codex/config.toml`
+  (`url` + `bearer_token_env_var = "OBSY_BRAIN_TOKEN_CODEX"`), OpenCode `opencode.json`
+  (`{env:OBSY_BRAIN_TOKEN_OPENCODE}`), Cursor `.cursor/mcp.json` (`${env:OBSY_BRAIN_TOKEN_CURSOR}`).
+  Other agents use `OBSY_BRAIN_TOKEN` and `~/.config/rsc-brain/token`, the bridge's. The kit only
   carries a placeholder (`tokenPlaceholder`); the web fills it once, when you create the token there.
 - **The optional reminder:** for Claude Code, two hooks (below). Other agents get a text for their
   instructions file (`AGENTS.md`) and the server's `close_session` prompt.
@@ -540,7 +540,7 @@ As a local MCP server: `{"command": "rsc-brain", "args": ["bridge", "--url", "<a
 "~/.config/rsc-brain/token"]}`. The bridge reads one JSON-RPC message per line on stdin and sends each to
 `/mcp` with the token and the headers the server checks; answers go to stdout, notifications get none.
 It speaks to modern clients and to older ones that start with `initialize`. The token comes from
-`--token-file`, else `RSC_BRAIN_TOKEN`, else `~/.config/rsc-brain/token`; there is no option to pass it on the
+`--token-file`, else `OBSY_BRAIN_TOKEN`, else `~/.config/rsc-brain/token`; there is no option to pass it on the
 command line, and it is never printed. Plain `http` is refused except to this machine. When rsc-brain does
 not answer, the request gets a JSON-RPC error that says so and how to proceed; the bridge keeps running.
 
@@ -619,7 +619,7 @@ rsc-brain takes a password only over an encrypted connection, or from the same m
 on the same machine must therefore send `X-Forwarded-For` and `X-Forwarded-Proto` (nginx:
 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` and
 `proxy_set_header X-Forwarded-Proto $scheme;`). List the proxy's own address in
-`RSC_BRAIN_TRUSTED_PROXIES`. Without those headers, everything the proxy forwards looks local.
+`OBSY_BRAIN_TRUSTED_PROXIES`. Without those headers, everything the proxy forwards looks local.
 
 ## In a container
 
@@ -629,10 +629,10 @@ run by an unprivileged user, healthy when `GET /v1/health` answers. `rsc-brain s
 
 In a container, a browser on the same machine arrives through the container's gateway, not from
 `127.0.0.1`, so the rule above would refuse its password. When the port is published on `127.0.0.1`
-alone, set `RSC_BRAIN_PUBLISH=127.0.0.1:<port>` and `RSC_BRAIN_LOCAL_ONLY=1`: a request straight
+alone, set `OBSY_BRAIN_PUBLISH=127.0.0.1:<port>` and `OBSY_BRAIN_LOCAL_ONLY=1`: a request straight
 from the gateway, with no forwarded headers and addressed to `localhost`, `127.0.0.1` or `[::1]`,
 then counts as this machine. The service refuses to
-start with `RSC_BRAIN_LOCAL_ONLY=1` and any other `RSC_BRAIN_PUBLISH`: published to the network,
+start with `OBSY_BRAIN_LOCAL_ONLY=1` and any other `OBSY_BRAIN_PUBLISH`: published to the network,
 every visitor would arrive from the gateway and a password would cross it in clear. Never publish
 the port elsewhere by hand with the flag on; for access from other machines use a domain with HTTPS.
 

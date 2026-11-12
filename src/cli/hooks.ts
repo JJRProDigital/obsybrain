@@ -135,7 +135,7 @@ async function remember(base: string, token: string, claude: string, brain: stri
 // Where the stop hook remembers that it already asked (so it asks once per brain session in each
 // Claude Code session, even if the agent does not close it).
 function stateDir(): string {
-  if (process.env.RSC_BRAIN_STATE_DIR) return process.env.RSC_BRAIN_STATE_DIR
+  if (process.env.OBSY_BRAIN_STATE_DIR) return process.env.OBSY_BRAIN_STATE_DIR
   let who = 'user'
   try {
     who = String(userInfo().uid)

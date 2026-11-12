@@ -1,6 +1,6 @@
 // `rsc-brain db check|provision|drop` (plan §3.7): what the launcher runs to prepare an existing or shared PostgreSQL.
 // A connection URL holds a password, so it never comes on the command line: from a file (`-` is the standard input),
-// or for check RSC_BRAIN_DATABASE_URL; provision and drop also read an administration URL piped in. The password of the new role is generated here and leaves once: written to a new
+// or for check OBSY_BRAIN_DATABASE_URL; provision and drop also read an administration URL piped in. The password of the new role is generated here and leaves once: written to a new
 // file only its owner reads (0600), or printed on standard output. Exit codes: 0 done, 2 usage, 3 a missing
 // requirement (nothing changed), 1 anything else.
 import { randomBytes } from 'node:crypto'
@@ -123,7 +123,7 @@ async function checkCommand(args: string[]): Promise<number> {
   // The standard input only when asked: a program that runs check with its own input open is not read.
   const url = await readUrl(v['url-stdin'] ? '-' : v['db-url-file'], {
     piped: false,
-    fallback: process.env.RSC_BRAIN_DATABASE_URL || undefined,
+    fallback: process.env.OBSY_BRAIN_DATABASE_URL || undefined,
   })
   const r = await db.check(url)
   if ('code' in r) return failed(tooOldError(r))

@@ -47,7 +47,7 @@ export type RestoreOptions = {
   file: string
   // The key the copy was made with.
   key: string
-  // The key of this installation (RSC_BRAIN_SECRET): what was sealed is sealed again with it.
+  // The key of this installation (OBSY_BRAIN_SECRET): what was sealed is sealed again with it.
   targetSecret: string | undefined
   // Only the rollback of an update: keys and sessions keep working, no epoch move, no audit line (spec C13).
   keepKeys: boolean
@@ -104,7 +104,7 @@ const notRscBrain = () =>
     409,
     'not_rsc_brain_database',
     'This database holds tables that are not rsc-brain’s, so a restore will not replace them.',
-    'Point RSC_BRAIN_DATABASE_URL at the database of rsc-brain (one it owns alone), then restore again.',
+    'Point OBSY_BRAIN_DATABASE_URL at the database of rsc-brain (one it owns alone), then restore again.',
   )
 
 const restoreFailed = (code: unknown) =>

@@ -1,4 +1,4 @@
-// The installation key (spec B7 «La llave de la instalación»; plan §3.3, §3.4): RSC_BRAIN_SECRET seals what the
+// The installation key (spec B7 «La llave de la instalación»; plan §3.3, §3.4): OBSY_BRAIN_SECRET seals what the
 // server must read back (second-factor seeds, the mail password, the key of the meaning provider) and keys the
 // fingerprint of where meaning search sends text. Restoring a copy into another installation, and rotating the key,
 // seal all of it again from one key to another, in the caller's transaction.

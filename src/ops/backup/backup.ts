@@ -233,14 +233,14 @@ function failure(cat: FailureCategory, err: unknown): AppError {
       507,
       'disk_full',
       'The copy did not fit: the disk of the copies is full. No copy was kept.',
-      'Free space in the folder of the copies (RSC_BRAIN_BACKUPS), or keep fewer (RSC_BRAIN_BACKUP_KEEP), then make a copy again.',
+      'Free space in the folder of the copies (OBSY_BRAIN_BACKUPS), or keep fewer (OBSY_BRAIN_BACKUP_KEEP), then make a copy again.',
     )
   if (cat === 'no_permission')
     return new AppError(
       500,
       'backup_failed',
       'rsc-brain cannot write in the folder of the copies.',
-      'Let the user that runs rsc-brain write in RSC_BRAIN_BACKUPS, then make a copy again.',
+      'Let the user that runs rsc-brain write in OBSY_BRAIN_BACKUPS, then make a copy again.',
     )
   return new AppError(
     500,

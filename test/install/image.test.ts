@@ -1,8 +1,8 @@
 // The rsc-brain image (plan T033, spec B7 C19), with real containers: local only, never in CI (plan §5.1). Runs with
-// RSC_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Builds the image from this tree, then: it
+// OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Builds the image from this tree, then: it
 // prints its version; it holds the built server, the web and the migrations, and none of the tests, the local
 // database, .env or the git history; it runs as an unprivileged user and says when it is healthy. And «this machine
-// only» behind the container's network: published on 127.0.0.1 with RSC_BRAIN_LOCAL_ONLY=1, the browser on this
+// only» behind the container's network: published on 127.0.0.1 with OBSY_BRAIN_LOCAL_ONLY=1, the browser on this
 // machine counts as this machine; without the flag it does not; with the flag but published to the network, the
 // service refuses to start. Everything it creates carries a unique name and is removed after.
 import assert from 'node:assert/strict'
@@ -19,12 +19,12 @@ const ID = randomBytes(4).toString('hex')
 const IMAGE = `rscb-pr33-test-image:${ID}`
 const NET = `rscb-pr33-test-net-${ID}`
 const PG = `rscb-pr33-test-pg-${ID}`
-const PG_IMAGE = process.env.RSC_BRAIN_TEST_PG_IMAGE ?? 'postgres:17-alpine'
+const PG_IMAGE = process.env.OBSY_BRAIN_TEST_PG_IMAGE ?? 'postgres:17-alpine'
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
-  if (process.env.RSC_BRAIN_INSTALL_TESTS !== '1')
-    return 'set RSC_BRAIN_INSTALL_TESTS=1 to build and run the image'
+  if (process.env.OBSY_BRAIN_INSTALL_TESTS !== '1')
+    return 'set OBSY_BRAIN_INSTALL_TESTS=1 to build and run the image'
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) return 'Docker does not answer'
   return null
 })()
@@ -124,7 +124,7 @@ describe('the rsc-brain image', { skip: why ?? false }, () => {
       const port = await freePort()
       const name = `rscb-pr33-test-app-${ID}-${port}`
       containers.push(name)
-      const envArgs = Object.entries({ RSC_BRAIN_DATABASE_URL: pgUrl, ...env }).flatMap(([k, v]) => [
+      const envArgs = Object.entries({ OBSY_BRAIN_DATABASE_URL: pgUrl, ...env }).flatMap(([k, v]) => [
         '-e',
         `${k}=${v}`,
       ])
@@ -152,8 +152,8 @@ describe('the rsc-brain image', { skip: why ?? false }, () => {
         return r.status === 200 ? ((await r.json()) as { connection: { local: boolean } }).connection : null
       })
 
-    it('C19: with RSC_BRAIN_LOCAL_ONLY=1, published on 127.0.0.1, this machine is this machine; and it is healthy', async () => {
-      const app = await start({ RSC_BRAIN_LOCAL_ONLY: '1', RSC_BRAIN_PUBLISH: '127.0.0.1:8090' })
+    it('C19: with OBSY_BRAIN_LOCAL_ONLY=1, published on 127.0.0.1, this machine is this machine; and it is healthy', async () => {
+      const app = await start({ OBSY_BRAIN_LOCAL_ONLY: '1', OBSY_BRAIN_PUBLISH: '127.0.0.1:8090' })
       assert.deepEqual(await setupConnection(app.base), { encrypted: false, local: true })
       const status = await until('healthy', async () => {
         const s = await docker('inspect', '--format', '{{.State.Health.Status}}', app.name)
@@ -171,14 +171,14 @@ describe('the rsc-brain image', { skip: why ?? false }, () => {
     })
 
     it('C19: with the flag but published to the network, the service does not start', async () => {
-      const app = await start({ RSC_BRAIN_LOCAL_ONLY: '1', RSC_BRAIN_PUBLISH: '0.0.0.0:8090' })
+      const app = await start({ OBSY_BRAIN_LOCAL_ONLY: '1', OBSY_BRAIN_PUBLISH: '0.0.0.0:8090' })
       const state = await until('the exit', async () => {
         const s = await docker('inspect', '--format', '{{.State.Status}} {{.State.ExitCode}}', app.name)
         return s.startsWith('exited') ? s : null
       })
       assert.notEqual(state, 'exited 0')
       const logs = (await run('docker', ['logs', app.name])).stderr
-      assert.match(logs, /RSC_BRAIN_LOCAL_ONLY=1 needs RSC_BRAIN_PUBLISH/)
+      assert.match(logs, /OBSY_BRAIN_LOCAL_ONLY=1 needs OBSY_BRAIN_PUBLISH/)
     })
   })
 })

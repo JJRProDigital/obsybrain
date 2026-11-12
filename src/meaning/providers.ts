@@ -83,7 +83,7 @@ export function ollama(baseUrl: string, model = 'nomic-embed-text'): Provider {
 
 export function providersFromEnv(env: NodeJS.ProcessEnv = process.env): Providers {
   const out: Providers = {}
-  if (env.RSC_BRAIN_OPENAI_KEY) out.openai = openai(env.RSC_BRAIN_OPENAI_KEY)
-  if (env.RSC_BRAIN_OLLAMA_URL) out.ollama = ollama(env.RSC_BRAIN_OLLAMA_URL)
+  if (env.OBSY_BRAIN_OPENAI_KEY) out.openai = openai(env.OBSY_BRAIN_OPENAI_KEY)
+  if (env.OBSY_BRAIN_OLLAMA_URL) out.ollama = ollama(env.OBSY_BRAIN_OLLAMA_URL)
   return out
 }

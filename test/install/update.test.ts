@@ -1,6 +1,6 @@
 // Updating with real containers (plan T042, T043; spec B7 CA6, CA7, CA7b, CA17): local only, never in CI (plan
-// §5.1). Runs with RSC_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Every Docker resource carries
-// the prefix rscb-pr35-test- and a random id, and is removed after; the folders live under RSC_BRAIN_INSTALL_TMP (or
+// §5.1). Runs with OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Every Docker resource carries
+// the prefix rscb-pr35-test- and a random id, and is removed after; the folders live under OBSY_BRAIN_INSTALL_TMP (or
 // the system's temporary folder).
 //
 // Three images are built here: the tree as it is (installed first); «next», the same with one more migration, added
@@ -28,8 +28,8 @@ const ID = randomBytes(4).toString('hex')
 // The version of the tree, which is what the first image says.
 const INSTALLED = (JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')) as { version: string })
   .version
-// RSC_BRAIN_INSTALL_PREFIX: another prefix for its resources, for a run beside others.
-const PREFIX = process.env.RSC_BRAIN_INSTALL_PREFIX ?? 'rscb-pr35-test'
+// OBSY_BRAIN_INSTALL_PREFIX: another prefix for its resources, for a run beside others.
+const PREFIX = process.env.OBSY_BRAIN_INSTALL_PREFIX ?? 'rscb-pr35-test'
 const BASE_IMAGE = `${PREFIX}-image:${ID}`
 const NEXT = `${PREFIX}-next:${ID}`
 const BROKEN = `${PREFIX}-broken:${ID}`
@@ -49,8 +49,8 @@ const CANARY = {
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
-  if (process.env.RSC_BRAIN_INSTALL_TESTS !== '1')
-    return 'set RSC_BRAIN_INSTALL_TESTS=1 to update with real containers'
+  if (process.env.OBSY_BRAIN_INSTALL_TESTS !== '1')
+    return 'set OBSY_BRAIN_INSTALL_TESTS=1 to update with real containers'
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) return 'Docker does not answer'
   return null
 })()
@@ -72,7 +72,7 @@ const launch = (args: string[], onStderr?: (all: string) => void): Promise<Run> 
     const started = Date.now()
     const p = spawn('sh', [LAUNCHER, ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, RSC_BRAIN_TTY: '/nonexistent/tty' },
+      env: { ...process.env, OBSY_BRAIN_TTY: '/nonexistent/tty' },
     })
     let stdout = ''
     let stderr = ''
@@ -147,7 +147,7 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
     })
 
   before(async () => {
-    BASE = mkdtempSync(join(process.env.RSC_BRAIN_INSTALL_TMP ?? tmpdir(), `${PREFIX}-`))
+    BASE = mkdtempSync(join(process.env.OBSY_BRAIN_INSTALL_TMP ?? tmpdir(), `${PREFIX}-`))
     dir = join(BASE, 'install')
     let started = Date.now()
     await run('docker', ['build', '-q', '-t', BASE_IMAGE, ROOT], { maxBuffer: 64 << 20 })
@@ -268,7 +268,7 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
       `CA6 tables compared: ${Object.keys(before).length}, rows ${Object.values(before).reduce((n, v) => n + Number(v.split(' ')[0]), 0)}`,
     )
     assert.equal(await psql("SELECT count(*) FROM schema_migrations WHERE id LIKE '0024_test_next%'"), '1')
-    assert.equal(envOf(dir).RSC_BRAIN_IMAGE, NEXT)
+    assert.equal(envOf(dir).OBSY_BRAIN_IMAGE, NEXT)
     assert.equal((await asToken('/v1/brains')).status, 200, 'the token from before')
     assert.equal((await asAdmin('/v1/me')).status, 200, 'the session from before')
     const copies = (await (await asAdmin('/v1/admin/backups')).json()) as {
@@ -359,7 +359,7 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
     // The version before answers; its tables are as the copy held them (the writes after it was back apart).
     const status = await launch(['status', '--json', '--dir', dir])
     assert.equal(JSON.parse(status.stdout).version, '98.0.0')
-    assert.equal(envOf(dir).RSC_BRAIN_IMAGE, NEXT)
+    assert.equal(envOf(dir).OBSY_BRAIN_IMAGE, NEXT)
     assert.equal(await psql("SELECT count(*) FROM schema_migrations WHERE id LIKE '0025_test_broken%'"), '0')
     assert.ok(atCopy && Object.keys(atCopy).length > 0, 'the tables were read when the copy was made')
     // Every table as the copy held it: nothing refused got in, nothing accepted was lost.
@@ -375,7 +375,7 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
     }
     assert.equal(copies.lastUpdate.ok, false)
     assert.equal(copies.lastUpdate.to, '99.0.0')
-    assert.ok(!String(copies.lastUpdate.log).includes(envOf(dir).RSC_BRAIN_SECRET as string))
+    assert.ok(!String(copies.lastUpdate.log).includes(envOf(dir).OBSY_BRAIN_SECRET as string))
     assert.match(String(copies.lastUpdate.log), /division by zero|0025_test_broken/)
     const { chromium } = await import('@playwright/test')
     const browser = await chromium.launch()
@@ -395,7 +395,7 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
   })
 
   it('CA17: a day of use with canaries; docker compose logs of every service hold none of them', async () => {
-    const secrets = [token, cookie.split('=').slice(1).join('='), envOf(dir).RSC_BRAIN_SECRET as string]
+    const secrets = [token, cookie.split('=').slice(1).join('='), envOf(dir).OBSY_BRAIN_SECRET as string]
     assert.equal(
       (
         await asAdmin('/v1/brains', {

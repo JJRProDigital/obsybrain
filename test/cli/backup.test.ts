@@ -41,16 +41,16 @@ describe('rsc-brain backups list (no database needed)', () => {
   })
   after(async () => rm(dir, { recursive: true, force: true }))
 
-  it('without RSC_BRAIN_BACKUPS: exit 2, saying which variable to set', async () => {
+  it('without OBSY_BRAIN_BACKUPS: exit 2, saying which variable to set', async () => {
     for (const args of [['backups', 'list'], ['backup']]) {
-      const r = await run(args, { RSC_BRAIN_BACKUPS: '', RSC_BRAIN_DATABASE_URL: 'postgres://nowhere/x' })
+      const r = await run(args, { OBSY_BRAIN_BACKUPS: '', OBSY_BRAIN_DATABASE_URL: 'postgres://nowhere/x' })
       assert.equal(r.code, 2, r.err)
-      assert.match(r.err, /RSC_BRAIN_BACKUPS/)
+      assert.match(r.err, /OBSY_BRAIN_BACKUPS/)
     }
   })
 
   it('an empty folder: no copies, said plainly; --json gives the items and the status', async () => {
-    const env = { RSC_BRAIN_BACKUPS: dir, RSC_BRAIN_DATABASE_URL: 'postgres://nowhere/x' }
+    const env = { OBSY_BRAIN_BACKUPS: dir, OBSY_BRAIN_DATABASE_URL: 'postgres://nowhere/x' }
     const r = await run(['backups', 'list'], env)
     assert.equal(r.code, 0, r.err)
     assert.match(r.out, /No copies yet/)
@@ -60,9 +60,9 @@ describe('rsc-brain backups list (no database needed)', () => {
 
   it('a reason a person cannot give, or an unknown option: exit 2', async () => {
     const env = {
-      RSC_BRAIN_BACKUPS: dir,
-      RSC_BRAIN_DATABASE_URL: 'postgres://nowhere/x',
-      RSC_BRAIN_SECRET: KEY,
+      OBSY_BRAIN_BACKUPS: dir,
+      OBSY_BRAIN_DATABASE_URL: 'postgres://nowhere/x',
+      OBSY_BRAIN_SECRET: KEY,
     }
     assert.equal((await run(['backup', '--reason', 'scheduled'], env)).code, 2)
     assert.equal((await run(['backup', '--key', KEY], env)).code, 2)
@@ -78,7 +78,7 @@ describe('rsc-brain backup', { skip: skipPg }, () => {
     t = await freshDatabase()
     await migrate(t.db)
     dir = await mkdtemp(join(tmpdir(), 'rsc-brain-cli-backup-'))
-    env = { RSC_BRAIN_DATABASE_URL: t.url, RSC_BRAIN_BACKUPS: dir, RSC_BRAIN_SECRET: KEY }
+    env = { OBSY_BRAIN_DATABASE_URL: t.url, OBSY_BRAIN_BACKUPS: dir, OBSY_BRAIN_SECRET: KEY }
   })
   after(async () => {
     await t.drop()
@@ -117,14 +117,14 @@ describe('rsc-brain backup', { skip: skipPg }, () => {
 
   it('without the installation key: exit 1, nothing written, the failure kept for the web', async () => {
     const before = (await readdir(dir)).sort()
-    const { RSC_BRAIN_SECRET: _, ...noKey } = env
-    const saved = process.env.RSC_BRAIN_SECRET
-    delete process.env.RSC_BRAIN_SECRET
+    const { OBSY_BRAIN_SECRET: _, ...noKey } = env
+    const saved = process.env.OBSY_BRAIN_SECRET
+    delete process.env.OBSY_BRAIN_SECRET
     const r = await run(['backup'], noKey).finally(() => {
-      if (saved !== undefined) process.env.RSC_BRAIN_SECRET = saved
+      if (saved !== undefined) process.env.OBSY_BRAIN_SECRET = saved
     })
     assert.equal(r.code, 1)
-    assert.match(r.err, /RSC_BRAIN_SECRET/)
+    assert.match(r.err, /OBSY_BRAIN_SECRET/)
     assert.deepEqual((await readdir(dir)).sort(), before)
     assert.equal((await readStatus(dir)).lastFailure?.category, 'no_installation_secret')
     const list = await run(['backups', 'list'], env)

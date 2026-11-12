@@ -77,7 +77,7 @@ const PROJECT = 'rsc-brain-updater'
 let BASE = ''
 let SYSBIN = ''
 let FAKEBIN = ''
-const shell = () => process.env.RSC_BRAIN_TEST_SHELL ?? join(SYSBIN, 'sh')
+const shell = () => process.env.OBSY_BRAIN_TEST_SHELL ?? join(SYSBIN, 'sh')
 before(() => {
   BASE = mkdtempSync(join(tmpdir(), 'rscb-webupd-'))
   SYSBIN = join(BASE, 'sysbin')
@@ -149,8 +149,8 @@ const launch = (c: Case, args: string[], o: { env?: Record<string, string>; answ
       FAKE_STDIN: c.stdin,
       FAKE_STATE: c.state,
       FAKE_IMAGE_VERSIONS: VERSIONS,
-      RSC_BRAIN_TTY: tty,
-      RSC_BRAIN_TEST_WAIT: '2',
+      OBSY_BRAIN_TTY: tty,
+      OBSY_BRAIN_TEST_WAIT: '2',
       ...o.env,
     },
   })
@@ -239,10 +239,10 @@ describe('web-updates enable', () => {
   it('in an installation made by rsc-factory: exit 2, says where to update, touches nothing and calls nothing', async () => {
     const c = await installed()
     const env = readFileSync(join(c.dir, '.env'), 'utf8').replace(
-      "RSC_BRAIN_COMPANION='0'",
-      "RSC_BRAIN_COMPANION='1'",
+      "OBSY_BRAIN_COMPANION='0'",
+      "OBSY_BRAIN_COMPANION='1'",
     )
-    assert.match(env, /RSC_BRAIN_COMPANION='1'/)
+    assert.match(env, /OBSY_BRAIN_COMPANION='1'/)
     writeFileSync(join(c.dir, '.env'), env)
     const before = readdirSync(c.dir).sort()
     for (const more of [[], ['--yes']]) {
@@ -357,19 +357,19 @@ describe('web-updates enable', () => {
     const own = readEnv(c.dir)
     // The owner of the settings: what the updater writes stays theirs.
     const owner = statSync(join(c.dir, '.env'))
-    assert.match(e, new RegExp(`RSC_BRAIN_UPDATER_DIR='${c.dir}'`))
-    assert.match(e, new RegExp(`RSC_BRAIN_UPDATER_UID='${owner.uid}'`))
-    assert.match(e, new RegExp(`RSC_BRAIN_UPDATER_GID='${owner.gid}'`))
-    assert.match(e, /RSC_BRAIN_UPDATER_SOCKET_GID='999'/)
-    assert.match(e, /RSC_BRAIN_UPDATER_HOSTNAME='rsc-brain-updater'/)
-    assert.match(e, new RegExp(`RSC_BRAIN_UPDATER_IMAGE='${IMG}'`))
+    assert.match(e, new RegExp(`OBSY_BRAIN_UPDATER_DIR='${c.dir}'`))
+    assert.match(e, new RegExp(`OBSY_BRAIN_UPDATER_UID='${owner.uid}'`))
+    assert.match(e, new RegExp(`OBSY_BRAIN_UPDATER_GID='${owner.gid}'`))
+    assert.match(e, /OBSY_BRAIN_UPDATER_SOCKET_GID='999'/)
+    assert.match(e, /OBSY_BRAIN_UPDATER_HOSTNAME='rsc-brain-updater'/)
+    assert.match(e, new RegExp(`OBSY_BRAIN_UPDATER_IMAGE='${IMG}'`))
     assert.match(
       readFileSync(join(u, 'passwd'), 'utf8'),
       new RegExp(`^root:x:0:0:.*\\nupdater:x:${owner.uid}:${owner.gid}:`),
     )
     // The installation key is in .env, which the updater reads as the launcher does; it is not copied anywhere else.
     for (const f of everyFile(u))
-      assert.equal(readFileSync(f, 'utf8').includes(own.RSC_BRAIN_SECRET as string), false, f)
+      assert.equal(readFileSync(f, 'utf8').includes(own.OBSY_BRAIN_SECRET as string), false, f)
   })
 
   it('the credential of a file: copied to one place for its owner, and nowhere else, not on a command line, not in a log', async () => {

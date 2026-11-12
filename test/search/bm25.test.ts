@@ -1,7 +1,7 @@
 // Spec v0.6 «Búsqueda», CA12, CA13, CA15: with pg_search installed, results are ranked by BM25 — a rare word
 // counts more than a common one repeated, and a word in the title more than the same word in the body; without
 // it, search keeps its own ranking and never fails; on every database a superseded page goes after the page
-// that replaced it. Run on the three databases (RSC_BRAIN_PG_EXTENSIONS, see test/helpers/pg.ts).
+// that replaced it. Run on the three databases (OBSY_BRAIN_PG_EXTENSIONS, see test/helpers/pg.ts).
 import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
 import { ensureSearchIndexes, forgetSearchFeatures, searchFeatures } from '../../src/db/extensions.ts'

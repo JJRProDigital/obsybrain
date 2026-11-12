@@ -66,8 +66,8 @@ test('the live check waits, then turns green on the first request of the token m
   expect(secret).toMatch(/^rscb_/)
   // The commands never carry it: it is pasted at a hidden prompt, into this agent's own file.
   await expect(once).toContainText('read -rs t')
-  await expect(once).toContainText('RSC_BRAIN_TOKEN_CLAUDE_CODE')
-  await expect(once).not.toContainText(`export RSC_BRAIN_TOKEN_CLAUDE_CODE="${secret}"`)
+  await expect(once).toContainText('OBSY_BRAIN_TOKEN_CLAUDE_CODE')
+  await expect(once).not.toContainText(`export OBSY_BRAIN_TOKEN_CLAUDE_CODE="${secret}"`)
   await expect(once).toContainText('.mcp.json')
   await expect(check).toContainText('Waiting for your agent…')
   // The agent makes its first request.
@@ -135,7 +135,7 @@ test('each agent has its own token and check: green for Claude Code, then Codex 
   await codex.getByRole('button', { name: 'Create a token' }).click()
   await expect(codex.getByRole('region', { name: 'Your new token' })).toBeVisible()
   await expect(check).toContainText('Waiting for your agent…')
-  await expect(codex).toContainText('RSC_BRAIN_TOKEN_CODEX')
+  await expect(codex).toContainText('OBSY_BRAIN_TOKEN_CODEX')
   // Back on Claude Code, its green is still there.
   await page.getByRole('tab', { name: 'Claude Code' }).click()
   await expect(check).toContainText('Connected')
@@ -211,7 +211,7 @@ test('after a minute it offers tips; after 10 minutes it stops and offers «Chec
   await page.clock.fastForward('01:05')
   await expect(check).toContainText('Still waiting?')
   await expect(check).toContainText('run /mcp')
-  await expect(check).toContainText('echo $' + '{#RSC_BRAIN_TOKEN_CLAUDE_CODE}')
+  await expect(check).toContainText('echo $' + '{#OBSY_BRAIN_TOKEN_CLAUDE_CODE}')
   await page.clock.fastForward('09:00')
   await expect(check).toContainText('Stopped checking after 10 minutes.')
   await check.getByRole('button', { name: 'Check again' }).click()

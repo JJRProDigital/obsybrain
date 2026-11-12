@@ -9,19 +9,19 @@
 # Exit codes: 0 done, 2 wrong usage, 3 a requirement is missing (nothing was changed), 4 failed and put back what was
 # there, 1 anything else.
 #
-# For tests: RSC_BRAIN_TTY is the terminal questions are asked on (default /dev/tty); RSC_BRAIN_REPO is where the
-# source is cloned from; RSC_BRAIN_TEST_STOP_AT=<step> makes a first install (or an update, at update-journal) stop
-# itself right after that step, with RSC_BRAIN_TEST_STOP_SIGNAL (default KILL); RSC_BRAIN_TEST_WAIT is how many seconds the service gets to answer (default 120); RSC_BRAIN_TEST_TAIL_WAIT how many seconds each call at the end of an update gets (default 60).
+# For tests: OBSY_BRAIN_TTY is the terminal questions are asked on (default /dev/tty); OBSY_BRAIN_REPO is where the
+# source is cloned from; OBSY_BRAIN_TEST_STOP_AT=<step> makes a first install (or an update, at update-journal) stop
+# itself right after that step, with OBSY_BRAIN_TEST_STOP_SIGNAL (default KILL); OBSY_BRAIN_TEST_WAIT is how many seconds the service gets to answer (default 120); OBSY_BRAIN_TEST_TAIL_WAIT how many seconds each call at the end of an update gets (default 60).
 
 set -u
 umask 077
 
 PROG=rsc-brain.sh
-REPO=${RSC_BRAIN_REPO:-https://github.com/ericrisco/rsc-brain.git}
-# Whether this run was told where the repository is; if not, the installation's own address counts (RSC_BRAIN_REPO_URL).
+REPO=${OBSY_BRAIN_REPO:-https://github.com/ericrisco/rsc-brain.git}
+# Whether this run was told where the repository is; if not, the installation's own address counts (OBSY_BRAIN_REPO_URL).
 REPO_GIVEN=0
-[ -n "${RSC_BRAIN_REPO:-}" ] && REPO_GIVEN=1
-TTY=${RSC_BRAIN_TTY:-/dev/tty}
+[ -n "${OBSY_BRAIN_REPO:-}" ] && REPO_GIVEN=1
+TTY=${OBSY_BRAIN_TTY:-/dev/tty}
 HERE=$(cd -- "$(dirname -- "$0")" && pwd)
 NL='
 '
@@ -31,9 +31,9 @@ TAB=$(printf '\t')
 BLANK=" $TAB$NL"
 C1_CONTROLS=$(printf '\302[\200-\237]')
 MIN_FREE_KB=2097152
-WAIT_SECONDS=${RSC_BRAIN_TEST_WAIT:-120}
+WAIT_SECONDS=${OBSY_BRAIN_TEST_WAIT:-120}
 # How long each call of the end of an update (maintenance off, the record) may take before it is ended (60 seconds).
-TAIL_WAIT=${RSC_BRAIN_TEST_TAIL_WAIT:-60}
+TAIL_WAIT=${OBSY_BRAIN_TEST_TAIL_WAIT:-60}
 
 USAGE="Usage: sh $PROG <command> [options]
 
@@ -324,7 +324,7 @@ fi
 # ----------------------------------------------------------------------------------------------- the installation
 # Everything the launcher keeps for itself lives in <dir>/.rsc-brain (the source it builds from, an install still in
 # progress, the settings before a change). An installation is a folder whose .env the launcher wrote (it carries
-# RSC_BRAIN_LAUNCHER='1'); .env is written only once an install has completed.
+# OBSY_BRAIN_LAUNCHER='1'); .env is written only once an install has completed.
 STATE=.rsc-brain
 ENV_FILE='' PROFILES=''
 # file_get FILE NAME: a value of a settings file (.env, or a journal) as say_env wrote it.
@@ -360,7 +360,7 @@ redact() {
     printf '%s\n' "$line"
   done
 }
-is_installation() { [ -f "$1/.env" ] && grep -q "^RSC_BRAIN_LAUNCHER='1'\$" "$1/.env"; }
+is_installation() { [ -f "$1/.env" ] && grep -q "^OBSY_BRAIN_LAUNCHER='1'\$" "$1/.env"; }
 
 # Where an installation is when --dir is not given: the one for this machine, or the one for a server.
 find_dir() {
@@ -381,7 +381,7 @@ need_installation() {
     exit 3
   fi
   ENV_FILE=$DIR/.env
-  NAME=$(env_get RSC_BRAIN_NAME)
+  NAME=$(env_get OBSY_BRAIN_NAME)
   PROFILES=$(env_get COMPOSE_PROFILES)
 }
 
@@ -441,15 +441,15 @@ release_lock() {
 }
 # A test hook: stop dead right after a step, as a power cut would (or with another signal, as a Ctrl-C would).
 checkpoint() {
-  [ "${RSC_BRAIN_TEST_STOP_AT:-}" = "$1" ] && kill -"${RSC_BRAIN_TEST_STOP_SIGNAL:-KILL}" $$
+  [ "${OBSY_BRAIN_TEST_STOP_AT:-}" = "$1" ] && kill -"${OBSY_BRAIN_TEST_STOP_SIGNAL:-KILL}" $$
   return 0
 }
 
 # What docker compose would take from this shell instead of the installation's file: the variables compose.yaml
 # names, and Compose's own. They are removed for every compose call.
 FIXED_VARS='COMPOSE_PROJECT_NAME COMPOSE_PROFILES COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PATH_SEPARATOR
-POSTGRES_PASSWORD RSC_BRAIN_SECRET RSC_BRAIN_DATABASE_URL RSC_BRAIN_PUBLISH RSC_BRAIN_IMAGE RSC_BRAIN_DOMAIN
-RSC_BRAIN_ACME_CA RSC_BRAIN_SHARED_NETWORK'
+POSTGRES_PASSWORD OBSY_BRAIN_SECRET OBSY_BRAIN_DATABASE_URL OBSY_BRAIN_PUBLISH OBSY_BRAIN_IMAGE OBSY_BRAIN_DOMAIN
+OBSY_BRAIN_ACME_CA OBSY_BRAIN_SHARED_NETWORK'
 compose_vars() {
   {
     # shellcheck disable=SC2086
@@ -729,7 +729,7 @@ companion_requirements() {
     fi
   fi
 }
-# The app joins the shared network as rsc-brain; its own network keeps the default route (RSC_BRAIN_LOCAL_ONLY trusts
+# The app joins the shared network as rsc-brain; its own network keeps the default route (OBSY_BRAIN_LOCAL_ONLY trusts
 # that gateway as this machine).
 write_companion_compose() {
   {
@@ -770,7 +770,7 @@ write_companion_compose() {
     echo 'networks:'
     echo '  shared:'
     # shellcheck disable=SC2016
-    echo '    name: ${RSC_BRAIN_SHARED_NETWORK:?run rsc-brain.sh install}'
+    echo '    name: ${OBSY_BRAIN_SHARED_NETWORK:?run rsc-brain.sh install}'
     echo '    external: true'
   } >"$DIR/compose.companion.yaml.new" && chmod 644 "$DIR/compose.companion.yaml.new" &&
     mv -f "$DIR/compose.companion.yaml.new" "$DIR/compose.companion.yaml"
@@ -845,45 +845,45 @@ write_env() {
   {
     echo '# rsc-brain settings, written by rsc-brain.sh. Only its owner may read this file: it holds the'
     echo '# installation key, which opens every copy. Change settings by running rsc-brain.sh install again.'
-    say_env RSC_BRAIN_LAUNCHER 1
-    say_env RSC_BRAIN_NAME "$NAME"
+    say_env OBSY_BRAIN_LAUNCHER 1
+    say_env OBSY_BRAIN_NAME "$NAME"
     say_env COMPOSE_PROJECT_NAME "$NAME"
     say_env COMPOSE_PROFILES "$PROFILES"
-    say_env RSC_BRAIN_MODE "$MODE"
-    say_env RSC_BRAIN_DB "$DB"
-    say_env RSC_BRAIN_IMAGE "$IMAGE"
-    say_env RSC_BRAIN_REPO_URL "$(repo_setting)"
-    say_env RSC_BRAIN_SITE "$SITE"
-    say_env RSC_BRAIN_SETUP_URL "$SITE"
-    say_env RSC_BRAIN_DOMAIN "$DOMAIN"
-    say_env RSC_BRAIN_PUBLISH "127.0.0.1:$PORT"
-    say_env RSC_BRAIN_LOCAL_ONLY "$LOCAL_ONLY"
-    say_env RSC_BRAIN_HTTP_PORT "$HTTP_PORT"
-    say_env RSC_BRAIN_HTTPS_PORT "$HTTPS_PORT"
-    say_env RSC_BRAIN_SUBNET "$SUBNET"
-    say_env RSC_BRAIN_IP_RANGE "$IP_RANGE"
-    say_env RSC_BRAIN_PROXY_IP "$PROXY_IP"
-    say_env RSC_BRAIN_TRUSTED_PROXIES "$TRUSTED"
-    say_env RSC_BRAIN_UID "$RUN_UID"
-    say_env RSC_BRAIN_GID "$RUN_GID"
-    say_env RSC_BRAIN_DB_NAME "$DB_NAME"
-    say_env RSC_BRAIN_FACTORY_DB "$FACTORY_DB"
-    say_env RSC_BRAIN_COMPANION "$COMPANION"
-    say_env RSC_BRAIN_SHARED_NETWORK "$SHARED_NET"
-    say_env RSC_BRAIN_COMPANION_NETWORK "$SHARED_CIDR"
-    say_env RSC_BRAIN_COMPANION_GATEWAY "$SHARED_GW"
-    say_env RSC_BRAIN_COMPANION_PROXY "$TRUSTED_PROXY"
-    say_env RSC_BRAIN_FACTORY_URL "$FACTORY_URL"
-    say_env RSC_BRAIN_COMPANION_TOKEN "$COMPANION_TOKEN"
+    say_env OBSY_BRAIN_MODE "$MODE"
+    say_env OBSY_BRAIN_DB "$DB"
+    say_env OBSY_BRAIN_IMAGE "$IMAGE"
+    say_env OBSY_BRAIN_REPO_URL "$(repo_setting)"
+    say_env OBSY_BRAIN_SITE "$SITE"
+    say_env OBSY_BRAIN_SETUP_URL "$SITE"
+    say_env OBSY_BRAIN_DOMAIN "$DOMAIN"
+    say_env OBSY_BRAIN_PUBLISH "127.0.0.1:$PORT"
+    say_env OBSY_BRAIN_LOCAL_ONLY "$LOCAL_ONLY"
+    say_env OBSY_BRAIN_HTTP_PORT "$HTTP_PORT"
+    say_env OBSY_BRAIN_HTTPS_PORT "$HTTPS_PORT"
+    say_env OBSY_BRAIN_SUBNET "$SUBNET"
+    say_env OBSY_BRAIN_IP_RANGE "$IP_RANGE"
+    say_env OBSY_BRAIN_PROXY_IP "$PROXY_IP"
+    say_env OBSY_BRAIN_TRUSTED_PROXIES "$TRUSTED"
+    say_env OBSY_BRAIN_UID "$RUN_UID"
+    say_env OBSY_BRAIN_GID "$RUN_GID"
+    say_env OBSY_BRAIN_DB_NAME "$DB_NAME"
+    say_env OBSY_BRAIN_FACTORY_DB "$FACTORY_DB"
+    say_env OBSY_BRAIN_COMPANION "$COMPANION"
+    say_env OBSY_BRAIN_SHARED_NETWORK "$SHARED_NET"
+    say_env OBSY_BRAIN_COMPANION_NETWORK "$SHARED_CIDR"
+    say_env OBSY_BRAIN_COMPANION_GATEWAY "$SHARED_GW"
+    say_env OBSY_BRAIN_COMPANION_PROXY "$TRUSTED_PROXY"
+    say_env OBSY_BRAIN_FACTORY_URL "$FACTORY_URL"
+    say_env OBSY_BRAIN_COMPANION_TOKEN "$COMPANION_TOKEN"
     [ "$DB" = bundled ] && say_env POSTGRES_PASSWORD "$PG_PASSWORD"
-    say_env RSC_BRAIN_DATABASE_URL "$DATABASE_URL"
-    say_env RSC_BRAIN_SECRET "$SECRET"
+    say_env OBSY_BRAIN_DATABASE_URL "$DATABASE_URL"
+    say_env OBSY_BRAIN_SECRET "$SECRET"
     if [ "${2:-}" = pending ]; then
-      say_env RSC_BRAIN_PENDING_MADE "$MADE_FILES"
-      say_env RSC_BRAIN_PENDING_MADE_DIR "$MADE_DIR"
-      say_env RSC_BRAIN_PENDING_MADE_IMAGE "$MADE_IMAGE"
-      say_env RSC_BRAIN_PENDING_PROVISIONED "$PROVISIONED"
-      say_env RSC_BRAIN_PENDING_STARTED "$STARTED"
+      say_env OBSY_BRAIN_PENDING_MADE "$MADE_FILES"
+      say_env OBSY_BRAIN_PENDING_MADE_DIR "$MADE_DIR"
+      say_env OBSY_BRAIN_PENDING_MADE_IMAGE "$MADE_IMAGE"
+      say_env OBSY_BRAIN_PENDING_PROVISIONED "$PROVISIONED"
+      say_env OBSY_BRAIN_PENDING_STARTED "$STARTED"
     fi
   } >"$1.new" && chmod 600 "$1.new" && mv -f "$1.new" "$1"
 }
@@ -915,11 +915,11 @@ repo_public() {
 printable() {
   LC_ALL=C tr -d '\001-\010\013-\037\177' | LC_ALL=C sed "s/$C1_CONTROLS//g"
 }
-# RSC_BRAIN_REPO_URL, where the service asks for new versions: what this run was told or, on an installation that has
+# OBSY_BRAIN_REPO_URL, where the service asks for new versions: what this run was told or, on an installation that has
 # one, what it has (empty: the service never asks).
 repo_setting() {
-  if [ "$REPO_GIVEN" = 0 ] && grep -q '^RSC_BRAIN_REPO_URL=' "$DIR/.env" 2>/dev/null; then
-    file_get "$DIR/.env" RSC_BRAIN_REPO_URL
+  if [ "$REPO_GIVEN" = 0 ] && grep -q '^OBSY_BRAIN_REPO_URL=' "$DIR/.env" 2>/dev/null; then
+    file_get "$DIR/.env" OBSY_BRAIN_REPO_URL
   else
     repo_public "$REPO"
   fi
@@ -927,7 +927,7 @@ repo_setting() {
 # The launcher asks the repository of the installation, unless told another. Its being empty only silences the service.
 installation_repo() {
   [ "$REPO_GIVEN" = 0 ] || return 0
-  ir=$(env_get RSC_BRAIN_REPO_URL)
+  ir=$(env_get OBSY_BRAIN_REPO_URL)
   [ -z "$ir" ] || REPO=$ir
 }
 
@@ -961,9 +961,9 @@ install() {
   if is_installation "$DIR"; then
     REINSTALL=1
     ENV_FILE=$DIR/.env
-    OLD_NAME=$(env_get RSC_BRAIN_NAME)
-    OLD_DB=$(env_get RSC_BRAIN_DB)
-    OLD_IMAGE=$(env_get RSC_BRAIN_IMAGE)
+    OLD_NAME=$(env_get OBSY_BRAIN_NAME)
+    OLD_DB=$(env_get OBSY_BRAIN_DB)
+    OLD_IMAGE=$(env_get OBSY_BRAIN_IMAGE)
     [ -n "$NAME" ] && [ "$NAME" != "$OLD_NAME" ] && usage "The installation in \"$DIR\" is called $OLD_NAME; its name cannot change."
     NAME=$OLD_NAME
     [ -n "$DB" ] && [ "$DB" != "$OLD_DB" ] &&
@@ -974,23 +974,23 @@ install() {
     fi
     IMAGE=$OLD_IMAGE VERSION=''
     if [ -z "$MODE" ]; then
-      MODE=$(env_get RSC_BRAIN_MODE)
-      DOMAIN=$(env_get RSC_BRAIN_DOMAIN)
+      MODE=$(env_get OBSY_BRAIN_MODE)
+      DOMAIN=$(env_get OBSY_BRAIN_DOMAIN)
     fi
     # Installed by rsc-factory or not: install keeps that (and the shared network and addresses it is not given).
-    if [ "$(env_get RSC_BRAIN_COMPANION)" = 1 ]; then
+    if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
       COMPANION=1
-      [ -n "$SHARED_NET" ] || SHARED_NET=$(env_get RSC_BRAIN_SHARED_NETWORK)
-      [ -n "$FACTORY_URL" ] || FACTORY_URL=$(env_get RSC_BRAIN_FACTORY_URL)
-      [ -n "$TRUSTED_PROXY" ] || [ "$MODE" != server ] || TRUSTED_PROXY=$(env_get RSC_BRAIN_COMPANION_PROXY)
+      [ -n "$SHARED_NET" ] || SHARED_NET=$(env_get OBSY_BRAIN_SHARED_NETWORK)
+      [ -n "$FACTORY_URL" ] || FACTORY_URL=$(env_get OBSY_BRAIN_FACTORY_URL)
+      [ -n "$TRUSTED_PROXY" ] || [ "$MODE" != server ] || TRUSTED_PROXY=$(env_get OBSY_BRAIN_COMPANION_PROXY)
     elif [ "$COMPANION" = 1 ]; then
       usage "The installation in \"$DIR\" was not installed by rsc-factory, and install keeps that (--companion). To move it: make a copy (backup), uninstall, install anew with --companion and restore the copy."
     fi
-    [ -n "$PORT" ] || PORT=$(env_get RSC_BRAIN_PUBLISH | sed 's/.*://')
-    [ -n "$HTTP_PORT" ] || HTTP_PORT=$(env_get RSC_BRAIN_HTTP_PORT)
-    [ -n "$HTTPS_PORT" ] || HTTPS_PORT=$(env_get RSC_BRAIN_HTTPS_PORT)
+    [ -n "$PORT" ] || PORT=$(env_get OBSY_BRAIN_PUBLISH | sed 's/.*://')
+    [ -n "$HTTP_PORT" ] || HTTP_PORT=$(env_get OBSY_BRAIN_HTTP_PORT)
+    [ -n "$HTTPS_PORT" ] || HTTPS_PORT=$(env_get OBSY_BRAIN_HTTPS_PORT)
     [ -n "$DB_URL_FILE$ADMIN_URL_FILE" ] && say 'The installation keeps its database: the URL file is not used.'
-    DB_URL_FILE='' ADMIN_URL_FILE='' FACTORY_DB=$(env_get RSC_BRAIN_FACTORY_DB)
+    DB_URL_FILE='' ADMIN_URL_FILE='' FACTORY_DB=$(env_get OBSY_BRAIN_FACTORY_DB)
   elif [ -f "$PENDING" ]; then
     # A first install that was killed: the next one takes it back, then installs as a first install.
     RESUME=1
@@ -1065,7 +1065,7 @@ install() {
   [ -n "$HTTPS_PORT" ] || HTTPS_PORT=443
   DB_NAME=$(printf '%s' "$NAME" | tr '-' '_')
   case $DB_NAME in [0-9]*) DB_NAME=b_$DB_NAME ;; esac
-  [ "$REINSTALL" = 1 ] && DB_NAME=$(env_get RSC_BRAIN_DB_NAME)
+  [ "$REINSTALL" = 1 ] && DB_NAME=$(env_get OBSY_BRAIN_DB_NAME)
   DB_URL='' ADMIN_URL=''
   if [ -n "$DB_URL_FILE" ]; then
     read_url "$DB_URL_FILE"
@@ -1083,8 +1083,8 @@ install() {
   fi
   if [ "$RESUME" = 1 ]; then
     ENV_FILE=$PENDING
-    if [ "$(env_get RSC_BRAIN_PENDING_PROVISIONED)" = 1 ] && [ "$(env_get RSC_BRAIN_DB)" != bundled ] && [ -z "$ADMIN_URL" ]; then
-      usage "An install in \"$DIR\" was interrupted while it made the database $(env_get RSC_BRAIN_DB_NAME). Pass --db-admin-url-file with the administration login, so that database is removed before installing again."
+    if [ "$(env_get OBSY_BRAIN_PENDING_PROVISIONED)" = 1 ] && [ "$(env_get OBSY_BRAIN_DB)" != bundled ] && [ -z "$ADMIN_URL" ]; then
+      usage "An install in \"$DIR\" was interrupted while it made the database $(env_get OBSY_BRAIN_DB_NAME). Pass --db-admin-url-file with the administration login, so that database is removed before installing again."
     fi
   fi
 
@@ -1097,15 +1097,15 @@ install() {
     # Take back the interrupted install with what it wrote down, then go on as a first install.
     step "Taking back an install in \"$DIR\" that was interrupted"
     saved="$NAME|$DB|$DB_NAME|$IMAGE|$PROFILES"
-    NAME=$(env_get RSC_BRAIN_NAME) DB=$(env_get RSC_BRAIN_DB) DB_NAME=$(env_get RSC_BRAIN_DB_NAME)
-    IMAGE=$(env_get RSC_BRAIN_IMAGE) PROFILES=$(env_get COMPOSE_PROFILES)
+    NAME=$(env_get OBSY_BRAIN_NAME) DB=$(env_get OBSY_BRAIN_DB) DB_NAME=$(env_get OBSY_BRAIN_DB_NAME)
+    IMAGE=$(env_get OBSY_BRAIN_IMAGE) PROFILES=$(env_get COMPOSE_PROFILES)
     MADE_FILES='' MADE_DIR=0
     # Its own folder holds this run's lock: it stays, and what the other run made there goes.
-    for f in $(env_get RSC_BRAIN_PENDING_MADE); do [ "$f" = "$STATE" ] || MADE_FILES="$MADE_FILES $f"; done
-    MADE_IMAGE=$(env_get RSC_BRAIN_PENDING_MADE_IMAGE) PROVISIONED=$(env_get RSC_BRAIN_PENDING_PROVISIONED)
-    STARTED=$(env_get RSC_BRAIN_PENDING_STARTED)
-    adopt_dir=$(env_get RSC_BRAIN_PENDING_MADE_DIR) adopt_state=0
-    case " $(env_get RSC_BRAIN_PENDING_MADE) " in *" $STATE "*) adopt_state=1 ;; esac
+    for f in $(env_get OBSY_BRAIN_PENDING_MADE); do [ "$f" = "$STATE" ] || MADE_FILES="$MADE_FILES $f"; done
+    MADE_IMAGE=$(env_get OBSY_BRAIN_PENDING_MADE_IMAGE) PROVISIONED=$(env_get OBSY_BRAIN_PENDING_PROVISIONED)
+    STARTED=$(env_get OBSY_BRAIN_PENDING_STARTED)
+    adopt_dir=$(env_get OBSY_BRAIN_PENDING_MADE_DIR) adopt_state=0
+    case " $(env_get OBSY_BRAIN_PENDING_MADE) " in *" $STATE "*) adopt_state=1 ;; esac
     take_back
     rm -rf "${DIR:?}/${STATE:?}/src" "${PENDING:?}"
     oldifs=$IFS
@@ -1146,10 +1146,10 @@ install() {
   # Its own running installation holds its ports: those are not «in use».
   OWN=0
   [ "$REINSTALL" = 1 ] && PROFILES=$(env_get COMPOSE_PROFILES) && running && OWN=1
-  if [ "$OWN" = 0 ] || [ "127.0.0.1:$PORT" != "$(env_get RSC_BRAIN_PUBLISH)" ]; then free_port PORT --port; fi
+  if [ "$OWN" = 0 ] || [ "127.0.0.1:$PORT" != "$(env_get OBSY_BRAIN_PUBLISH)" ]; then free_port PORT --port; fi
   if [ "$MODE" = server ] && [ "$COMPANION" = 0 ]; then
-    if [ "$OWN" = 0 ] || [ "$(env_get RSC_BRAIN_MODE)" != server ] || [ "$HTTP_PORT" != "$(env_get RSC_BRAIN_HTTP_PORT)" ]; then free_port HTTP_PORT --http-port; fi
-    if [ "$OWN" = 0 ] || [ "$(env_get RSC_BRAIN_MODE)" != server ] || [ "$HTTPS_PORT" != "$(env_get RSC_BRAIN_HTTPS_PORT)" ]; then free_port HTTPS_PORT --https-port; fi
+    if [ "$OWN" = 0 ] || [ "$(env_get OBSY_BRAIN_MODE)" != server ] || [ "$HTTP_PORT" != "$(env_get OBSY_BRAIN_HTTP_PORT)" ]; then free_port HTTP_PORT --http-port; fi
+    if [ "$OWN" = 0 ] || [ "$(env_get OBSY_BRAIN_MODE)" != server ] || [ "$HTTPS_PORT" != "$(env_get OBSY_BRAIN_HTTPS_PORT)" ]; then free_port HTTPS_PORT --https-port; fi
   fi
 
   # A new installation never takes the name of one Docker already holds (a failure would take its volumes down).
@@ -1195,11 +1195,11 @@ install() {
   # The values: kept on a reinstall, new on a first install.
   if [ "$(id -u)" = 0 ]; then RUN_UID=1000 RUN_GID=1000; else RUN_UID=$(id -u) RUN_GID=$(id -g); fi
   if [ "$REINSTALL" = 1 ]; then
-    SECRET=$(env_get RSC_BRAIN_SECRET)
+    SECRET=$(env_get OBSY_BRAIN_SECRET)
     PG_PASSWORD=$(env_get POSTGRES_PASSWORD)
-    DATABASE_URL=$(env_get RSC_BRAIN_DATABASE_URL)
-    SUBNET=$(env_get RSC_BRAIN_SUBNET) IP_RANGE=$(env_get RSC_BRAIN_IP_RANGE) PROXY_IP=$(env_get RSC_BRAIN_PROXY_IP)
-    COMPANION_TOKEN=$(env_get RSC_BRAIN_COMPANION_TOKEN)
+    DATABASE_URL=$(env_get OBSY_BRAIN_DATABASE_URL)
+    SUBNET=$(env_get OBSY_BRAIN_SUBNET) IP_RANGE=$(env_get OBSY_BRAIN_IP_RANGE) PROXY_IP=$(env_get OBSY_BRAIN_PROXY_IP)
+    COMPANION_TOKEN=$(env_get OBSY_BRAIN_COMPANION_TOKEN)
   else
     SECRET=${REUSED:-$(random_hex 48)}
     PG_PASSWORD=$(random_hex 32)
@@ -1403,7 +1403,7 @@ status() {
     healthy && is_healthy=true
     version=$(dc exec -T app rsc-brain version </dev/null 2>/dev/null)
   fi
-  site=$(env_get RSC_BRAIN_SITE) mode=$(env_get RSC_BRAIN_MODE) db=$(env_get RSC_BRAIN_DB) image=$(env_get RSC_BRAIN_IMAGE)
+  site=$(env_get OBSY_BRAIN_SITE) mode=$(env_get OBSY_BRAIN_MODE) db=$(env_get OBSY_BRAIN_DB) image=$(env_get OBSY_BRAIN_IMAGE)
   if [ "$JSON" = 1 ]; then
     printf '{"url":%s,"mode":%s,"db":%s,"dir":%s,"image":%s,"version":%s,"running":%s,"healthy":%s}\n' \
       "$(json_str "$site")" "$(json_str "$mode")" "$(json_str "$db")" "$(json_str "$DIR")" "$(json_str "$image")" \
@@ -1606,8 +1606,8 @@ update_failure_log() {
   {
     dc logs --no-color --tail 200 app </dev/null 2>&1
     [ -f "$UPDATE_LOG" ] && cat "$UPDATE_LOG"
-  } | redact "$(env_get RSC_BRAIN_SECRET)" "$(env_get POSTGRES_PASSWORD)" \
-    "$(url_password "$(env_get RSC_BRAIN_DATABASE_URL)")" >"$DIR/last-failure.log.new" &&
+  } | redact "$(env_get OBSY_BRAIN_SECRET)" "$(env_get POSTGRES_PASSWORD)" \
+    "$(url_password "$(env_get OBSY_BRAIN_DATABASE_URL)")" >"$DIR/last-failure.log.new" &&
     chmod 600 "$DIR/last-failure.log.new" && mv -f "$DIR/last-failure.log.new" "$DIR/last-failure.log" &&
     FAILURE_LOG=$DIR/last-failure.log
   return 0
@@ -1622,7 +1622,7 @@ door_image() {
 # Companion mode: the file follows the compose file it goes with.
 door_companion() {
   [ -f "$DIR/compose.companion.yaml" ] || return 0
-  MODE=$(env_get RSC_BRAIN_MODE)
+  MODE=$(env_get OBSY_BRAIN_MODE)
   write_companion_compose || say "Could not write \"$DIR/compose.companion.yaml\"."
   return 0
 }
@@ -1681,10 +1681,10 @@ rollback() {
     rm -f "${DIR:?}/${STATE:?}/rollback.failed"
   else
     {
-      say_env RSC_BRAIN_ROLLBACK_FROM "$UPDATE_FROM"
-      say_env RSC_BRAIN_ROLLBACK_TO "$UPDATE_TO"
-      say_env RSC_BRAIN_ROLLBACK_COPY "$PRE_COPY"
-      say_env RSC_BRAIN_ROLLBACK_RESTORE "sh $PROG restore --file $PRE_COPY --confirm <the installation's name> --dir \"$DIR\""
+      say_env OBSY_BRAIN_ROLLBACK_FROM "$UPDATE_FROM"
+      say_env OBSY_BRAIN_ROLLBACK_TO "$UPDATE_TO"
+      say_env OBSY_BRAIN_ROLLBACK_COPY "$PRE_COPY"
+      say_env OBSY_BRAIN_ROLLBACK_RESTORE "sh $PROG restore --file $PRE_COPY --confirm <the installation's name> --dir \"$DIR\""
     } >"$DIR/$STATE/rollback.failed.new" && mv -f "$DIR/$STATE/rollback.failed.new" "$DIR/$STATE/rollback.failed"
   fi
   step "Starting rsc-brain $UPDATE_FROM"
@@ -1737,9 +1737,9 @@ interrupted_work() {
   journal=$DIR/$STATE/update.pending
   if [ -f "$journal" ]; then
     ENV_FILE=$DIR/.env
-    NAME=$(env_get RSC_BRAIN_NAME) PROFILES=$(env_get COMPOSE_PROFILES)
-    UPDATE_FROM=$(file_get "$journal" RSC_BRAIN_UPDATE_FROM) UPDATE_TO=$(file_get "$journal" RSC_BRAIN_UPDATE_TO)
-    PRE_COPY=$(file_get "$journal" RSC_BRAIN_UPDATE_COPY)
+    NAME=$(env_get OBSY_BRAIN_NAME) PROFILES=$(env_get COMPOSE_PROFILES)
+    UPDATE_FROM=$(file_get "$journal" OBSY_BRAIN_UPDATE_FROM) UPDATE_TO=$(file_get "$journal" OBSY_BRAIN_UPDATE_TO)
+    PRE_COPY=$(file_get "$journal" OBSY_BRAIN_UPDATE_COPY)
     UPDATE_LOG=$DIR/$STATE/update.log
     [ -d "$DIR/$STATE/src.next" ] && NEXT_SRC=$DIR/$STATE/src.next
     case $PRE_COPY in
@@ -1769,10 +1769,10 @@ rollback_failed_notice() {
   [ "$ROLLBACK_FAILED" = 1 ] && return 0
   ROLLBACK_FAILED=1
   say ''
-  say "!! An update to $(file_get "$mark" RSC_BRAIN_ROLLBACK_TO) failed, and rsc-brain could not go back to"
-  say "!! $(file_get "$mark" RSC_BRAIN_ROLLBACK_FROM) by itself: the data may not be as it was. Everything up to that update is in the"
-  say "!! copy $(file_get "$mark" RSC_BRAIN_ROLLBACK_COPY). Restore it by hand (everyone signs in again afterwards):"
-  say "!!   $(file_get "$mark" RSC_BRAIN_ROLLBACK_RESTORE)"
+  say "!! An update to $(file_get "$mark" OBSY_BRAIN_ROLLBACK_TO) failed, and rsc-brain could not go back to"
+  say "!! $(file_get "$mark" OBSY_BRAIN_ROLLBACK_FROM) by itself: the data may not be as it was. Everything up to that update is in the"
+  say "!! copy $(file_get "$mark" OBSY_BRAIN_ROLLBACK_COPY). Restore it by hand (everyone signs in again afterwards):"
+  say "!!   $(file_get "$mark" OBSY_BRAIN_ROLLBACK_RESTORE)"
   say ''
   return 0
 }
@@ -1908,7 +1908,7 @@ update() {
   need_docker
   interrupted_work
   need_running
-  old_image=$(env_get RSC_BRAIN_IMAGE)
+  old_image=$(env_get OBSY_BRAIN_IMAGE)
   UPDATE_FROM=$(dc exec -T app rsc-brain version </dev/null 2>/dev/null)
   version_ok "$UPDATE_FROM" || {
     say "rsc-brain in \"$DIR\" does not say its version. Check it with: sh $PROG status --dir \"$DIR\". Nothing was changed."
@@ -2003,19 +2003,19 @@ update() {
   journal=$DIR/$STATE/update.pending
   {
     {
-      say_env RSC_BRAIN_UPDATE_PHASE switched
-      say_env RSC_BRAIN_UPDATE_FROM "$UPDATE_FROM"
-      say_env RSC_BRAIN_UPDATE_TO "$UPDATE_TO"
-      say_env RSC_BRAIN_UPDATE_COPY "$PRE_COPY"
-      say_env RSC_BRAIN_UPDATE_PREVIOUS_IMAGE "$old_image"
-      say_env RSC_BRAIN_UPDATE_IMAGE "$IMAGE"
+      say_env OBSY_BRAIN_UPDATE_PHASE switched
+      say_env OBSY_BRAIN_UPDATE_FROM "$UPDATE_FROM"
+      say_env OBSY_BRAIN_UPDATE_TO "$UPDATE_TO"
+      say_env OBSY_BRAIN_UPDATE_COPY "$PRE_COPY"
+      say_env OBSY_BRAIN_UPDATE_PREVIOUS_IMAGE "$old_image"
+      say_env OBSY_BRAIN_UPDATE_IMAGE "$IMAGE"
     } >"$journal.new" && mv -f "$journal.new" "$journal"
   } || update_abort "Could not write \"$journal\"."
   checkpoint update-journal
   # From here on, a failure goes back to the copy just made.
   UPDATE_PHASE=switched
   UPDATE_LOG=$DIR/$STATE/update.log
-  { env_with RSC_BRAIN_IMAGE "$IMAGE" <"$DIR/$STATE/env.previous" >"$DIR/.env.new" &&
+  { env_with OBSY_BRAIN_IMAGE "$IMAGE" <"$DIR/$STATE/env.previous" >"$DIR/.env.new" &&
     chmod 600 "$DIR/.env.new" && mv -f "$DIR/.env.new" "$DIR/.env"; } || rollback "Could not write \"$DIR/.env\"."
   if [ "$BUILD" = 1 ]; then
     for f in compose.yaml Caddyfile door.Caddyfile; do
@@ -2081,7 +2081,7 @@ update() {
       "$(json_str "$UPDATE_TO")" "$(json_str "$IMAGE")" "$(json_str "$PRE_COPY")" "$(json_str "$DIR")"
     return 0
   fi
-  out "rsc-brain was updated from $UPDATE_FROM to $UPDATE_TO and answers at $(env_get RSC_BRAIN_SITE)."
+  out "rsc-brain was updated from $UPDATE_FROM to $UPDATE_TO and answers at $(env_get OBSY_BRAIN_SITE)."
   out "A copy of everything from just before is kept in \"$DIR/backups\": $PRE_COPY"
   return 0
 }
@@ -2148,8 +2148,8 @@ ensure_update_dirs() {
 uc() {
   (
     for v in COMPOSE_PROJECT_NAME COMPOSE_PROFILES COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PATH_SEPARATOR \
-      RSC_BRAIN_UPDATER_DIR RSC_BRAIN_UPDATER_UID RSC_BRAIN_UPDATER_GID RSC_BRAIN_UPDATER_SOCKET_GID \
-      RSC_BRAIN_UPDATER_HOSTNAME RSC_BRAIN_UPDATER_IMAGE; do unset "$v"; done
+      OBSY_BRAIN_UPDATER_DIR OBSY_BRAIN_UPDATER_UID OBSY_BRAIN_UPDATER_GID OBSY_BRAIN_UPDATER_SOCKET_GID \
+      OBSY_BRAIN_UPDATER_HOSTNAME OBSY_BRAIN_UPDATER_IMAGE; do unset "$v"; done
     exec docker compose --project-directory "$DIR" -p "$UPD_PROJECT" -f "$DIR/updater/compose.updater.yaml" \
       --env-file "$DIR/updater/updater.env" "$@"
   )
@@ -2270,7 +2270,7 @@ check_key_file() {
 }
 web_updates_enable() {
   need_installation
-  if [ "$(env_get RSC_BRAIN_COMPANION)" = 1 ]; then
+  if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
     say 'rsc-brain was installed by rsc-factory: update it from there.'
     say 'Nothing was changed.'
     exit 2
@@ -2397,12 +2397,12 @@ web_updates_enable() {
   }
   if ! {
     {
-      say_env RSC_BRAIN_UPDATER_DIR "$DIR"
-      say_env RSC_BRAIN_UPDATER_UID "$we_uid"
-      say_env RSC_BRAIN_UPDATER_GID "$we_gid"
-      say_env RSC_BRAIN_UPDATER_SOCKET_GID "$we_sock"
-      say_env RSC_BRAIN_UPDATER_HOSTNAME "$UPD_PROJECT"
-      say_env RSC_BRAIN_UPDATER_IMAGE "$UPD_IMAGE"
+      say_env OBSY_BRAIN_UPDATER_DIR "$DIR"
+      say_env OBSY_BRAIN_UPDATER_UID "$we_uid"
+      say_env OBSY_BRAIN_UPDATER_GID "$we_gid"
+      say_env OBSY_BRAIN_UPDATER_SOCKET_GID "$we_sock"
+      say_env OBSY_BRAIN_UPDATER_HOSTNAME "$UPD_PROJECT"
+      say_env OBSY_BRAIN_UPDATER_IMAGE "$UPD_IMAGE"
     } >"$DIR/updater/updater.env.new" && mv -f "$DIR/updater/updater.env.new" "$DIR/updater/updater.env"
   }; then
     updater_take_back
@@ -2420,7 +2420,7 @@ web_updates_enable() {
   # The repository must answer with this access, from a container like the updater's, before anything runs.
   step "Checking that $(repo_public "$REPO") answers with this access"
   docker run --rm -u "$we_uid:$we_gid" -v "$DIR:$DIR" -v "$DIR/updater/passwd:/etc/passwd:ro" \
-    -e "RSC_BRAIN_UPDATER_DIR=$DIR" -e "HOME=$DIR/updater/home" "$UPD_IMAGE" sh "$DIR/updater/loop.sh" --access </dev/null >&2 || {
+    -e "OBSY_BRAIN_UPDATER_DIR=$DIR" -e "HOME=$DIR/updater/home" "$UPD_IMAGE" sh "$DIR/updater/loop.sh" --access </dev/null >&2 || {
     updater_take_back
     say "Could not turn updates from the web on: $(repo_public "$REPO") does not answer with that access."
     say 'Give it read access (--repo-token-file for an https address, --repo-key for SSH) that works from this machine.'
@@ -2464,7 +2464,7 @@ web_updates_disable() {
 web_updates_status() {
   need_installation
   updater_names
-  if [ "$(env_get RSC_BRAIN_COMPANION)" = 1 ]; then
+  if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
     out 'Updates from the web are off. rsc-brain was installed by rsc-factory: update it from there.'
     return 0
   fi
@@ -2503,7 +2503,7 @@ key_rotate() {
   take_lock
   need_docker
   interrupted_work update-only
-  old=$(env_get RSC_BRAIN_SECRET)
+  old=$(env_get OBSY_BRAIN_SECRET)
   old_id=$(key_id_of "$old")
   case $old_id in '' | *[!0-9A-Za-z_-]*)
     say 'Could not read the id of the key in use (see: sh rsc-brain.sh status). Nothing was changed.'
@@ -2521,7 +2521,7 @@ key_rotate() {
   # it there, and the data may be sealed with it already: it is finished with that key, never with another.
   rotated=$DIR/$STATE/env.rotated
   if [ -f "$rotated" ]; then
-    new=$(file_get "$rotated" RSC_BRAIN_SECRET)
+    new=$(file_get "$rotated" OBSY_BRAIN_SECRET)
     if [ ${#new} -lt 32 ] || [ "$new" = "$old" ]; then
       say "A key rotation was interrupted, and \"$rotated\" holds no new key. Nothing was changed: look at that file (it may"
       say 'hold the key the data is sealed with) and remove it only if it does not.'
@@ -2530,7 +2530,7 @@ key_rotate() {
     say "A key rotation in \"$DIR\" was interrupted: finishing it with the key it had made."
   else
     new=$(random_hex 48)
-    { env_with RSC_BRAIN_SECRET "$new" <"$DIR/.env" >"$rotated.new" && chmod 600 "$rotated.new" && mv -f "$rotated.new" "$rotated"; } || {
+    { env_with OBSY_BRAIN_SECRET "$new" <"$DIR/.env" >"$rotated.new" && chmod 600 "$rotated.new" && mv -f "$rotated.new" "$rotated"; } || {
       rm -f "${rotated:?}.new"
       say "Could not write \"$rotated\". Nothing was changed."
       exit 1
@@ -2605,7 +2605,7 @@ key_show() {
     can_ask || usage 'There is no terminal to confirm on. Pass --yes to print the installation key.'
     yes_no 'The installation key opens every copy of this installation. Print it here?' n || exit 1
   fi
-  env_get RSC_BRAIN_SECRET
+  env_get OBSY_BRAIN_SECRET
 }
 
 uninstall() {
@@ -2621,7 +2621,7 @@ uninstall() {
   fi
   need_docker
   interrupted_work
-  db=$(env_get RSC_BRAIN_DB)
+  db=$(env_get OBSY_BRAIN_DB)
   updater_names
   updater_remove || say 'The updater could not be fully removed (the lines above say why).'
   if [ "$DELETE_DATA" = 0 ]; then
@@ -2631,7 +2631,7 @@ uninstall() {
     out "installation key (\"$DIR/.env\") are kept: sh $PROG install --dir \"$DIR\" brings it back as it was."
     return 0
   fi
-  db_name=$(env_get RSC_BRAIN_DB_NAME)
+  db_name=$(env_get OBSY_BRAIN_DB_NAME)
   if [ "$db" != bundled ] && [ -n "$ADMIN_URL_FILE" ]; then
     read_url "$ADMIN_URL_FILE"
     step "Removing the database $db_name and the role $db_name"
@@ -2643,7 +2643,7 @@ uninstall() {
   fi
   step 'Stopping rsc-brain and removing its containers, network and volumes'
   dc down -v --remove-orphans >&2 </dev/null || exit 1
-  printf '%s\n' "$(env_get RSC_BRAIN_SECRET)" >"$DIR/installation-key.txt"
+  printf '%s\n' "$(env_get OBSY_BRAIN_SECRET)" >"$DIR/installation-key.txt"
   chmod 600 "$DIR/installation-key.txt"
   rm -rf "${DIR:?}/backups" "${DIR:?}/${STATE:?}" "${DIR:?}/compose.yaml" "${DIR:?}/Caddyfile" "${DIR:?}/door.Caddyfile" "${DIR:?}/.env" \
     "${DIR:?}/compose.companion.yaml" "${DIR:?}/last-failure.log" "${DIR:?}/update"

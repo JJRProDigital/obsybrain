@@ -49,9 +49,9 @@ export type PublicReq = {
   timings: EventTimings
   // When this process started serving (Admin › Backups & system).
   startedAt: Date
-  // The folder of the copies (RSC_BRAIN_BACKUPS), when one is set.
+  // The folder of the copies (OBSY_BRAIN_BACKUPS), when one is set.
   backups: string | null
-  // The copies of this process (list, by hand, restore), when RSC_BRAIN_BACKUPS is set (spec B7).
+  // The copies of this process (list, by hand, restore), when OBSY_BRAIN_BACKUPS is set (spec B7).
   copies: Copies | null
   // Whether a newer release exists (plan §3.10); null when nothing checks.
   releases: ReleaseChecker | null

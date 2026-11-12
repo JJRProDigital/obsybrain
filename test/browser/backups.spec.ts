@@ -141,7 +141,7 @@ test.describe('Admin › Backups & system: the copies', () => {
     await behind(baseURL as string, e.id, { backupsOff: true })
     await page.reload()
     await expect(part).toContainText('No folder for copies is set')
-    await expect(part).toContainText('RSC_BRAIN_BACKUPS')
+    await expect(part).toContainText('OBSY_BRAIN_BACKUPS')
     await expect(part.getByRole('button', { name: 'Make a copy now' })).toHaveCount(0)
 
     await scenario(context, baseURL as string, 'signed-in', { 'admin-backups': 'much-data' })

@@ -10,7 +10,7 @@ state=${FAKE_STATE:?}
 # A value of the installation's that reached docker compose from the caller's environment instead of its .env file
 # (`docker compose version` reads no project).
 if [ "$1" = compose ] && [ "${2:-}" != version ]; then
-  env | grep -E '^(RSC_BRAIN_|POSTGRES_|COMPOSE_)' | grep -vE '^RSC_BRAIN_(TTY|REPO)=' | sed 's/^/LEAK /' >>"$FAKE_LOG"
+  env | grep -E '^(OBSY_BRAIN_|POSTGRES_|COMPOSE_)' | grep -vE '^OBSY_BRAIN_(TTY|REPO)=' | sed 's/^/LEAK /' >>"$FAKE_LOG"
 fi
 # The env file a compose call reads (for the logs below).
 env_file='' project_dir=''
@@ -23,7 +23,7 @@ done
 
 # Updates: the image a compose call reads in the env file; what the last `up` started; the version each image says
 # (FAKE_IMAGE_VERSIONS="image=version ...", default 0.1.0). $FAKE_STATE/images.log says which image each run/up used.
-env_image() { sed -n "s/^RSC_BRAIN_IMAGE='\\(.*\\)'$/\\1/p" "$env_file" 2>/dev/null; }
+env_image() { sed -n "s/^OBSY_BRAIN_IMAGE='\\(.*\\)'$/\\1/p" "$env_file" 2>/dev/null; }
 up_image() { cat "$state/up-image" 2>/dev/null || env_image; }
 version_of() {
   for pair in ${FAKE_IMAGE_VERSIONS:-}; do
@@ -101,12 +101,12 @@ case "$args" in
   ;;
 *" rsc-brain key reseal"*)
   # The key the data is sealed with is kept in $FAKE_STATE/sealed (at first, the installation's own). The reseal goes
-  # from the key in the env file (the container's RSC_BRAIN_SECRET) to the key on the standard input, as the real one
+  # from the key in the env file (the container's OBSY_BRAIN_SECRET) to the key on the standard input, as the real one
   # does: already sealed with the new key, nothing to do; sealed with neither, refused. FAKE_RESEAL_EXIT fails it
   # before anything is written; FAKE_RESEAL_FAIL_AFTER_COMMIT (once) writes, then reports a failure.
   to=$(cat)
   printf '<<< key reseal\n%s\n' "$to" >>"$FAKE_STDIN"
-  secret_of() { sed -n "s/^RSC_BRAIN_SECRET='\\(.*\\)'$/\\1/p" "$1" 2>/dev/null; }
+  secret_of() { sed -n "s/^OBSY_BRAIN_SECRET='\\(.*\\)'$/\\1/p" "$1" 2>/dev/null; }
   from=$(secret_of "$env_file")
   sealed=$(cat "$state/sealed" 2>/dev/null)
   [ -n "$sealed" ] || sealed=$(secret_of "$project_dir/.env")
@@ -412,7 +412,7 @@ compose)
     ;;
   *" logs "*)
     # A service that prints its own key at start (it never should): the launcher must not keep it.
-    secret=$(sed -n "s/^RSC_BRAIN_SECRET='\\(.*\\)'$/\\1/p" "$env_file" 2>/dev/null)
+    secret=$(sed -n "s/^OBSY_BRAIN_SECRET='\\(.*\\)'$/\\1/p" "$env_file" 2>/dev/null)
     echo "app-1  | boot failed: database refused (key $secret; again: $secret)"
     exit 0
     ;;

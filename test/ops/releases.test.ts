@@ -2,7 +2,7 @@
 // any credential, with limits on time and size, and what it changes from the `## vX.Y.Z` section of the CHANGELOG.md in
 // that tag. There is no shared package: the definition is written again here and pinned by a copy of rsc-factory's
 // vectors, with the same SHA-256. And (spec C18) the checker: once a day, sooner after a failure, only the User-Agent,
-// and off with an empty RSC_BRAIN_REPO_URL or RSC_BRAIN_RELEASES_URL.
+// and off with an empty OBSY_BRAIN_REPO_URL or OBSY_BRAIN_RELEASES_URL.
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
@@ -422,14 +422,14 @@ describe('the checker', () => {
     })
   })
 
-  test('empty RSC_BRAIN_REPO_URL or RSC_BRAIN_RELEASES_URL: no address, and nothing is ever asked', async () => {
-    assert.equal(repoUrl({ RSC_BRAIN_REPO_URL: '' }), null)
-    assert.equal(repoUrl({ RSC_BRAIN_REPO_URL: '  ' }), null)
-    assert.equal(repoUrl({ RSC_BRAIN_RELEASES_URL: '' }), null)
-    assert.equal(repoUrl({ RSC_BRAIN_RELEASES_URL: '', RSC_BRAIN_REPO_URL: REPO }), null)
+  test('empty OBSY_BRAIN_REPO_URL or OBSY_BRAIN_RELEASES_URL: no address, and nothing is ever asked', async () => {
+    assert.equal(repoUrl({ OBSY_BRAIN_REPO_URL: '' }), null)
+    assert.equal(repoUrl({ OBSY_BRAIN_REPO_URL: '  ' }), null)
+    assert.equal(repoUrl({ OBSY_BRAIN_RELEASES_URL: '' }), null)
+    assert.equal(repoUrl({ OBSY_BRAIN_RELEASES_URL: '', OBSY_BRAIN_REPO_URL: REPO }), null)
     assert.equal(repoUrl({}), DEFAULT_REPO_URL)
-    assert.equal(repoUrl({ RSC_BRAIN_RELEASES_URL: 'https://example.com/list' }), DEFAULT_REPO_URL)
-    assert.equal(repoUrl({ RSC_BRAIN_REPO_URL: ` ${REPO} ` }), REPO)
+    assert.equal(repoUrl({ OBSY_BRAIN_RELEASES_URL: 'https://example.com/list' }), DEFAULT_REPO_URL)
+    assert.equal(repoUrl({ OBSY_BRAIN_REPO_URL: ` ${REPO} ` }), REPO)
     assert.equal(DEFAULT_REPO_URL, 'https://github.com/ericrisco/rsc-brain')
     const { fetch, calls } = stub({})
     const c = releaseChecker({ repo: null, version: '0.1.0', clock: at(T0), fetch })
@@ -712,11 +712,11 @@ describe("the updater's report (B2: with the updater on, the web does not ask th
     assert.equal(checker(report({ updater: alive(T0 + 61_000), check })).c.state().latest, null)
   })
 
-  test('RSC_BRAIN_UPDATE_REPORT is what makes the service read the report', async () => {
+  test('OBSY_BRAIN_UPDATE_REPORT is what makes the service read the report', async () => {
     const d = report({ updater: alive(), check: good() })
     const { fetch, calls } = stub({ [INFO]: () => advert(refs('refs/tags/v0.3.0')) })
     const withReport = checkerFromEnv(
-      { RSC_BRAIN_REPO_URL: REPO, RSC_BRAIN_UPDATE_REPORT: d },
+      { OBSY_BRAIN_REPO_URL: REPO, OBSY_BRAIN_UPDATE_REPORT: d },
       '0.2.0',
       at(T0),
       fetch,
@@ -724,11 +724,11 @@ describe("the updater's report (B2: with the updater on, the web does not ask th
     await withReport.check()
     assert.equal(withReport.state().latest, 'v0.9.0')
     assert.equal(calls.length, 0)
-    const without = checkerFromEnv({ RSC_BRAIN_REPO_URL: REPO }, '0.2.0', at(T0), fetch)
+    const without = checkerFromEnv({ OBSY_BRAIN_REPO_URL: REPO }, '0.2.0', at(T0), fetch)
     await without.check()
     assert.equal(without.state().latest, 'v0.3.0')
     const empty = checkerFromEnv(
-      { RSC_BRAIN_REPO_URL: REPO, RSC_BRAIN_UPDATE_REPORT: '' },
+      { OBSY_BRAIN_REPO_URL: REPO, OBSY_BRAIN_UPDATE_REPORT: '' },
       '0.2.0',
       at(T0),
       fetch,

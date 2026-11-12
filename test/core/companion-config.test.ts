@@ -7,18 +7,18 @@ import { readConfig } from '../../src/config.ts'
 import { fromSharedNetwork, sameKey } from '../../src/domain/companion.ts'
 
 const TOKEN = 'c0ffee'.repeat(11)
-const base = { RSC_BRAIN_DATABASE_URL: 'postgres://x' }
+const base = { OBSY_BRAIN_DATABASE_URL: 'postgres://x' }
 const companion = {
   ...base,
-  RSC_BRAIN_COMPANION_TOKEN: TOKEN,
-  RSC_BRAIN_COMPANION_NETWORK: '192.168.210.0/24',
-  RSC_BRAIN_COMPANION_GATEWAY: '192.168.210.1',
-  RSC_BRAIN_FACTORY_URL: 'https://factory.example.com/',
-  RSC_BRAIN_SETUP_URL: 'https://brain.example.com',
+  OBSY_BRAIN_COMPANION_TOKEN: TOKEN,
+  OBSY_BRAIN_COMPANION_NETWORK: '192.168.210.0/24',
+  OBSY_BRAIN_COMPANION_GATEWAY: '192.168.210.1',
+  OBSY_BRAIN_FACTORY_URL: 'https://factory.example.com/',
+  OBSY_BRAIN_SETUP_URL: 'https://brain.example.com',
 }
 
 describe('companion mode: the settings', () => {
-  it('off without RSC_BRAIN_COMPANION_TOKEN', () => {
+  it('off without OBSY_BRAIN_COMPANION_TOKEN', () => {
     assert.equal(readConfig(base).companion, null)
   })
 
@@ -30,37 +30,37 @@ describe('companion mode: the settings', () => {
       factoryUrl: 'https://factory.example.com',
       publicUrl: 'https://brain.example.com',
     })
-    const noGateway = { ...companion, RSC_BRAIN_COMPANION_GATEWAY: '' }
+    const noGateway = { ...companion, OBSY_BRAIN_COMPANION_GATEWAY: '' }
     assert.equal(readConfig(noGateway).companion?.gateway, null)
   })
 
   const bad: Array<[string, Record<string, string>, RegExp]> = [
-    ['a short key', { RSC_BRAIN_COMPANION_TOKEN: 'short-key' }, /RSC_BRAIN_COMPANION_TOKEN.*32/],
-    ['a key with a space', { RSC_BRAIN_COMPANION_TOKEN: `${TOKEN} x` }, /RSC_BRAIN_COMPANION_TOKEN/],
-    ['no shared network', { RSC_BRAIN_COMPANION_NETWORK: '' }, /RSC_BRAIN_COMPANION_NETWORK/],
+    ['a short key', { OBSY_BRAIN_COMPANION_TOKEN: 'short-key' }, /OBSY_BRAIN_COMPANION_TOKEN.*32/],
+    ['a key with a space', { OBSY_BRAIN_COMPANION_TOKEN: `${TOKEN} x` }, /OBSY_BRAIN_COMPANION_TOKEN/],
+    ['no shared network', { OBSY_BRAIN_COMPANION_NETWORK: '' }, /OBSY_BRAIN_COMPANION_NETWORK/],
     [
       'a network that is not IPv4 CIDR',
-      { RSC_BRAIN_COMPANION_NETWORK: 'rsc-shared' },
-      /RSC_BRAIN_COMPANION_NETWORK/,
+      { OBSY_BRAIN_COMPANION_NETWORK: 'rsc-shared' },
+      /OBSY_BRAIN_COMPANION_NETWORK/,
     ],
     [
       'a network that takes in every address',
-      { RSC_BRAIN_COMPANION_NETWORK: '0.0.0.0/0' },
-      /RSC_BRAIN_COMPANION_NETWORK/,
+      { OBSY_BRAIN_COMPANION_NETWORK: '0.0.0.0/0' },
+      /OBSY_BRAIN_COMPANION_NETWORK/,
     ],
-    ['a prefix past 32', { RSC_BRAIN_COMPANION_NETWORK: '10.0.0.0/33' }, /RSC_BRAIN_COMPANION_NETWORK/],
-    ['an octet past 255', { RSC_BRAIN_COMPANION_NETWORK: '10.0.300.0/16' }, /RSC_BRAIN_COMPANION_NETWORK/],
+    ['a prefix past 32', { OBSY_BRAIN_COMPANION_NETWORK: '10.0.0.0/33' }, /OBSY_BRAIN_COMPANION_NETWORK/],
+    ['an octet past 255', { OBSY_BRAIN_COMPANION_NETWORK: '10.0.300.0/16' }, /OBSY_BRAIN_COMPANION_NETWORK/],
     [
       'a gateway that is not an address',
-      { RSC_BRAIN_COMPANION_GATEWAY: 'gw' },
-      /RSC_BRAIN_COMPANION_GATEWAY/,
+      { OBSY_BRAIN_COMPANION_GATEWAY: 'gw' },
+      /OBSY_BRAIN_COMPANION_GATEWAY/,
     ],
-    ['a gateway off the network', { RSC_BRAIN_COMPANION_GATEWAY: '10.0.0.1' }, /RSC_BRAIN_COMPANION_GATEWAY/],
-    ['no address of rsc-factory', { RSC_BRAIN_FACTORY_URL: '' }, /RSC_BRAIN_FACTORY_URL/],
+    ['a gateway off the network', { OBSY_BRAIN_COMPANION_GATEWAY: '10.0.0.1' }, /OBSY_BRAIN_COMPANION_GATEWAY/],
+    ['no address of rsc-factory', { OBSY_BRAIN_FACTORY_URL: '' }, /OBSY_BRAIN_FACTORY_URL/],
     [
       'an address of rsc-factory in clear',
-      { RSC_BRAIN_FACTORY_URL: 'http://factory.example.com' },
-      /RSC_BRAIN_FACTORY_URL/,
+      { OBSY_BRAIN_FACTORY_URL: 'http://factory.example.com' },
+      /OBSY_BRAIN_FACTORY_URL/,
     ],
   ]
   for (const [what, change, says] of bad) {

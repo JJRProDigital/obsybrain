@@ -458,7 +458,7 @@ describe('the import route and the command (CA19)', { skip: skipPg }, () => {
   })
 
   it('the command line: an administrator who joined and made itself curator imports a folder or a zip', async () => {
-    const env = { RSC_BRAIN_DATABASE_URL: w.url }
+    const env = { OBSY_BRAIN_DATABASE_URL: w.url }
     const email = String((await w.db.one('SELECT email FROM accounts WHERE id = $1', [P('boss').id]))?.email)
     // Not joined yet: the brain is not found, and nothing changes.
     const out = await run(['import', '--brain', 'cli', '--from', SAMPLE, '--as', email], env)

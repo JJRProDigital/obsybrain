@@ -1,6 +1,6 @@
 // The updater with real containers (plan T060 for CA25, CA25b, CA26): local only, never in CI (plan §5.1). Runs with
-// RSC_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Every Docker resource carries the prefix
-// rscb-b2-test- (RSC_BRAIN_INSTALL_PREFIX changes it) and a random id, and is removed by exact name afterwards.
+// OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Every Docker resource carries the prefix
+// rscb-b2-test- (OBSY_BRAIN_INSTALL_PREFIX changes it) and a random id, and is removed by exact name afterwards.
 //
 // There is no rsc-brain service here: `web-updates enable` needs an installation folder (its .env), a repository to
 // reach and Docker, not the service. What this shows with a real Docker: the image builds; the repository answers from
@@ -22,15 +22,15 @@ const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
 const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
 const ID = randomBytes(4).toString('hex')
-const PREFIX = process.env.RSC_BRAIN_INSTALL_PREFIX ?? 'rscb-b2-test'
+const PREFIX = process.env.OBSY_BRAIN_INSTALL_PREFIX ?? 'rscb-b2-test'
 const NAME = `${PREFIX}-${ID}`
 const PROJECT = `${NAME}-updater`
 const IMAGE = `rsc-brain-updater:${NAME}`
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
-  if (process.env.RSC_BRAIN_INSTALL_TESTS !== '1')
-    return 'set RSC_BRAIN_INSTALL_TESTS=1 to run the updater in a real container'
+  if (process.env.OBSY_BRAIN_INSTALL_TESTS !== '1')
+    return 'set OBSY_BRAIN_INSTALL_TESTS=1 to run the updater in a real container'
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) return 'Docker does not answer'
   return null
 })()
@@ -41,7 +41,7 @@ const launch = (args: string[]) =>
   spawnSync('sh', [LAUNCHER, ...args], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env, RSC_BRAIN_TTY: '/nonexistent/tty' },
+    env: { ...process.env, OBSY_BRAIN_TTY: '/nonexistent/tty' },
     timeout: 600_000,
   })
 
@@ -49,7 +49,7 @@ describe('the updater in a real container (CA25, CA25b, CA26)', { skip: why ?? f
   let dir = ''
   before(() => {
     // The installation folder the container mounts at its own path: a real path, which Docker shares.
-    const base = realpathSync(process.env.RSC_BRAIN_INSTALL_TMP ?? tmpdir())
+    const base = realpathSync(process.env.OBSY_BRAIN_INSTALL_TMP ?? tmpdir())
     dir = join(mkdtempSync(join(base, 'rscb-b2-')), 'install')
     mkdirSync(dir, { recursive: true })
     const repo = join(dir, 'repo.git')
@@ -77,7 +77,7 @@ describe('the updater in a real container (CA25, CA25b, CA26)', { skip: why ?? f
     rmSync(work, { recursive: true, force: true })
     writeFileSync(
       join(dir, '.env'),
-      `RSC_BRAIN_LAUNCHER='1'\nRSC_BRAIN_NAME='${NAME}'\nCOMPOSE_PROJECT_NAME='${NAME}'\nRSC_BRAIN_COMPANION='0'\nRSC_BRAIN_REPO_URL='file://${repo}'\nRSC_BRAIN_UID='${process.getuid?.()}'\nRSC_BRAIN_GID='${process.getgid?.()}'\n`,
+      `OBSY_BRAIN_LAUNCHER='1'\nOBSY_BRAIN_NAME='${NAME}'\nCOMPOSE_PROJECT_NAME='${NAME}'\nOBSY_BRAIN_COMPANION='0'\nOBSY_BRAIN_REPO_URL='file://${repo}'\nOBSY_BRAIN_UID='${process.getuid?.()}'\nOBSY_BRAIN_GID='${process.getgid?.()}'\n`,
       { mode: 0o600 },
     )
   })

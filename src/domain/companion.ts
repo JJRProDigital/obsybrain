@@ -1,5 +1,5 @@
 // Companion mode (plan F1 §3.1, spec F1 C24): rsc-factory's installer leaves rsc-brain installed but not set up, with
-// a one-time key both keep (RSC_BRAIN_COMPANION_TOKEN). While it waits, the setup of the web says to finish in
+// a one-time key both keep (OBSY_BRAIN_COMPANION_TOKEN). While it waits, the setup of the web says to finish in
 // rsc-factory. rsc-factory's own setup then calls POST /v1/setup/companion with that key, from the network the two
 // share, and gets the main key of its service account. The handshake answers only:
 // - while the installation is not set up (the setup's own transaction makes a second call fail, so two at once make

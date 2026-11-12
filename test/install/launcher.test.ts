@@ -1,6 +1,6 @@
 // The launcher with real containers (plan T039; spec B7 CA1, CA2, CA16): local only, never in CI (plan §5.1). Runs
-// with RSC_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). The folders it installs into are made
-// under RSC_BRAIN_INSTALL_TMP (or the system's temporary folder); every Docker resource carries the prefix
+// with OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). The folders it installs into are made
+// under OBSY_BRAIN_INSTALL_TMP (or the system's temporary folder); every Docker resource carries the prefix
 // rscb-pr34-test- and a random id, and is removed after.
 //
 // CA1: from nothing to the first-time setup in a browser in under 300 s (building the image included; the images it
@@ -39,8 +39,8 @@ const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
-  if (process.env.RSC_BRAIN_INSTALL_TESTS !== '1')
-    return 'set RSC_BRAIN_INSTALL_TESTS=1 to install with real containers'
+  if (process.env.OBSY_BRAIN_INSTALL_TESTS !== '1')
+    return 'set OBSY_BRAIN_INSTALL_TESTS=1 to install with real containers'
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) return 'Docker does not answer'
   return null
 })()
@@ -81,7 +81,7 @@ const launch = (
     const started = Date.now()
     const p = spawn('sh', [...(o.argv ?? [LAUNCHER]), ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, RSC_BRAIN_TTY: '/nonexistent/tty', ...o.env },
+      env: { ...process.env, OBSY_BRAIN_TTY: '/nonexistent/tty', ...o.env },
     })
     let stdout = ''
     let stderr = ''
@@ -113,7 +113,7 @@ const envOf = (dir: string) => {
 describe('the launcher with real containers', { skip: why ?? false }, () => {
   let buildSeconds = 0
   before(async () => {
-    BASE = mkdtempSync(join(process.env.RSC_BRAIN_INSTALL_TMP ?? tmpdir(), 'rscb-pr34-test-'))
+    BASE = mkdtempSync(join(process.env.OBSY_BRAIN_INSTALL_TMP ?? tmpdir(), 'rscb-pr34-test-'))
     const started = Date.now()
     await run('docker', ['build', '--no-cache', '-q', '-t', IMAGE, ROOT], { maxBuffer: 64 << 20 })
     buildSeconds = (Date.now() - started) / 1000
@@ -183,7 +183,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       const s = JSON.parse(r.stdout)
       site = s.url
       assert.equal(site, `http://localhost:${port}`)
-      assert.equal(s.installationKey, envOf(dir).RSC_BRAIN_SECRET)
+      assert.equal(s.installationKey, envOf(dir).OBSY_BRAIN_SECRET)
       const branding = (await (await fetch(`${site}/v1/branding`)).json()) as { setupRequired: boolean }
       assert.equal(branding.setupRequired, true)
       // The web, in a browser, leads to the first-time setup.
@@ -234,7 +234,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
 
     it('CA16: uninstall keeps the data, the copies and the key; installing again brings all of it back', async () => {
       const before = await counts()
-      const key = envOf(dir).RSC_BRAIN_SECRET
+      const key = envOf(dir).OBSY_BRAIN_SECRET
       const u = await launch(['uninstall', '--dir', dir])
       assert.equal(u.code, 0, u.stderr)
       assert.deepEqual(await ofProject('ps', name), [])
@@ -262,7 +262,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       const wrong = await launch(['uninstall', '--delete-data', '--confirm', 'not-it', '--dir', dir])
       assert.equal(wrong.code, 2)
       assert.ok((await ofProject('ps', name)).length > 0)
-      const key = envOf(dir).RSC_BRAIN_SECRET
+      const key = envOf(dir).OBSY_BRAIN_SECRET
       const right = await launch(['uninstall', '--delete-data', '--confirm', name, '--dir', dir])
       assert.equal(right.code, 0, right.stderr)
       assert.deepEqual(await ofProject('ps', name), [])
@@ -344,7 +344,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
         `services:
   caddy:
     environment:
-      RSC_BRAIN_ACME_CA: https://pebble:14000/dir
+      OBSY_BRAIN_ACME_CA: https://pebble:14000/dir
       SSL_CERT_FILE: /pebble/pebble.minica.pem
     volumes:
       - ${pebble}/pebble.minica.pem:/pebble/pebble.minica.pem:ro
@@ -443,14 +443,14 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       assert.equal(await ask(`${name}-caddy-1`), true, 'from Caddy')
       assert.equal(await ask(`${name}-postgres-1`), false, 'from another container on the same network')
       const env = envOf(dir)
-      assert.equal(env.RSC_BRAIN_TRUSTED_PROXIES, env.RSC_BRAIN_PROXY_IP)
+      assert.equal(env.OBSY_BRAIN_TRUSTED_PROXIES, env.OBSY_BRAIN_PROXY_IP)
       const ip = await docker(
         'inspect',
         '--format',
         '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
         `${name}-caddy-1`,
       )
-      assert.equal(ip, env.RSC_BRAIN_PROXY_IP)
+      assert.equal(ip, env.OBSY_BRAIN_PROXY_IP)
     })
 
     it('uninstall --delete-data removes all of it', async () => {
@@ -515,7 +515,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
         ],
         {
           argv: ['-c', 'umask 077 && exec sh "$0" "$@"', join(alone, 'rsc-brain.sh')],
-          env: { RSC_BRAIN_REPO: `file://${repo}` },
+          env: { OBSY_BRAIN_REPO: `file://${repo}` },
         },
       )
       assert.equal(r.code, 0, r.stderr.slice(-3000))
@@ -648,7 +648,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       )
       assert.equal(first.code, 0, first.stderr)
       const key = JSON.parse(first.stdout).installationKey
-      assert.equal(key, envOf(dir).RSC_BRAIN_SECRET)
+      assert.equal(key, envOf(dir).OBSY_BRAIN_SECRET)
       const branding = (await (await fetch(`${JSON.parse(first.stdout).url}/v1/branding`)).json()) as {
         setupRequired: boolean
       }

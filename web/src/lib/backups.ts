@@ -6,7 +6,7 @@
 const FAILURES: Record<string, string> = {
   disk_full: 'the disk of the copies is full',
   no_permission: 'rsc-brain cannot write in the folder of the copies',
-  no_installation_secret: 'the installation has no key (RSC_BRAIN_SECRET is not set)',
+  no_installation_secret: 'the installation has no key (OBSY_BRAIN_SECRET is not set)',
   weak_installation_key: 'the installation key is too short to protect a copy',
   database: 'the database did not answer as expected',
   busy: 'writes were still running after a minute',
@@ -16,7 +16,7 @@ const HOW: Record<string, string> = {
   disk_full: 'Free space in the folder of the copies, or keep fewer, then make a copy again.',
   no_permission:
     'Let the user that runs rsc-brain write in the folder of the copies, then make a copy again.',
-  no_installation_secret: 'Set RSC_BRAIN_SECRET for the service, restart it, then make a copy again.',
+  no_installation_secret: 'Set OBSY_BRAIN_SECRET for the service, restart it, then make a copy again.',
   weak_installation_key: 'Rotate to a long random key on the machine (rsc-brain.sh key rotate).',
   database: 'Make a copy again; if it fails again, look at the log of the service.',
   busy: 'Make a copy again in a few minutes.',

@@ -968,9 +968,9 @@ describe('restore: a copy larger than the memory of the process', { skip: skipPg
           {
             env: {
               ...process.env,
-              RSC_BRAIN_DATABASE_URL: target.url,
-              RSC_BRAIN_SECRET: TEST_SECRET,
-              RSC_BRAIN_BACKUPS: join(d, 'pre'),
+              OBSY_BRAIN_DATABASE_URL: target.url,
+              OBSY_BRAIN_SECRET: TEST_SECRET,
+              OBSY_BRAIN_BACKUPS: join(d, 'pre'),
             },
           },
         )

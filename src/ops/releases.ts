@@ -4,8 +4,8 @@
 // no shared package) and pinned by test/fixtures/published-vectors.json. The repository is asked the way git does, with
 // no credential at all and nothing but `User-Agent: rsc-brain/<version>`, so a private one answers no_access and the
 // web sends the operator to `rsc-brain.sh update --check`, which has the server's own access. An error never carries a
-// version: nothing here can turn a failed check into «up to date». RSC_BRAIN_REPO_URL says where to ask; empty, as an
-// empty RSC_BRAIN_RELEASES_URL, nothing is ever asked. What it learns stays in this process's memory.
+// version: nothing here can turn a failed check into «up to date». OBSY_BRAIN_REPO_URL says where to ask; empty, as an
+// empty OBSY_BRAIN_RELEASES_URL, nothing is ever asked. What it learns stays in this process's memory.
 //
 // With the updater on (rsc-brain.sh web-updates enable) the web asks nobody: the updater has the server's access, asks
 // the repository through the launcher and leaves update/report/check.json, which is read here, read only, for as long as
@@ -256,11 +256,11 @@ export type ReleaseChecker = {
   stop(): void
 }
 
-// Where to ask, from the environment: unset, the public repository; empty, nowhere (off). RSC_BRAIN_RELEASES_URL is
+// Where to ask, from the environment: unset, the public repository; empty, nowhere (off). OBSY_BRAIN_RELEASES_URL is
 // from before: its address means nothing any more, but empty still turns the check off.
 export function repoUrl(env: Record<string, string | undefined>): string | null {
-  if (env.RSC_BRAIN_RELEASES_URL?.trim() === '') return null
-  const v = env.RSC_BRAIN_REPO_URL
+  if (env.OBSY_BRAIN_RELEASES_URL?.trim() === '') return null
+  const v = env.OBSY_BRAIN_REPO_URL
   if (v === undefined) return DEFAULT_REPO_URL
   return v.trim() === '' ? null : v.trim()
 }
@@ -438,7 +438,7 @@ export function releaseView(s: ReleaseState | null, version: string): ReleaseVie
   return { ...base, newer: c === 'newer' || (c === 'up_to_date' && preview), ahead: c === 'older' }
 }
 
-// The checker the service runs: where to ask from RSC_BRAIN_REPO_URL, and, when RSC_BRAIN_UPDATE_REPORT names a folder,
+// The checker the service runs: where to ask from OBSY_BRAIN_REPO_URL, and, when OBSY_BRAIN_UPDATE_REPORT names a folder,
 // the updater's report to read while it is alive.
 export function checkerFromEnv(
   env: Record<string, string | undefined>,
@@ -451,6 +451,6 @@ export function checkerFromEnv(
     version,
     clock,
     ...(send ? { fetch: send } : {}),
-    ...(env.RSC_BRAIN_UPDATE_REPORT ? { report: env.RSC_BRAIN_UPDATE_REPORT } : {}),
+    ...(env.OBSY_BRAIN_UPDATE_REPORT ? { report: env.OBSY_BRAIN_UPDATE_REPORT } : {}),
   })
 }

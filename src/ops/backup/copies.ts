@@ -63,7 +63,7 @@ const notSetUp = () =>
     409,
     'backups_not_set_up',
     'This installation has no folder for its copies.',
-    'Set RSC_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain.',
+    'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain.',
   )
 
 // A copy's id is its file name without `.rscb`; nothing else is ever a path here.

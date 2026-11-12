@@ -1,5 +1,5 @@
 // Companion mode with real containers (plan F1 T049, the B7 container lane): local only, never in CI (plan §5.1). Runs
-// with RSC_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). It stands in for rsc-factory's installer:
+// with OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). It stands in for rsc-factory's installer:
 // a shared network and a PostgreSQL on it (as rsc-factory's), then `rsc-brain.sh install --companion`, then the
 // handshake from a container on that network, as rsc-factory's setup makes it. Every Docker resource carries the
 // prefix rscb-f1c- and a random id, and is removed after.
@@ -33,8 +33,8 @@ const ADMIN = { name: 'Eric', email: 'eric@example.com', password: 'a long enoug
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
-  if (process.env.RSC_BRAIN_INSTALL_TESTS !== '1')
-    return 'set RSC_BRAIN_INSTALL_TESTS=1 to install with real containers'
+  if (process.env.OBSY_BRAIN_INSTALL_TESTS !== '1')
+    return 'set OBSY_BRAIN_INSTALL_TESTS=1 to install with real containers'
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) return 'Docker does not answer'
   return null
 })()
@@ -105,7 +105,7 @@ describe('companion mode with real containers', { skip: why ?? false }, () => {
   const local = (path: string, init: RequestInit = {}) => fetch(`http://127.0.0.1:${port}${path}`, init)
 
   before(async () => {
-    base = mkdtempSync(join(process.env.RSC_BRAIN_INSTALL_TMP ?? tmpdir(), 'rscb-f1c-'))
+    base = mkdtempSync(join(process.env.OBSY_BRAIN_INSTALL_TMP ?? tmpdir(), 'rscb-f1c-'))
     dir = join(base, 'install')
     await run('docker', ['build', '-q', '-t', IMAGE, ROOT], { maxBuffer: 64 << 20 })
     // What rsc-factory's installer has made before it calls the launcher: the shared network and its PostgreSQL.
@@ -163,7 +163,7 @@ describe('companion mode with real containers', { skip: why ?? false }, () => {
         '--factory-db',
         'rscf',
       ],
-      { encoding: 'utf8', env: { ...process.env, RSC_BRAIN_TTY: '/nonexistent/tty' }, timeout: 300_000 },
+      { encoding: 'utf8', env: { ...process.env, OBSY_BRAIN_TTY: '/nonexistent/tty' }, timeout: 300_000 },
     )
     rmSync(admin)
     assert.equal(r.status, 0, r.stderr)
@@ -196,7 +196,7 @@ describe('companion mode with real containers', { skip: why ?? false }, () => {
     assert.equal(summary.url, `http://localhost:${port}`)
     assert.match(
       readFileSync(join(dir, '.env'), 'utf8'),
-      new RegExp(`RSC_BRAIN_COMPANION_TOKEN='${summary.companionToken}'`),
+      new RegExp(`OBSY_BRAIN_COMPANION_TOKEN='${summary.companionToken}'`),
     )
   })
 

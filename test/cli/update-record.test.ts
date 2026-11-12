@@ -41,9 +41,9 @@ describe('rsc-brain update record (no database needed)', () => {
   before(async () => {
     dir = await mkdtemp(join(tmpdir(), 'rsc-brain-cli-update-'))
     env = {
-      RSC_BRAIN_BACKUPS: dir,
-      RSC_BRAIN_SECRET: KEY,
-      RSC_BRAIN_DATABASE_URL: `postgres://rsc_brain:${DB_PASSWORD}@postgres:5432/rsc_brain`,
+      OBSY_BRAIN_BACKUPS: dir,
+      OBSY_BRAIN_SECRET: KEY,
+      OBSY_BRAIN_DATABASE_URL: `postgres://rsc_brain:${DB_PASSWORD}@postgres:5432/rsc_brain`,
     }
   })
   after(async () => rm(dir, { recursive: true, force: true }))
@@ -115,7 +115,7 @@ describe('rsc-brain update record (no database needed)', () => {
     }
     const none = await run(['update', 'record', '--ok', '--from', '0.1.0', '--to', '0.2.0'], {
       ...env,
-      RSC_BRAIN_BACKUPS: '',
+      OBSY_BRAIN_BACKUPS: '',
     })
     assert.equal(none.code, 2)
     assert.equal(await readFile(join(dir, 'status.json'), 'utf8'), before)

@@ -10,10 +10,10 @@ export class UsageError extends Error {}
 
 const LOOPBACK = new Set(['localhost', '127.0.0.1', '[::1]'])
 
-// The MCP address, from --url or RSC_BRAIN_URL. A bare installation address gets /mcp. Plain http only
+// The MCP address, from --url or OBSY_BRAIN_URL. A bare installation address gets /mcp. Plain http only
 // to this machine: a token must not cross a network in clear text.
 export function mcpAddress(raw: string | undefined): URL {
-  const v = raw ?? process.env.RSC_BRAIN_URL
+  const v = raw ?? process.env.OBSY_BRAIN_URL
   if (!v)
     throw new UsageError(
       'Pass --url with the MCP address of your installation, such as https://brain.example.com/mcp.',
@@ -41,8 +41,8 @@ export function apiBase(mcp: URL): string {
 
 const expand = (p: string) => (p === '~' || p.startsWith('~/') ? join(homedir(), p.slice(1)) : p)
 
-// The file given, else RSC_BRAIN_TOKEN, else the usual file when it exists. A file named on the command
-// line wins over the environment: another agent's setup may have set RSC_BRAIN_TOKEN. An explicit file
+// The file given, else OBSY_BRAIN_TOKEN, else the usual file when it exists. A file named on the command
+// line wins over the environment: another agent's setup may have set OBSY_BRAIN_TOKEN. An explicit file
 // that cannot be read is an error; no token at all is null.
 export function readToken(file: string | undefined): string | null {
   const env = process.env[TOKEN_ENV]?.trim()

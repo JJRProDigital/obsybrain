@@ -112,7 +112,7 @@ describe('the .rscb copy format', () => {
     assert.equal((await readAll(opened)).toString('utf8'), big)
   })
 
-  it('second pass: no copy with a key shorter than RSC_BRAIN_SECRET allows (32), measured the same way', async () => {
+  it('second pass: no copy with a key shorter than OBSY_BRAIN_SECRET allows (32), measured the same way', async () => {
     const sink = async () => {}
     for (const weak of ['short-key', 'x'.repeat(31), 'ü'.repeat(31)]) {
       await assert.rejects(

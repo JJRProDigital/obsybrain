@@ -1,5 +1,5 @@
 // Secrets the server must read back (the second-factor seed, the mail password) are sealed with a key
-// derived from the installation secret (RSC_BRAIN_SECRET), AES-256-GCM. Without that secret they
+// derived from the installation secret (OBSY_BRAIN_SECRET), AES-256-GCM. Without that secret they
 // cannot be stored, and the refusal says so.
 import { createCipheriv, createDecipheriv, createHmac, randomBytes, scryptSync } from 'node:crypto'
 import { AppError } from '../core/errors.ts'
@@ -18,8 +18,8 @@ export const noVault = () =>
   new AppError(
     409,
     'no_installation_secret',
-    'This installation has no secret to keep this safely (RSC_BRAIN_SECRET is not set).',
-    'Set RSC_BRAIN_SECRET for the server (a long random value; the installer writes one), then try again.',
+    'This installation has no secret to keep this safely (OBSY_BRAIN_SECRET is not set).',
+    'Set OBSY_BRAIN_SECRET for the server (a long random value; the installer writes one), then try again.',
   )
 
 // What a sealed value is for. Each value is bound to its purpose (v2: the purpose is authenticated data), so a

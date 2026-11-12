@@ -11,7 +11,7 @@ import { describe, it } from 'node:test'
 
 const ROOT = new URL('../../', import.meta.url).pathname
 const WEB_DIST = join(ROOT, 'dist', 'web')
-// "RSC Brain", "Risco Brain", in any case; RSC_BRAIN_* variables and the package name are fine.
+// "RSC Brain", "Risco Brain", in any case; OBSY_BRAIN_* variables and the package name are fine.
 const WRONG = /\b(rsc|risco)[ \t]+brain\b/i
 
 export async function wrongNames(dir: string): Promise<string[]> {
@@ -29,7 +29,7 @@ export async function wrongNames(dir: string): Promise<string[]> {
 }
 
 // A capitalised «Brain» standing alone, as the product's name. "Brain" inside a longer name (BrainRow,
-// X-Brain-Cut, RSC_BRAIN_*) is not a word on its own, and "brain" in lower case is the noun.
+// X-Brain-Cut, OBSY_BRAIN_*) is not a word on its own, and "brain" in lower case is the noun.
 const BARE = /(?<![\w-])Brain(?![\w-]|\.\w)/
 
 // Where «Brain» is the noun capitalised at the start of a heading or label, not the product. Each entry
@@ -111,7 +111,7 @@ describe('the product name', () => {
   it('a wrong name is caught, and the right one passes', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'brain-name-'))
     try {
-      await writeFile(join(dir, 'a.ts'), "const title = 'rsc-brain'; const env = 'RSC_BRAIN_TOKEN'")
+      await writeFile(join(dir, 'a.ts'), "const title = 'rsc-brain'; const env = 'OBSY_BRAIN_TOKEN'")
       assert.deepEqual(await wrongNames(dir), [])
       for (const bad of ['RSC Brain', 'Risco Brain', 'rsc  brain']) {
         await writeFile(join(dir, 'a.ts'), `const title = '${bad}'`)
@@ -145,7 +145,7 @@ describe('the product name', () => {
       "import { Brain } from './screens/Brain.tsx'",
       "const t = 'Create brain'",
       "const h = 'X-Brain-Cut'",
-      "const e = 'RSC_BRAIN_TOKEN'",
+      "const e = 'OBSY_BRAIN_TOKEN'",
       '// Brain does this in a comment',
       "const t = 'Your brains'",
       "const t = 'rsc-brain is set up.'",

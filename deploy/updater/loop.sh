@@ -17,25 +17,25 @@
 # Secrets: the credential is a file made for this container; the launcher gets only the name of a helper that reads it
 # (GIT_ASKPASS) or of an ssh key file, never a value. What a failure says passes through redact before it is kept.
 #
-# For tests: RSC_BRAIN_UPDATER_ONCE=1 does one round and ends; RSC_BRAIN_UPDATER_NOW is the time (epoch seconds);
-# RSC_BRAIN_UPDATER_LAUNCHER is the launcher to call; RSC_BRAIN_UPDATER_BEAT is the seconds between beats (default 5). `loop.sh --access` only proves the repository answers with the
+# For tests: OBSY_BRAIN_UPDATER_ONCE=1 does one round and ends; OBSY_BRAIN_UPDATER_NOW is the time (epoch seconds);
+# OBSY_BRAIN_UPDATER_LAUNCHER is the launcher to call; OBSY_BRAIN_UPDATER_BEAT is the seconds between beats (default 5). `loop.sh --access` only proves the repository answers with the
 # credentials given (what `web-updates enable` asks before it starts anything).
 
 set -u
 umask 022
 
-DIR=${RSC_BRAIN_UPDATER_DIR:-}
+DIR=${OBSY_BRAIN_UPDATER_DIR:-}
 case $DIR in
 /*) ;;
 *)
-  echo 'loop.sh: RSC_BRAIN_UPDATER_DIR must be the absolute path of the installation.' >&2
+  echo 'loop.sh: OBSY_BRAIN_UPDATER_DIR must be the absolute path of the installation.' >&2
   exit 2
   ;;
 esac
 REQ=$DIR/update/request REPORT=$DIR/update/report STATE=$DIR/update/state CRED=$DIR/updater/credentials
-LAUNCHER=${RSC_BRAIN_UPDATER_LAUNCHER:-$DIR/updater/rsc-brain.sh}
-ONCE=${RSC_BRAIN_UPDATER_ONCE:-0}
-BEAT=${RSC_BRAIN_UPDATER_BEAT:-5} CHECK_EVERY=21600 RETRY_AFTER=900 MAX_RETRIES=3
+LAUNCHER=${OBSY_BRAIN_UPDATER_LAUNCHER:-$DIR/updater/rsc-brain.sh}
+ONCE=${OBSY_BRAIN_UPDATER_ONCE:-0}
+BEAT=${OBSY_BRAIN_UPDATER_BEAT:-5} CHECK_EVERY=21600 RETRY_AFTER=900 MAX_RETRIES=3
 DEFAULT_REPO=https://github.com/ericrisco/rsc-brain
 
 # A stop may come while the output goes to a file: what is said then goes where it was going when this started.
@@ -45,7 +45,7 @@ if (exec 5>&1) 2>/dev/null; then exec 5>&1; else exec 5>/dev/null; fi
 to_terminal() { exec 2>&4 1>&5; }
 say() { printf '%s\n' "$*" >&2; }
 
-now() { if [ -n "${RSC_BRAIN_UPDATER_NOW:-}" ]; then echo "$RSC_BRAIN_UPDATER_NOW"; else date +%s; fi; }
+now() { if [ -n "${OBSY_BRAIN_UPDATER_NOW:-}" ]; then echo "$OBSY_BRAIN_UPDATER_NOW"; else date +%s; fi; }
 iso() { date -u -d "@$1" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -r "$1" +%Y-%m-%dT%H:%M:%SZ; }
 # put FILE <IN: the file whole, beside and moved into place.
 put() { cat >"$1.new" && chmod 644 "$1.new" && mv -f "$1.new" "$1"; }
@@ -58,7 +58,7 @@ env_value() { sed -n "s/^$1='\\(.*\\)'\$/\\1/p" "$DIR/.env" 2>/dev/null | head -
 
 # The host of the repository, as git names it in a question for a password (with its port, if it has one).
 repo_url() {
-  u=$(env_value RSC_BRAIN_REPO_URL)
+  u=$(env_value OBSY_BRAIN_REPO_URL)
   [ -n "$u" ] || u=$DEFAULT_REPO
   printf '%s' "$u"
 }
@@ -74,10 +74,10 @@ repo_host() {
 # value. Called in a subshell.
 credentials_env() {
   GIT_TERMINAL_PROMPT=0
-  export GIT_TERMINAL_PROMPT RSC_BRAIN_UPDATER_DIR
+  export GIT_TERMINAL_PROMPT OBSY_BRAIN_UPDATER_DIR
   if [ -f "$CRED/token" ] && [ ! -L "$CRED/token" ]; then
-    GIT_ASKPASS=$DIR/updater/credentials.sh RSC_BRAIN_UPDATER_REPO_HOST=$(repo_host)
-    export GIT_ASKPASS RSC_BRAIN_UPDATER_REPO_HOST
+    GIT_ASKPASS=$DIR/updater/credentials.sh OBSY_BRAIN_UPDATER_REPO_HOST=$(repo_host)
+    export GIT_ASKPASS OBSY_BRAIN_UPDATER_REPO_HOST
   fi
   if [ -f "$CRED/key" ] && [ ! -L "$CRED/key" ]; then
     # git runs this through a shell, so the quotes around the paths are meant.
@@ -129,9 +129,9 @@ write_updater() { # [running-version running-since]
     fi
     # A way back that could not restore: the data may be damaged, and only the terminal goes on from here.
     if rollback_failed; then
-      printf ',"rollbackFailed":{"from":%s,"to":%s,"copy":%s,"restore":%s}' "$(jstr "$(rb_value RSC_BRAIN_ROLLBACK_FROM)")" \
-        "$(jstr "$(rb_value RSC_BRAIN_ROLLBACK_TO)")" "$(jstr "$(rb_value RSC_BRAIN_ROLLBACK_COPY)")" \
-        "$(jstr "$(rb_value RSC_BRAIN_ROLLBACK_RESTORE)")"
+      printf ',"rollbackFailed":{"from":%s,"to":%s,"copy":%s,"restore":%s}' "$(jstr "$(rb_value OBSY_BRAIN_ROLLBACK_FROM)")" \
+        "$(jstr "$(rb_value OBSY_BRAIN_ROLLBACK_TO)")" "$(jstr "$(rb_value OBSY_BRAIN_ROLLBACK_COPY)")" \
+        "$(jstr "$(rb_value OBSY_BRAIN_ROLLBACK_RESTORE)")"
     fi
     printf ',"attempts":{'
     sep=''

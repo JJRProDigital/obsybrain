@@ -1,7 +1,7 @@
 // What a request's connection is: encrypted or not, from this machine or not, and from which address. B4's rule
 // («a password only over an encrypted connection or from this machine») reads it.
 //
-// «This machine only» (RSC_BRAIN_LOCAL_ONLY, spec B7 C19): in a container, a browser on the same machine reaches
+// «This machine only» (OBSY_BRAIN_LOCAL_ONLY, spec B7 C19): in a container, a browser on the same machine reaches
 // the service through the container's gateway, never from 127.0.0.1. With the flag on, a request that comes
 // straight from that gateway (through no proxy) counts as this machine. That is only true because the port is
 // published on 127.0.0.1 alone: readConfig refuses the flag otherwise, and the launcher sets both together. Published
@@ -15,7 +15,7 @@ const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1'])
 export type ConnOptions = {
   // Proxies whose X-Forwarded-Proto / X-Forwarded-For are believed.
   trusted: string[]
-  // With RSC_BRAIN_LOCAL_ONLY: the container's gateway; empty otherwise.
+  // With OBSY_BRAIN_LOCAL_ONLY: the container's gateway; empty otherwise.
   localGateways: string[]
 }
 

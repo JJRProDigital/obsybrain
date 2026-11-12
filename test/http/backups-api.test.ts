@@ -406,7 +406,7 @@ describe('a copy that fails where its status cannot be written either: the web s
       assert.deepEqual(r.body.items, [])
       const made = await v.callWeb(web, 'POST', '/v1/admin/backups', {})
       assert.deepEqual([made.status, made.body.error?.code], [409, 'backups_not_set_up'], made.text)
-      assert.match(made.body.error?.howToProceed ?? '', /RSC_BRAIN_BACKUPS/)
+      assert.match(made.body.error?.howToProceed ?? '', /OBSY_BRAIN_BACKUPS/)
     } finally {
       await v.close()
     }

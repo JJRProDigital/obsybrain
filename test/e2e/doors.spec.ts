@@ -32,7 +32,7 @@ test('first run from the web makes the administrator and signs them in', async (
   await page.getByLabel('Your email').fill(ADMIN.email)
   await page.getByLabel('Password', { exact: true }).fill(ADMIN.password)
   await page.getByRole('button', { name: 'Set up and sign in' }).click()
-  // T019: the last step shows the installation key of this process (RSC_BRAIN_SECRET), once.
+  // T019: the last step shows the installation key of this process (OBSY_BRAIN_SECRET), once.
   await expect(page.getByRole('heading', { level: 1, name: 'Keep the installation key' })).toBeVisible()
   await expect(page.locator('pre')).toHaveText(E2E_SECRET)
   await page.getByLabel('I saved the installation key somewhere safe, outside this machine').check()

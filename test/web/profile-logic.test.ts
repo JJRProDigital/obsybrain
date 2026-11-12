@@ -158,22 +158,22 @@ describe('the key of the second factor', () => {
 
 describe('the configuration with the token filled in', () => {
   const blocks = [
-    { title: 'env', where: 'terminal', format: 'shell', text: 'export RSC_BRAIN_TOKEN="<paste-your-token>"' },
+    { title: 'env', where: 'terminal', format: 'shell', text: 'export OBSY_BRAIN_TOKEN="<paste-your-token>"' },
     {
       title: 'file',
       where: '.mcp.json',
       format: 'json',
-      text: `{"Authorization":"Bearer $\{RSC_BRAIN_TOKEN}"}`,
+      text: `{"Authorization":"Bearer $\{OBSY_BRAIN_TOKEN}"}`,
     },
     { title: 'two', where: 'remote', format: 'text', text: 'a <paste-your-token> b <paste-your-token>' },
   ]
   it('puts the token where the kit has the placeholder, and nowhere else', () => {
     const out = fillToken(blocks, '<paste-your-token>', 'rscb_secret1234')
-    assert.equal(out[0]?.text, 'export RSC_BRAIN_TOKEN="rscb_secret1234"')
+    assert.equal(out[0]?.text, 'export OBSY_BRAIN_TOKEN="rscb_secret1234"')
     assert.equal(out[1]?.text, blocks[1]?.text)
     assert.equal(out[2]?.text, 'a rscb_secret1234 b rscb_secret1234')
     // The kit itself is untouched (it is cached and shown again later without the token).
-    assert.equal(blocks[0]?.text, 'export RSC_BRAIN_TOKEN="<paste-your-token>"')
+    assert.equal(blocks[0]?.text, 'export OBSY_BRAIN_TOKEN="<paste-your-token>"')
   })
 })
 

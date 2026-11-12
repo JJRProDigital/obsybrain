@@ -1,7 +1,7 @@
 // The updater of rsc-brain (rsc-updates §3.7, §3.9; T059 for CA27): the loop that runs inside its own container and
 // starts `update` when the web leaves a request mark, and what it may reach. No Docker here: the loop runs on this
-// machine with a stand-in launcher that records how it was called, one tick at a time (RSC_BRAIN_UPDATER_ONCE=1), with
-// a clock the test sets (RSC_BRAIN_UPDATER_NOW). What this pins is the rules of CA20 and CA21: a mark is only looked at
+// machine with a stand-in launcher that records how it was called, one tick at a time (OBSY_BRAIN_UPDATER_ONCE=1), with
+// a clock the test sets (OBSY_BRAIN_UPDATER_NOW). What this pins is the rules of CA20 and CA21: a mark is only looked at
 // (never opened: a FIFO does not hang it, a link is not followed, what is written in it means nothing), the update that
 // starts is always the same command for the newest published version, a failed version is tried once, then at most
 // 3 times more with 15 minutes between them, and nothing a failure says carries a credential. The real containers are
@@ -32,7 +32,7 @@ const COMPOSE = join(ROOT, 'deploy', 'compose.yaml')
 const DOCKERFILE = join(ROOT, 'deploy', 'updater', 'Dockerfile')
 const TOKEN = 'ghp_SecretTokenValue0123456789'
 const NOW = 1_800_000_000
-const SHELLS = (process.env.RSC_BRAIN_TEST_SHELL ?? '/bin/sh').split(',')
+const SHELLS = (process.env.OBSY_BRAIN_TEST_SHELL ?? '/bin/sh').split(',')
 
 let BASE = ''
 let FAKE = ''
@@ -59,8 +59,8 @@ update)
     echo "env GIT_ASKPASS=\${GIT_ASKPASS:-}"
     echo "env GIT_SSH_COMMAND=\${GIT_SSH_COMMAND:-}"
     echo "env GIT_TERMINAL_PROMPT=\${GIT_TERMINAL_PROMPT:-}"
-    echo "request_mark=$([ -e "\${RSC_BRAIN_UPDATER_DIR}/update/request/request" ] || [ -L "\${RSC_BRAIN_UPDATER_DIR}/update/request/request" ] && echo present || echo gone)"
-    echo "running=$(grep -c running "\${RSC_BRAIN_UPDATER_DIR}/update/report/updater.json" 2>/dev/null)"
+    echo "request_mark=$([ -e "\${OBSY_BRAIN_UPDATER_DIR}/update/request/request" ] || [ -L "\${OBSY_BRAIN_UPDATER_DIR}/update/request/request" ] && echo present || echo gone)"
+    echo "running=$(grep -c running "\${OBSY_BRAIN_UPDATER_DIR}/update/report/updater.json" 2>/dev/null)"
     env | sed 's/^/ENV /'
   } >>"\${FAKE_LOG}.snapshot"
   trap 'echo forwarded >>"\${FAKE_LOG}.signals"; exit 4' TERM
@@ -87,7 +87,7 @@ const fresh = (): Case => {
   const dir = join(c, 'install')
   for (const d of ['update/request', 'update/report', 'update/state', 'updater/credentials', '.rsc-brain'])
     mkdirSync(join(dir, d), { recursive: true })
-  writeFileSync(join(dir, '.env'), "RSC_BRAIN_LAUNCHER='1'\nRSC_BRAIN_NAME='rsc-brain'\n")
+  writeFileSync(join(dir, '.env'), "OBSY_BRAIN_LAUNCHER='1'\nOBSY_BRAIN_NAME='rsc-brain'\n")
   writeFileSync(join(c, 'launcher.log'), '')
   return { dir, log: join(c, 'launcher.log') }
 }
@@ -108,10 +108,10 @@ function tick(
     env: {
       PATH: process.env.PATH ?? '/usr/bin:/bin',
       HOME: join(c.dir, 'updater', 'home'),
-      RSC_BRAIN_UPDATER_DIR: c.dir,
-      RSC_BRAIN_UPDATER_LAUNCHER: FAKE,
-      RSC_BRAIN_UPDATER_ONCE: '1',
-      RSC_BRAIN_UPDATER_NOW: String(o.at ?? NOW),
+      OBSY_BRAIN_UPDATER_DIR: c.dir,
+      OBSY_BRAIN_UPDATER_LAUNCHER: FAKE,
+      OBSY_BRAIN_UPDATER_ONCE: '1',
+      OBSY_BRAIN_UPDATER_NOW: String(o.at ?? NOW),
       FAKE_LOG: c.log,
       FAKE_CHECK: NEWER(),
       ...env,
@@ -149,7 +149,7 @@ for (const shell of SHELLS) {
   describe(`the updater loop, under ${shell} (CA12b, CA20, CA21)`, () => {
     it('starts by taking back what an interrupted update left: the launcher is asked for its status first', () => {
       const c = fresh()
-      writeFileSync(join(c.dir, '.rsc-brain', 'update.pending'), "RSC_BRAIN_UPDATE_PHASE='switched'\n")
+      writeFileSync(join(c.dir, '.rsc-brain', 'update.pending'), "OBSY_BRAIN_UPDATE_PHASE='switched'\n")
       const t = tick(c, {}, sh)
       assert.equal(t.code, 0, t.stderr)
       assert.match(t.calls[0] ?? '', new RegExp(`^status --dir ${c.dir}$`))
@@ -421,7 +421,7 @@ for (const shell of SHELLS) {
         c,
         {
           PATH: `${bin}:${process.env.PATH ?? '/usr/bin:/bin'}`,
-          RSC_BRAIN_UPDATER_NOW: '',
+          OBSY_BRAIN_UPDATER_NOW: '',
           FAKE_UPDATE_EXIT: '4',
           FAKE_UPDATE_SAYS: 'It failed.',
         },
@@ -559,10 +559,10 @@ for (const shell of SHELLS) {
         env: {
           PATH: process.env.PATH ?? '/usr/bin:/bin',
           HOME: join(c.dir, 'updater', 'home'),
-          RSC_BRAIN_UPDATER_DIR: c.dir,
-          RSC_BRAIN_UPDATER_LAUNCHER: FAKE,
-          RSC_BRAIN_UPDATER_ONCE: '1',
-          RSC_BRAIN_UPDATER_BEAT: '1',
+          OBSY_BRAIN_UPDATER_DIR: c.dir,
+          OBSY_BRAIN_UPDATER_LAUNCHER: FAKE,
+          OBSY_BRAIN_UPDATER_ONCE: '1',
+          OBSY_BRAIN_UPDATER_BEAT: '1',
           FAKE_LOG: c.log,
           FAKE_CHECK: NEWER(),
           FAKE_UPDATE_SLEEP: '4',
@@ -648,10 +648,10 @@ for (const shell of SHELLS) {
         env: {
           PATH: `${slow}:${process.env.PATH ?? '/usr/bin:/bin'}`,
           HOME: join(c.dir, 'updater', 'home'),
-          RSC_BRAIN_UPDATER_DIR: c.dir,
-          RSC_BRAIN_UPDATER_LAUNCHER: FAKE,
-          RSC_BRAIN_UPDATER_ONCE: '1',
-          RSC_BRAIN_UPDATER_BEAT: '1',
+          OBSY_BRAIN_UPDATER_DIR: c.dir,
+          OBSY_BRAIN_UPDATER_LAUNCHER: FAKE,
+          OBSY_BRAIN_UPDATER_ONCE: '1',
+          OBSY_BRAIN_UPDATER_BEAT: '1',
           FAKE_LOG: c.log,
           FAKE_CHECK: NEWER(),
           FAKE_UPDATE_SLEEP: '3',
@@ -688,10 +688,10 @@ for (const shell of SHELLS) {
         env: {
           PATH: process.env.PATH ?? '/usr/bin:/bin',
           HOME: join(c.dir, 'updater', 'home'),
-          RSC_BRAIN_UPDATER_DIR: c.dir,
-          RSC_BRAIN_UPDATER_LAUNCHER: FAKE,
-          RSC_BRAIN_UPDATER_ONCE: '1',
-          RSC_BRAIN_UPDATER_NOW: String(NOW),
+          OBSY_BRAIN_UPDATER_DIR: c.dir,
+          OBSY_BRAIN_UPDATER_LAUNCHER: FAKE,
+          OBSY_BRAIN_UPDATER_ONCE: '1',
+          OBSY_BRAIN_UPDATER_NOW: String(NOW),
           FAKE_LOG: c.log,
           FAKE_CHECK: NEWER(),
           FAKE_UPDATE_SLEEP: '30',
@@ -736,8 +736,8 @@ describe('the credential helper (GIT_ASKPASS)', () => {
       encoding: 'utf8',
       env: {
         PATH: process.env.PATH ?? '/usr/bin:/bin',
-        RSC_BRAIN_UPDATER_DIR: c.dir,
-        RSC_BRAIN_UPDATER_REPO_HOST: 'github.com',
+        OBSY_BRAIN_UPDATER_DIR: c.dir,
+        OBSY_BRAIN_UPDATER_REPO_HOST: 'github.com',
         ...env,
       },
     })
@@ -765,7 +765,7 @@ describe('the credential helper (GIT_ASKPASS)', () => {
     const c = fresh()
     assert.notEqual(ask(c, "Password for 'https://github.com': ").status, 0)
     writeFileSync(join(c.dir, 'updater', 'credentials', 'token'), `${TOKEN}\n`)
-    const r = ask(c, "Password for 'https://github.com': ", { RSC_BRAIN_UPDATER_REPO_HOST: '' })
+    const r = ask(c, "Password for 'https://github.com': ", { OBSY_BRAIN_UPDATER_REPO_HOST: '' })
     assert.notEqual(r.status, 0)
     assert.equal(r.stdout, '')
   })
@@ -799,7 +799,7 @@ describe('what the updater may reach (CA15, CA25, CA25b)', () => {
   })
 
   it('mounts the socket, the installation in its own path and the list of users, and nothing else', () => {
-    const VAR = '$' + '{RSC_BRAIN_UPDATER_DIR}'
+    const VAR = '$' + '{OBSY_BRAIN_UPDATER_DIR}'
     const volumes: string[] = []
     let inside = false
     for (const l of lines) {
@@ -818,16 +818,16 @@ describe('what the updater may reach (CA15, CA25, CA25b)', () => {
   })
 
   it('runs as the owner of the installation with the group of the socket, restarts, and gets time to put things back', () => {
-    assert.match(body, /user: "\$\{RSC_BRAIN_UPDATER_UID\}:\$\{RSC_BRAIN_UPDATER_GID\}"/)
-    assert.match(body, /group_add:\s*\n\s*- "\$\{RSC_BRAIN_UPDATER_SOCKET_GID\}"/)
+    assert.match(body, /user: "\$\{OBSY_BRAIN_UPDATER_UID\}:\$\{OBSY_BRAIN_UPDATER_GID\}"/)
+    assert.match(body, /group_add:\s*\n\s*- "\$\{OBSY_BRAIN_UPDATER_SOCKET_GID\}"/)
     assert.match(body, /restart: unless-stopped/)
     assert.match(body, /stop_grace_period: 10m/)
     assert.match(body, /init: true/)
-    assert.match(body, /HOME: \$\{RSC_BRAIN_UPDATER_DIR\}\/updater\/home/)
-    assert.match(body, /hostname: \$\{RSC_BRAIN_UPDATER_HOSTNAME\}/)
-    assert.match(body, /working_dir: \$\{RSC_BRAIN_UPDATER_DIR\}/)
+    assert.match(body, /HOME: \$\{OBSY_BRAIN_UPDATER_DIR\}\/updater\/home/)
+    assert.match(body, /hostname: \$\{OBSY_BRAIN_UPDATER_HOSTNAME\}/)
+    assert.match(body, /working_dir: \$\{OBSY_BRAIN_UPDATER_DIR\}/)
     assert.equal(
-      /RSC_BRAIN_(TEST|UPDATER_NOW|UPDATER_ONCE|UPDATER_LAUNCHER)/.test(body),
+      /OBSY_BRAIN_(TEST|UPDATER_NOW|UPDATER_ONCE|UPDATER_LAUNCHER)/.test(body),
       false,
       'no variables for tests',
     )
@@ -851,8 +851,8 @@ describe('what the updater may reach (CA15, CA25, CA25b)', () => {
       './update/report:/update/report:ro',
       './update/request:/update/request',
     ])
-    assert.match(app, /RSC_BRAIN_UPDATE_REPORT: \/update\/report/)
-    assert.match(app, /RSC_BRAIN_UPDATE_REQUEST: \/update\/request/)
+    assert.match(app, /OBSY_BRAIN_UPDATE_REPORT: \/update\/report/)
+    assert.match(app, /OBSY_BRAIN_UPDATE_REQUEST: \/update\/request/)
   })
 
   it('the image is the pinned docker cli with only the tools the launcher needs', () => {
@@ -905,10 +905,10 @@ describe('the updater: what a refusal and a way back that failed say (closing re
     writeFileSync(
       join(c.dir, '.rsc-brain', 'rollback.failed'),
       [
-        "RSC_BRAIN_ROLLBACK_FROM='0.2.0'",
-        "RSC_BRAIN_ROLLBACK_TO='0.3.0'",
-        "RSC_BRAIN_ROLLBACK_COPY='rsc-brain-1-pre-update.rscb'",
-        `RSC_BRAIN_ROLLBACK_RESTORE='sh rsc-brain.sh restore --file rsc-brain-1-pre-update.rscb --confirm <the installation's name> --dir "${c.dir}"'`,
+        "OBSY_BRAIN_ROLLBACK_FROM='0.2.0'",
+        "OBSY_BRAIN_ROLLBACK_TO='0.3.0'",
+        "OBSY_BRAIN_ROLLBACK_COPY='rsc-brain-1-pre-update.rscb'",
+        `OBSY_BRAIN_ROLLBACK_RESTORE='sh rsc-brain.sh restore --file rsc-brain-1-pre-update.rscb --confirm <the installation's name> --dir "${c.dir}"'`,
         '',
       ].join('\n'),
     )

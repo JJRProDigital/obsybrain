@@ -126,7 +126,7 @@ rsc-brain as rsc-factory's memory: rsc-factory can install it, set it up and wor
   person has in the brains it belongs to; a service allowed to invite brings people into the brains it
   created (`POST /v1/brains/{slug}/invitations`). It only ever raises a role, never lowers one, takes
   over someone else's open invitation only when the new mail goes out, and is held to an hourly
-  invitation quota (`RSC_BRAIN_SERVICE_INVITES_PER_HOUR`). Brain listings say `createdByYou`.
+  invitation quota (`OBSY_BRAIN_SERVICE_INVITES_PER_HOUR`). Brain listings say `createdByYou`.
 - **Context names what it gave.** The context an agent starts with now lists each entry and page it
   included (`items`), so the program running the agent can say which correction reached it.
 - **On behalf of.** An entry an agent writes with a short key made on behalf of a person now names

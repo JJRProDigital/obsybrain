@@ -2125,7 +2125,7 @@ const HAND: Record<string, Op> = {
       }),
       disk: obj({
         backupsFree: nul(
-          n('Free bytes where the copies go; null when no folder is set (RSC_BRAIN_BACKUPS).'),
+          n('Free bytes where the copies go; null when no folder is set (OBSY_BRAIN_BACKUPS).'),
         ),
         databaseBytes: n('The size of the database, in bytes.'),
       }),
@@ -2222,7 +2222,7 @@ const HAND: Record<string, Op> = {
     summary:
       'The copies of this installation, newest first, with the id of the key each needs; the last good copy, the last failure or warning, the schedule (administration, in the rsc-brain web).',
     reply: obj({
-      configured: b('A folder for the copies is set (RSC_BRAIN_BACKUPS).'),
+      configured: b('A folder for the copies is set (OBSY_BRAIN_BACKUPS).'),
       items: list(
         obj({
           id: s('The copy: its file name without .rscb.'),
@@ -2292,7 +2292,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/installation-key': {
     summary:
-      'The installation key (RSC_BRAIN_SECRET), to keep: copies are restored with it. Administration, in the rsc-brain web, with the password again (and the code); never with a key of a program. Not cached; recorded in the audit.',
+      'The installation key (OBSY_BRAIN_SECRET), to keep: copies are restored with it. Administration, in the rsc-brain web, with the password again (and the code); never with a key of a program. Not cached; recorded in the audit.',
     body: obj(
       { password: s('Your password.'), code: s('The code of your authenticator app, with a second factor.') },
       ['code'],
@@ -2521,7 +2521,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/brains/{slug}/invitations': {
     summary:
-      'A service account allowed to invite, with its main key, brings people into a brain it created: an active person is added with the role, someone without an account gets an invitation by mail. A role is raised, never lowered. An open invitation another account made is taken over only when its new link is mailed and the mail is accepted: then the old link stops working and the previous inviter is told; otherwise it is left as it was and that person is refused (invitation_pending_elsewhere). A removed account is refused for that person alone (account_removed). At most RSC_BRAIN_SERVICE_INVITES_PER_HOUR invitation mails an hour per service account (100 by default): past it the whole request is refused with 429 invite_quota and Retry-After, and nothing changes. Another brain answers 404 as one that does not exist.',
+      'A service account allowed to invite, with its main key, brings people into a brain it created: an active person is added with the role, someone without an account gets an invitation by mail. A role is raised, never lowered. An open invitation another account made is taken over only when its new link is mailed and the mail is accepted: then the old link stops working and the previous inviter is told; otherwise it is left as it was and that person is refused (invitation_pending_elsewhere). A removed account is refused for that person alone (account_removed). At most OBSY_BRAIN_SERVICE_INVITES_PER_HOUR invitation mails an hour per service account (100 by default): past it the whole request is refused with 429 invite_quota and Retry-After, and nothing changes. Another brain answers 404 as one that does not exist.',
     status: 201,
     body: obj({
       people: {

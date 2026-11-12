@@ -1,7 +1,7 @@
 // CA18 of spec B3: on a brain with 10 000 pages and 100 000 entries, 95 % of 100 varied searches by words
-// answer in under a second. Runs outside CI, against the PostgreSQL in RSC_BRAIN_PG_URL (a throwaway
+// answer in under a second. Runs outside CI, against the PostgreSQL in OBSY_BRAIN_PG_URL (a throwaway
 // database is created and dropped):
-//   RSC_BRAIN_PG_URL=postgres://… node scripts/bench-search.ts
+//   OBSY_BRAIN_PG_URL=postgres://… node scripts/bench-search.ts
 import { world } from '../test/helpers/world.ts'
 
 const PAGES = Number(process.env.BENCH_PAGES ?? 10_000)
@@ -28,7 +28,7 @@ function rnd(seed: number) {
 }
 
 async function main() {
-  if (!process.env.RSC_BRAIN_PG_URL) throw new Error('Set RSC_BRAIN_PG_URL.')
+  if (!process.env.OBSY_BRAIN_PG_URL) throw new Error('Set OBSY_BRAIN_PG_URL.')
   const w = await world()
   try {
     const eric = await w.person('Eric')

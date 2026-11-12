@@ -1,5 +1,5 @@
 // When the daily copy runs (spec B7 C2; plan §3.3): at HH:MM of the installation's time zone
-// (RSC_BRAIN_BACKUP_AT, default 03:00; RSC_BRAIN_TIMEZONE), in `serve`, one process. A check that comes late
+// (OBSY_BRAIN_BACKUP_AT, default 03:00; OBSY_BRAIN_TIMEZONE), in `serve`, one process. A check that comes late
 // (the machine slept) makes one copy, not one per missed day.
 import type { Clock } from '../../core/clock.ts'
 
@@ -8,7 +8,7 @@ export const DEFAULT_BACKUP_KEEP = 14
 
 export function parseBackupAt(v: string): string {
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(v))
-    throw new Error(`RSC_BRAIN_BACKUP_AT must be HH:MM (24-hour), for example 03:00; got "${v}".`)
+    throw new Error(`OBSY_BRAIN_BACKUP_AT must be HH:MM (24-hour), for example 03:00; got "${v}".`)
   return v
 }
 

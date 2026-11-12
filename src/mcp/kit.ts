@@ -11,7 +11,7 @@
 import { AppError } from '../core/errors.ts'
 import { SAFE_URL } from '../core/urls.ts'
 
-export const TOKEN_ENV = 'RSC_BRAIN_TOKEN'
+export const TOKEN_ENV = 'OBSY_BRAIN_TOKEN'
 export const TOKEN_PLACEHOLDER = '<paste-your-token>'
 export const TOKEN_FILE = '~/.config/rsc-brain/token'
 export const SERVER_NAME = 'rsc-brain'
@@ -50,7 +50,7 @@ export type Kit = {
 
 const json = (v: unknown) => JSON.stringify(v, null, 2)
 
-// Each agent's own variable and file (RSC_BRAIN_TOKEN and the usual file stay the bridge's).
+// Each agent's own variable and file (OBSY_BRAIN_TOKEN and the usual file stay the bridge's).
 const ENV_OF: Record<AgentId, string> = {
   'claude-code': `${TOKEN_ENV}_CLAUDE_CODE`,
   codex: `${TOKEN_ENV}_CODEX`,

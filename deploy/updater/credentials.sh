@@ -1,11 +1,11 @@
 #!/bin/sh
 # What git asks for when it needs a user name or a password (GIT_ASKPASS). It answers for the host of rsc-brain's
-# repository (RSC_BRAIN_UPDATER_REPO_HOST) and for no other: a redirect or a submodule elsewhere gets nothing. The token
+# repository (OBSY_BRAIN_UPDATER_REPO_HOST) and for no other: a redirect or a submodule elsewhere gets nothing. The token
 # is read from <installation>/updater/credentials/token, which `web-updates enable` made for its owner alone; it is
 # never an argument and never written anywhere.
 set -u
-dir=${RSC_BRAIN_UPDATER_DIR:-}
-host=${RSC_BRAIN_UPDATER_REPO_HOST:-}
+dir=${OBSY_BRAIN_UPDATER_DIR:-}
+host=${OBSY_BRAIN_UPDATER_REPO_HOST:-}
 [ -n "$dir" ] && [ -n "$host" ] || exit 1
 file=$dir/updater/credentials/token
 [ -f "$file" ] && [ ! -L "$file" ] || exit 1

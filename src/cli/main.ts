@@ -56,16 +56,16 @@ const HELP = `rsc-brain — self-hosted knowledge server for AI agents
 Usage:
   rsc-brain migrate                                   apply pending database migrations
   rsc-brain serve                                     start the HTTP server
-  rsc-brain setup --from-env                          prepare the installation from RSC_BRAIN_SETUP_URL,
-                                                      RSC_BRAIN_ADMIN_NAME/_EMAIL/_PASSWORD [RSC_BRAIN_SETUP_NAME,
-                                                      RSC_BRAIN_SERVICE_NAME]; prints Factory's service key once
+  rsc-brain setup --from-env                          prepare the installation from OBSY_BRAIN_SETUP_URL,
+                                                      OBSY_BRAIN_ADMIN_NAME/_EMAIL/_PASSWORD [OBSY_BRAIN_SETUP_NAME,
+                                                      OBSY_BRAIN_SERVICE_NAME]; prints Factory's service key once
   rsc-brain admin bootstrap --email E --name N        create the first administrator and print a key
   rsc-brain admin reset-link --email E                print a single-use link to set a password
   rsc-brain service create --name N [--can-create-brains] [--can-invite]
                                                       create a service account and print its main key
   rsc-brain bridge --url U [--token-file F]           MCP over stdio for local agents, carried to the
                                                       installation at U; the token comes from
-                                                      RSC_BRAIN_TOKEN or a file (~/.config/rsc-brain/token)
+                                                      OBSY_BRAIN_TOKEN or a file (~/.config/rsc-brain/token)
   rsc-brain hook session-start --url U [--brain B]    Claude Code hook: the brain's context at the start
   rsc-brain hook stop --url U                         Claude Code hook: ask once for the session summary
   rsc-brain maintenance on [--seconds N] [--reason R] refuse writes for N seconds (60 to 1800, default 1800);
@@ -73,7 +73,7 @@ Usage:
   rsc-brain maintenance off                           take writes again
   rsc-brain maintenance status [--json]               whether writes are refused, until when and why
   rsc-brain backup [--reason R] [--json]              make an encrypted copy of everything now, in
-                                                      RSC_BRAIN_BACKUPS; R is manual (default), pre-update
+                                                      OBSY_BRAIN_BACKUPS; R is manual (default), pre-update
                                                       (under maintenance) or pre-restore
   rsc-brain backups list [--json]                     the copies, newest first, and whether the last failed
   rsc-brain restore --file F --confirm NAME [--key-file K] [--keep-keys] [--check] [--json]
@@ -81,17 +81,17 @@ Usage:
                                                       is there (pre-restore). NAME is this installation's name
                                                       (or the copy's, on a new installation). The key the copy
                                                       was made with comes from K or the standard input
-                                                      (default: RSC_BRAIN_SECRET). Every key, session,
+                                                      (default: OBSY_BRAIN_SECRET). Every key, session,
                                                       pending invitation and password link ends, but with
                                                       --keep-keys (only the rollback of an update, with the
                                                       pre-update copy of this installation). --check only checks
                                                       the name, the key and the version, and changes nothing
   rsc-brain key id [--key-file K]                     the id of a key (K, the standard input or
-                                                      RSC_BRAIN_SECRET); never the key
+                                                      OBSY_BRAIN_SECRET); never the key
   rsc-brain key reseal [--from-file OLD] [--to-file NEW]
-                                                      seal everything sealed with OLD (default RSC_BRAIN_SECRET)
+                                                      seal everything sealed with OLD (default OBSY_BRAIN_SECRET)
                                                       with NEW (default the standard input): rotating the key,
-                                                      with the service stopped; then set RSC_BRAIN_SECRET
+                                                      with the service stopped; then set OBSY_BRAIN_SECRET
   rsc-brain update record --ok|--failed --from V --to V
                                                       what the launcher says about the update it just made, for
                                                       the web (Admin > Backups & system); with --failed, the
@@ -100,7 +100,7 @@ Usage:
                                                       whether a PostgreSQL can hold rsc-brain (17 or newer,
                                                       unaccent) and what the login may do there; the URL comes
                                                       from F (- or --url-stdin: the standard input) or
-                                                      RSC_BRAIN_DATABASE_URL
+                                                      OBSY_BRAIN_DATABASE_URL
   rsc-brain db provision --database D --role R [--isolate-from NAME] [--db-admin-url-file F] [--url-file OUT]
                                                       with an administration login (F or the standard input; never
                                                       kept): a role that is no superuser and a database only it
@@ -119,17 +119,17 @@ Usage:
   rsc-brain help                                      show this help
 
 Environment:
-  RSC_BRAIN_DATABASE_URL   PostgreSQL connection URL (required)
-  RSC_BRAIN_PORT           HTTP port (default 8090)
-  RSC_BRAIN_HOST           address to listen on (default 127.0.0.1)
-  RSC_BRAIN_SECRET         installation secret (32+ characters) that seals second factors and mail
-  RSC_BRAIN_TRUSTED_PROXIES  proxies whose X-Forwarded-Proto/-For are believed (comma separated)
-  RSC_BRAIN_LOCAL_ONLY     1 in a container published on 127.0.0.1 alone (RSC_BRAIN_PUBLISH=127.0.0.1:<port>):
+  OBSY_BRAIN_DATABASE_URL   PostgreSQL connection URL (required)
+  OBSY_BRAIN_PORT           HTTP port (default 8090)
+  OBSY_BRAIN_HOST           address to listen on (default 127.0.0.1)
+  OBSY_BRAIN_SECRET         installation secret (32+ characters) that seals second factors and mail
+  OBSY_BRAIN_TRUSTED_PROXIES  proxies whose X-Forwarded-Proto/-For are believed (comma separated)
+  OBSY_BRAIN_LOCAL_ONLY     1 in a container published on 127.0.0.1 alone (OBSY_BRAIN_PUBLISH=127.0.0.1:<port>):
                            requests from the container's gateway count as this machine
-  RSC_BRAIN_BACKUPS        folder of the copies; with it, serve makes a copy every day
-  RSC_BRAIN_BACKUP_AT      time of the daily copy, HH:MM in RSC_BRAIN_TIMEZONE (default 03:00)
-  RSC_BRAIN_BACKUP_KEEP    daily copies kept (default 14); copies made by hand are never removed
-  RSC_BRAIN_SERVICE_INVITES_PER_HOUR  invitation mails one service account may have sent in an hour (default 100)
+  OBSY_BRAIN_BACKUPS        folder of the copies; with it, serve makes a copy every day
+  OBSY_BRAIN_BACKUP_AT      time of the daily copy, HH:MM in OBSY_BRAIN_TIMEZONE (default 03:00)
+  OBSY_BRAIN_BACKUP_KEEP    daily copies kept (default 14); copies made by hand are never removed
+  OBSY_BRAIN_SERVICE_INVITES_PER_HOUR  invitation mails one service account may have sent in an hour (default 100)
 `
 
 const out = (s: string) => process.stdout.write(s)
@@ -225,8 +225,8 @@ async function main(argv: string[]): Promise<number> {
         ...(copies ? { copies } : {}),
         releases,
         update: {
-          request: process.env.RSC_BRAIN_UPDATE_REQUEST || null,
-          report: process.env.RSC_BRAIN_UPDATE_REPORT || null,
+          request: process.env.OBSY_BRAIN_UPDATE_REQUEST || null,
+          report: process.env.OBSY_BRAIN_UPDATE_REPORT || null,
         },
         serviceInvitesPerHour: cfg.serviceInvitesPerHour,
         log,
@@ -237,7 +237,7 @@ async function main(argv: string[]): Promise<number> {
         reject(
           new Error(
             err.code === 'EADDRINUSE'
-              ? `Port ${cfg.port} is already in use. Stop the other process or set RSC_BRAIN_PORT.`
+              ? `Port ${cfg.port} is already in use. Stop the other process or set OBSY_BRAIN_PORT.`
               : err.message,
           ),
         )
@@ -323,10 +323,10 @@ async function main(argv: string[]): Promise<number> {
   if (cmd === 'setup' && sub === '--from-env') {
     const env = process.env
     const missing = [
-      'RSC_BRAIN_SETUP_URL',
-      'RSC_BRAIN_ADMIN_NAME',
-      'RSC_BRAIN_ADMIN_EMAIL',
-      'RSC_BRAIN_ADMIN_PASSWORD',
+      'OBSY_BRAIN_SETUP_URL',
+      'OBSY_BRAIN_ADMIN_NAME',
+      'OBSY_BRAIN_ADMIN_EMAIL',
+      'OBSY_BRAIN_ADMIN_PASSWORD',
     ].filter((k) => !env[k])
     if (missing.length > 0) {
       process.stderr.write(`Set ${missing.join(', ')} to prepare the installation.\n`)
@@ -339,14 +339,14 @@ async function main(argv: string[]): Promise<number> {
         return 1
       }
       const made = await companionSetup(pool, systemClock, {
-        name: env.RSC_BRAIN_SETUP_NAME ?? 'rsc-brain',
-        publicUrl: env.RSC_BRAIN_SETUP_URL,
+        name: env.OBSY_BRAIN_SETUP_NAME ?? 'rsc-brain',
+        publicUrl: env.OBSY_BRAIN_SETUP_URL,
         admin: {
-          name: env.RSC_BRAIN_ADMIN_NAME,
-          email: env.RSC_BRAIN_ADMIN_EMAIL,
-          password: env.RSC_BRAIN_ADMIN_PASSWORD,
+          name: env.OBSY_BRAIN_ADMIN_NAME,
+          email: env.OBSY_BRAIN_ADMIN_EMAIL,
+          password: env.OBSY_BRAIN_ADMIN_PASSWORD,
         },
-        serviceName: env.RSC_BRAIN_SERVICE_NAME ?? 'RSC Factory',
+        serviceName: env.OBSY_BRAIN_SERVICE_NAME ?? 'RSC Factory',
       })
       out(
         `${JSON.stringify({ adminId: made.adminId, serviceId: made.serviceId, serviceKey: made.serviceKey })}\n`,
@@ -533,13 +533,13 @@ async function maintenanceCommand(which: string | undefined, args: string[]): Pr
 
 // The folder of the copies, or why there is none (exit 2).
 function backupsDir(): string | null {
-  const dir = process.env.RSC_BRAIN_BACKUPS
+  const dir = process.env.OBSY_BRAIN_BACKUPS
   if (dir) return dir
-  process.stderr.write('Set RSC_BRAIN_BACKUPS to the folder of the copies (in the container, /backups).\n')
+  process.stderr.write('Set OBSY_BRAIN_BACKUPS to the folder of the copies (in the container, /backups).\n')
   return null
 }
 
-// A copy now (plan §3.3). The installation key comes from RSC_BRAIN_SECRET only; the output says its id.
+// A copy now (plan §3.3). The installation key comes from OBSY_BRAIN_SECRET only; the output says its id.
 async function backupCommand(args: string[]): Promise<number> {
   const usage = (why: string) => {
     process.stderr.write(`${why} Usage: rsc-brain backup [--reason manual|pre-update|pre-restore] [--json]\n`)
@@ -794,7 +794,7 @@ async function updateCommand(which: string | undefined, args: string[]): Promise
   }
   const dbPassword = (() => {
     try {
-      return decodeURIComponent(new URL(process.env.RSC_BRAIN_DATABASE_URL ?? '').password)
+      return decodeURIComponent(new URL(process.env.OBSY_BRAIN_DATABASE_URL ?? '').password)
     } catch {
       return ''
     }
@@ -803,7 +803,7 @@ async function updateCommand(which: string | undefined, args: string[]): Promise
     dir,
     { ok: Boolean(values.ok), from: values.from, to: values.to, ...(log === undefined ? {} : { log }) },
     systemClock(),
-    [process.env.RSC_BRAIN_SECRET ?? '', dbPassword, process.env.POSTGRES_PASSWORD ?? ''],
+    [process.env.OBSY_BRAIN_SECRET ?? '', dbPassword, process.env.POSTGRES_PASSWORD ?? ''],
   )
   out(
     u.ok
@@ -826,11 +826,11 @@ async function keyCommand(which: string | undefined, args: string[]): Promise<nu
     if (!values) return usage('Unknown option or argument.')
     let key: string | undefined
     try {
-      key = (await readKeyInput(values['key-file'])) ?? process.env.RSC_BRAIN_SECRET
+      key = (await readKeyInput(values['key-file'])) ?? process.env.OBSY_BRAIN_SECRET
     } catch (err) {
       return usage((err as Error).message)
     }
-    if (!key) return usage('Set RSC_BRAIN_SECRET, or pass the key in --key-file or on the standard input.')
+    if (!key) return usage('Set OBSY_BRAIN_SECRET, or pass the key in --key-file or on the standard input.')
     out(`${keyId(key)}\n`)
     return 0
   }
@@ -840,17 +840,17 @@ async function keyCommand(which: string | undefined, args: string[]): Promise<nu
       'to-file': { type: 'string' },
     })
     if (!values) return usage('Unknown option or argument.')
-    // The key in use: a file, or the service's own (RSC_BRAIN_SECRET); the new one: a file, or the standard input
+    // The key in use: a file, or the service's own (OBSY_BRAIN_SECRET); the new one: a file, or the standard input
     // (how the launcher's `key rotate` passes it).
     let from: string | undefined
     let to: string | undefined
     try {
-      from = values['from-file'] ? await readKeyInput(values['from-file']) : process.env.RSC_BRAIN_SECRET
+      from = values['from-file'] ? await readKeyInput(values['from-file']) : process.env.OBSY_BRAIN_SECRET
       to = await readKeyInput(values['to-file'])
     } catch (err) {
       return usage((err as Error).message)
     }
-    if (!from) return usage('Pass --from-file with the key in use, or set RSC_BRAIN_SECRET to it.')
+    if (!from) return usage('Pass --from-file with the key in use, or set OBSY_BRAIN_SECRET to it.')
     if (!to) return usage('Pass --to-file with the new key, or give it on the standard input.')
     if (keyId(from) === keyId(to)) return usage('The two files hold the same key.')
     if (!strongKey(to))
@@ -862,7 +862,7 @@ async function keyCommand(which: string | undefined, args: string[]): Promise<nu
       if (n.resealed === 0 && n.already === 0 && n.notResealed > 0) {
         process.stderr.write(
           `None of the ${n.notResealed} sealed values opens with key id ${keyId(from)}: it is not the key in use. Nothing was changed. ` +
-            'Pass in --from-file the key in RSC_BRAIN_SECRET now (rsc-brain key id prints its id).\n',
+            'Pass in --from-file the key in OBSY_BRAIN_SECRET now (rsc-brain key id prints its id).\n',
         )
         return 1
       }
@@ -870,7 +870,7 @@ async function keyCommand(which: string | undefined, args: string[]): Promise<nu
       if (n.already) out(`${n.already} were sealed with the new key already.\n`)
       if (n.notResealed) out(`${n.notResealed} open with neither key and were left as they are.\n`)
       out(
-        'Set RSC_BRAIN_SECRET to the new key and start rsc-brain; copies made from now on need the new key.\n',
+        'Set OBSY_BRAIN_SECRET to the new key and start rsc-brain; copies made from now on need the new key.\n',
       )
       return 0
     })
@@ -1013,7 +1013,7 @@ async function bridgeCommand(args: string[]): Promise<number> {
     }
     if ((err as { code?: string }).code?.startsWith('ERR_PARSE_ARGS')) {
       process.stderr.write(
-        `${(err as Error).message}. Usage: rsc-brain bridge --url <address> [--token-file <file>]; the token is read from RSC_BRAIN_TOKEN or a file, never from the command line.\n`,
+        `${(err as Error).message}. Usage: rsc-brain bridge --url <address> [--token-file <file>]; the token is read from OBSY_BRAIN_TOKEN or a file, never from the command line.\n`,
       )
       return 2
     }

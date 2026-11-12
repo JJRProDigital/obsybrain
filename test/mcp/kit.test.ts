@@ -19,8 +19,8 @@ type Blocks = { blocks: Json[] }
 const CLI = new URL('../../src/cli/main.ts', import.meta.url).pathname
 const AGENTS = ['claude-code', 'codex', 'opencode', 'cursor', 'other']
 // What the config files write literally, for the agent to expand from the environment.
-const CLAUDE_HEADER = 'Bearer $' + '{RSC_BRAIN_TOKEN_CLAUDE_CODE}'
-const CURSOR_HEADER = 'Bearer $' + '{env:RSC_BRAIN_TOKEN_CURSOR}'
+const CLAUDE_HEADER = 'Bearer $' + '{OBSY_BRAIN_TOKEN_CLAUDE_CODE}'
+const CURSOR_HEADER = 'Bearer $' + '{env:OBSY_BRAIN_TOKEN_CURSOR}'
 
 // A port nothing listens on: the server is down.
 const deadPort = () =>
@@ -175,7 +175,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       const r = await w.call(eric.key, 'GET', '/v1/connect')
       assert.equal(r.status, 200, r.text)
       assert.equal(r.body.mcpUrl, 'http://localhost/mcp')
-      assert.equal(r.body.tokenEnv, 'RSC_BRAIN_TOKEN')
+      assert.equal(r.body.tokenEnv, 'OBSY_BRAIN_TOKEN')
       assert.equal(typeof r.body.tokenPlaceholder, 'string')
       const agents = agentsOf(r.body)
       assert.deepEqual(
@@ -201,7 +201,7 @@ describe('the connection kit', { skip: skipPg }, () => {
             `${a.id}: no token in a command`,
           )
         // Each agent has a variable and a file of its own, so two agents never overwrite one token.
-        assert.match(String(a.tokenEnv), /^RSC_BRAIN_TOKEN(_[A-Z]+)*$/)
+        assert.match(String(a.tokenEnv), /^OBSY_BRAIN_TOKEN(_[A-Z]+)*$/)
         assert.match(String(a.tokenFile), /^~\/\.config\/rsc-brain\//)
       }
       const envs = agents.map((a) => a.tokenEnv)
@@ -256,7 +256,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       assert.ok(
         tokenBlocks(a).some(
           (b) =>
-            b.text === 'export RSC_BRAIN_TOKEN_CLAUDE_CODE="$(cat ~/.config/rsc-brain/claude-code.token)"',
+            b.text === 'export OBSY_BRAIN_TOKEN_CLAUDE_CODE="$(cat ~/.config/rsc-brain/claude-code.token)"',
         ),
       )
       assert.equal(hooks.Stop?.[0]?.matcher, undefined, 'Stop takes no matcher')
@@ -274,7 +274,7 @@ describe('the connection kit', { skip: skipPg }, () => {
         type: 'remote',
         url: 'http://localhost/mcp',
         oauth: false,
-        headers: { Authorization: 'Bearer {env:RSC_BRAIN_TOKEN_OPENCODE}' },
+        headers: { Authorization: 'Bearer {env:OBSY_BRAIN_TOKEN_OPENCODE}' },
       })
       assert.deepEqual(blockOf('cursor', '.cursor/mcp.json').mcpServers['rsc-brain'], {
         url: 'http://localhost/mcp',
@@ -318,7 +318,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       const toml = String(tokenBlocks(a).find((b) => b.where === '~/.codex/config.toml')?.text)
       assert.match(toml, /^\[mcp_servers\.rsc-brain\]$/m)
       assert.equal(/^url = "(.+)"$/m.exec(toml)?.[1], 'http://localhost/mcp')
-      assert.equal(/^bearer_token_env_var = "(.+)"$/m.exec(toml)?.[1], 'RSC_BRAIN_TOKEN_CODEX')
+      assert.equal(/^bearer_token_env_var = "(.+)"$/m.exec(toml)?.[1], 'OBSY_BRAIN_TOKEN_CODEX')
       // Codex sends the value of that variable as a bearer token to the url; here, to the test server.
       const token = await w.token(eric.id, { perm: 'write' })
       const init = await direct(token, 'initialize', {
@@ -348,7 +348,7 @@ describe('the connection kit', { skip: skipPg }, () => {
   describe('rsc-brain bridge (CA15)', () => {
     it('a legacy client over stdio gets what a remote client gets: initialize, tools/list, mem_save, mem_search', async () => {
       const token = await w.token(eric.id)
-      const b = new Bridge(['--url', mcpUrl], { RSC_BRAIN_TOKEN: token })
+      const b = new Bridge(['--url', mcpUrl], { OBSY_BRAIN_TOKEN: token })
       const hello = {
         protocolVersion: '2025-06-18',
         capabilities: {},
@@ -381,7 +381,7 @@ describe('the connection kit', { skip: skipPg }, () => {
 
     it('a modern client: the bridge adds the headers the server checks, encoding a name that needs it', async () => {
       const token = await w.token(eric.id)
-      const b = new Bridge(['--url', mcpUrl], { RSC_BRAIN_TOKEN: token })
+      const b = new Bridge(['--url', mcpUrl], { OBSY_BRAIN_TOKEN: token })
       const meta = { _meta: { 'io.modelcontextprotocol/protocolVersion': MODERN } }
       try {
         const disc = await b.request(1, 'server/discover', meta)
@@ -406,7 +406,7 @@ describe('the connection kit', { skip: skipPg }, () => {
 
     it('errors stay JSON-RPC: a bad line, a refused token, and a server that is down, without crashing', async () => {
       const port = await deadPort()
-      const down = new Bridge(['--url', `http://127.0.0.1:${port}/mcp`], { RSC_BRAIN_TOKEN: 'x' })
+      const down = new Bridge(['--url', `http://127.0.0.1:${port}/mcp`], { OBSY_BRAIN_TOKEN: 'x' })
       try {
         const e1 = await down.request(1, 'tools/list')
         const err = e1.error as { code: number; message: string }
@@ -423,7 +423,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       } finally {
         down.p.kill()
       }
-      const refused = new Bridge(['--url', mcpUrl], { RSC_BRAIN_TOKEN: 'rscb_not_a_real_token' })
+      const refused = new Bridge(['--url', mcpUrl], { OBSY_BRAIN_TOKEN: 'rscb_not_a_real_token' })
       try {
         const r = await refused.request('a', 'tools/list')
         assert.equal(r.id, 'a', 'the error carries the request id')
@@ -436,14 +436,14 @@ describe('the connection kit', { skip: skipPg }, () => {
 
     it('needs a token from the environment or a file, never from the command line; refuses plain http to another host', async () => {
       const none = await run(['bridge', '--url', mcpUrl], {
-        env: { RSC_BRAIN_TOKEN: undefined, HOME: stateDir },
+        env: { OBSY_BRAIN_TOKEN: undefined, HOME: stateDir },
       })
       assert.equal(none.code, 2)
-      assert.match(none.stderr, /RSC_BRAIN_TOKEN/)
-      const flag = await run(['bridge', '--url', mcpUrl, '--token', 'abc'], { env: { RSC_BRAIN_TOKEN: 'x' } })
+      assert.match(none.stderr, /OBSY_BRAIN_TOKEN/)
+      const flag = await run(['bridge', '--url', mcpUrl, '--token', 'abc'], { env: { OBSY_BRAIN_TOKEN: 'x' } })
       assert.equal(flag.code, 2)
       const plain = await run(['bridge', '--url', 'http://brain.example.com/mcp'], {
-        env: { RSC_BRAIN_TOKEN: 'x' },
+        env: { OBSY_BRAIN_TOKEN: 'x' },
       })
       assert.equal(plain.code, 2)
       assert.match(plain.stderr, /https/)
@@ -451,7 +451,7 @@ describe('the connection kit', { skip: skipPg }, () => {
 
     it('a token with a line break inside is refused and never printed', async () => {
       const r = await run(['bridge', '--url', mcpUrl], {
-        env: { RSC_BRAIN_TOKEN: 'rsc_live_SECRETPART1\nrsc_live_SECRETPART2' },
+        env: { OBSY_BRAIN_TOKEN: 'rsc_live_SECRETPART1\nrsc_live_SECRETPART2' },
       })
       assert.equal(r.code, 2)
       assert.match(r.stderr, /line break/)
@@ -493,7 +493,7 @@ describe('the connection kit', { skip: skipPg }, () => {
           .join('\n')
         const r = await run(['bridge', '--url', `http://127.0.0.1:${port}/mcp`], {
           stdin: `${lines}\n`,
-          env: { RSC_BRAIN_TOKEN: 'stub-token' },
+          env: { OBSY_BRAIN_TOKEN: 'stub-token' },
         })
         const out = r.stdout
           .trim()
@@ -507,7 +507,7 @@ describe('the connection kit', { skip: skipPg }, () => {
         assert.equal(out.find((x) => x.id === 3)?.error?.code, -32600)
         // A client that waits for initialize, as clients do: later requests carry the agreed version.
         seen.length = 0
-        const b = new Bridge(['--url', `http://127.0.0.1:${port}/mcp`], { RSC_BRAIN_TOKEN: 'stub-token' })
+        const b = new Bridge(['--url', `http://127.0.0.1:${port}/mcp`], { OBSY_BRAIN_TOKEN: 'stub-token' })
         try {
           await b.request(1, 'initialize', { protocolVersion: '2025-11-25' })
           await b.request(2, 'tools/call', { name: 'mem_get', arguments: {} })
@@ -527,11 +527,11 @@ describe('the connection kit', { skip: skipPg }, () => {
       }
     })
 
-    it('a --token-file given wins over RSC_BRAIN_TOKEN (another agent may have set it)', async () => {
+    it('a --token-file given wins over OBSY_BRAIN_TOKEN (another agent may have set it)', async () => {
       const token = await w.token(eric.id)
       const file = join(stateDir, 'token-explicit')
       await writeFile(file, `${token}\n`, { mode: 0o600 })
-      const b = new Bridge(['--url', mcpUrl, '--token-file', file], { RSC_BRAIN_TOKEN: 'rscb_not_this_one' })
+      const b = new Bridge(['--url', mcpUrl, '--token-file', file], { OBSY_BRAIN_TOKEN: 'rscb_not_this_one' })
       try {
         const r = await b.request(1, 'tools/list')
         assert.ok(((r.result as Json).tools as Json[]).length > 0, JSON.stringify(r))
@@ -543,7 +543,7 @@ describe('the connection kit', { skip: skipPg }, () => {
 
     it('says who it is: the rsc-brain bridge and its version, as the profile shows it', async () => {
       const token = await w.token(eric.id)
-      const b = new Bridge(['--url', mcpUrl], { RSC_BRAIN_TOKEN: token })
+      const b = new Bridge(['--url', mcpUrl], { OBSY_BRAIN_TOKEN: token })
       try {
         await b.request(1, 'tools/list')
         await b.close()
@@ -561,7 +561,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       const token = await w.token(eric.id)
       const file = join(stateDir, 'token')
       await writeFile(file, `${token}\n`, { mode: 0o600 })
-      const b = new Bridge(['--url', mcpUrl, '--token-file', file], { RSC_BRAIN_TOKEN: undefined })
+      const b = new Bridge(['--url', mcpUrl, '--token-file', file], { OBSY_BRAIN_TOKEN: undefined })
       try {
         const r = await b.request(1, 'tools/list')
         assert.ok(((r.result as Json).tools as Json[]).length > 0, JSON.stringify(r))
@@ -577,7 +577,7 @@ describe('the connection kit', { skip: skipPg }, () => {
     const stop = (env: Record<string, string | undefined>, input: Json, url = mcpUrl) =>
       run(['hook', 'stop', '--url', url], {
         stdin: JSON.stringify({ hook_event_name: 'Stop', cwd: tmpdir(), ...input }),
-        env: { RSC_BRAIN_STATE_DIR: stateDir, ...env },
+        env: { OBSY_BRAIN_STATE_DIR: stateDir, ...env },
       })
     const start = (
       env: Record<string, string | undefined>,
@@ -604,7 +604,7 @@ describe('the connection kit', { skip: skipPg }, () => {
 
     it('session-start: the context of the brain linked to the repository, as additional context', async () => {
       const token = await w.token(eric.id)
-      const r = await start({ RSC_BRAIN_TOKEN: token }, repo)
+      const r = await start({ OBSY_BRAIN_TOKEN: token }, repo)
       assert.equal(r.code, 0, r.stderr)
       const out = JSON.parse(r.stdout) as { hookSpecificOutput: Json }
       assert.equal(out.hookSpecificOutput.hookEventName, 'SessionStart')
@@ -620,15 +620,15 @@ describe('the connection kit', { skip: skipPg }, () => {
       const token = await w.token(eric.id)
       const plain = await mkdtemp(join(tmpdir(), 'rsc-brain-plain-'))
       try {
-        const named = await start({ RSC_BRAIN_TOKEN: token }, plain, ['--brain', 'alpha'])
+        const named = await start({ OBSY_BRAIN_TOKEN: token }, plain, ['--brain', 'alpha'])
         assert.equal(named.code, 0)
         assert.match(JSON.parse(named.stdout).hookSpecificOutput.additionalContext, /Retention first/)
-        const nothing = await start({ RSC_BRAIN_TOKEN: token }, plain)
+        const nothing = await start({ OBSY_BRAIN_TOKEN: token }, plain)
         assert.deepEqual([nothing.code, nothing.stdout], [0, ''])
         const port = await deadPort()
-        const down = await start({ RSC_BRAIN_TOKEN: token }, repo, [], `http://127.0.0.1:${port}/mcp`)
+        const down = await start({ OBSY_BRAIN_TOKEN: token }, repo, [], `http://127.0.0.1:${port}/mcp`)
         assert.deepEqual([down.code, down.stdout], [0, ''])
-        const noToken = await start({ RSC_BRAIN_TOKEN: undefined, HOME: stateDir }, repo)
+        const noToken = await start({ OBSY_BRAIN_TOKEN: undefined, HOME: stateDir }, repo)
         assert.deepEqual([noToken.code, noToken.stdout], [0, ''])
       } finally {
         await rm(plain, { recursive: true, force: true })
@@ -642,26 +642,26 @@ describe('the connection kit', { skip: skipPg }, () => {
       const opened = await w.call(token, 'POST', '/v1/brains/alpha/sessions', { purpose: 'work' })
       const sid = (opened.body.session as Json).id as string
       // The agent is already continuing because of a stop hook: let it stop, and keep the ask for later.
-      const active = await stop({ RSC_BRAIN_TOKEN: token }, { session_id: 'cc-1', stop_hook_active: true })
+      const active = await stop({ OBSY_BRAIN_TOKEN: token }, { session_id: 'cc-1', stop_hook_active: true })
       assert.deepEqual([active.code, active.stdout], [0, ''])
-      const r = await stop({ RSC_BRAIN_TOKEN: token }, { session_id: 'cc-1', stop_hook_active: false })
+      const r = await stop({ OBSY_BRAIN_TOKEN: token }, { session_id: 'cc-1', stop_hook_active: false })
       assert.equal(r.code, 0, r.stderr)
       const out = JSON.parse(r.stdout) as { decision: string; reason: string }
       assert.equal(out.decision, 'block')
       assert.match(out.reason, /mem_session_summary/)
       assert.ok(out.reason.includes(sid), 'names the session to close')
       // Asked once in this Claude Code session; the next stop lets it go.
-      const again = await stop({ RSC_BRAIN_TOKEN: token }, { session_id: 'cc-1', stop_hook_active: false })
+      const again = await stop({ OBSY_BRAIN_TOKEN: token }, { session_id: 'cc-1', stop_hook_active: false })
       assert.deepEqual([again.code, again.stdout], [0, ''])
       // Another Claude Code session is asked on its own.
-      const other = await stop({ RSC_BRAIN_TOKEN: token }, { session_id: 'cc-9', stop_hook_active: false })
+      const other = await stop({ OBSY_BRAIN_TOKEN: token }, { session_id: 'cc-9', stop_hook_active: false })
       assert.equal((JSON.parse(other.stdout) as { decision: string }).decision, 'block')
       // With the summary written, nothing is asked, even in a new Claude Code session.
       const summary = await w.call(token, 'POST', `/v1/sessions/${sid}/summary`, {
         content: 'Goal: x. Done: y.',
       })
       assert.equal(summary.status, 201, summary.text)
-      const done = await stop({ RSC_BRAIN_TOKEN: token }, { session_id: 'cc-2', stop_hook_active: false })
+      const done = await stop({ OBSY_BRAIN_TOKEN: token }, { session_id: 'cc-2', stop_hook_active: false })
       assert.deepEqual([done.code, done.stdout], [0, ''])
     })
 
@@ -672,7 +672,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       const opened = await w.call(p.key, 'POST', '/v1/brains/alpha/sessions', { purpose: 'agent work' })
       const sid = (opened.body.session as Json).id as string
       const hookToken = await w.token(p.id)
-      const r = await stop({ RSC_BRAIN_TOKEN: hookToken }, { session_id: 'cc-s', stop_hook_active: false })
+      const r = await stop({ OBSY_BRAIN_TOKEN: hookToken }, { session_id: 'cc-s', stop_hook_active: false })
       assert.ok(r.stdout.includes(sid), r.stdout || r.stderr)
     })
 
@@ -682,7 +682,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       await w.call(eric.key, 'POST', '/v1/brains', { slug: 'gamma-kit' })
       await w.member('gamma-kit', p.id, 'contributor')
       const token = await w.token(p.id)
-      const env = { RSC_BRAIN_TOKEN: token, RSC_BRAIN_STATE_DIR: stateDir }
+      const env = { OBSY_BRAIN_TOKEN: token, OBSY_BRAIN_STATE_DIR: stateDir }
       // Window B is already working when window A begins.
       const b = await w.call(token, 'POST', '/v1/brains/alpha/sessions', { purpose: 'window B' })
       const bid = (b.body.session as Json).id as string
@@ -701,7 +701,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       // Another brain, opened meanwhile by some other agent of the person.
       const g = await w.call(token, 'POST', '/v1/brains/gamma-kit/sessions', { purpose: 'elsewhere' })
       const gid = (g.body.session as Json).id as string
-      const r = await stop({ RSC_BRAIN_TOKEN: token }, { session_id: 'win-a', stop_hook_active: false })
+      const r = await stop({ OBSY_BRAIN_TOKEN: token }, { session_id: 'win-a', stop_hook_active: false })
       const reason = (JSON.parse(r.stdout) as { reason: string }).reason
       assert.ok(reason.includes(aid), reason)
       assert.ok(!reason.includes(bid), "window B's session is not window A's to close")
@@ -715,7 +715,7 @@ describe('the connection kit', { skip: skipPg }, () => {
         title: 'n',
         content: 'Loose note.',
       })
-      const r = await stop({ RSC_BRAIN_TOKEN: token }, { session_id: 'cc-3', stop_hook_active: false })
+      const r = await stop({ OBSY_BRAIN_TOKEN: token }, { session_id: 'cc-3', stop_hook_active: false })
       assert.equal(JSON.parse(r.stdout).decision, 'block')
     })
 
@@ -724,16 +724,16 @@ describe('the connection kit', { skip: skipPg }, () => {
       await w.call(token, 'POST', '/v1/brains/alpha/sessions', { purpose: 'open' })
       const port = await deadPort()
       const down = await stop(
-        { RSC_BRAIN_TOKEN: token },
+        { OBSY_BRAIN_TOKEN: token },
         { session_id: 'cc-4' },
         `http://127.0.0.1:${port}/mcp`,
       )
       assert.deepEqual([down.code, down.stdout], [0, ''])
-      const noToken = await stop({ RSC_BRAIN_TOKEN: undefined, HOME: stateDir }, { session_id: 'cc-4' })
+      const noToken = await stop({ OBSY_BRAIN_TOKEN: undefined, HOME: stateDir }, { session_id: 'cc-4' })
       assert.deepEqual([noToken.code, noToken.stdout], [0, ''])
       const garbage = await run(['hook', 'stop', '--url', mcpUrl], {
         stdin: '{ nope',
-        env: { RSC_BRAIN_TOKEN: token, RSC_BRAIN_STATE_DIR: stateDir },
+        env: { OBSY_BRAIN_TOKEN: token, OBSY_BRAIN_STATE_DIR: stateDir },
       })
       assert.deepEqual([garbage.code, garbage.stdout], [0, ''])
     })

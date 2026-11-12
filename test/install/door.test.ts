@@ -1,5 +1,5 @@
 // The stand-in door with real containers (rsc-updates §3.9, T057; CA22, CA27): local only, never in CI. Runs with
-// RSC_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install), and with the shell in RSC_BRAIN_TEST_SHELL.
+// OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install), and with the shell in OBSY_BRAIN_TEST_SHELL.
 // Every Docker resource carries the prefix rscb-b1-door- and a random id, and is removed after.
 //
 // An update to an image whose migration takes a few seconds and then fails, on this machine and on a server (Caddy in
@@ -28,8 +28,8 @@ const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
-  if (process.env.RSC_BRAIN_INSTALL_TESTS !== '1')
-    return 'set RSC_BRAIN_INSTALL_TESTS=1 to update with real containers'
+  if (process.env.OBSY_BRAIN_INSTALL_TESTS !== '1')
+    return 'set OBSY_BRAIN_INSTALL_TESTS=1 to update with real containers'
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) return 'Docker does not answer'
   return null
 })()
@@ -46,9 +46,9 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 type Run = { code: number | null; stdout: string; stderr: string }
 const launch = (args: string[], onStderr?: (all: string) => void): Promise<Run> =>
   new Promise((resolve) => {
-    const p = spawn(process.env.RSC_BRAIN_TEST_SHELL ?? 'sh', [LAUNCHER, ...args], {
+    const p = spawn(process.env.OBSY_BRAIN_TEST_SHELL ?? 'sh', [LAUNCHER, ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, RSC_BRAIN_TTY: '/nonexistent/tty' },
+      env: { ...process.env, OBSY_BRAIN_TTY: '/nonexistent/tty' },
     })
     let stdout = ''
     let stderr = ''
@@ -128,7 +128,7 @@ describe('the stand-in door with real containers', { skip: why ?? false }, () =>
   }
 
   before(async () => {
-    BASE = mkdtempSync(join(process.env.RSC_BRAIN_INSTALL_TMP ?? tmpdir(), 'rscb-b1-door-'))
+    BASE = mkdtempSync(join(process.env.OBSY_BRAIN_INSTALL_TMP ?? tmpdir(), 'rscb-b1-door-'))
     await run('docker', ['build', '-q', '-t', IMAGE, ROOT], { maxBuffer: 64 << 20 })
     const ctx = join(BASE, 'image')
     mkdirSync(ctx)
@@ -323,11 +323,11 @@ describe('the stand-in door with real containers', { skip: why ?? false }, () =>
       prepare: async (dir) => {
         writeFileSync(
           join(dir, 'compose.override.yaml'),
-          `services:\n  caddy:\n    environment:\n      RSC_BRAIN_ACME_CA: http://127.0.0.1:1/dir\n    volumes:\n      - ${join(BASE, 'Caddyfile.test')}:/etc/caddy/Caddyfile:ro\n`,
+          `services:\n  caddy:\n    environment:\n      OBSY_BRAIN_ACME_CA: http://127.0.0.1:1/dir\n    volumes:\n      - ${join(BASE, 'Caddyfile.test')}:/etc/caddy/Caddyfile:ro\n`,
         )
         writeFileSync(
           join(BASE, 'Caddyfile.test'),
-          '{$RSC_BRAIN_DOMAIN} {\n\ttls internal\n\treverse_proxy app:8090\n}\n',
+          '{$OBSY_BRAIN_DOMAIN} {\n\ttls internal\n\treverse_proxy app:8090\n}\n',
         )
       },
       setupAt: () => `https://brain.test:${https}`,

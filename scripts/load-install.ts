@@ -57,7 +57,7 @@ const launcher = (args: string[]) =>
   new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve) => {
     const p = spawn('sh', [LAUNCHER, ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, RSC_BRAIN_TTY: '/nonexistent/tty' },
+      env: { ...process.env, OBSY_BRAIN_TTY: '/nonexistent/tty' },
     })
     let stdout = ''
     let stderr = ''

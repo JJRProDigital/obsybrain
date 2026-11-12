@@ -28,7 +28,7 @@ function run(
 
 describe('rsc-brain version', () => {
   it('prints the version and needs no database', async () => {
-    const r = await run(['version'], { RSC_BRAIN_DATABASE_URL: '' })
+    const r = await run(['version'], { OBSY_BRAIN_DATABASE_URL: '' })
     assert.equal(r.code, 0, r.err)
     assert.equal(r.out, `${VERSION}\n`)
   })
@@ -39,7 +39,7 @@ describe('rsc-brain maintenance', { skip: skipPg }, () => {
   let env: Record<string, string>
   before(async () => {
     t = await freshDatabase()
-    env = { RSC_BRAIN_DATABASE_URL: t.url }
+    env = { OBSY_BRAIN_DATABASE_URL: t.url }
   })
   after(async () => t.drop())
 
@@ -116,7 +116,7 @@ describe('rsc-brain maintenance', { skip: skipPg }, () => {
   it('status and off on a database of a release before maintenance: off, nothing to clear', async () => {
     const old = await freshDatabase()
     try {
-      const e = { RSC_BRAIN_DATABASE_URL: old.url }
+      const e = { OBSY_BRAIN_DATABASE_URL: old.url }
       const s = await run(['maintenance', 'status', '--json'], e)
       assert.equal(s.code, 0, s.err)
       assert.deepEqual(JSON.parse(s.out), { until: null, reason: null })

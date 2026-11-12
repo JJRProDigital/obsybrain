@@ -2,7 +2,7 @@
 // `docker` on the PATH (test/deploy/fake-docker.sh): no daemon, no containers, so it runs in CI (plan §5.1). The real
 // containers are test/install/launcher.test.ts. The launcher runs with a PATH made of the few tools it may use, never
 // with this machine's: a missing `docker`, `docker compose` or `git` is really missing. The terminal it asks on is
-// RSC_BRAIN_TTY (a file of answers here; a path that cannot be opened is «no terminal»).
+// OBSY_BRAIN_TTY (a file of answers here; a path that cannot be opened is «no terminal»).
 //
 // CA4 (requirements: nothing changes when one is missing), CA5 (no questions with --yes; the same result as the
 // questions answered alike; --json prints only the summary), CA9c (the summary carries the installation key), CA21
@@ -133,9 +133,9 @@ const launch = (
     tty = join(c.state, `answers-${++n}`)
     writeFileSync(tty, o.answers)
   }
-  // RSC_BRAIN_TEST_SHELL runs the whole file under another shell (dash), as test/deploy/update.test.ts does.
+  // OBSY_BRAIN_TEST_SHELL runs the whole file under another shell (dash), as test/deploy/update.test.ts does.
   const r = spawnSync(
-    o.shell ?? process.env.RSC_BRAIN_TEST_SHELL ?? join(SYSBIN, 'sh'),
+    o.shell ?? process.env.OBSY_BRAIN_TEST_SHELL ?? join(SYSBIN, 'sh'),
     [LAUNCHER, ...args],
     {
       encoding: 'utf8',
@@ -148,7 +148,7 @@ const launch = (
         FAKE_LOG: c.log,
         FAKE_STDIN: c.stdin,
         FAKE_STATE: c.state,
-        RSC_BRAIN_TTY: tty,
+        OBSY_BRAIN_TTY: tty,
         ...o.env,
       },
     },
@@ -405,7 +405,7 @@ describe('the launcher: options (CA5)', () => {
     const ea = readEnv(a.dir)
     const eb = readEnv(b.dir)
     assert.deepEqual(Object.keys(ea).sort(), Object.keys(eb).sort())
-    const random = new Set(['RSC_BRAIN_SECRET', 'POSTGRES_PASSWORD'])
+    const random = new Set(['OBSY_BRAIN_SECRET', 'POSTGRES_PASSWORD'])
     for (const k of Object.keys(ea)) if (!random.has(k)) assert.equal(ea[k], eb[k], k)
     assert.deepEqual(readdirSync(a.dir).sort(), readdirSync(b.dir).sort())
   })
@@ -431,8 +431,8 @@ describe('the launcher: a local installation', () => {
       'url',
       'version',
     ])
-    assert.equal(s.installationKey, env.RSC_BRAIN_SECRET)
-    assert.ok((env.RSC_BRAIN_SECRET ?? '').length >= 64)
+    assert.equal(s.installationKey, env.OBSY_BRAIN_SECRET)
+    assert.ok((env.OBSY_BRAIN_SECRET ?? '').length >= 64)
     assert.equal(s.keyId, 'k3yid0123456')
     assert.equal(s.url, `http://localhost:${port}`)
     assert.equal(s.mode, 'local')
@@ -451,20 +451,20 @@ describe('the launcher: a local installation', () => {
     assert.equal(r.code, 0, r.stderr)
     assert.equal(mode(join(c.dir, '.env')), 0o600)
     const env = readEnv(c.dir)
-    assert.equal(env.RSC_BRAIN_PUBLISH, `127.0.0.1:${port}`)
-    assert.equal(env.RSC_BRAIN_LOCAL_ONLY, '1')
-    assert.equal(env.RSC_BRAIN_TRUSTED_PROXIES, '')
-    assert.equal(env.RSC_BRAIN_IMAGE, 'rsc-brain:test')
-    assert.equal(env.RSC_BRAIN_DB, 'bundled')
+    assert.equal(env.OBSY_BRAIN_PUBLISH, `127.0.0.1:${port}`)
+    assert.equal(env.OBSY_BRAIN_LOCAL_ONLY, '1')
+    assert.equal(env.OBSY_BRAIN_TRUSTED_PROXIES, '')
+    assert.equal(env.OBSY_BRAIN_IMAGE, 'rsc-brain:test')
+    assert.equal(env.OBSY_BRAIN_DB, 'bundled')
     assert.equal(
-      env.RSC_BRAIN_DATABASE_URL,
+      env.OBSY_BRAIN_DATABASE_URL,
       'postgres://rsc_brain:provisioned-pw@postgres:5432/rsc_brain?sslmode=disable',
     )
     assert.match(env.POSTGRES_PASSWORD ?? '', /^[0-9a-f]{64}$/)
     // The compose file publishes exactly the value the service is told (one value for both: risk 7).
     const compose = readFileSync(join(c.dir, 'compose.yaml'), 'utf8')
-    assert.match(compose, /- "\$\{RSC_BRAIN_PUBLISH[:?][^}]*\}:8090"/)
-    assert.match(compose, /RSC_BRAIN_PUBLISH: \$\{RSC_BRAIN_PUBLISH/)
+    assert.match(compose, /- "\$\{OBSY_BRAIN_PUBLISH[:?][^}]*\}:8090"/)
+    assert.match(compose, /OBSY_BRAIN_PUBLISH: \$\{OBSY_BRAIN_PUBLISH/)
     assert.ok(existsSync(join(c.dir, 'Caddyfile')))
     assert.ok(statSync(join(c.dir, 'backups')).isDirectory())
     // The bundled profile, never the server one.
@@ -490,10 +490,10 @@ describe('the launcher: a local installation', () => {
     assert.equal(r.code, 0)
     const env = readEnv(c.dir)
     const all = r.calls.join('\n')
-    for (const secret of [env.RSC_BRAIN_SECRET, env.POSTGRES_PASSWORD, 'provisioned-pw'])
+    for (const secret of [env.OBSY_BRAIN_SECRET, env.POSTGRES_PASSWORD, 'provisioned-pw'])
       assert.equal(all.includes(secret as string), false, 'a secret on a command line')
     // The key id is asked with the key on the standard input.
-    assert.match(r.piped, new RegExp(`<<< key id\\n${env.RSC_BRAIN_SECRET}`))
+    assert.match(r.piped, new RegExp(`<<< key id\\n${env.OBSY_BRAIN_SECRET}`))
   })
 
   it('says the address and the first-time setup; the key is printed once, only to a terminal', async () => {
@@ -504,7 +504,7 @@ describe('the launcher: a local installation', () => {
     assert.match(r.stdout, /http:\/\/localhost:\d+/)
     assert.match(r.stdout, /first-time setup/)
     // Standard output is not a terminal here (it could be a log): the key is not printed, how to see it is.
-    assert.equal((r.stdout + r.stderr).includes(env.RSC_BRAIN_SECRET as string), false)
+    assert.equal((r.stdout + r.stderr).includes(env.OBSY_BRAIN_SECRET as string), false)
     assert.match(r.stdout, /key show/)
   })
 
@@ -557,7 +557,7 @@ describe('the launcher: the port', () => {
       },
     )
     assert.equal(r.code, 0, r.stderr)
-    const chosen = Number((readEnv(c.dir).RSC_BRAIN_PUBLISH ?? '').split(':')[1])
+    const chosen = Number((readEnv(c.dir).OBSY_BRAIN_PUBLISH ?? '').split(':')[1])
     assert.ok(chosen > port, `chose ${chosen}`)
     assert.match(r.stderr, new RegExp(`Use ${chosen} instead`))
   })
@@ -574,10 +574,10 @@ describe('the launcher: reinstalling (spec «Volver a ejecutar el instalador»)'
     const second = launch(c, ['install', '--local', '--yes', '--json', '--dir', c.dir, '--port', port2])
     assert.equal(second.code, 0, second.stderr)
     const afterEnv = readEnv(c.dir)
-    for (const k of ['RSC_BRAIN_SECRET', 'POSTGRES_PASSWORD', 'RSC_BRAIN_DATABASE_URL', 'RSC_BRAIN_IMAGE'])
+    for (const k of ['OBSY_BRAIN_SECRET', 'POSTGRES_PASSWORD', 'OBSY_BRAIN_DATABASE_URL', 'OBSY_BRAIN_IMAGE'])
       assert.equal(afterEnv[k], before[k], k)
-    assert.equal(afterEnv.RSC_BRAIN_PUBLISH, `127.0.0.1:${port2}`)
-    assert.equal(JSON.parse(second.stdout).installationKey, before.RSC_BRAIN_SECRET)
+    assert.equal(afterEnv.OBSY_BRAIN_PUBLISH, `127.0.0.1:${port2}`)
+    assert.equal(JSON.parse(second.stdout).installationKey, before.OBSY_BRAIN_SECRET)
     assert.equal(
       readFileSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-scheduled.rscb'), 'utf8'),
       'copy',
@@ -715,7 +715,7 @@ describe('the launcher: databases', () => {
     const r = launch(c, await local(c, '--db', 'existing', '--db-url-file', url))
     assert.equal(r.code, 0, r.stderr)
     const env = readEnv(c.dir)
-    assert.equal(env.RSC_BRAIN_DATABASE_URL, 'postgres://brain:s3cret-db-pw@db.internal:5432/brain')
+    assert.equal(env.OBSY_BRAIN_DATABASE_URL, 'postgres://brain:s3cret-db-pw@db.internal:5432/brain')
     assert.equal(env.POSTGRES_PASSWORD, undefined)
     assert.ok(r.calls.some((l) => / rsc-brain db check --url-stdin /.test(l)))
     assert.match(r.piped, /<<< db check\npostgres:\/\/brain:s3cret-db-pw@/)
@@ -752,7 +752,7 @@ describe('the launcher: databases', () => {
     assert.match(r.stderr, /superuser/)
     const env = readEnv(c.dir)
     assert.equal(
-      env.RSC_BRAIN_DATABASE_URL,
+      env.OBSY_BRAIN_DATABASE_URL,
       'postgres://rsc_brain:provisioned-pw@db.internal:5432/rsc_brain?sslmode=disable',
     )
     assert.equal(readFileSync(join(c.dir, '.env'), 'utf8').includes('adm1n-pw'), false)
@@ -806,18 +806,18 @@ describe('the launcher: a server', () => {
     assert.equal(s.mode, 'server')
     assert.equal(s.url, `https://brain.example.com:${https}`)
     const env = readEnv(c.dir)
-    assert.equal(env.RSC_BRAIN_DOMAIN, 'brain.example.com')
-    assert.equal(env.RSC_BRAIN_LOCAL_ONLY, '0')
-    assert.equal(env.RSC_BRAIN_SETUP_URL, `https://brain.example.com:${https}`)
+    assert.equal(env.OBSY_BRAIN_DOMAIN, 'brain.example.com')
+    assert.equal(env.OBSY_BRAIN_LOCAL_ONLY, '0')
+    assert.equal(env.OBSY_BRAIN_SETUP_URL, `https://brain.example.com:${https}`)
     // A subnet nobody uses, and the proxy's address inside it, outside the range handed out to the others.
-    assert.equal(env.RSC_BRAIN_SUBNET, '192.168.201.0/24')
-    assert.equal(env.RSC_BRAIN_PROXY_IP, '192.168.201.2')
-    assert.equal(env.RSC_BRAIN_TRUSTED_PROXIES, '192.168.201.2')
+    assert.equal(env.OBSY_BRAIN_SUBNET, '192.168.201.0/24')
+    assert.equal(env.OBSY_BRAIN_PROXY_IP, '192.168.201.2')
+    assert.equal(env.OBSY_BRAIN_TRUSTED_PROXIES, '192.168.201.2')
     const up = r.calls.find((l) => /^compose /.test(l) && / up /.test(l)) ?? ''
     assert.match(up, /--profile server/)
     assert.match(up, /--profile bundled/)
     const caddy = readFileSync(join(c.dir, 'Caddyfile'), 'utf8')
-    assert.match(caddy, /\{\$RSC_BRAIN_DOMAIN\}/)
+    assert.match(caddy, /\{\$OBSY_BRAIN_DOMAIN\}/)
     assert.match(caddy, /reverse_proxy app:8090/)
   })
 
@@ -883,7 +883,7 @@ describe('the launcher: building from the source', () => {
     assert.ok(
       r.calls.some((l) => new RegExp(`^build -t rsc-brain:v0\\.1\\.0 ${c.dir}/\\.rsc-brain/src$`).test(l)),
     )
-    assert.equal(readEnv(c.dir).RSC_BRAIN_IMAGE, 'rsc-brain:v0.1.0')
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:v0.1.0')
     assert.ok(existsSync(join(c.dir, '.rsc-brain', 'src', 'deploy', 'compose.yaml')))
   })
 })
@@ -933,7 +933,7 @@ describe('the launcher: day to day', () => {
     const env = readEnv(c.dir)
     const yes = launch(c, ['key', 'show', '--yes', '--dir', c.dir])
     assert.equal(yes.code, 0)
-    assert.equal(yes.stdout, `${env.RSC_BRAIN_SECRET}\n`)
+    assert.equal(yes.stdout, `${env.OBSY_BRAIN_SECRET}\n`)
     const asked = launch(c, ['key', 'show', '--dir', c.dir], { answers: 'n\n' })
     assert.equal(asked.code, 1)
     assert.equal(asked.stdout, '')
@@ -1059,7 +1059,7 @@ describe('the launcher: uninstall (CA16, spec «Desinstalar»)', () => {
     assert.equal(existsSync(join(c.dir, 'backups')), false)
     assert.equal(existsSync(join(c.dir, '.env')), false)
     const keyFile = join(c.dir, 'installation-key.txt')
-    assert.equal(readFileSync(keyFile, 'utf8').trim(), env.RSC_BRAIN_SECRET)
+    assert.equal(readFileSync(keyFile, 'utf8').trim(), env.OBSY_BRAIN_SECRET)
     assert.equal(mode(keyFile), 0o600)
     // What the person wrote there stays.
     assert.ok(existsSync(join(c.dir, 'compose.override.yaml')))
@@ -1135,10 +1135,10 @@ describe('the launcher: only its own (review of PR #35)', () => {
   it('a .env the launcher did not write is not an installation: refused, untouched', async () => {
     const c = fresh()
     mkdirSync(c.dir)
-    writeFileSync(join(c.dir, '.env'), "RSC_BRAIN_SECRET='someone elses'\n")
+    writeFileSync(join(c.dir, '.env'), "OBSY_BRAIN_SECRET='someone elses'\n")
     const r = launch(c, await local(c))
     assert.equal(r.code, 2, r.stderr)
-    assert.equal(readFileSync(join(c.dir, '.env'), 'utf8'), "RSC_BRAIN_SECRET='someone elses'\n")
+    assert.equal(readFileSync(join(c.dir, '.env'), 'utf8'), "OBSY_BRAIN_SECRET='someone elses'\n")
     for (const cmd of [['uninstall'], ['key', 'show', '--yes']]) {
       const u = launch(c, [...cmd, '--dir', c.dir])
       assert.equal(u.code, 3, u.stderr)
@@ -1150,14 +1150,14 @@ describe('the launcher: only its own (review of PR #35)', () => {
     const c = fresh()
     const r = launch(c, await local(c), {
       env: {
-        RSC_BRAIN_SECRET: 'from-the-shell-0123456789abcdef0123456789',
-        RSC_BRAIN_PUBLISH: '0.0.0.0:80',
+        OBSY_BRAIN_SECRET: 'from-the-shell-0123456789abcdef0123456789',
+        OBSY_BRAIN_PUBLISH: '0.0.0.0:80',
         POSTGRES_PASSWORD: 'shell-pw',
-        RSC_BRAIN_ACME_CA: 'https://evil.example/dir',
+        OBSY_BRAIN_ACME_CA: 'https://evil.example/dir',
         COMPOSE_PROFILES: 'server',
         // Named only in compose.yaml: the list comes from the file, not from the launcher's memory.
-        RSC_BRAIN_TRUSTED_PROXIES: '0.0.0.0/0',
-        RSC_BRAIN_LOCAL_ONLY: '0',
+        OBSY_BRAIN_TRUSTED_PROXIES: '0.0.0.0/0',
+        OBSY_BRAIN_LOCAL_ONLY: '0',
       },
     })
     assert.equal(r.code, 0, r.stderr)
@@ -1166,11 +1166,11 @@ describe('the launcher: only its own (review of PR #35)', () => {
       [],
     )
     assert.equal((r.stderr.match(/set in this shell/g) ?? []).length, 1, r.stderr)
-    assert.match(r.stderr, /RSC_BRAIN_SECRET/)
+    assert.match(r.stderr, /OBSY_BRAIN_SECRET/)
     assert.doesNotMatch(r.stderr, /from-the-shell/)
     for (const day of [['status'], ['backups'], ['uninstall']]) {
       const d = launch(c, [...day, '--dir', c.dir], {
-        env: { RSC_BRAIN_SECRET: 'x'.repeat(40), RSC_BRAIN_IMAGE: 'evil' },
+        env: { OBSY_BRAIN_SECRET: 'x'.repeat(40), OBSY_BRAIN_IMAGE: 'evil' },
       })
       assert.deepEqual(
         d.calls.filter((l) => l.startsWith('LEAK ')),
@@ -1224,7 +1224,7 @@ describe('the launcher: only its own (review of PR #35)', () => {
           FAKE_LOG: c.log,
           FAKE_STDIN: c.stdin,
           FAKE_STATE: c.state,
-          RSC_BRAIN_TTY: c.tty,
+          OBSY_BRAIN_TTY: c.tty,
           ...env,
         },
       })
@@ -1273,7 +1273,7 @@ describe('the launcher: only its own (review of PR #35)', () => {
     assert.ok(drop >= 0 && drop < provision, 'the database the first one was making is removed first')
     // A first install: the onboarding, and the new key in the summary.
     assert.match(again.stdout, /first-time setup/)
-    assert.match(readFileSync(join(c.dir, '.env'), 'utf8'), /RSC_BRAIN_LAUNCHER='1'/)
+    assert.match(readFileSync(join(c.dir, '.env'), 'utf8'), /OBSY_BRAIN_LAUNCHER='1'/)
     assert.equal(existsSync(join(c.dir, '.rsc-brain', 'install.pending')), false)
   })
 
@@ -1396,7 +1396,7 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
         FAKE_LOG: c.log,
         FAKE_STDIN: c.stdin,
         FAKE_STATE: c.state,
-        RSC_BRAIN_TTY: c.tty,
+        OBSY_BRAIN_TTY: c.tty,
         ...env,
       },
     })
@@ -1433,7 +1433,7 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
     )
     const first = await a.done
     assert.equal(first.code, 0, first.stderr)
-    assert.equal(JSON.parse(first.stdout).installationKey, readEnv(c.dir).RSC_BRAIN_SECRET)
+    assert.equal(JSON.parse(first.stdout).installationKey, readEnv(c.dir).OBSY_BRAIN_SECRET)
     assert.equal(existsSync(join(c.dir, '.rsc-brain', 'lock')), false, 'the lock is let go')
   })
 
@@ -1503,11 +1503,11 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
   it('uninstall --delete-data then install: the saved key is used again (--yes), so old copies stay restorable; it says which', async () => {
     const c = fresh()
     assert.equal(launch(c, await local(c)).code, 0)
-    const key = readEnv(c.dir).RSC_BRAIN_SECRET
+    const key = readEnv(c.dir).OBSY_BRAIN_SECRET
     assert.equal(launch(c, ['uninstall', '--delete-data', '--confirm', 'rsc-brain', '--dir', c.dir]).code, 0)
     const again = launch(c, await local(c, '--json'))
     assert.equal(again.code, 0, again.stderr)
-    assert.equal(readEnv(c.dir).RSC_BRAIN_SECRET, key)
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_SECRET, key)
     assert.equal(JSON.parse(again.stdout).installationKey, key)
     assert.ok(
       again.stderr.includes(`Using the installation key saved in "${join(c.dir, 'installation-key.txt')}"`),
@@ -1527,7 +1527,7 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
       },
     )
     assert.equal(r.code, 0, r.stderr)
-    assert.notEqual(readEnv(c.dir).RSC_BRAIN_SECRET, 'k'.repeat(64))
+    assert.notEqual(readEnv(c.dir).OBSY_BRAIN_SECRET, 'k'.repeat(64))
     assert.match(r.stderr, /Reuse the installation key saved in/)
     assert.match(r.stderr, /A new installation key was made/)
     assert.equal(readFileSync(join(c.dir, 'installation-key.txt'), 'utf8'), `${'k'.repeat(64)}\n`)
@@ -1546,10 +1546,10 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
     it(`killed right after it makes ${at}: the journal already names it, and the next run takes it back`, async () => {
       const c = fresh()
       const args = await local(c)
-      const killed = launch(c, args, { env: { RSC_BRAIN_TEST_STOP_AT: at } })
+      const killed = launch(c, args, { env: { OBSY_BRAIN_TEST_STOP_AT: at } })
       assert.equal(killed.signal, 'SIGKILL', killed.stderr)
       const pending = readFileSync(join(c.dir, '.rsc-brain', 'install.pending'), 'utf8')
-      const made = /^RSC_BRAIN_PENDING_MADE='(.*)'$/m.exec(pending)?.[1] ?? ''
+      const made = /^OBSY_BRAIN_PENDING_MADE='(.*)'$/m.exec(pending)?.[1] ?? ''
       assert.ok(made.split(' ').includes(at === 'state' ? '.rsc-brain' : at), made)
       const again = launch(c, args)
       assert.equal(again.code, 0, again.stderr)
@@ -1602,7 +1602,7 @@ describe('the launcher: the folder changed while it asked (second pass on PR #35
         FAKE_LOG: c.log,
         FAKE_STDIN: c.stdin,
         FAKE_STATE: c.state,
-        RSC_BRAIN_TTY: tty,
+        OBSY_BRAIN_TTY: tty,
       },
     })
     let stderr = ''
@@ -1681,31 +1681,31 @@ describe('the launcher: companion mode (F1)', () => {
       const env = readEnv(c.dir)
       assert.match(s.companionToken, /^[0-9a-f]{64}$/)
       assert.notEqual(s.companionToken, s.installationKey)
-      assert.equal(env.RSC_BRAIN_COMPANION_TOKEN, s.companionToken)
+      assert.equal(env.OBSY_BRAIN_COMPANION_TOKEN, s.companionToken)
       assert.equal(s.internalUrl, 'http://rsc-brain:8090')
       assert.deepEqual([s.mode, s.db], ['local', 'shared'])
       assert.equal(mode(join(c.dir, '.env')), 0o600)
       assert.deepEqual(
         [
-          env.RSC_BRAIN_SHARED_NETWORK,
-          env.RSC_BRAIN_COMPANION_NETWORK,
-          env.RSC_BRAIN_COMPANION_GATEWAY,
-          env.RSC_BRAIN_FACTORY_URL,
-          env.RSC_BRAIN_LOCAL_ONLY,
-          env.RSC_BRAIN_TRUSTED_PROXIES,
+          env.OBSY_BRAIN_SHARED_NETWORK,
+          env.OBSY_BRAIN_COMPANION_NETWORK,
+          env.OBSY_BRAIN_COMPANION_GATEWAY,
+          env.OBSY_BRAIN_FACTORY_URL,
+          env.OBSY_BRAIN_LOCAL_ONLY,
+          env.OBSY_BRAIN_TRUSTED_PROXIES,
         ],
         ['rsc-shared', '192.168.230.0/24', '192.168.230.1', 'http://localhost:3000', '1', ''],
       )
       // The app joins the shared network, external, as rsc-brain; the compose file names the service's settings.
       const extra = readFileSync(join(c.dir, 'compose.companion.yaml'), 'utf8')
-      assert.match(extra, /name: \$\{RSC_BRAIN_SHARED_NETWORK/)
+      assert.match(extra, /name: \$\{OBSY_BRAIN_SHARED_NETWORK/)
       assert.match(extra, /external: true/)
       assert.match(extra, /aliases:\s*\n\s*- rsc-brain/)
       // Its own network keeps the default route: «this machine only» trusts that gateway, never the shared one.
       assert.match(extra, /default:\s*\n\s*gw_priority: 1/)
       const compose = readFileSync(join(c.dir, 'compose.yaml'), 'utf8')
       for (const v of ['COMPANION_TOKEN', 'COMPANION_NETWORK', 'COMPANION_GATEWAY', 'FACTORY_URL'])
-        assert.match(compose, new RegExp(`RSC_BRAIN_${v}: \\$\\{RSC_BRAIN_${v}:-\\}`))
+        assert.match(compose, new RegExp(`OBSY_BRAIN_${v}: \\$\\{OBSY_BRAIN_${v}:-\\}`))
       const up = r.calls.find((l) => /^compose /.test(l) && / up /.test(l)) ?? ''
       assert.match(up, new RegExp(`-f ${join(c.dir, 'compose.companion.yaml')}`))
       assert.doesNotMatch(up, /--profile (server|bundled)/)
@@ -1730,7 +1730,7 @@ describe('the launcher: companion mode (F1)', () => {
     )
     const env = readEnv(c.dir)
     assert.deepEqual(
-      [env.RSC_BRAIN_TRUSTED_PROXIES, env.RSC_BRAIN_LOCAL_ONLY, env.RSC_BRAIN_SETUP_URL],
+      [env.OBSY_BRAIN_TRUSTED_PROXIES, env.OBSY_BRAIN_LOCAL_ONLY, env.OBSY_BRAIN_SETUP_URL],
       ['192.168.230.2', '0', 'https://brain.example.com'],
     )
     const up = r.calls.find((l) => /^compose /.test(l) && / up /.test(l)) ?? ''
@@ -1931,11 +1931,11 @@ describe('the launcher: companion mode (F1)', () => {
     assert.equal(s.companionToken, JSON.parse(first.stdout).companionToken)
     const after = readEnv(c.dir)
     for (const k of [
-      'RSC_BRAIN_COMPANION_TOKEN',
-      'RSC_BRAIN_SHARED_NETWORK',
-      'RSC_BRAIN_COMPANION_NETWORK',
-      'RSC_BRAIN_FACTORY_URL',
-      'RSC_BRAIN_SECRET',
+      'OBSY_BRAIN_COMPANION_TOKEN',
+      'OBSY_BRAIN_SHARED_NETWORK',
+      'OBSY_BRAIN_COMPANION_NETWORK',
+      'OBSY_BRAIN_FACTORY_URL',
+      'OBSY_BRAIN_SECRET',
     ])
       assert.equal(after[k], before[k], k)
     const up = again.calls.find((l) => /^compose /.test(l) && / up /.test(l)) ?? ''
@@ -1972,9 +1972,9 @@ describe('the launcher: companion mode (F1)', () => {
     const r = launch(c, await companion(c), {
       env: {
         FAKE_NETWORKS: NET,
-        RSC_BRAIN_SHARED_NETWORK: 'elsewhere',
-        RSC_BRAIN_COMPANION_TOKEN: 'from-the-shell-0123456789abcdef0123',
-        RSC_BRAIN_FACTORY_URL: 'https://evil.example.com',
+        OBSY_BRAIN_SHARED_NETWORK: 'elsewhere',
+        OBSY_BRAIN_COMPANION_TOKEN: 'from-the-shell-0123456789abcdef0123',
+        OBSY_BRAIN_FACTORY_URL: 'https://evil.example.com',
       },
     })
     assert.equal(r.code, 0, r.stderr)

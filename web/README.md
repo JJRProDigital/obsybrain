@@ -15,7 +15,7 @@ The text of the web is in English and lives in `src/text.ts`, so it can be trans
 ```sh
 npm install
 npm run build                       # once: the server and dist/web
-RSC_BRAIN_PORT=4100 node dist/cli/main.js serve   # with RSC_BRAIN_PG_URL set
+OBSY_BRAIN_PORT=4100 node dist/cli/main.js serve   # with OBSY_BRAIN_PG_URL set
 npm run web:dev                     # Vite on port 5173; it forwards /v1, /mcp, /oauth and /.well-known to 4100
 ```
 
@@ -71,7 +71,7 @@ Three layers, from fast to real:
    light and dark themes (`axe.spec.ts` and the audits in each screen's spec), the keyboard, and the
    timing of the graph (CA5, CA6; CI is the judge for timing).
 3. **End-to-end tests** (`test/e2e/*.spec.ts`, `npm run test:e2e`): the built web against the real server
-   and PostgreSQL (`RSC_BRAIN_PG_URL`), one worker, mail captured. They run locally in `scripts/verify.sh`
+   and PostgreSQL (`OBSY_BRAIN_PG_URL`), one worker, mail captured. They run locally in `scripts/verify.sh`
    when PostgreSQL answers; CI has no PostgreSQL and says so. CA1 (from the invitation to a connected
    agent) is counted here and printed by `verify.sh`.
 

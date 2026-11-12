@@ -1,7 +1,7 @@
 // Updating from the web with real containers (plan T064; spec CA27, CA28): local only, never in CI (plan §5.1). Runs with
-// RSC_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Every Docker resource carries the prefix
-// rscb-b3-test- (RSC_BRAIN_INSTALL_PREFIX changes it) and a random id, and is removed by exact name afterwards; the
-// folders live under RSC_BRAIN_INSTALL_TMP (or the system's temporary folder).
+// OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Every Docker resource carries the prefix
+// rscb-b3-test- (OBSY_BRAIN_INSTALL_PREFIX changes it) and a random id, and is removed by exact name afterwards; the
+// folders live under OBSY_BRAIN_INSTALL_TMP (or the system's temporary folder).
 //
 // CA27, complete: a standalone installation, built from this tree, has the button off (409 updates_off, no updater
 // container). `web-updates enable` starts the updater against a repository of its own (a local bare repository holding a
@@ -35,7 +35,7 @@ const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
 const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
 const ID = randomBytes(4).toString('hex')
-const PREFIX = process.env.RSC_BRAIN_INSTALL_PREFIX ?? 'rscb-b3-test'
+const PREFIX = process.env.OBSY_BRAIN_INSTALL_PREFIX ?? 'rscb-b3-test'
 const NAME = `${PREFIX}-${ID}`
 const BASE_IMAGE = `${PREFIX}-image:${ID}`
 const UPDATER = `${NAME}-updater`
@@ -48,8 +48,8 @@ const INSTALLED = (JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')) 
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
-  if (process.env.RSC_BRAIN_INSTALL_TESTS !== '1')
-    return 'set RSC_BRAIN_INSTALL_TESTS=1 to update from the web with real containers'
+  if (process.env.OBSY_BRAIN_INSTALL_TESTS !== '1')
+    return 'set OBSY_BRAIN_INSTALL_TESTS=1 to update from the web with real containers'
   if (spawnSync('docker', ['info'], { stdio: 'ignore' }).status !== 0) return 'Docker does not answer'
   return null
 })()
@@ -81,7 +81,7 @@ const launch = (args: string[]) =>
   spawnSync('sh', [LAUNCHER, ...args], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env, RSC_BRAIN_TTY: '/nonexistent/tty' },
+    env: { ...process.env, OBSY_BRAIN_TTY: '/nonexistent/tty' },
     timeout: 900_000,
   })
 const git = (...a: string[]) => {
@@ -133,7 +133,7 @@ describe('updating from the web with real containers (CA27)', { skip: why ?? fal
   const marks = () => readdirSync(join(dir, 'update', 'request'))
 
   before(async () => {
-    base = mkdtempSync(join(process.env.RSC_BRAIN_INSTALL_TMP ?? tmpdir(), `${PREFIX}-`))
+    base = mkdtempSync(join(process.env.OBSY_BRAIN_INSTALL_TMP ?? tmpdir(), `${PREFIX}-`))
     dir = join(base, 'install')
     let started = Date.now()
     await run('docker', ['build', '-q', '-t', BASE_IMAGE, ROOT], { maxBuffer: 64 << 20 })
@@ -186,8 +186,8 @@ describe('updating from the web with real containers (CA27)', { skip: why ?? fal
     // The updater reaches the repository at the same path as here, so it lives in the installation folder.
     cpSync(repo, join(dir, 'repo.git'), { recursive: true })
     const env = readFileSync(join(dir, '.env'), 'utf8').replace(
-      /^RSC_BRAIN_REPO_URL=.*$/m,
-      `RSC_BRAIN_REPO_URL='file://${join(dir, 'repo.git')}'`,
+      /^OBSY_BRAIN_REPO_URL=.*$/m,
+      `OBSY_BRAIN_REPO_URL='file://${join(dir, 'repo.git')}'`,
     )
     writeFileSync(join(dir, '.env'), env, { mode: 0o600 })
     const setup = await fetch(`${site}/v1/setup`, {
@@ -354,11 +354,11 @@ describe('an installation made by rsc-factory has no button of its own (CA28)', 
 }, () => {
   let dir = ''
   before(() => {
-    dir = join(mkdtempSync(join(process.env.RSC_BRAIN_INSTALL_TMP ?? tmpdir(), `${PREFIX}-c-`)), 'install')
+    dir = join(mkdtempSync(join(process.env.OBSY_BRAIN_INSTALL_TMP ?? tmpdir(), `${PREFIX}-c-`)), 'install')
     mkdirSync(dir, { recursive: true })
     writeFileSync(
       join(dir, '.env'),
-      `RSC_BRAIN_LAUNCHER='1'\nRSC_BRAIN_NAME='${NAME}-c'\nCOMPOSE_PROJECT_NAME='${NAME}-c'\nRSC_BRAIN_COMPANION='1'\n`,
+      `OBSY_BRAIN_LAUNCHER='1'\nOBSY_BRAIN_NAME='${NAME}-c'\nCOMPOSE_PROJECT_NAME='${NAME}-c'\nOBSY_BRAIN_COMPANION='1'\n`,
       { mode: 0o600 },
     )
   })

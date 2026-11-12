@@ -289,7 +289,7 @@ export async function enableMeaning(ctx: Ctx, input: { provider: string; accept:
       `The provider "${input.provider}" is not configured in this installation.`,
       names.length
         ? `Use one of: ${names.join(', ')}.`
-        : 'Set a key or address in Admin › Meaning search (or RSC_BRAIN_OPENAI_KEY or RSC_BRAIN_OLLAMA_URL for the server), then try again.',
+        : 'Set a key or address in Admin › Meaning search (or OBSY_BRAIN_OPENAI_KEY or OBSY_BRAIN_OLLAMA_URL for the server), then try again.',
     )
   }
   if (input.accept !== true) {
