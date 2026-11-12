@@ -159,15 +159,20 @@ describe('shared tokens (shared.css)', () => {
 
   it('the monospaced stack starts with the self-hosted font and falls back to the system ones', () => {
     const mono = theme(sharedBlocks, 'dark').get('--font-mono') ?? ''
-    assert.match(mono, /^"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas/)
+    assert.match(mono, /^"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas/)
     const faces = [...shared.matchAll(/@font-face\s*\{([^}]*)\}/g)].map((m) => m[1] ?? '')
     assert.ok(faces.length >= 2, 'a regular and a bold face')
     for (const f of faces) {
-      assert.match(f, /font-family:\s*"JetBrains Mono"/)
+      assert.match(f, /font-family:\s*"(Inter|IBM Plex Mono|Playfair Display)"/)
       assert.match(f, /font-display:\s*swap/)
       // Served from the same origin (the CSP's font-src 'self'): a relative file, never a URL elsewhere.
       assert.match(f, /src:\s*url\("\.\/fonts\/[\w.-]+\.woff2"\)\s*format\("woff2"\)/)
     }
+    const families = new Set(faces.map((f) => /font-family:\s*"([^"]+)"/.exec(f)?.[1]))
+    assert.deepEqual([...families].sort(), ['IBM Plex Mono', 'Inter', 'Playfair Display'])
+    const stacks = theme(sharedBlocks, 'dark')
+    assert.match(stacks.get('--font-sans') ?? '', /^"Inter"/)
+    assert.match(stacks.get('--font-display') ?? '', /^"Playfair Display"/)
     for (const f of faces) {
       const file = /url\("\.\/fonts\/([\w.-]+)"\)/.exec(f)?.[1] as string
       assert.ok(readFileSync(new URL(`fonts/${file}`, STYLES)).length > 10_000, `${file} is there`)
@@ -291,7 +296,7 @@ describe("Brain's tokens over the shared ones (tokens.css)", () => {
     })
   }
 
-  it('Brain keeps its own accent (hue 156) over the shared sheet', () => {
-    for (const t of ['light', 'dark'] as const) assert.match(theme(brain, t).get('--accent') ?? '', / 156\)$/)
+  it("Brain keeps the brand's gold accent (hue 81) over the shared sheet", () => {
+    for (const t of ['light', 'dark'] as const) assert.match(theme(brain, t).get('--accent') ?? '', / 81\.\d\)$/)
   })
 })

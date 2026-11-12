@@ -1288,7 +1288,7 @@ export const T = {
     logoLead:
       'Shown in the header and at the top of every email. A PNG, JPEG or WebP of at most 2 MB; not SVG, which can carry scripts.',
     logoFileHint: 'PNG, JPEG or WebP, up to 2 MB.',
-    noLogo: 'No logo: the header shows the RSC mark, and emails show the name only.',
+    noLogo: 'No logo: the header shows the ObsyBrain mark, and emails show the name only.',
     currentLogo: 'The current logo',
     chooseLogo: 'Choose a logo',
     chosenLogo: 'The logo you chose',
@@ -1297,9 +1297,9 @@ export const T = {
     uploaded: 'Logo uploaded. It shows in the header and at the top of every email.',
     removeLogo: 'Remove the logo',
     removeLogoTitle: 'Remove the logo?',
-    removeLogoLead: 'The header shows the RSC mark again, and emails show the name only.',
+    removeLogoLead: 'The header shows the ObsyBrain mark again, and emails show the name only.',
     keepLogo: 'Keep it',
-    logoRemoved: 'Logo removed. The header shows the RSC mark; emails show the name only.',
+    logoRemoved: 'Logo removed. The header shows the ObsyBrain mark; emails show the name only.',
   },
 
   wiki: {

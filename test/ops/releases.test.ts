@@ -32,12 +32,14 @@ type Vectors = {
   compare: Array<{ name: string; installed: string; newest: string; result: string }>
   notes: Array<{ name: string; tag: string; changelog: string; notes: string }>
 }
-// The copy of rsc-factory's test/fixtures/published-vectors.json. When rsc-factory adds sections, both change together.
-const VECTORS_SHA256 = '95b691dd221a9f99e0269f9a417594e0f630e523f73fe2ab0d18d0e061ccd4a7'
+// ObsyBrain's copy of the release-check vectors (from rsc-factory's test/fixtures at the fork point, v0.7.0).
+// This repository is a frozen fork: the byte pin is now a local edit guard, not cross-repo parity — change it
+// consciously when the vectors change.
+const VECTORS_SHA256 = '556d872b98099dd4d2337a977f56996a510fd66fd295eddc41f6d267272b34d8'
 const vectorsText = readFileSync(new URL('../fixtures/published-vectors.json', import.meta.url), 'utf8')
 const vectors = JSON.parse(vectorsText) as Vectors
 
-test('the vectors are the copy of rsc-factory: same SHA-256', () => {
+test('the vectors are pinned: same SHA-256', () => {
   assert.equal(createHash('sha256').update(vectorsText).digest('hex'), VECTORS_SHA256)
 })
 

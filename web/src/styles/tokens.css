@@ -1,22 +1,24 @@
-/* Brain's own tokens, over the shared ones (shared.css v2, loaded first): the dark terminal with neon (plan
-   canvas-ui S.0). A near-black blue ground, panels one step lighter, one monospaced face. Elevation is
-   lightness and a thin border; the accent marks selection, data and confirmation, never a button, a tab or
-   the navigation. Dark is the default; light is a choice of the person. */
+/* Brain's own tokens, over the shared ones (shared.css v3, loaded first): the ObsyBrain brand. A deep ink
+   ground in the Obsessive Solutions palette (--ink #1E312F family), panels one step lighter, and a gold
+   accent (#D5B06D family) that marks selection, data and confirmation, never a button, a tab or the
+   navigation. Light sits on the brand's paper (#F1EFEA family). Elevation is lightness and a thin border.
+   Type: Inter for text, IBM Plex Mono for command-line content, Playfair Display for display headings.
+   Dark is the default; light is a choice of the person. */
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ground: oklch(0.145 0.015 262);
-  --surface: oklch(0.175 0.016 262);
-  --raised: oklch(0.225 0.018 262);
-  --text: oklch(0.94 0.006 260);
-  --muted: oklch(0.76 0.012 260);
-  --accent: oklch(0.82 0.16 156);
-  --rule: oklch(0.27 0.018 262);
-  --field-line: oklch(0.56 0.02 262);
-  --nav: oklch(0.78 0.01 260);
-  --primary-bg: oklch(0.94 0.006 260);
-  --primary-fg: oklch(0.145 0.015 262);
-  --scrim: oklch(0.08 0.012 262 / 0.75);
+  --ground: oklch(0.231 0.018 177.4);
+  --surface: oklch(0.296 0.025 187.6);
+  --raised: oklch(0.358 0.031 183);
+  --text: oklch(0.952 0.007 88.6);
+  --muted: oklch(0.76 0.014 167);
+  --accent: oklch(0.776 0.096 81.4);
+  --rule: oklch(0.42 0.03 183);
+  --field-line: oklch(0.62 0.025 178);
+  --nav: oklch(0.835 0.01 164.8);
+  --primary-bg: oklch(0.952 0.007 88.6);
+  --primary-fg: oklch(0.296 0.025 187.6);
+  --scrim: oklch(0.16 0.02 178 / 0.75);
   /* The graph's communities (v0.5.0): ten categorical colours told apart on the dark ground, the small
      communities' shared grey and the pages without links' lighter one. */
   --com-0: oklch(0.72 0.15 255);
@@ -35,18 +37,18 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --ground: oklch(0.975 0.004 95);
-  --surface: oklch(0.995 0.002 95);
-  --raised: oklch(0.935 0.005 260);
-  --text: oklch(0.2 0.012 260);
-  --muted: oklch(0.44 0.01 260);
-  --accent: oklch(0.5 0.13 156);
-  --rule: oklch(0.9 0.006 260);
-  --field-line: oklch(0.56 0.01 260);
-  --nav: oklch(0.42 0.01 260);
-  --primary-bg: oklch(0.2 0.012 260);
-  --primary-fg: oklch(0.985 0.003 95);
-  --scrim: oklch(0.2 0.01 260 / 0.4);
+  --ground: oklch(0.952 0.007 88.6);
+  --surface: oklch(0.985 0.005 95.1);
+  --raised: oklch(0.923 0.013 86.8);
+  --text: oklch(0.296 0.025 187.6);
+  --muted: oklch(0.453 0.021 178.5);
+  --accent: oklch(0.505 0.089 81.9);
+  --rule: oklch(0.871 0.017 88);
+  --field-line: oklch(0.628 0.017 170.7);
+  --nav: oklch(0.371 0.023 179);
+  --primary-bg: oklch(0.296 0.025 187.6);
+  --primary-fg: oklch(0.952 0.007 88.6);
+  --scrim: oklch(0.296 0.03 187 / 0.4);
   --com-0: oklch(0.52 0.16 255);
   --com-1: oklch(0.6 0.17 55);
   --com-2: oklch(0.55 0.2 25);
@@ -62,9 +64,11 @@
 }
 
 :root {
-  /* The whole interface is monospaced: the two old names both point at the shared stack. */
-  --sans: var(--font-mono);
+  /* The interface reads in Inter; command-line content keeps a monospaced face; titles get the brand's
+     display serif. */
+  --sans: var(--font-sans);
   --mono: var(--font-mono);
+  --display: var(--font-display);
   --topbar: 64px;
   --gutter: 28px;
   --gap: 16px;
@@ -78,4 +82,10 @@
   --positive: var(--ok);
   --control: 36px;
   --field: 40px;
+}
+
+/* Display headings in the brand's serif (the Obsessive Solutions manual), over the interface's own sizes. */
+h1,
+h2 {
+  font-family: var(--display);
 }

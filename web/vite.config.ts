@@ -75,9 +75,9 @@ function licences(): Plugin {
           return `${pkg.name}@${pkg.version} (${pkg.license})\n\n${text}`
         })
         .sort()
-      // The interface's face, self-hosted beside shared.css: its licence travels with it.
+      // The interface's faces, self-hosted beside shared.css: their licences travel with them.
       const font = readFileSync(fileURLToPath(new URL('src/styles/fonts/OFL.txt', import.meta.url)), 'utf8')
-      notices.push(`JetBrains Mono (OFL-1.1)\n\n${font.trim()}`)
+      notices.push(`Inter, IBM Plex Mono, Playfair Display (OFL-1.1)\n\n${font.trim()}`)
       this.emitFile({
         type: 'asset',
         fileName: 'licences.txt',

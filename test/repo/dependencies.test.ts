@@ -85,15 +85,15 @@ describe('the licence notices of the bundled web', () => {
     assert.match(text, /Permission is hereby granted, free of charge/)
   })
 
-  // The interface's face (shared.css v2) is a font under the SIL Open Font License, which asks that the
-  // licence travel with the font.
-  it('carry the font and its SIL Open Font License', {
+  // The interface's faces (shared.css v3) are fonts under the SIL Open Font License, which asks that the
+  // licences travel with them.
+  it('carry the fonts and their SIL Open Font License', {
     skip: !existsSync(new URL('dist/web/', ROOT)),
   }, () => {
     const text = readFileSync(file, 'utf8')
-    assert.match(text, /JetBrains Mono \(OFL-1\.1\)/)
+    assert.match(text, /Inter, IBM Plex Mono, Playfair Display \(OFL-1\.1\)/)
     assert.match(text, /SIL OPEN FONT LICENSE Version 1\.1/)
     const fonts = readdirSync(new URL('dist/web/assets/', ROOT)).filter((f) => f.endsWith('.woff2'))
-    assert.equal(fonts.length, 2, 'the regular and the bold face, as files of their own')
+    assert.equal(fonts.length, 6, 'a regular and a bold face for each of the three families')
   })
 })

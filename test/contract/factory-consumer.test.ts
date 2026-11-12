@@ -2,9 +2,9 @@
 // makes, sent with a body that fits the request shape rsc-factory sends (brain-shapes.json "requests"),
 // answered by the real server with the reply shapes it reads. brain-shapes.json is a reviewed copy of
 // rsc-factory's test/memory/brain-shapes.json: its fake obsybrain answers with the same replies and refuses a
-// body that breaks the same requests. Both sides pin the SHA-256 of their copy to the same constant (below):
-// an edit to one copy fails its own side until the constant changes, and the constant changes in both
-// repositories in the same pair of PRs. That catches a one-sided edit; it cannot see the other repository.
+// body that breaks the same requests. ObsyBrain is a frozen fork: the byte pin below is now a local edit
+// guard, not cross-repo parity — a change here must mirror rsc-factory's copy deliberately, so companion
+// compatibility keeps working.
 // It also pins what that fake models of obsybrain's behaviour: relayed corrections and their refusals,
 // request keys per credential, the start-up context of each agent, and "mine" among the pending proposals.
 import assert from 'node:assert/strict'
@@ -32,7 +32,7 @@ type Shapes = {
 }
 
 // The same constant is in rsc-factory's test/memory/brain-client.test.ts: change both, with both copies.
-const BRAIN_SHAPES_SHA256 = '3564df2b6f4cd5c873711f95c4c04475a8f87f8b4819d7b63bb8f345e5ddcce0'
+const BRAIN_SHAPES_SHA256 = '25741160b89ed1035cb5e98df5961c9980d1f9b13c2c5783d918da6632ad3e15'
 const SHAPES_TEXT = readFileSync(new URL('./brain-shapes.json', import.meta.url), 'utf8')
 const SHAPES = JSON.parse(SHAPES_TEXT) as Shapes
 
@@ -390,7 +390,7 @@ describe('the consumer contract of rsc-factory', { skip: skipPg }, () => {
     assert.equal(stats.pendingProposals, 2)
   })
 
-  it('the shapes are the copy rsc-factory pins (SHA-256), and every request names an operation', () => {
+  it('the shapes are pinned (SHA-256), and every request names an operation', () => {
     assert.equal(createHash('sha256').update(SHAPES_TEXT).digest('hex'), BRAIN_SHAPES_SHA256)
     const ops = Object.keys(SHAPES.operations)
     for (const op of Object.keys(SHAPES.requests).filter((k) => k !== '$comment'))

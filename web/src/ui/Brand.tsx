@@ -1,4 +1,4 @@
-// The name and logo of the installation (spec B6: on every screen). The RSC mark until the
+// The name and logo of the installation (spec B6: on every screen). The ObsyBrain mark until the
 // administration uploads a logo (G3).
 import { branding, installationName } from '../session.ts'
 import { T } from '../text.ts'
