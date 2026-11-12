@@ -1,5 +1,5 @@
 // Spec B6 «Profile» (PR24 review): what acts in a person's name. The list of tokens carries the expired ones,
-// marked, and never a revoked one; a connected app says when its key first reached rsc-brain (the live check
+// marked, and never a revoked one; a connected app says when its key first reached obsybrain (the live check
 // of «Connect your agent» waits for that, not for the code exchange); and «Revoke all tokens and apps» ends
 // every token and connection of the person at once, leaving web sessions and other people alone.
 import assert from 'node:assert/strict'

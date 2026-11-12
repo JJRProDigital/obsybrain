@@ -40,7 +40,10 @@ describe('configuration', () => {
   })
   it('service invitation mails: 100 an hour, unless OBSY_BRAIN_SERVICE_INVITES_PER_HOUR says otherwise (1..100000)', () => {
     assert.equal(readConfig({ OBSY_BRAIN_DATABASE_URL: 'postgres://x' }).serviceInvitesPerHour, 100)
-    const c = readConfig({ OBSY_BRAIN_DATABASE_URL: 'postgres://x', OBSY_BRAIN_SERVICE_INVITES_PER_HOUR: '7' })
+    const c = readConfig({
+      OBSY_BRAIN_DATABASE_URL: 'postgres://x',
+      OBSY_BRAIN_SERVICE_INVITES_PER_HOUR: '7',
+    })
     assert.equal(c.serviceInvitesPerHour, 7)
     for (const n of ['0', '100001', '2.5', 'lots', '']) {
       assert.throws(

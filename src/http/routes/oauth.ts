@@ -76,8 +76,8 @@ function page(
   headers: Record<string, string | string[]> = {},
 ): Reply {
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)} · rsc-brain</title><style>
-${PAGE_STYLE}</style></head><body><main><div class="card">${body}</div><p class="muted">rsc-brain</p></main></body></html>`
+<title>${esc(title)} · obsybrain</title><style>
+${PAGE_STYLE}</style></head><body><main><div class="card">${body}</div><p class="muted">obsybrain</p></main></body></html>`
   return { status, body: html, headers: { ...PAGE_HEADERS, ...headers } }
 }
 
@@ -88,7 +88,7 @@ const errorPage = (message: string, status = 400) =>
     status,
   )
 
-// While rsc-brain is under maintenance the sign-in and consent forms write nothing (spec B7 C12): a page in
+// While obsybrain is under maintenance the sign-in and consent forms write nothing (spec B7 C12): a page in
 // English with Retry-After, and a link back to the start of the same connection. Null when there is none.
 async function maintenancePage(r: PublicReq, q: Record<string, string>): Promise<Reply | null> {
   const m = await maintenance.current(r.db, r.clock())
@@ -97,7 +97,7 @@ async function maintenancePage(r: PublicReq, q: Record<string, string>): Promise
   const again = `/oauth/authorize?${new URLSearchParams(q).toString()}`
   return page(
     'Updating',
-    `<h1>rsc-brain is updating</h1><p>rsc-brain is updating. Try again in ${seconds} seconds.</p><p><a href="${esc(again)}">Try again</a></p><p class="muted">Nothing was changed.</p>`,
+    `<h1>obsybrain is updating</h1><p>obsybrain is updating. Try again in ${seconds} seconds.</p><p><a href="${esc(again)}">Try again</a></p><p class="muted">Nothing was changed.</p>`,
     503,
     { 'retry-after': String(seconds) },
   )
@@ -415,6 +415,6 @@ async function protectedResource(r: PublicReq): Promise<Reply> {
     authorization_servers: [iss],
     scopes_supported: ['brain:read', 'brain:write'],
     bearer_methods_supported: ['header'],
-    resource_name: 'rsc-brain',
+    resource_name: 'obsybrain',
   })
 }

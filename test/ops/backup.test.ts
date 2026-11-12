@@ -60,7 +60,7 @@ describe('backups on PostgreSQL', { skip: skipPg }, () => {
 
   before(async () => {
     w = await world()
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-backups-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-backups-'))
     const p = await w.person('Canary', { name: CANARIES.name, email: CANARIES.email, isAdmin: true })
     assert.equal((await w.call(p.key, 'POST', '/v1/brains', { slug: 'canary' })).status, 201)
     const e = await w.call(p.key, 'POST', '/v1/brains/canary/entries', {
@@ -124,7 +124,7 @@ describe('backups on PostgreSQL', { skip: skipPg }, () => {
   let first: BackupInfo
   it('a copy holds every table of the snapshot, row for row, and reads back with the key', async () => {
     first = await backup.create(w.db, { dir, secret: TEST_SECRET, reason: 'manual', clock: w.clock })
-    assert.match(first.file, /^rsc-brain-20261029T100000Z-manual\.rscb$/)
+    assert.match(first.file, /^obsybrain-20261029T100000Z-manual\.rscb$/)
     assert.equal(first.keyId, keyId(TEST_SECRET))
     assert.deepEqual(await files(), [first.file])
     const path = join(dir, first.file)
@@ -542,9 +542,9 @@ describe('backups on PostgreSQL', { skip: skipPg }, () => {
 
   it('a .part left by a copy that died more than an hour ago is cleared by the next copy; a recent one is left', async () => {
     w.advance(60_000)
-    const stale = join(dir, 'rsc-brain-20261029T090000Z-scheduled.rscb.123.00112233445566aa.part')
-    const old = join(dir, 'rsc-brain-20261029T080000Z-scheduled.rscb.part')
-    const recent = join(dir, 'rsc-brain-20261029T095900Z-scheduled.rscb.456.00112233445566bb.part')
+    const stale = join(dir, 'obsybrain-20261029T090000Z-scheduled.rscb.123.00112233445566aa.part')
+    const old = join(dir, 'obsybrain-20261029T080000Z-scheduled.rscb.part')
+    const recent = join(dir, 'obsybrain-20261029T095900Z-scheduled.rscb.456.00112233445566bb.part')
     for (const f of [stale, old, recent]) await writeFile(f, 'half a copy')
     const twoHoursAgo = new Date(Date.now() - 2 * 3600_000)
     await utimes(stale, twoHoursAgo, twoHoursAgo)
@@ -811,7 +811,7 @@ describe('backups on PostgreSQL', { skip: skipPg }, () => {
     try {
       // What an export holds open: a read-only snapshot, named as the export names it.
       await reading.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY')
-      await reading.query("SET LOCAL application_name = 'rsc-brain export'")
+      await reading.query("SET LOCAL application_name = 'obsybrain export'")
       await reading.query('SELECT count(*) FROM entries')
       await maintenance.on(w.db, w.clock(), { reason: 'update' })
       const t0 = Date.now()

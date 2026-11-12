@@ -1,4 +1,4 @@
-// Companion mode (plan F1 §3.1, spec F1 C24): rsc-factory's installer leaves rsc-brain installed but not set up, with
+// Companion mode (plan F1 §3.1, spec F1 C24): rsc-factory's installer leaves obsybrain installed but not set up, with
 // a one-time key both keep (OBSY_BRAIN_COMPANION_TOKEN). While it waits, the setup of the web says to finish in
 // rsc-factory. rsc-factory's own setup then calls POST /v1/setup/companion with that key, from the network the two
 // share, and gets the main key of its service account. The handshake answers only:
@@ -73,18 +73,18 @@ export const companionPending = (factoryUrl: string) => {
     409,
     'companion_pending',
     'Finish the setup in rsc-factory.',
-    `rsc-brain was installed with rsc-factory: open rsc-factory at ${factoryUrl} and finish its first-time setup. rsc-brain is set up with the same administration.`,
+    `obsybrain was installed with rsc-factory: open rsc-factory at ${factoryUrl} and finish its first-time setup. obsybrain is set up with the same administration.`,
   )
   e.extra = { factoryUrl }
   return e
 }
 
-// The setup of the web, while rsc-factory is to set rsc-brain up: refused, with where to finish.
+// The setup of the web, while rsc-factory is to set obsybrain up: refused, with where to finish.
 export async function refuseWhileCompanion(db: Db, c: { factoryUrl: string } | null): Promise<void> {
   if (c && !(await setupDone(db))) throw companionPending(c.factoryUrl)
 }
 
-// After the setup (spec F1 C24 «Finish connecting rsc-brain»): rsc-factory lost its main key (an answer that never
+// After the setup (spec F1 C24 «Finish connecting obsybrain»): rsc-factory lost its main key (an answer that never
 // arrived, a restore that killed every key). With the one-time key it already holds and an administrator's email and
 // password (the brake of signing in, shared with it), it gets a new main key for the service account the first
 // handshake made (never another); the ones before, and what hangs from them, stop working. If an administrator removed
@@ -107,15 +107,15 @@ export async function companionReconnect(
       detail: `not an administrator, from ${conn.ip}`,
     })
     throw denied(
-      'Only an administrator of rsc-brain can reconnect rsc-factory.',
-      'Use the email and password of an administrator of rsc-brain.',
+      'Only an administrator of obsybrain can reconnect rsc-factory.',
+      'Use the email and password of an administrator of obsybrain.',
     )
   }
   const out = await db.tx(
     async (tx): Promise<{ removed: string } | { serviceKey: string; serviceId: string; adminId: string }> => {
       // One reconnect at a time: the row of the installation is the lock.
       await tx.query('SELECT 1 FROM installation WHERE id = 1 FOR UPDATE')
-      // The account the first handshake made (whatever its name now); none only when rsc-brain was set up without the
+      // The account the first handshake made (whatever its name now); none only when obsybrain was set up without the
       // handshake (the command line), and then it is made here, once.
       const marked = await tx.one<{ id: string; status: string | null }>(
         `SELECT m.target AS id, a.status FROM audit m LEFT JOIN accounts a ON a.id = m.target
@@ -168,7 +168,7 @@ export async function companionReconnect(
     throw new AppError(
       409,
       'service_removed',
-      'An administrator removed the rsc-factory account in rsc-brain.',
+      'An administrator removed the rsc-factory account in obsybrain.',
       'Reactivate it there first (Admin › People), then finish connecting again.',
     )
   }

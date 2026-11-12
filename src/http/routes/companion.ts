@@ -1,7 +1,7 @@
-// Companion mode (plan F1 §3.1, T047): rsc-factory sets up the rsc-brain its installer left waiting, with the one-time
+// Companion mode (plan F1 §3.1, T047): rsc-factory sets up the obsybrain its installer left waiting, with the one-time
 // key, and gets the main key of its service account (POST /v1/setup/companion). Afterwards, when that key is lost (an
 // answer that never arrived, a restore), it gets a new one with the same one-time key and an administrator's email and
-// password (POST /v1/setup/companion/reconnect, spec F1 C24 «Finish connecting rsc-brain»). Where the handshake must
+// password (POST /v1/setup/companion/reconnect, spec F1 C24 «Finish connecting obsybrain»). Where the handshake must
 // not answer (no companion mode, through a proxy, from outside the shared network) the routes are not there: the same
 // 404 as an unknown address.
 import { AppError } from '../../core/errors.ts'
@@ -41,7 +41,7 @@ async function keyed(r: PublicReq, token: string): Promise<void> {
     401,
     'unauthorized',
     'The key of the companion setup is missing or wrong.',
-    'Send Authorization: Bearer <companionToken>, the key rsc-brain.sh install --companion --json gave.',
+    'Send Authorization: Bearer <companionToken>, the key obsybrain.sh install --companion --json gave.',
   )
 }
 
@@ -55,7 +55,7 @@ export const companionRoutes: Route[] = [
       await keyed(r, c.token)
       const b = obj(r.body)
       const out = await companionSetup(r.db, r.clock, {
-        name: b.name ?? 'rsc-brain',
+        name: b.name ?? 'obsybrain',
         publicUrl: b.publicUrl ?? c.publicUrl ?? undefined,
         admin: obj(b.admin ?? {}) as { name: unknown; email: unknown; password: unknown },
         serviceName: typeof b.serviceName === 'string' ? b.serviceName : 'rsc-factory',

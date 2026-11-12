@@ -1,5 +1,5 @@
-// `rsc-brain maintenance on|off|status` and `rsc-brain version` (plan §3.1, §3.9): what the launcher runs
-// inside the container to put rsc-brain in maintenance around an update, and to check the version it serves.
+// `obsybrain maintenance on|off|status` and `obsybrain version` (plan §3.1, §3.9): what the launcher runs
+// inside the container to put obsybrain in maintenance around an update, and to check the version it serves.
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { after, before, describe, it } from 'node:test'
@@ -26,7 +26,7 @@ function run(
   })
 }
 
-describe('rsc-brain version', () => {
+describe('obsybrain version', () => {
   it('prints the version and needs no database', async () => {
     const r = await run(['version'], { OBSY_BRAIN_DATABASE_URL: '' })
     assert.equal(r.code, 0, r.err)
@@ -34,7 +34,7 @@ describe('rsc-brain version', () => {
   })
 })
 
-describe('rsc-brain maintenance', { skip: skipPg }, () => {
+describe('obsybrain maintenance', { skip: skipPg }, () => {
   let t: TestDb
   let env: Record<string, string>
   before(async () => {

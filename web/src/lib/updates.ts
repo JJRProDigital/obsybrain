@@ -24,7 +24,7 @@ export type UpdateInfo = {
 export type UpdateView =
   // Only the command: no updater runs, there is nothing newer, or the server does not say.
   | { kind: 'terminal' }
-  // Installed by rsc-factory: it updates rsc-brain.
+  // Installed by rsc-factory: it updates obsybrain.
   | { kind: 'companion'; factoryUrl: string | null }
   | { kind: 'available'; to: string; refused?: { at: string; reason: string } }
   // A way back that could not restore the copy: no button, no retry; what happened and the steps on the server.

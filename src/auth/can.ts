@@ -152,7 +152,7 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
       if (actor.kind !== 'person' || actor.credential.kind !== 'web') {
         return no(
           'Corrections are a person’s word, written by that person in the web; agents cannot write them.',
-          'Save it as a "learning" or "preference" entry instead, or ask a person to add the correction in the rsc-brain web.',
+          'Save it as a "learning" or "preference" entry instead, or ask a person to add the correction in the obsybrain web.',
         )
       }
       const r = needRole(f.role, 'contributor')

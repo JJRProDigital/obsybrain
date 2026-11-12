@@ -61,12 +61,12 @@ describe('the API client', () => {
     assert.equal(f.seen[0]?.headers['x-requested-with'], undefined)
   })
 
-  it('writes carry X-Requested-With: rsc-brain-web and a JSON body', async () => {
+  it('writes carry X-Requested-With: obsybrain-web and a JSON body', async () => {
     const f = fake(() => ({ status: 200, body: { account: { id: 'acc_1' } } }))
     const api = createClient({ transport: f.transport, onSignedOut: () => {}, here: () => '/' })
     await api.call('login', { body: { email: 'a@example.test', password: 'p' } })
     assert.equal(f.seen[0]?.method, 'POST')
-    assert.equal(f.seen[0]?.headers['x-requested-with'], 'rsc-brain-web')
+    assert.equal(f.seen[0]?.headers['x-requested-with'], 'obsybrain-web')
     assert.equal(f.seen[0]?.headers['content-type'], 'application/json')
     assert.deepEqual(JSON.parse(f.seen[0]?.body ?? ''), { email: 'a@example.test', password: 'p' })
   })
@@ -337,7 +337,7 @@ describe('a download through the client (an export, spec B7)', () => {
       headers: {
         get: (n: string) =>
           n === 'content-disposition'
-            ? 'attachment; filename="rsc-brain-growth-readable-20261102T101010Z.zip"'
+            ? 'attachment; filename="obsybrain-growth-readable-20261102T101010Z.zip"'
             : null,
       },
       body: streamOf(parts),
@@ -355,7 +355,7 @@ describe('a download through the client (an export, spec B7)', () => {
       { path: { slug: 'growth' }, query: { format: 'readable' } },
       (n) => seen.push(n),
     )
-    assert.equal(got.name, 'rsc-brain-growth-readable-20261102T101010Z.zip')
+    assert.equal(got.name, 'obsybrain-growth-readable-20261102T101010Z.zip')
     assert.equal(got.bytes, 8)
     assert.equal(await got.blob.text(), 'PKabcdef')
     assert.deepEqual(seen, [2, 5, 8])
@@ -439,7 +439,7 @@ describe('the web client: uploading a file (an import, B7 PR32)', () => {
         method: 'POST',
         headers: {
           accept: 'application/json',
-          'x-requested-with': 'rsc-brain-web',
+          'x-requested-with': 'obsybrain-web',
           'content-type': 'application/zip',
         },
         size: 5,

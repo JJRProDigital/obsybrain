@@ -1,4 +1,4 @@
-// Spec v0.6 «Búsqueda» as it runs in production: the extensions created by a superuser, rsc-brain connected as a
+// Spec v0.6 «Búsqueda» as it runs in production: the extensions created by a superuser, obsybrain connected as a
 // plain role that owns its database. Migrating makes the BM25 indexes then, with no grant beyond what creating the
 // extensions gives; and when making them fails (here an event trigger of the superuser refuses them, as an
 // unexpected failure would), the migrations still commit, the failure is logged, and search keeps its own ranking —

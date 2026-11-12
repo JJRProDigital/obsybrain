@@ -1,5 +1,5 @@
 // Mail (spec B6 «Admin › Email»; spec B4 «Avisos por email»; PR25b). Who: the administration. Jobs: set the
-// mail server rsc-brain sends from; check it with a test email; see what did not go, and why. Done when: a
+// mail server obsybrain sends from; check it with a test email; see what did not go, and why. Done when: a
 // save says so, a test says where it went or why not, and failures are listed with their reason. Risks: the
 // password leaking (never sent back: the screen shows only whether it is set and its last 4; it is typed
 // only when choosing a new one, in a password box, and never kept as a draft); two administrators saving at

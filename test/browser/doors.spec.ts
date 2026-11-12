@@ -106,8 +106,8 @@ test.describe('first run', () => {
     await scenario(context, baseURL as string, 'fresh')
     await page.goto('/b/growth')
     await expect(page).toHaveURL(/\/setup$/)
-    await expect(page.getByRole('heading', { name: 'Set up rsc-brain' })).toBeVisible()
-    await page.getByLabel('Name of this installation').fill('rsc-brain')
+    await expect(page.getByRole('heading', { name: 'Set up obsybrain' })).toBeVisible()
+    await page.getByLabel('Name of this installation').fill('obsybrain')
     await expect(page.getByLabel('Address people open')).toHaveValue(baseURL as string)
     await page.getByLabel('Your name').fill('Eric')
     await page.getByLabel('Your email').fill('eric@example.test')
@@ -125,9 +125,9 @@ test.describe('first run', () => {
     await page.getByRole('button', { name: 'Set up and sign in' }).click()
     await keepTheKey(page)
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByRole('link', { name: /rsc-brain/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /obsybrain/ })).toBeVisible()
     await page.goto('/setup')
-    await expect(page.getByRole('heading', { name: 'rsc-brain is already set up' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'obsybrain is already set up' })).toBeVisible()
   })
 
   test('installed with rsc-factory: says to finish there, links to it, asks for nothing; then leads to sign in', async ({
@@ -148,7 +148,7 @@ test.describe('first run', () => {
     await page.goto('/b/growth')
     await expect(page).toHaveURL(/\/setup$/)
     await expect(page.getByRole('heading', { name: 'Finish the setup in rsc-factory' })).toBeVisible()
-    await expect(page.getByText('rsc-brain was installed with rsc-factory')).toBeVisible()
+    await expect(page.getByText('obsybrain was installed with rsc-factory')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Open rsc-factory' })).toHaveAttribute(
       'href',
       'https://factory.example.test',
@@ -169,7 +169,7 @@ test.describe('first run', () => {
     // rsc-factory finishes its setup meanwhile: checking again leads to signing in.
     await s.setUpElsewhere()
     await page.getByRole('button', { name: 'Check again' }).click()
-    await expect(page.getByRole('heading', { name: 'rsc-brain is already set up' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'obsybrain is already set up' })).toBeVisible()
   })
 
   test('over a connection that is not safe, it explains and does not ask for a password', async ({

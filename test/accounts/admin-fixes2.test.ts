@@ -20,11 +20,11 @@ import { type World, world } from '../helpers/world.ts'
 
 type Json = Record<string, unknown>
 const SECRET = 'test-secret-of-at-least-thirty-two-characters'
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 const PW = 'correct horse battery staple'
 
 function sealV1(secret: string, text: string): string {
-  const key = scryptSync(secret, 'rsc-brain vault v1', 32)
+  const key = scryptSync(secret, 'obsybrain vault v1', 32)
   const iv = randomBytes(12)
   const c = createCipheriv('aes-256-gcm', key, iv)
   const body = Buffer.concat([c.update(text, 'utf8'), c.final()])
@@ -44,7 +44,7 @@ function trickle(
     let tick: NodeJS.Timeout | undefined
     const s = connect(Number(u.port), u.hostname, () => {
       s.write(
-        `PUT ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/json\r\nX-Requested-With: rsc-brain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: 500000000\r\n\r\n`,
+        `PUT ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/json\r\nX-Requested-With: obsybrain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: 500000000\r\n\r\n`,
       )
       tick = setInterval(() => {
         if (!s.destroyed) s.write(Buffer.alloc(16384, 0x20))

@@ -71,13 +71,13 @@
       "address": "ops/backups",
       "title": "Backups",
       "summary": "The daily copy and restoring it.",
-      "body": "rsc-brain makes a daily copy of the database and keeps fourteen. A copy restores into a new installation. A copy made with pg_dump restores with pg_restore too."
+      "body": "obsybrain makes a daily copy of the database and keeps fourteen. A copy restores into a new installation. A copy made with pg_dump restores with pg_restore too."
     },
     {
       "address": "ops/updates",
       "title": "Updates",
       "summary": "Updating from the web.",
-      "body": "The administration updates rsc-brain from the web to a published version, with a way back if the update fails. Writes wait during maintenance; reads keep working."
+      "body": "The administration updates obsybrain from the web to a published version, with a way back if the update fails. Writes wait during maintenance; reads keep working."
     },
     {
       "address": "notes/graph-ideas",

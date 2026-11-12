@@ -1,6 +1,6 @@
 #!/bin/sh
-# rsc-brain's updater: the loop that runs in its own container (compose.updater.yaml, started by
-# `rsc-brain.sh web-updates enable`) and starts `rsc-brain.sh update` when the web leaves a request mark.
+# obsybrain's updater: the loop that runs in its own container (compose.updater.yaml, started by
+# `obsybrain.sh web-updates enable`) and starts `obsybrain.sh update` when the web leaves a request mark.
 #
 # What it trusts: the marks are only looked at, never opened. <install>/update/request/request and .../retry count when
 # they are regular files (lstat: a link is not followed, a FIFO is not opened, a folder is left alone); what is in them,
@@ -33,10 +33,10 @@ case $DIR in
   ;;
 esac
 REQ=$DIR/update/request REPORT=$DIR/update/report STATE=$DIR/update/state CRED=$DIR/updater/credentials
-LAUNCHER=${OBSY_BRAIN_UPDATER_LAUNCHER:-$DIR/updater/rsc-brain.sh}
+LAUNCHER=${OBSY_BRAIN_UPDATER_LAUNCHER:-$DIR/updater/obsybrain.sh}
 ONCE=${OBSY_BRAIN_UPDATER_ONCE:-0}
 BEAT=${OBSY_BRAIN_UPDATER_BEAT:-5} CHECK_EVERY=21600 RETRY_AFTER=900 MAX_RETRIES=3
-DEFAULT_REPO=https://github.com/ericrisco/rsc-brain
+DEFAULT_REPO=https://github.com/obsessive-solutions/obsybrain
 
 # A stop may come while the output goes to a file: what is said then goes where it was going when this started.
 if (exec 4>&2); then exec 4>&2; else exec 4>/dev/null; fi
@@ -100,9 +100,9 @@ mkdir -p "$STATE/attempts" 2>/dev/null && chmod 700 "$STATE" 2>/dev/null
 
 # --------------------------------------------------------------------------------------------------------- reports
 ACCEPTED=''
-# The mark of a way back that failed is the launcher's (<install>/.rsc-brain/rollback.failed); this only looks at it.
-rollback_failed() { [ -f "$DIR/.rsc-brain/rollback.failed" ] && [ ! -L "$DIR/.rsc-brain/rollback.failed" ]; }
-rb_value() { sed -n "s/^$1='\\(.*\\)'\$/\\1/p" "$DIR/.rsc-brain/rollback.failed" 2>/dev/null | head -n 1; }
+# The mark of a way back that failed is the launcher's (<install>/.obsybrain/rollback.failed); this only looks at it.
+rollback_failed() { [ -f "$DIR/.obsybrain/rollback.failed" ] && [ ! -L "$DIR/.obsybrain/rollback.failed" ]; }
+rb_value() { sed -n "s/^$1='\\(.*\\)'\$/\\1/p" "$DIR/.obsybrain/rollback.failed" 2>/dev/null | head -n 1; }
 # updater.json: alive, when the last request was taken, what is running, and what failed with when it may be tried again.
 write_updater() { # [running-version running-since]
   wu_now=$(now)
@@ -172,7 +172,7 @@ run_check() {
     return 0
   fi
   reason=$(printf '%s\n' "$out" | sed -nE 's/.*,"error":"([a-z_]+)"\}$/\1/p' | head -n 1)
-  # The three the web understands; anything else the launcher said (rsc-brain is stopped, an update is running) is a
+  # The three the web understands; anything else the launcher said (obsybrain is stopped, an update is running) is a
   # check that did not get an answer.
   case $reason in no_access | none) ;; *) reason=network ;; esac
   known=$(sed -nE 's/^\{"checkedAt":"[^"]*","ok":(true|false),"reason":("[a-z_]*"|null),"products":(.*)\}$/\3/p' "$REPORT/check.json" 2>/dev/null)

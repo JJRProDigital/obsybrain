@@ -63,11 +63,11 @@ const notSetUp = () =>
     409,
     'backups_not_set_up',
     'This installation has no folder for its copies.',
-    'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain.',
+    'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart obsybrain.',
   )
 
 // A copy's id is its file name without `.rscb`; nothing else is ever a path here.
-const ID = /^rsc-brain-\d{8}T\d{6}Z-(scheduled|manual|pre-update|pre-restore)$/
+const ID = /^obsybrain-\d{8}T\d{6}Z-(scheduled|manual|pre-update|pre-restore)$/
 
 export function createCopies(o: {
   db: Pool

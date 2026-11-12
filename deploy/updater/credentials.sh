@@ -1,5 +1,5 @@
 #!/bin/sh
-# What git asks for when it needs a user name or a password (GIT_ASKPASS). It answers for the host of rsc-brain's
+# What git asks for when it needs a user name or a password (GIT_ASKPASS). It answers for the host of obsybrain's
 # repository (OBSY_BRAIN_UPDATER_REPO_HOST) and for no other: a redirect or a submodule elsewhere gets nothing. The token
 # is read from <installation>/updater/credentials/token, which `web-updates enable` made for its owner alone; it is
 # never an argument and never written anywhere.

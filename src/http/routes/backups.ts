@@ -26,7 +26,7 @@ const copiesOf = (r: Req) => {
       409,
       'backups_not_set_up',
       'This installation has no folder for its copies.',
-      'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain.',
+      'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart obsybrain.',
     )
   }
   return r.copies

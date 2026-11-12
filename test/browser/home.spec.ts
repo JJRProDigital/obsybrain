@@ -116,11 +116,11 @@ test.describe('connect your agent', () => {
     await expect(page).toHaveURL(/\/connect$/)
     const panel = page.getByRole('tabpanel', { name: 'Claude Code' })
     await expect(panel.locator('pre.command').first()).toContainText(
-      'claude mcp add --transport http rsc-brain https://brain.example.test/mcp',
+      'claude mcp add --transport http obsybrain https://brain.example.test/mcp',
     )
     await page.getByRole('tab', { name: 'Codex' }).click()
     await expect(page.getByRole('tabpanel', { name: 'Codex' }).locator('pre.command').first()).toContainText(
-      'codex mcp add rsc-brain',
+      'codex mcp add obsybrain',
     )
     await expect(page.getByRole('region', { name: 'How to check it works' })).toBeVisible()
     // Back home, where it started.
@@ -198,7 +198,7 @@ test.describe('invite people from home', () => {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-requested-with': 'rsc-brain-web',
+        'x-requested-with': 'obsybrain-web',
         'x-fixture-scenario': s.id,
       },
       body: JSON.stringify({ token: INVITE, name: 'Marta', password: PASSWORD }),
@@ -241,7 +241,7 @@ test.describe('Get started: the command to connect an agent', () => {
           return { text: e.textContent ?? '', top: Math.round(r.top), left: Math.round(r.left) }
         }),
       )
-      const command = `claude mcp add --transport http rsc-brain ${LONG}/mcp --scope user\nclaude mcp login rsc-brain`
+      const command = `claude mcp add --transport http obsybrain ${LONG}/mcp --scope user\nclaude mcp login obsybrain`
       assert.deepEqual(
         words.map((w) => w.text),
         command.split(/\s+/),

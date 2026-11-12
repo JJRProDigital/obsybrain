@@ -33,7 +33,7 @@ export type ZipItem = {
 }
 
 const invalid = (why: string) =>
-  new UnzipError('invalid_archive', `This is not a zip rsc-brain can read: ${why}.`)
+  new UnzipError('invalid_archive', `This is not a zip obsybrain can read: ${why}.`)
 const EOCD = 0x06054b50
 const CENTRAL = 0x02014b50
 const LOCAL = 0x04034b50
@@ -160,7 +160,7 @@ export function openZip(buf: Buffer, limits: typeof UNZIP_LIMITS = UNZIP_LIMITS)
         throw invalid(`${JSON.stringify(path)} is not a file or a folder`)
       if (type === S_IFDIR && !folder) throw invalid(`${JSON.stringify(path)} is a folder without its "/"`)
     }
-    if (method !== 0 && method !== 8) throw invalid(`a file in it is packed in a way rsc-brain does not read`)
+    if (method !== 0 && method !== 8) throw invalid(`a file in it is packed in a way obsybrain does not read`)
     if (method === 0 && comp !== size) throw invalid('the sizes of a stored file differ')
     // The local header: inside the file, before the directory, saying the same.
     if (local + 30 > cdOffset || buf.readUInt32LE(local) !== LOCAL) throw invalid('a file in it is damaged')

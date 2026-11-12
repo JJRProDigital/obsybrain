@@ -1,12 +1,12 @@
 // Updating from the web (rsc-updates §3.9, B3; spec CA27, CA28). The service has no Docker, no passphrase and no
 // credential: the only thing it does is leave an empty mark in a folder (update/request: `request`, and `retry` after
-// a failure) which a container of its own, the updater, looks at and answers by running `rsc-brain.sh update`. It
+// a failure) which a container of its own, the updater, looks at and answers by running `obsybrain.sh update`. It
 // never writes a version, an address or a command: the updater finds the newest published version itself and ignores
 // what is in the mark (the mark is not even read). What the service learns about the update comes the other way, from
 // the updater's report (update/report/updater.json), read only, as small text that is not trusted: a version has to be
 // a published one, a time a time, a count a number.
 //
-// Three modes: `off` (no updater alive: the terminal command is shown), `on` (an updater beats), `companion` (rsc-brain
+// Three modes: `off` (no updater alive: the terminal command is shown), `on` (an updater beats), `companion` (obsybrain
 // was installed by rsc-factory, which updates it: this screen has no button and points there).
 import { lstatSync } from 'node:fs'
 import { open } from 'node:fs/promises'
@@ -64,7 +64,7 @@ const CONTROLS = /[\u0000-\u0008\u000B-\u001F\u007F-\u009F]/g
 const text = (v: unknown, max: number) =>
   typeof v === 'string' ? v.replace(CONTROLS, '').slice(0, max) : null
 
-const COMMAND = 'rsc-brain.sh update'
+const COMMAND = 'obsybrain.sh update'
 const terminal = `On the server, run: ${COMMAND}`
 
 export function updates(
@@ -174,7 +174,7 @@ export function updates(
         return new AppError(
           409,
           'companion',
-          'rsc-brain was installed by rsc-factory: update it from there.',
+          'obsybrain was installed by rsc-factory: update it from there.',
           s.factoryUrl
             ? `Open rsc-factory at ${s.factoryUrl} and update from Admin › Updates.`
             : 'Open rsc-factory and update from Admin › Updates.',
@@ -185,7 +185,7 @@ export function updates(
           409,
           'updates_off',
           'Updating from the web is off on this installation.',
-          `${terminal}. To turn the button on: rsc-brain.sh web-updates enable`,
+          `${terminal}. To turn the button on: obsybrain.sh web-updates enable`,
         )
       }
       if (s.requested || s.running) return running()
@@ -194,10 +194,10 @@ export function updates(
         return new AppError(
           409,
           'rollback_failed',
-          `The last update${to ? ` to ${to}` : ''} failed, and rsc-brain could not go back by itself: the data may not be as it was.`,
+          `The last update${to ? ` to ${to}` : ''} failed, and obsybrain could not go back by itself: the data may not be as it was.`,
           restore
             ? `Do not update again. On the server, restore the copy made before it (everyone signs in again afterwards): ${restore}`
-            : 'Do not update again. On the server, run rsc-brain.sh status: it says what to restore (everyone signs in again afterwards).',
+            : 'Do not update again. On the server, run obsybrain.sh status: it says what to restore (everyone signs in again afterwards).',
         )
       }
       if (!view.newer || !view.latest) {

@@ -21,7 +21,7 @@ export const SUPPORTED = [MODERN, ...LEGACY]
 // One limit for the API and the MCP endpoint.
 export { MAX_REPLY_CHARS }
 
-const SERVER_INFO = { name: 'rsc-brain', title: 'rsc-brain', version: VERSION }
+const SERVER_INFO = { name: 'obsybrain', title: 'obsybrain', version: VERSION }
 const CAPABILITIES = { tools: { listChanged: false }, prompts: { listChanged: false } }
 
 type Msg = { jsonrpc?: unknown; id?: unknown; method?: unknown; params?: Record<string, unknown> }
@@ -68,7 +68,7 @@ const failure = (id: unknown, e: RpcError) =>
     e.headers,
   )
 
-// A write while rsc-brain is under maintenance (spec B7 C12): 503 with Retry-After, said in JSON-RPC like the
+// A write while obsybrain is under maintenance (spec B7 C12): 503 with Retry-After, said in JSON-RPC like the
 // rate limit, so an agent waits and sends it again.
 function refuseDuringMaintenance(r: PublicReq, who: Who): void {
   if (!who.maintenance) return
@@ -391,7 +391,7 @@ async function callTool(
     // A path no route takes means a value in it was malformed (such as an empty id).
     if (!found || found === 'method' || found.route.public) {
       throw invalid(
-        'A value in this call is not one rsc-brain can use (an empty or malformed id or address).',
+        'A value in this call is not one obsybrain can use (an empty or malformed id or address).',
         'Check the arguments and try again.',
       )
     }

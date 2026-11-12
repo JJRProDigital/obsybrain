@@ -76,8 +76,8 @@ export const newerCopy = (release: string) => {
   const e = new AppError(
     409,
     'newer_copy',
-    `This copy was made by rsc-brain ${release}, which is newer than this one (${VERSION}).`,
-    `Restore it with rsc-brain ${release} or newer.`,
+    `This copy was made by obsybrain ${release}, which is newer than this one (${VERSION}).`,
+    `Restore it with obsybrain ${release} or newer.`,
   )
   e.extra = { needs: release }
   return e
@@ -102,9 +102,9 @@ const keepKeysRefused = () =>
 const notRscBrain = () =>
   new AppError(
     409,
-    'not_rsc_brain_database',
-    'This database holds tables that are not rsc-brain’s, so a restore will not replace them.',
-    'Point OBSY_BRAIN_DATABASE_URL at the database of rsc-brain (one it owns alone), then restore again.',
+    'not_obsybrain_database',
+    'This database holds tables that are not obsybrain’s, so a restore will not replace them.',
+    'Point OBSY_BRAIN_DATABASE_URL at the database of obsybrain (one it owns alone), then restore again.',
   )
 
 const restoreFailed = (code: unknown) =>
@@ -253,7 +253,7 @@ const dangling = () =>
     422,
     'corrupt_copy',
     'This copy holds rows that point to rows it does not hold, so it cannot be restored. Nothing was changed.',
-    'Use another copy from the list (rsc-brain backups list).',
+    'Use another copy from the list (obsybrain backups list).',
   )
 
 async function checkLinks(tx: Db, fixed: Link[]): Promise<void> {
@@ -356,7 +356,7 @@ export async function restore(db: Pool, o: RestoreOptions): Promise<RestoreResul
     }
 
     const now = await present(db)
-    // The database is rsc-brain's alone (plan §3.3): tables without the migrations of rsc-brain are someone else's.
+    // The database is obsybrain's alone (plan §3.3): tables without the migrations of obsybrain are someone else's.
     if (now.tables.length > 0 && !now.tables.includes('schema_migrations')) throw notRscBrain()
     if (o.confirm !== undefined) {
       const expected = now.name || h.installation.name

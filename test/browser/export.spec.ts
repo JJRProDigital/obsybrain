@@ -38,12 +38,12 @@ test.describe('exporting a brain', () => {
       page.waitForEvent('download'),
       p.getByRole('button', { name: 'Download the export' }).click(),
     ])
-    expect(file.suggestedFilename()).toMatch(/^rsc-brain-growth-readable-\d{8}T\d{6}Z\.zip$/)
+    expect(file.suggestedFilename()).toMatch(/^obsybrain-growth-readable-\d{8}T\d{6}Z\.zip$/)
     const saved = filesOf(readFileSync(await file.path()))
     expect(saved.get('README.md')).toContain('format: readable')
     expect(saved.get('README.md')).toContain('includeForgotten: false')
     await expect(p.getByRole('status')).toContainText(
-      /Saved rsc-brain-growth-readable-\d{8}T\d{6}Z\.zip \(\d+(\.\d)? (bytes|kB)\)\./,
+      /Saved obsybrain-growth-readable-\d{8}T\d{6}Z\.zip \(\d+(\.\d)? (bytes|kB)\)\./,
     )
     await audit(page, 'export saved')
   })
@@ -68,10 +68,10 @@ test.describe('exporting a brain', () => {
     await page.keyboard.press('Tab')
     await expect(p.getByRole('button', { name: 'Download the export' })).toBeFocused()
     const [file] = await Promise.all([page.waitForEvent('download'), page.keyboard.press('Enter')])
-    expect(file.suggestedFilename()).toMatch(/^rsc-brain-growth-faithful-/)
+    expect(file.suggestedFilename()).toMatch(/^obsybrain-growth-faithful-/)
     const saved = filesOf(readFileSync(await file.path()))
     expect(saved.get('README.md')).toContain('includeForgotten: true')
-    await expect(p.getByRole('status')).toContainText('Saved rsc-brain-growth-faithful-')
+    await expect(p.getByRole('status')).toContainText('Saved obsybrain-growth-faithful-')
   })
 
   test('while the server makes it, the screen says so and the button waits', async ({

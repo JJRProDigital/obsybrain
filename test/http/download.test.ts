@@ -14,7 +14,7 @@ import { silentLog } from '../../src/core/log.ts'
 import { sendDownload } from '../../src/http/app.ts'
 
 describe('a download sent from a prepared file', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'rsc-brain-download-'))
+  const dir = mkdtempSync(join(tmpdir(), 'obsybrain-download-'))
   const body = randomBytes(16 * 1024 * 1024)
   let server: Server
   let base = ''

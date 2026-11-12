@@ -13,8 +13,8 @@ import { SAFE_URL } from '../core/urls.ts'
 
 export const TOKEN_ENV = 'OBSY_BRAIN_TOKEN'
 export const TOKEN_PLACEHOLDER = '<paste-your-token>'
-export const TOKEN_FILE = '~/.config/rsc-brain/token'
-export const SERVER_NAME = 'rsc-brain'
+export const TOKEN_FILE = '~/.config/obsybrain/token'
+export const SERVER_NAME = 'obsybrain'
 export const AGENT_IDS = ['claude-code', 'codex', 'opencode', 'cursor', 'other'] as const
 export type AgentId = (typeof AGENT_IDS)[number]
 
@@ -58,7 +58,7 @@ const ENV_OF: Record<AgentId, string> = {
   cursor: `${TOKEN_ENV}_CURSOR`,
   other: TOKEN_ENV,
 }
-const fileOf = (id: AgentId) => (id === 'other' ? TOKEN_FILE : `~/.config/rsc-brain/${id}.token`)
+const fileOf = (id: AgentId) => (id === 'other' ? TOKEN_FILE : `~/.config/obsybrain/${id}.token`)
 
 // The token, pasted at a hidden prompt, into a file only you can read: never on a command line.
 const saveToken = (id: AgentId): Block => ({
@@ -68,7 +68,7 @@ const saveToken = (id: AgentId): Block => ({
   format: 'shell',
   // umask shapes only a new file; one already there keeps its mode, so the file is emptied and set to 600
   // before the token goes in (never a moment with the token in a file others can read).
-  text: `mkdir -p ~/.config/rsc-brain && (umask 077 && printf 'Token: ' && read -rs t && : > ${fileOf(id)} && chmod 600 ${fileOf(id)} && printf '%s\\n' "$t" > ${fileOf(id)} && echo saved)`,
+  text: `mkdir -p ~/.config/obsybrain && (umask 077 && printf 'Token: ' && read -rs t && : > ${fileOf(id)} && chmod 600 ${fileOf(id)} && printf '%s\\n' "$t" > ${fileOf(id)} && echo saved)`,
 })
 
 // The variable the config files read, loaded from that file.
@@ -84,7 +84,7 @@ const loadToken = (id: AgentId): Block => ({
 // reminder is an invocable prompt plus this text).
 const INSTRUCTIONS_TEXT = (brain: string | null) =>
   [
-    '## rsc-brain',
+    '## obsybrain',
     '',
     `- At the start of a task, call brain_resolve with the output of \`git remote get-url origin\`${brain ? ` (or use the brain "${brain}")` : ''}, then mem_context.`,
     '- Search with mem_search before you decide. Save decisions, discoveries and corrections with mem_save as you work.',
@@ -112,7 +112,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
     where: string,
   ): { kind: 'instructions'; note: string; prompt: string; blocks: Block[] } => ({
     kind: 'instructions',
-    note: 'This agent has no start and stop hooks for rsc-brain. Add this text to its instructions file, and use the "close_session" prompt of the server ("Close my session") when you finish.',
+    note: 'This agent has no start and stop hooks for obsybrain. Add this text to its instructions file, and use the "close_session" prompt of the server ("Close my session") when you finish.',
     prompt: 'close_session',
     blocks: [
       { title: 'Add to the instructions file', where, format: 'text', text: INSTRUCTIONS_TEXT(o.brain) },
@@ -128,10 +128,10 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
       id: 'claude-code',
       name: 'Claude Code',
       signIn: {
-        note: 'Paste it in a terminal and press Enter: it adds rsc-brain and opens your browser to approve. Then start Claude Code. (Inside Claude Code, /mcp signs in too.)',
+        note: 'Paste it in a terminal and press Enter: it adds obsybrain and opens your browser to approve. Then start Claude Code. (Inside Claude Code, /mcp signs in too.)',
         blocks: [
           {
-            title: 'Add rsc-brain for all your projects and sign in',
+            title: 'Add obsybrain for all your projects and sign in',
             where: 'terminal',
             format: 'shell',
             text: `claude mcp add --transport http ${SERVER_NAME} ${url} --scope user\nclaude mcp login ${SERVER_NAME}`,
@@ -144,7 +144,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
           saveToken('claude-code'),
           loadToken('claude-code'),
           {
-            title: 'Add rsc-brain to a project (the file can be shared: it holds no token)',
+            title: 'Add obsybrain to a project (the file can be shared: it holds no token)',
             where: '.mcp.json',
             format: 'json',
             text: json({
@@ -161,7 +161,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
       },
       reminder: {
         kind: 'hooks',
-        note: `At the start of a session the hook brings the context of the brain linked to the repository; when Claude stops with a brain session still open, it asks once for the summary. The hooks need the rsc-brain command and a token in ${fileOf('claude-code')} (the token connection saves it there). They never block your work when rsc-brain does not answer. The rsc-brain command is not published yet: it comes with the installation release; until then it runs only from a copy of rsc-brain's source (node dist/cli/main.js). Claude Code connects without it, by the standard connection above.`,
+        note: `At the start of a session the hook brings the context of the brain linked to the repository; when Claude stops with a brain session still open, it asks once for the summary. The hooks need the obsybrain command and a token in ${fileOf('claude-code')} (the token connection saves it there). They never block your work when obsybrain does not answer. The obsybrain command is not published yet: it comes with the installation release; until then it runs only from a copy of obsybrain's source (node dist/cli/main.js). Claude Code connects without it, by the standard connection above.`,
         blocks: [
           {
             title: 'Add to ~/.claude/settings.json (or .claude/settings.json in a project)',
@@ -175,7 +175,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
                     hooks: [
                       {
                         type: 'command',
-                        command: `rsc-brain hook session-start ${hookArgs}${o.brain ? ` --brain ${o.brain}` : ''} ${hookFile}`,
+                        command: `obsybrain hook session-start ${hookArgs}${o.brain ? ` --brain ${o.brain}` : ''} ${hookFile}`,
                         timeout: 15,
                       },
                     ],
@@ -186,7 +186,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
                     hooks: [
                       {
                         type: 'command',
-                        command: `rsc-brain hook stop ${hookArgs} ${hookFile}`,
+                        command: `obsybrain hook stop ${hookArgs} ${hookFile}`,
                         timeout: 15,
                       },
                     ],
@@ -210,7 +210,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
         note: 'Add the address, then sign in; your browser opens to accept.',
         blocks: [
           {
-            title: 'Add rsc-brain and sign in',
+            title: 'Add obsybrain and sign in',
             where: 'terminal',
             format: 'shell',
             text: `codex mcp add ${SERVER_NAME} --url ${url}\ncodex mcp login ${SERVER_NAME}`,
@@ -240,7 +240,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
       id: 'opencode',
       name: 'OpenCode',
       signIn: {
-        note: 'Add the address; OpenCode opens your browser to sign in (or run "opencode mcp auth rsc-brain").',
+        note: 'Add the address; OpenCode opens your browser to sign in (or run "opencode mcp auth obsybrain").',
         blocks: [
           {
             title: 'Add to opencode.json',
@@ -323,7 +323,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
       name: 'Other agents',
       signIn: null,
       token: {
-        note: `If your agent speaks MCP over HTTP, give it the address and the header "Authorization: Bearer <token>". If it only starts local MCP programs, use the bridge: it runs on your machine and connects to rsc-brain with your token (from ${TOKEN_FILE}, or ${TOKEN_ENV} when no file is given). The bridge is the rsc-brain command, which is not published yet (it comes with the installation release); an agent that speaks HTTP connects without it, by "Remote MCP over HTTP" below.`,
+        note: `If your agent speaks MCP over HTTP, give it the address and the header "Authorization: Bearer <token>". If it only starts local MCP programs, use the bridge: it runs on your machine and connects to obsybrain with your token (from ${TOKEN_FILE}, or ${TOKEN_ENV} when no file is given). The bridge is the obsybrain command, which is not published yet (it comes with the installation release); an agent that speaks HTTP connects without it, by "Remote MCP over HTTP" below.`,
         blocks: [
           saveToken('other'),
           {
@@ -333,7 +333,7 @@ export function connectKit(o: { mcpUrl: string; brain: string | null; agent?: Ag
             text: json({
               mcpServers: {
                 [SERVER_NAME]: {
-                  command: 'rsc-brain',
+                  command: 'obsybrain',
                   args: ['bridge', '--url', url, '--token-file', TOKEN_FILE],
                 },
               },

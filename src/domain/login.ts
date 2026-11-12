@@ -292,7 +292,7 @@ export const endResets = (db: Db, accountId: string, now: Date) =>
 // Links for one account take turns on one lock, whoever makes them (email, the administration, the CLI):
 // ending the older links and adding the new one happen together, so exactly one link works.
 export const lockResets = (db: Db, accountId: string) =>
-  db.query("SELECT pg_advisory_xact_lock(hashtext('rsc-brain reset ' || $1))", [accountId])
+  db.query("SELECT pg_advisory_xact_lock(hashtext('obsybrain reset ' || $1))", [accountId])
 
 export async function newReset(db: Db, accountId: string, by: string | null, now: Date): Promise<string> {
   const token = newSecret()
@@ -646,7 +646,7 @@ export async function startTotp(ctx: Ctx, secret: string | undefined, code?: unk
     ctx.who.accountId,
     seal(secret, s, 'account.totp'),
   ])
-  const name = (await installation(ctx.db)).name || 'rsc-brain'
+  const name = (await installation(ctx.db)).name || 'obsybrain'
   return { secret: s, otpauthUrl: otpauthUrl(s, ctx.who.email ?? ctx.who.name, name) }
 }
 

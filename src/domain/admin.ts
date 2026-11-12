@@ -94,7 +94,7 @@ export async function anonymiseAuthor(ctx: Ctx, id: string) {
 // Changes to who administers take turns, so two administrators demoting each other cannot both pass
 // the "another administrator remains" check.
 const adminTurn = (db: Ctx['db']) =>
-  db.query("SELECT pg_advisory_xact_lock(hashtext('rsc-brain administrators'))")
+  db.query("SELECT pg_advisory_xact_lock(hashtext('obsybrain administrators'))")
 
 async function otherAdmins(db: Ctx['db'], id: string): Promise<number> {
   const r = await db.one<{ n: number }>(
@@ -699,7 +699,7 @@ export async function testMail(ctx: Ctx, to?: unknown) {
   adminOnly(ctx)
   const addr = to === undefined ? ctx.who.email : emailOf(to)
   if (!addr || !EMAIL.test(addr)) throw invalid('"to" is an email.', 'Leave it out to use yours.')
-  const name = (await installation(ctx.db)).name || 'rsc-brain'
+  const name = (await installation(ctx.db)).name || 'obsybrain'
   const r = await send(ctx.db, ctx.clock, ctx.mail, 'test', {
     to: addr,
     subject: `Test mail from ${name}`,

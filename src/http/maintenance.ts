@@ -16,7 +16,7 @@ export {
 } from '../domain/maintenance.ts'
 
 export const MAINTENANCE_MESSAGE = (seconds: number) =>
-  `rsc-brain is under maintenance, retry after ${seconds} seconds`
+  `obsybrain is under maintenance, retry after ${seconds} seconds`
 
 // What is left of it, said in whole seconds: at most two minutes (a client comes back to check), at least 5.
 export const retryAfter = (m: Maintenance, now: Date): number =>
@@ -48,7 +48,7 @@ export function underMaintenance(m: Maintenance, now: Date, endsAccess = false):
     'under_maintenance',
     MAINTENANCE_MESSAGE(seconds),
     endsAccess
-      ? 'Send it again after that time. An admin can end maintenance with `rsc-brain maintenance off`.'
+      ? 'Send it again after that time. An admin can end maintenance with `obsybrain maintenance off`.'
       : 'Send it again after that time; reading keeps working meanwhile.',
   )
   e.headers = { 'retry-after': String(seconds) }

@@ -1,4 +1,4 @@
-// `rsc-brain restore`, `rsc-brain key id` and `rsc-brain key reseal` (plan §3.3, T014): what the launcher runs in the
+// `obsybrain restore`, `obsybrain key id` and `obsybrain key reseal` (plan §3.3, T014): what the launcher runs in the
 // container. A key is read from a file or from the standard input, never from the command line, and never printed:
 // only its id. A restore asks for the name of the installation; without it, or with another, it exits 2 and nothing
 // changes. Before replacing anything it makes a copy of what is there.
@@ -64,10 +64,10 @@ async function state(db: Db): Promise<Record<string, string>> {
   return out
 }
 
-describe('rsc-brain key id and restore options (no database needed)', () => {
+describe('obsybrain key id and restore options (no database needed)', () => {
   let dir: string
   before(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-cli-key-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-cli-key-'))
     await writeFile(join(dir, 'key'), `${SOURCE_KEY}\n`, { mode: 0o600 })
   })
   after(async () => rm(dir, { recursive: true, force: true }))
@@ -123,7 +123,7 @@ describe('rsc-brain key id and restore options (no database needed)', () => {
   })
 })
 
-describe('rsc-brain restore and key reseal', { skip: skipPg }, () => {
+describe('obsybrain restore and key reseal', { skip: skipPg }, () => {
   let source: TestDb
   let target: TestDb
   let dir: string
@@ -135,7 +135,7 @@ describe('rsc-brain restore and key reseal', { skip: skipPg }, () => {
   before(async () => {
     source = await freshDatabase()
     target = await freshDatabase()
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-cli-restore-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-cli-restore-'))
     copies = join(dir, 'backups')
     for (const k of KEYS) await writeFile(keyFile(k), `${k}\n`, { mode: 0o600 })
     await migrate(source.db)

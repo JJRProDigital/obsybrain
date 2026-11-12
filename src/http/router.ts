@@ -23,7 +23,7 @@ import type { RateLimiter } from './ratelimit.ts'
 export type Conn = { encrypted: boolean; local: boolean; ip: string; userAgent: string }
 
 // The header only the Brain web sends: a form on another site cannot add it (CSRF).
-export const WEB_HEADER = 'rsc-brain-web'
+export const WEB_HEADER = 'obsybrain-web'
 
 export type PublicReq = {
   headers: IncomingHttpHeaders

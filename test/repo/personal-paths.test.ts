@@ -1,6 +1,6 @@
 // What ships holds no path of the machine it was made on (spec B7 «El repositorio público»): the README, the launcher
 // and its files, the source, the web, the image recipe and the migrations. The repository's own address
-// (github.com/ericrisco/rsc-brain, the package @ericrisco/rsc-brain) is not a personal path. Tests may use made-up
+// (github.com/obsessive-solutions/obsybrain, the package obsybrain) is not a personal path. Tests may use made-up
 // paths as data; they do not ship.
 import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
@@ -21,7 +21,7 @@ const SHIPPED = [
 ]
 const PERSONAL = /\/Users\/[^/\s'"`]+|\/Volumes\/[^/\s'"`]+|\/home\/(?!node\b)[a-z][^/\s'"`]*|[A-Z]:\\Users\\/
 const REPO =
-  /(github\.com|githubusercontent\.com\/|api\.github\.com\/repos)[/:]?ericrisco\/rsc-brain|@ericrisco\/rsc-brain/g
+  /(github\.com|githubusercontent\.com\/|api\.github\.com\/repos)[/:]?obsessive-solutions\/obsybrain/g
 
 export function personalPaths(text: string): string[] {
   const hits: string[] = []
@@ -51,12 +51,12 @@ describe('personal paths', () => {
     ])
       assert.equal(personalPaths(bad).length, 1, bad)
     for (const fine of [
-      'git clone https://github.com/ericrisco/rsc-brain.git',
-      'curl -fsSLO https://raw.githubusercontent.com/ericrisco/rsc-brain/main/deploy/rsc-brain.sh',
-      'npm i @ericrisco/rsc-brain',
-      "'https://api.github.com/repos/ericrisco/rsc-brain/releases'",
+      'git clone https://github.com/obsessive-solutions/obsybrain.git',
+      'curl -fsSLO https://raw.githubusercontent.com/obsessive-solutions/obsybrain/main/deploy/obsybrain.sh',
+      'npm i obsybrain',
+      "'https://api.github.com/repos/obsessive-solutions/obsybrain/releases'",
       'the image user is /home/node',
-      '/opt/rsc-brain and ~/rsc-brain',
+      '/opt/obsybrain and ~/obsybrain',
     ])
       assert.deepEqual(personalPaths(fine), [], fine)
   })

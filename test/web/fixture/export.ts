@@ -21,7 +21,7 @@ for (const format of ['readable', 'faithful'])
         'README.md': `# Growth\n\nformat: ${format}\nincludeForgotten: ${forgotten}\n`,
         ...(format === 'readable'
           ? { 'wiki/audience/retention.md': '# Retention\n', 'index.md': '# Growth\n' }
-          : { 'manifest.json': `${JSON.stringify({ format: 'rsc-brain-faithful', version: 1 })}\n` }),
+          : { 'manifest.json': `${JSON.stringify({ format: 'obsybrain-faithful', version: 1 })}\n` }),
       }),
     )
 

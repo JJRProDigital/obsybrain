@@ -7,7 +7,7 @@
 //
 //   node scripts/load-install.ts [--minutes 10] [--keep]
 //
-// Real containers through the launcher (deploy/rsc-brain.sh) with the image built from this tree; Docker resources
+// Real containers through the launcher (deploy/obsybrain.sh) with the image built from this tree; Docker resources
 // named rscb-load-<id>, removed at the end (--keep leaves the installation). The pages come in through the import
 // (a generated documentation folder per brain, 200 linked pages each); a few entries through the API (so the agents'
 // sessions exist), then the rest straight into the database as the journal stores them (one row in entries and its
@@ -23,7 +23,7 @@ import { parseArgs, promisify } from 'node:util'
 
 const run = promisify(execFile)
 const ROOT = new URL('..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const { values } = parseArgs({
   options: { minutes: { type: 'string', default: '10' }, keep: { type: 'boolean', default: false } },
 })
@@ -36,7 +36,7 @@ const BRAINS = ['alpha', 'beta', 'gamma']
 const ENTRIES = 50_000
 const PAGES_PER_BRAIN = 200
 const PASSWORD = 'a long load password 18'
-const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/json' }
+const WEB = { 'x-requested-with': 'obsybrain-web', 'content-type': 'application/json' }
 const WORDS =
   'release deploy schema index cache queue billing invoice customer refund latency timeout retry backup restore migration token session password search ranking embedding wiki journal proposal curator reader contributor audit export import vault graph health budget roadmap pricing onboarding support incident outage postmortem metric alert dashboard quarter launch partner contract'.split(
     ' ',
@@ -164,7 +164,7 @@ async function main(): Promise<number> {
           'exec',
           '-T',
           'app',
-          'rsc-brain',
+          'obsybrain',
           'import',
           '--brain',
           slug,

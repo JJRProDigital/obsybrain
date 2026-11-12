@@ -4,7 +4,7 @@
 import { type APIRequestContext, expect, test } from '@playwright/test'
 
 const ADMIN = { name: 'Eric', email: 'eric@example.test', password: 'correct horse battery staple' }
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 // The installation key of the e2e server (test/e2e/server.ts).
 const E2E_SECRET = 'e2e-secret-of-at-least-thirty-two-characters'
 
@@ -26,7 +26,7 @@ async function mailLink(request: APIRequestContext, to: string, kind: 'invite' |
 test('first run from the web makes the administrator and signs them in', async ({ page, baseURL }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/setup$/)
-  await page.getByLabel('Name of this installation').fill('rsc-brain')
+  await page.getByLabel('Name of this installation').fill('obsybrain')
   await page.getByLabel('Address people open').fill(baseURL as string)
   await page.getByLabel('Your name').fill(ADMIN.name)
   await page.getByLabel('Your email').fill(ADMIN.email)
@@ -36,7 +36,7 @@ test('first run from the web makes the administrator and signs them in', async (
   await expect(page.getByRole('heading', { level: 1, name: 'Keep the installation key' })).toBeVisible()
   await expect(page.locator('pre')).toHaveText(E2E_SECRET)
   await page.getByLabel('I saved the installation key somewhere safe, outside this machine').check()
-  await page.getByRole('button', { name: 'Continue to rsc-brain' }).click()
+  await page.getByRole('button', { name: 'Continue to obsybrain' }).click()
   await expect(page.getByRole('heading', { name: 'Your brains' })).toBeVisible()
   expect((await page.request.post('/v1/setup/key', { headers: WEB, data: {} })).status()).toBe(404)
   await expect(page.locator('body')).not.toContainText(E2E_SECRET)
@@ -44,7 +44,7 @@ test('first run from the web makes the administrator and signs them in', async (
   await expect(page.getByRole('status').filter({ hasText: 'Brain is set up.' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Get started' })).toBeVisible()
   await expect(page.getByText(`${baseURL}/mcp`)).toBeVisible()
-  await expect(page.locator('header')).toContainText('rsc-brain')
+  await expect(page.locator('header')).toContainText('obsybrain')
 })
 
 test('an invitation by email is accepted and opens a session', async ({ page, browser }) => {

@@ -81,7 +81,7 @@ function licences(): Plugin {
       this.emitFile({
         type: 'asset',
         fileName: 'licences.txt',
-        source: `Libraries and fonts bundled into the rsc-brain web, with their licence notices.\n\n${notices.join('\n\n---\n\n')}\n`,
+        source: `Libraries and fonts bundled into the obsybrain web, with their licence notices.\n\n${notices.join('\n\n---\n\n')}\n`,
       })
     },
   }

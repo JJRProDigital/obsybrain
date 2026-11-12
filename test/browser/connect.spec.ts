@@ -27,7 +27,7 @@ test('one tab per agent, with the standard connection, the reminder and how to c
   await expect(tabs.getByRole('tab', { name: 'Claude Code' })).toHaveAttribute('aria-selected', 'true')
   const panel = page.getByRole('tabpanel', { name: 'Claude Code' })
   await expect(panel.getByRole('region', { name: 'Standard connection' })).toContainText(
-    'claude mcp add --transport http rsc-brain https://brain.example.test/mcp',
+    'claude mcp add --transport http obsybrain https://brain.example.test/mcp',
   )
   await expect(panel.getByRole('region', { name: 'Reminder (optional)' })).toContainText('SessionStart')
   await expect(panel.getByRole('region', { name: 'How to check it works' })).toContainText('Ask your agent')
@@ -36,7 +36,7 @@ test('one tab per agent, with the standard connection, the reminder and how to c
   await page.keyboard.press('ArrowRight')
   await expect(tabs.getByRole('tab', { name: 'Codex' })).toBeFocused()
   await expect(tabs.getByRole('tab', { name: 'Codex' })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('tabpanel', { name: 'Codex' })).toContainText('codex mcp add rsc-brain')
+  await expect(page.getByRole('tabpanel', { name: 'Codex' })).toContainText('codex mcp add obsybrain')
   await page.keyboard.press('End')
   await expect(tabs.getByRole('tab', { name: 'Other agents' })).toBeFocused()
   await expect(page.getByRole('tabpanel', { name: 'Other agents' })).toContainText(
@@ -73,7 +73,7 @@ test('the live check waits, then turns green on the first request of the token m
   // The agent makes its first request.
   await agent(baseURL as string, s.id, { via: 'token', client: 'claude-code/2.1.3' })
   await expect(check).toContainText('Connected', { timeout: 6_000 })
-  await expect(check).toContainText('Claude Code reached rsc-brain')
+  await expect(check).toContainText('Claude Code reached obsybrain')
   await expect(check.locator('[data-check="connected"]')).toBeVisible()
   await withToken.getByRole('button', { name: 'Done, hide the token' }).click()
   await expect(page.locator('body')).not.toContainText(secret)
@@ -103,14 +103,14 @@ test('the standard connection turns the check green when a new connected app app
   await expect(check).toContainText('Waiting for your agent…')
   // The app that was already connected (Cursor) does not count; wait for the first answer to know it.
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
-  // The code exchange alone is not the agent reaching rsc-brain: still waiting.
+  // The code exchange alone is not the agent reaching obsybrain: still waiting.
   await agent(baseURL as string, s.id, { via: 'app', client: 'Claude Code', requested: false })
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
   await expect(check).toContainText('Waiting for your agent…')
   await agent(baseURL as string, s.id, { via: 'app-request' })
   await expect(check).toContainText('Connected', { timeout: 6_000 })
-  await expect(check).toContainText('Claude Code reached rsc-brain')
+  await expect(check).toContainText('Claude Code reached obsybrain')
 })
 
 test('each agent has its own token and check: green for Claude Code, then Codex waits for its own', async ({
@@ -189,7 +189,7 @@ test('the check never asks while the tab is hidden, stops once green, and stops 
   // Left: no asking from a page that is gone.
   await page.getByRole('tab', { name: 'Codex' }).click()
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
-  await page.getByRole('link', { name: 'rsc-brain , home' }).click()
+  await page.getByRole('link', { name: 'obsybrain , home' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
   await page.waitForTimeout(500)
   const left = asks
@@ -239,11 +239,11 @@ test('each copy button says what it copies', async ({ page, context, baseURL }) 
   await scenario(context, baseURL as string, 'member')
   await page.goto('/connect')
   await expect(
-    page.getByRole('button', { name: 'Copy: Add rsc-brain for all your projects and sign in', exact: true }),
+    page.getByRole('button', { name: 'Copy: Add obsybrain for all your projects and sign in', exact: true }),
   ).toBeVisible()
 })
 
-test('a program without a known name reads as a sentence: «An API client reached rsc-brain»', async ({
+test('a program without a known name reads as a sentence: «An API client reached obsybrain»', async ({
   page,
   context,
   baseURL,
@@ -254,7 +254,7 @@ test('a program without a known name reads as a sentence: «An API client reache
   await expect(page.getByRole('region', { name: 'Your new token' })).toBeVisible()
   await agent(baseURL as string, s.id, { via: 'token', client: 'node' })
   await expect(page.getByRole('region', { name: 'Live check' })).toContainText(
-    'An API client reached rsc-brain',
+    'An API client reached obsybrain',
     {
       timeout: 6_000,
     },
@@ -346,7 +346,7 @@ test('the consent hint is left only when the standard command is copied, never o
   expect(await hint()).toBeUndefined()
   await page
     .getByRole('region', { name: 'Standard connection' })
-    .getByRole('button', { name: /^Copy: Add rsc-brain/ })
+    .getByRole('button', { name: /^Copy: Add obsybrain/ })
     .click()
   expect((await hint())?.value).toBe('growth')
 })

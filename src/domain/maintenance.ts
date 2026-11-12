@@ -1,4 +1,4 @@
-// Maintenance (spec B7 «Actualizar», C12; plan §3.1): while an update or a restore runs, rsc-brain refuses
+// Maintenance (spec B7 «Actualizar», C12; plan §3.1): while an update or a restore runs, obsybrain refuses
 // every write and keeps serving reads, without writing their trail, so nothing accepted during it can be
 // lost if the update is rolled back. One row of the installation says until when and why; it ends on its
 // own after 30 minutes at most, so a command that died halfway never leaves the installation without

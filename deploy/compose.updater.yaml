@@ -1,14 +1,14 @@
-# rsc-brain's updater, as `rsc-brain.sh web-updates enable` runs it: a project of its own (-p <name>-updater), apart from
+# obsybrain's updater, as `obsybrain.sh web-updates enable` runs it: a project of its own (-p <name>-updater), apart from
 # the service's, so that starting or updating the service never recreates it. It has no ports and no network but the
 # one every project gets (outbound only), never the one shared with rsc-factory. It mounts exactly three things:
-#   - the Docker socket: it runs `rsc-brain.sh update`, which stops, builds and starts containers;
+#   - the Docker socket: it runs `obsybrain.sh update`, which stops, builds and starts containers;
 #   - the installation, at its own path: compose files mount ./backups relative to it, so the same path on the host and
 #     here is what keeps `up` from recreating what the host made;
 #   - a list of users with its own user in it, read only: ssh refuses to run as a user it does not know.
 # Whoever controls this container controls the machine. Every value comes from <install>/updater/updater.env.
 services:
   updater:
-    image: ${OBSY_BRAIN_UPDATER_IMAGE:?run rsc-brain.sh web-updates enable}
+    image: ${OBSY_BRAIN_UPDATER_IMAGE:?run obsybrain.sh web-updates enable}
     restart: unless-stopped
     init: true
     # Fixed, so that a lock this container left behind is recognised as its own by the next one.

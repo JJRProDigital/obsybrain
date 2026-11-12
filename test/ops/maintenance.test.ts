@@ -1,4 +1,4 @@
-// Maintenance (spec B7 «Actualizar», C12; plan §3.1): one row says until when rsc-brain refuses writes and
+// Maintenance (spec B7 «Actualizar», C12; plan §3.1): one row says until when obsybrain refuses writes and
 // why. It ends on its own after 30 minutes at most, so a command that died halfway never leaves the
 // installation without writes.
 import assert from 'node:assert/strict'

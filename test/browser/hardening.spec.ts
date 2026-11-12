@@ -264,7 +264,7 @@ test('a reader cannot pick «Read and write» for a token over brains she only r
   await scenario(context, baseURL as string, 'member')
   await page.goto('/profile')
   const roles = await page.evaluate(async () => {
-    const r = await fetch('/v1/brains', { headers: { 'x-requested-with': 'rsc-brain-web' } })
+    const r = await fetch('/v1/brains', { headers: { 'x-requested-with': 'obsybrain-web' } })
     return ((await r.json()) as { brains: Array<{ name: string; role: string }> }).brains
   })
   const read = roles.find((b) => b.role === 'reader')
@@ -401,7 +401,7 @@ test('the token form gives «Read and write» back when a brain she writes in jo
   await scenario(context, baseURL as string, 'member')
   await page.goto('/profile')
   const roles = await page.evaluate(async () => {
-    const r = await fetch('/v1/brains', { headers: { 'x-requested-with': 'rsc-brain-web' } })
+    const r = await fetch('/v1/brains', { headers: { 'x-requested-with': 'obsybrain-web' } })
     return ((await r.json()) as { brains: Array<{ name: string; role: string }> }).brains
   })
   const read = roles.find((b) => b.role === 'reader')

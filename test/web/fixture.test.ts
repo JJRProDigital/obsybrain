@@ -102,7 +102,7 @@ describe('the fixture API', () => {
       headers: {
         ...(o.scenario ? { 'x-fixture-scenario': o.scenario } : {}),
         ...(o.cookie ? { cookie: o.cookie } : {}),
-        ...(o.csrf === false || method === 'GET' ? {} : { 'x-requested-with': 'rsc-brain-web' }),
+        ...(o.csrf === false || method === 'GET' ? {} : { 'x-requested-with': 'obsybrain-web' }),
         ...(o.body === undefined ? {} : { 'content-type': 'application/json' }),
       },
       ...(o.body === undefined ? {} : { body: JSON.stringify(o.body) }),
@@ -183,7 +183,7 @@ describe('the fixture API', () => {
     const short = await call('POST', '/v1/setup', {
       scenario: s.id,
       body: {
-        name: 'rsc-brain',
+        name: 'obsybrain',
         publicUrl: 'http://localhost',
         admin: { name: 'Eric', email: 'e@example.test', password: 'short' },
       },
@@ -192,14 +192,14 @@ describe('the fixture API', () => {
     const done = await call('POST', '/v1/setup', {
       scenario: s.id,
       body: {
-        name: 'rsc-brain',
+        name: 'obsybrain',
         publicUrl: 'http://localhost',
         admin: { name: 'Eric', email: 'e@example.test', password: fx.password },
       },
     })
     assert.equal(done.status, 201)
     assert.deepEqual((await call('GET', '/v1/branding', { scenario: s.id })).body, {
-      name: 'rsc-brain',
+      name: 'obsybrain',
       logo: null,
       setupRequired: false,
       canSendMail: true,
@@ -1375,10 +1375,10 @@ describe('the fixture API', () => {
     const old = after.items.find((i) => i.needsOldKey)?.id as string
     const restore = (copy: string, body: unknown) =>
       call('POST', `/v1/admin/backups/${copy}/restore`, { ...o, body })
-    assert.equal(code(await restore(id, { confirm: 'rsc-brain' })), 'reauth_failed')
+    assert.equal(code(await restore(id, { confirm: 'obsybrain' })), 'reauth_failed')
     assert.equal(code(await restore(id, { confirm: 'nope', password: fx.password })), 'confirm_mismatch')
-    assert.equal(code(await restore(old, { confirm: 'rsc-brain', password: fx.password })), 'wrong_key')
-    assert.equal((await restore(id, { confirm: 'rsc-brain', password: fx.password })).status, 200)
+    assert.equal(code(await restore(old, { confirm: 'obsybrain', password: fx.password })), 'wrong_key')
+    assert.equal((await restore(id, { confirm: 'obsybrain', password: fx.password })).status, 200)
     assert.equal((await call('GET', '/v1/me', o)).status, 401)
     // No folder for copies.
     const off = fx.scenario('signed-in')
@@ -1431,7 +1431,7 @@ describe('the fixture API', () => {
     assert.equal(res.headers.get('content-type'), 'application/zip')
     assert.match(
       String(res.headers.get('content-disposition')),
-      /^attachment; filename="rsc-brain-growth-faithful-\d{8}T\d{6}Z\.zip"$/,
+      /^attachment; filename="obsybrain-growth-faithful-\d{8}T\d{6}Z\.zip"$/,
     )
     const files = filesOf(Buffer.from(await res.arrayBuffer()))
     assert.match(files.get('README.md') ?? '', /includeForgotten: true/)
@@ -1446,7 +1446,7 @@ describe('the fixture API', () => {
         method: 'POST',
         headers: {
           'x-fixture-scenario': s.id,
-          'x-requested-with': 'rsc-brain-web',
+          'x-requested-with': 'obsybrain-web',
           'content-type': 'application/zip',
           ...(cookie ? { cookie } : {}),
         },
@@ -1521,7 +1521,7 @@ describe('the fixture API', () => {
     }
     await behind({ update: { requested: false, attempts: [failure] } })
     assert.equal(code(await ask('/v1/admin/update', pw)), 'update_failed')
-    const wrecked = { from: '0.1.0', to: '0.2.0', copy: 'c', restore: 'sh rsc-brain.sh restore' }
+    const wrecked = { from: '0.1.0', to: '0.2.0', copy: 'c', restore: 'sh obsybrain.sh restore' }
     await behind({ update: { requested: false, attempts: [failure], rollbackFailed: wrecked } })
     assert.equal(code(await ask('/v1/admin/update/retry', pw)), 'rollback_failed')
     assert.equal(code(await ask('/v1/admin/update', pw)), 'rollback_failed')

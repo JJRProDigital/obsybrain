@@ -1,4 +1,4 @@
-// rsc-brain bridge (spec B5 CA15): MCP over stdio for agents that only start local MCP programs, carried
+// obsybrain bridge (spec B5 CA15): MCP over stdio for agents that only start local MCP programs, carried
 // to the remote /mcp of an installation with a token. One JSON-RPC message per line in; each request
 // becomes one POST, with the headers the server checks, and its answer one line out. Notifications get
 // no answer. Whatever goes wrong comes back as a JSON-RPC error that says how to proceed; the bridge
@@ -45,14 +45,14 @@ export async function runBridge(o: {
           accept: 'application/json, text/event-stream',
           authorization: `Bearer ${o.token}`,
           // Who is asking, as the profile and the live check of the web name it.
-          'user-agent': `rsc-brain-bridge/${VERSION}`,
+          'user-agent': `obsybrain-bridge/${VERSION}`,
           ...requestHeaders(msg, legacy),
         },
         body: JSON.stringify(msg),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       })
     } catch (err) {
-      const why = `Cannot reach rsc-brain at ${o.url.origin} (${reason(err)}).`
+      const why = `Cannot reach obsybrain at ${o.url.origin} (${reason(err)}).`
       if (notification) o.log(`${why}\n`)
       else
         o.out(
@@ -76,7 +76,7 @@ export async function runBridge(o: {
         errorLine(
           msg.id,
           -32603,
-          `rsc-brain answered HTTP ${res.status} without a JSON-RPC message. How to proceed: check that --url is the MCP address of the installation (it ends in /mcp); if it is, try again later.`,
+          `obsybrain answered HTTP ${res.status} without a JSON-RPC message. How to proceed: check that --url is the MCP address of the installation (it ends in /mcp); if it is, try again later.`,
         ),
       )
       return

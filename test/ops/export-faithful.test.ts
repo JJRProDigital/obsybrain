@@ -132,7 +132,7 @@ describe('the faithful export and the export route (CA13 shape, CA15)', { skip: 
   it('writes a manifest and one NDJSON file per kind of row, counted', async () => {
     const files = await zipOf('format=faithful')
     const m = JSON.parse(files.get('manifest.json') as string) as Json
-    assert.equal(m.format, 'rsc-brain-faithful')
+    assert.equal(m.format, 'obsybrain-faithful')
     assert.equal(m.version, 1)
     assert.equal(m.release, VERSION)
     assert.equal(m.includeForgotten, false)

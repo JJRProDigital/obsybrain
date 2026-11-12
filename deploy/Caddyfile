@@ -1,6 +1,6 @@
-# Caddy in front of rsc-brain on a server (the launcher's server mode): HTTPS for the domain in OBSY_BRAIN_DOMAIN,
+# Caddy in front of obsybrain on a server (the launcher's server mode): HTTPS for the domain in OBSY_BRAIN_DOMAIN,
 # with a certificate it gets and renews by itself over ACME (Let's Encrypt unless OBSY_BRAIN_ACME_CA names another).
-# Plain HTTP is redirected to HTTPS. Caddy replaces any X-Forwarded-* a client sends with what it saw, and rsc-brain
+# Plain HTTP is redirected to HTTPS. Caddy replaces any X-Forwarded-* a client sends with what it saw, and obsybrain
 # believes those headers only from Caddy's fixed address.
 {
 	acme_ca {$OBSY_BRAIN_ACME_CA}

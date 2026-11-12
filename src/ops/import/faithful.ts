@@ -236,7 +236,7 @@ export async function planFaithful(tree: FileTree): Promise<FaithfulPlan> {
   }
   if (m.version !== FAITHFUL_VERSION)
     throw bad(
-      `it is version ${String(m.version)}; this release of rsc-brain reads version ${FAITHFUL_VERSION}`,
+      `it is version ${String(m.version)}; this release of obsybrain reads version ${FAITHFUL_VERSION}`,
     )
   if (!Array.isArray(m.people)) throw bad('its manifest does not say who is who')
   const ppl: Person[] = []

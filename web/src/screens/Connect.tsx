@@ -1,5 +1,5 @@
 // «Connect your agent» (spec B6, B5 «Kit de conexión», plan T043). Who: anyone signed in, often someone
-// who just accepted an invitation. Job: get their agent talking to rsc-brain. Done when: the live check of
+// who just accepted an invitation. Job: get their agent talking to obsybrain. Done when: the live check of
 // that agent is green. Risk: a token that leaks — it is made only on request, held in this screen's memory,
 // shown once, and gone when the person says it is copied, leaves, or the page goes to the back/forward
 // cache; it never goes on a command line (the kit pastes it at a hidden prompt).

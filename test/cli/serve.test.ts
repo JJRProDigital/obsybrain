@@ -1,4 +1,4 @@
-// `rsc-brain serve` stops on SIGTERM even while a program follows a brain's events: an open stream must
+// `obsybrain serve` stops on SIGTERM even while a program follows a brain's events: an open stream must
 // not keep the server alive (spec B5 «Flujo de eventos»).
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
@@ -20,7 +20,7 @@ const freePort = () =>
     })
   })
 
-describe('rsc-brain serve', { skip: skipPg }, () => {
+describe('obsybrain serve', { skip: skipPg }, () => {
   let t: TestDb
   before(async () => {
     t = await freshDatabase()

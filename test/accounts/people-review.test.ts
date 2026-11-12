@@ -293,7 +293,7 @@ describe('people: review', { skip: skipPg }, () => {
     assert.equal(byAdmin.status, 201, byAdmin.text)
     const link = (byAdmin.body.invitations as Array<{ link: string }>)[0]?.link ?? ''
     const ok = await w.raw('POST', '/v1/invitations/accept', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: { token: tokenOf(link), name: 'PC', password: 'a long enough password' },
     })
     assert.equal(ok.status, 201, ok.text)

@@ -151,8 +151,8 @@ describe('what the updater reports besides the attempts (closing review, finding
   const wrecked = {
     from: '0.2.0',
     to: '0.3.0',
-    copy: 'rsc-brain-1-pre-update.rscb',
-    restore: 'sh rsc-brain.sh restore --file x.rscb --confirm <name> --dir "/srv/b"',
+    copy: 'obsybrain-1-pre-update.rscb',
+    restore: 'sh obsybrain.sh restore --file x.rscb --confirm <name> --dir "/srv/b"',
   }
   it('a way back that could not restore: the state says so, and neither Update nor Try again is allowed', () => {
     says({ rollbackFailed: wrecked })
@@ -203,7 +203,7 @@ describe('what the updater reports besides the attempts (closing review, finding
         const no = u.refusal(view, retry)
         assert.equal(no?.code, 'rollback_failed')
         assert.doesNotMatch(no?.howToProceed ?? '', /: $/)
-        assert.match(no?.howToProceed ?? '', /rsc-brain\.sh status/)
+        assert.match(no?.howToProceed ?? '', /obsybrain\.sh status/)
       }
     }
   })

@@ -5,7 +5,7 @@
 
 const FAILURES: Record<string, string> = {
   disk_full: 'the disk of the copies is full',
-  no_permission: 'rsc-brain cannot write in the folder of the copies',
+  no_permission: 'obsybrain cannot write in the folder of the copies',
   no_installation_secret: 'the installation has no key (OBSY_BRAIN_SECRET is not set)',
   weak_installation_key: 'the installation key is too short to protect a copy',
   database: 'the database did not answer as expected',
@@ -15,9 +15,9 @@ const FAILURES: Record<string, string> = {
 const HOW: Record<string, string> = {
   disk_full: 'Free space in the folder of the copies, or keep fewer, then make a copy again.',
   no_permission:
-    'Let the user that runs rsc-brain write in the folder of the copies, then make a copy again.',
+    'Let the user that runs obsybrain write in the folder of the copies, then make a copy again.',
   no_installation_secret: 'Set OBSY_BRAIN_SECRET for the service, restart it, then make a copy again.',
-  weak_installation_key: 'Rotate to a long random key on the machine (rsc-brain.sh key rotate).',
+  weak_installation_key: 'Rotate to a long random key on the machine (obsybrain.sh key rotate).',
   database: 'Make a copy again; if it fails again, look at the log of the service.',
   busy: 'Make a copy again in a few minutes.',
   failed: 'Make a copy again; if it fails again, look at the log of the service.',
@@ -33,7 +33,7 @@ const WARNINGS: Record<string, string> = {
   fsync_failed: 'the folder could not be flushed to disk',
   status_not_saved: 'its status could not be saved next to the copies',
   disk_full: 'the disk of the copies filled up right after it',
-  no_permission: 'rsc-brain could not write its status in the folder of the copies',
+  no_permission: 'obsybrain could not write its status in the folder of the copies',
 }
 
 // A copy kept whole, but with something after it not done.
@@ -78,7 +78,7 @@ export function restoreBlocked(
 ): string | null {
   if (!o.online) return 'You are offline: restoring needs the server.'
   if (item.needsOldKey)
-    return 'Made with an older key: restore it on the machine with that key (rsc-brain restore --key-file).'
+    return 'Made with an older key: restore it on the machine with that key (obsybrain restore --key-file).'
   if (o.running) return 'A copy is being made: restore when it ends.'
   return null
 }
@@ -90,7 +90,7 @@ export function confirmProblem(typed: string, name: string): string | null {
   return `Type the name exactly as it is: ${name}`
 }
 
-// The file the installation key is saved in holds the key alone, so `rsc-brain restore --key-file <file>` reads it as
+// The file the installation key is saved in holds the key alone, so `obsybrain restore --key-file <file>` reads it as
 // it is; its name says which installation and which key (its id) it is.
 export const keyFile = (key: string) => `${key}\n`
 
@@ -99,7 +99,7 @@ export function keyFileName(name: string, keyId: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-  return `rsc-brain-key-${slug ? `${slug}-` : ''}${keyId}.txt`
+  return `obsybrain-key-${slug ? `${slug}-` : ''}${keyId}.txt`
 }
 
 // The last update, as the launcher records it (plan §3.9): whether it went well, from and to which version, when, and
@@ -115,7 +115,7 @@ export function lastUpdateOf(x: unknown): LastUpdate | null {
 export function lastUpdateText(u: LastUpdate): string {
   if (u.ok) return `Updated from ${u.from} to ${u.to}.`
   return (
-    `The update from ${u.from} to ${u.to} failed. rsc-brain went back to ${u.from} with the data as it was just ` +
+    `The update from ${u.from} to ${u.to} failed. obsybrain went back to ${u.from} with the data as it was just ` +
     'before the update: nothing written was lost, and sessions and keys still work.'
   )
 }

@@ -69,9 +69,9 @@ describe('backups in words', () => {
     assert.match(String(confirmProblem(' Acme brain', 'Acme brain')), /exactly/)
   })
 
-  it('the key file holds the key alone (rsc-brain restore --key-file reads it as it is); its name says whose and which', () => {
+  it('the key file holds the key alone (obsybrain restore --key-file reads it as it is); its name says whose and which', () => {
     assert.equal(keyFile('k'.repeat(48)), `${'k'.repeat(48)}\n`)
-    assert.equal(keyFileName('Acme brain!', 'ab12cd34ef56'), 'rsc-brain-key-acme-brain-ab12cd34ef56.txt')
-    assert.equal(keyFileName('', 'ab12cd34ef56'), 'rsc-brain-key-ab12cd34ef56.txt')
+    assert.equal(keyFileName('Acme brain!', 'ab12cd34ef56'), 'obsybrain-key-acme-brain-ab12cd34ef56.txt')
+    assert.equal(keyFileName('', 'ab12cd34ef56'), 'obsybrain-key-ab12cd34ef56.txt')
   })
 })

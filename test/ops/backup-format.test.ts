@@ -32,7 +32,7 @@ const input = (o: Partial<HeaderInput> = {}): HeaderInput => ({
   release: '0.1.0',
   migrations: ['0001_accounts_brains_keys', '0022_maintenance'],
   createdAt: '2026-11-02T03:00:00.000Z',
-  installation: { id: 1, name: 'Acme rsc-brain' },
+  installation: { id: 1, name: 'Acme obsybrain' },
   reason: 'manual',
   tables: ['entries'],
   lastWriteAt: '2026-11-02T02:59:00.000Z',
@@ -165,7 +165,7 @@ describe('the .rscb copy format', () => {
     const { path } = await write('h.rscb', 'x')
     const h = await readHeader(path)
     assert.equal(h.format, 1)
-    assert.equal(h.product, 'rsc-brain')
+    assert.equal(h.product, 'obsybrain')
     assert.equal(h.reason, 'manual')
     assert.equal(h.keyId, keyId(A))
     assert.deepEqual(h.tables, ['entries'])
@@ -183,7 +183,7 @@ describe('the .rscb copy format', () => {
       'release',
       'tables',
     ])
-    assert.deepEqual(h.installation, { id: 1, name: 'Acme rsc-brain' })
+    assert.deepEqual(h.installation, { id: 1, name: 'Acme obsybrain' })
     assert.equal(h.createdAt, '2026-11-02T03:00:00.000Z')
     assert.equal(h.kdf.name, 'scrypt')
     assert.deepEqual([h.kdf.N, h.kdf.r, h.kdf.p], [2 ** 15, 8, 1])

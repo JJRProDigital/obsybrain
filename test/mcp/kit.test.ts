@@ -1,6 +1,6 @@
 // Spec B5 «El kit de conexión», CA2, CA15, CA16: what the server gives to connect each agent
-// (GET /v1/connect), the local bridge for agents that only speak MCP over stdio (`rsc-brain bridge`), and
-// the optional reminder of Claude Code (`rsc-brain hook session-start` / `rsc-brain hook stop`).
+// (GET /v1/connect), the local bridge for agents that only speak MCP over stdio (`obsybrain bridge`), and
+// the optional reminder of Claude Code (`obsybrain hook session-start` / `obsybrain hook stop`).
 import assert from 'node:assert/strict'
 import { type ChildProcessWithoutNullStreams, execFileSync, spawn } from 'node:child_process'
 import { chmod, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
@@ -152,7 +152,7 @@ describe('the connection kit', { skip: skipPg }, () => {
     w = await world()
     eric = await w.person('Eric')
     mcpUrl = `${w.base}/mcp`
-    stateDir = await mkdtemp(join(tmpdir(), 'rsc-brain-kit-'))
+    stateDir = await mkdtemp(join(tmpdir(), 'obsybrain-kit-'))
     await w.call(eric.key, 'POST', '/v1/brains', { slug: 'alpha', purpose: 'The channel.' })
     await w.call(eric.key, 'POST', '/v1/brains/alpha/entries', {
       type: 'decision',
@@ -202,7 +202,7 @@ describe('the connection kit', { skip: skipPg }, () => {
           )
         // Each agent has a variable and a file of its own, so two agents never overwrite one token.
         assert.match(String(a.tokenEnv), /^OBSY_BRAIN_TOKEN(_[A-Z]+)*$/)
-        assert.match(String(a.tokenFile), /^~\/\.config\/rsc-brain\//)
+        assert.match(String(a.tokenFile), /^~\/\.config\/obsybrain\//)
       }
       const envs = agents.map((a) => a.tokenEnv)
       assert.equal(new Set(envs).size, envs.length, 'one variable per agent')
@@ -228,12 +228,12 @@ describe('the connection kit', { skip: skipPg }, () => {
         signIn.blocks.some(
           (b) =>
             String(b.text) ===
-            'claude mcp add --transport http rsc-brain http://localhost/mcp --scope user\nclaude mcp login rsc-brain',
+            'claude mcp add --transport http obsybrain http://localhost/mcp --scope user\nclaude mcp login obsybrain',
         ),
       )
       const file = tokenBlocks(a).find((b) => b.where === '.mcp.json')
       const cfg = JSON.parse(String(file?.text)) as { mcpServers: Record<string, Json> }
-      assert.deepEqual(cfg.mcpServers['rsc-brain'], {
+      assert.deepEqual(cfg.mcpServers['obsybrain'], {
         type: 'http',
         url: 'http://localhost/mcp',
         headers: { Authorization: CLAUDE_HEADER },
@@ -246,17 +246,17 @@ describe('the connection kit', { skip: skipPg }, () => {
       assert.equal(hooks.SessionStart?.[0]?.hooks[0]?.type, 'command')
       assert.equal(
         hooks.SessionStart?.[0]?.hooks[0]?.command,
-        'rsc-brain hook session-start --url http://localhost/mcp --token-file ~/.config/rsc-brain/claude-code.token',
+        'obsybrain hook session-start --url http://localhost/mcp --token-file ~/.config/obsybrain/claude-code.token',
       )
       assert.equal(
         hooks.Stop?.[0]?.hooks[0]?.command,
-        'rsc-brain hook stop --url http://localhost/mcp --token-file ~/.config/rsc-brain/claude-code.token',
+        'obsybrain hook stop --url http://localhost/mcp --token-file ~/.config/obsybrain/claude-code.token',
       )
       // The variable the config reads is loaded from the agent's own file, never typed.
       assert.ok(
         tokenBlocks(a).some(
           (b) =>
-            b.text === 'export OBSY_BRAIN_TOKEN_CLAUDE_CODE="$(cat ~/.config/rsc-brain/claude-code.token)"',
+            b.text === 'export OBSY_BRAIN_TOKEN_CLAUDE_CODE="$(cat ~/.config/obsybrain/claude-code.token)"',
         ),
       )
       assert.equal(hooks.Stop?.[0]?.matcher, undefined, 'Stop takes no matcher')
@@ -270,19 +270,19 @@ describe('the connection kit', { skip: skipPg }, () => {
         assert.ok(b, `${id}: a block for ${where}`)
         return JSON.parse(String(b.text))
       }
-      assert.deepEqual(blockOf('opencode', 'opencode.json').mcp['rsc-brain'], {
+      assert.deepEqual(blockOf('opencode', 'opencode.json').mcp['obsybrain'], {
         type: 'remote',
         url: 'http://localhost/mcp',
         oauth: false,
         headers: { Authorization: 'Bearer {env:OBSY_BRAIN_TOKEN_OPENCODE}' },
       })
-      assert.deepEqual(blockOf('cursor', '.cursor/mcp.json').mcpServers['rsc-brain'], {
+      assert.deepEqual(blockOf('cursor', '.cursor/mcp.json').mcpServers['obsybrain'], {
         url: 'http://localhost/mcp',
         headers: { Authorization: CURSOR_HEADER },
       })
-      assert.deepEqual(blockOf('other', 'mcpServers').mcpServers['rsc-brain'], {
-        command: 'rsc-brain',
-        args: ['bridge', '--url', 'http://localhost/mcp', '--token-file', '~/.config/rsc-brain/token'],
+      assert.deepEqual(blockOf('other', 'mcpServers').mcpServers['obsybrain'], {
+        command: 'obsybrain',
+        args: ['bridge', '--url', 'http://localhost/mcp', '--token-file', '~/.config/obsybrain/token'],
       })
       // Agents without hooks get the invocable prompt and the text for their instructions file.
       const rem = by.codex?.reminder as { kind: string; prompt: string; blocks: Json[] }
@@ -316,7 +316,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       const r = await w.call(eric.key, 'GET', '/v1/connect?agent=codex')
       const [a] = agentsOf(r.body)
       const toml = String(tokenBlocks(a).find((b) => b.where === '~/.codex/config.toml')?.text)
-      assert.match(toml, /^\[mcp_servers\.rsc-brain\]$/m)
+      assert.match(toml, /^\[mcp_servers\.obsybrain\]$/m)
       assert.equal(/^url = "(.+)"$/m.exec(toml)?.[1], 'http://localhost/mcp')
       assert.equal(/^bearer_token_env_var = "(.+)"$/m.exec(toml)?.[1], 'OBSY_BRAIN_TOKEN_CODEX')
       // Codex sends the value of that variable as a bearer token to the url; here, to the test server.
@@ -345,7 +345,7 @@ describe('the connection kit', { skip: skipPg }, () => {
     })
   })
 
-  describe('rsc-brain bridge (CA15)', () => {
+  describe('obsybrain bridge (CA15)', () => {
     it('a legacy client over stdio gets what a remote client gets: initialize, tools/list, mem_save, mem_search', async () => {
       const token = await w.token(eric.id)
       const b = new Bridge(['--url', mcpUrl], { OBSY_BRAIN_TOKEN: token })
@@ -440,7 +440,9 @@ describe('the connection kit', { skip: skipPg }, () => {
       })
       assert.equal(none.code, 2)
       assert.match(none.stderr, /OBSY_BRAIN_TOKEN/)
-      const flag = await run(['bridge', '--url', mcpUrl, '--token', 'abc'], { env: { OBSY_BRAIN_TOKEN: 'x' } })
+      const flag = await run(['bridge', '--url', mcpUrl, '--token', 'abc'], {
+        env: { OBSY_BRAIN_TOKEN: 'x' },
+      })
       assert.equal(flag.code, 2)
       const plain = await run(['bridge', '--url', 'http://brain.example.com/mcp'], {
         env: { OBSY_BRAIN_TOKEN: 'x' },
@@ -541,7 +543,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       }
     })
 
-    it('says who it is: the rsc-brain bridge and its version, as the profile shows it', async () => {
+    it('says who it is: the obsybrain bridge and its version, as the profile shows it', async () => {
       const token = await w.token(eric.id)
       const b = new Bridge(['--url', mcpUrl], { OBSY_BRAIN_TOKEN: token })
       try {
@@ -554,7 +556,7 @@ describe('the connection kit', { skip: skipPg }, () => {
         "SELECT last_client FROM credentials WHERE kind = 'token' AND last4 = $1",
         [token.slice(-4)],
       )
-      assert.match(String(row?.last_client), /^rsc-brain-bridge\/\d+\.\d+\.\d+$/)
+      assert.match(String(row?.last_client), /^obsybrain-bridge\/\d+\.\d+\.\d+$/)
     })
 
     it('reads the token from --token-file', async () => {
@@ -591,7 +593,7 @@ describe('the connection kit', { skip: skipPg }, () => {
       })
 
     before(async () => {
-      repo = await mkdtemp(join(tmpdir(), 'rsc-brain-repo-'))
+      repo = await mkdtemp(join(tmpdir(), 'obsybrain-repo-'))
       execFileSync('git', ['init', '-q', repo])
       execFileSync('git', ['-C', repo, 'remote', 'add', 'origin', 'git@github.com:Acme/App.git'])
       const web = await w.web(eric.id)
@@ -618,7 +620,7 @@ describe('the connection kit', { skip: skipPg }, () => {
 
     it('session-start: --brain when no repository is linked; nothing when there is neither; open on failure', async () => {
       const token = await w.token(eric.id)
-      const plain = await mkdtemp(join(tmpdir(), 'rsc-brain-plain-'))
+      const plain = await mkdtemp(join(tmpdir(), 'obsybrain-plain-'))
       try {
         const named = await start({ OBSY_BRAIN_TOKEN: token }, plain, ['--brain', 'alpha'])
         assert.equal(named.code, 0)
@@ -798,7 +800,7 @@ describe('the block that saves a token, run in a shell', () => {
       const home = await mkdtemp(join(tmpdir(), 'rscb-kit-'))
       try {
         const file = join(home, a.tokenFile.replace(/^~\//, ''))
-        await mkdir(join(home, '.config/rsc-brain'), { recursive: true })
+        await mkdir(join(home, '.config/obsybrain'), { recursive: true })
         await writeFile(file, 'old\n')
         await chmod(file, 0o644)
         const out = execFileSync('bash', ['-c', save.text], {
@@ -815,10 +817,10 @@ describe('the block that saves a token, run in a shell', () => {
   }
 })
 
-// The final review of B6: the hooks and the bridge run the rsc-brain command, which is not published yet
+// The final review of B6: the hooks and the bridge run the obsybrain command, which is not published yet
 // (it comes with the installation release, B7). The kit says so, and that the standard connection or the
 // remote MCP over HTTP need no command.
-describe('the kit is honest about the rsc-brain command', () => {
+describe('the kit is honest about the obsybrain command', () => {
   const kit = connectKit({ mcpUrl: 'https://brain.example.com/mcp', brain: null })
   it('the Claude Code reminder says how to get the command, and that it is not published yet', () => {
     const cc = kit.agents.find((a) => a.id === 'claude-code')

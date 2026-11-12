@@ -2,7 +2,7 @@
 // OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Every Docker resource carries the prefix
 // rscb-b2-test- (OBSY_BRAIN_INSTALL_PREFIX changes it) and a random id, and is removed by exact name afterwards.
 //
-// There is no rsc-brain service here: `web-updates enable` needs an installation folder (its .env), a repository to
+// There is no obsybrain service here: `web-updates enable` needs an installation folder (its .env), a repository to
 // reach and Docker, not the service. What this shows with a real Docker: the image builds; the repository answers from
 // inside a container that runs as the owner with a user list mounted (what ssh needs); compose accepts the file; the
 // container has no port, no network but its project's, exactly the three mounts, the owner's uid, the socket's group,
@@ -20,12 +20,12 @@ import { promisify } from 'node:util'
 
 const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const ID = randomBytes(4).toString('hex')
 const PREFIX = process.env.OBSY_BRAIN_INSTALL_PREFIX ?? 'rscb-b2-test'
 const NAME = `${PREFIX}-${ID}`
 const PROJECT = `${NAME}-updater`
-const IMAGE = `rsc-brain-updater:${NAME}`
+const IMAGE = `obsybrain-updater:${NAME}`
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
@@ -141,7 +141,7 @@ describe('the updater in a real container (CA25, CA25b, CA26)', { skip: why ?? f
     const check = JSON.parse(
       await docker('exec', `${PROJECT}-updater-1`, 'cat', join(dir, 'update', 'report', 'check.json')),
     )
-    // There is no service here: the launcher says rsc-brain is not running, and that is a check that could not say.
+    // There is no service here: the launcher says obsybrain is not running, and that is a check that could not say.
     assert.equal(check.ok, false)
     assert.equal(check.reason, 'network')
     assert.equal(

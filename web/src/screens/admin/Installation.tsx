@@ -365,7 +365,7 @@ function Release({
           </p>
           <p class="meta">{r.error === 'no_access' ? A.releaseNoAccess : A.releaseNoAnswer}</p>
           <p class="meta">
-            <code>rsc-brain.sh update --check</code>
+            <code>obsybrain.sh update --check</code>
           </p>
         </>
       ) : state === 'ahead' && r.latest ? (
@@ -377,7 +377,7 @@ function Release({
           <p>{A.releaseNotChecked(r.installed)}</p>
           <p class="meta">{A.releaseNotCheckedHow}</p>
           <p class="meta">
-            <code>rsc-brain.sh update --check</code>
+            <code>obsybrain.sh update --check</code>
           </p>
         </>
       )}

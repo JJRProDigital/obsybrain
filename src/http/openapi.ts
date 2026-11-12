@@ -985,7 +985,7 @@ const HAND: Record<string, Op> = {
     }),
   },
   'POST /v1/setup': {
-    summary: 'The first-time setup (the rsc-brain web only): name, address and the first administrator.',
+    summary: 'The first-time setup (the obsybrain web only): name, address and the first administrator.',
     status: 201,
     body: obj({
       name: s('The name of the installation.', { maxLength: 80 }),
@@ -1001,11 +1001,11 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/setup/companion': {
     summary:
-      'Companion mode (installed by rsc-factory): set up the installation with the one-time key of rsc-brain.sh install --companion (Authorization: Bearer <companionToken>, not a key of rsc-brain), from the network shared with rsc-factory only. Makes the administration and the service account rsc-factory uses, and links runs to rsc-factory. 401 unauthorized with a wrong key; 404 setup_done once set up (the key serves nothing then); 404 no_such_route through a proxy, from elsewhere, or without companion mode. While it waits, GET and POST /v1/setup answer 409 companion_pending with factoryUrl.',
+      'Companion mode (installed by rsc-factory): set up the installation with the one-time key of obsybrain.sh install --companion (Authorization: Bearer <companionToken>, not a key of obsybrain), from the network shared with rsc-factory only. Makes the administration and the service account rsc-factory uses, and links runs to rsc-factory. 401 unauthorized with a wrong key; 404 setup_done once set up (the key serves nothing then); 404 no_such_route through a proxy, from elsewhere, or without companion mode. While it waits, GET and POST /v1/setup answer 409 companion_pending with factoryUrl.',
     status: 201,
     body: obj(
       {
-        name: s('The name of the installation (default rsc-brain).', { maxLength: 80 }),
+        name: s('The name of the installation (default obsybrain).', { maxLength: 80 }),
         publicUrl: s('The address people open (default: the one the launcher set).'),
         factoryUrl: s('The address of rsc-factory (default: the one the launcher set).'),
         admin: obj({
@@ -1025,11 +1025,11 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/setup/companion/reconnect': {
     summary:
-      'Companion mode, after the setup: a new main key for the service account the first handshake made for rsc-factory (never another account; made once here only if rsc-brain was set up without the handshake), when the one before was lost (an answer that never arrived, a restore). The one-time key (Authorization: Bearer <companionToken>) and the email and password (and code, with a second factor) of an administrator of rsc-brain; wrong passwords take the brake of signing in (429 too_many_attempts). The main keys before, and the keys made from them, stop working. From the network shared with rsc-factory only (404 no_such_route elsewhere); 409 companion_pending before the setup; 401 unauthorized with a wrong one-time key; 401 bad_credentials (or code_required, bad_code); 403 forbidden for someone who is not an administrator; 409 service_removed when an administrator removed that account (reactivate it first). Audited.',
+      'Companion mode, after the setup: a new main key for the service account the first handshake made for rsc-factory (never another account; made once here only if obsybrain was set up without the handshake), when the one before was lost (an answer that never arrived, a restore). The one-time key (Authorization: Bearer <companionToken>) and the email and password (and code, with a second factor) of an administrator of obsybrain; wrong passwords take the brake of signing in (429 too_many_attempts). The main keys before, and the keys made from them, stop working. From the network shared with rsc-factory only (404 no_such_route elsewhere); 409 companion_pending before the setup; 401 unauthorized with a wrong one-time key; 401 bad_credentials (or code_required, bad_code); 403 forbidden for someone who is not an administrator; 409 service_removed when an administrator removed that account (reactivate it first). Audited.',
     status: 201,
     body: obj(
       {
-        email: s('The email of an administrator of rsc-brain.'),
+        email: s('The email of an administrator of obsybrain.'),
         password: s('Their password.'),
         code: s('The 6 digits of their authenticator app, with a second factor.'),
       },
@@ -1042,7 +1042,7 @@ const HAND: Record<string, Op> = {
     }),
   },
   'POST /v1/auth/login': {
-    summary: 'Sign in to the web (the rsc-brain web only): sets the session cookie.',
+    summary: 'Sign in to the web (the obsybrain web only): sets the session cookie.',
     body: obj(
       { email: s('Email.'), password: s('Password.'), code: s('The 6 digits of the authenticator app.') },
       ['code'],
@@ -1085,7 +1085,7 @@ const HAND: Record<string, Op> = {
     }),
   },
   'POST /v1/invitations/accept': {
-    summary: 'Accept an invitation (the rsc-brain web only): your account, your roles and a web session.',
+    summary: 'Accept an invitation (the obsybrain web only): your account, your roles and a web session.',
     status: 201,
     body: obj({ token: s('The token.'), name: s('Your name.'), password: s('12 to 200 characters.') }),
     reply: obj({
@@ -1147,7 +1147,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/me/tokens': {
     summary:
-      'Create a personal token (the rsc-brain web only): read or read + write, for some brains or all, for 30, 90 or 365 days. The secret is shown only in this answer.',
+      'Create a personal token (the obsybrain web only): read or read + write, for some brains or all, for 30, 90 or 365 days. The secret is shown only in this answer.',
     status: 201,
     body: obj(
       {
@@ -1179,7 +1179,7 @@ const HAND: Record<string, Op> = {
   },
   'GET /v1/me/tokens': {
     summary:
-      'Your personal tokens that still work (the rsc-brain web only). Never the secret: its last four characters, its last use and its client.',
+      'Your personal tokens that still work (the obsybrain web only). Never the secret: its last four characters, its last use and its client.',
     reply: obj({
       tokens: list(
         obj({
@@ -1208,7 +1208,7 @@ const HAND: Record<string, Op> = {
   },
   'PUT /v1/brains/{slug}/wiki/writers/{keyId}': {
     summary:
-      'Let a key write to the wiki of the brain directly (a curator of the brain, in the rsc-brain web only). The key must reach the brain with read + write, and be of a contributor or curator. Giving it twice is once.',
+      'Let a key write to the wiki of the brain directly (a curator of the brain, in the obsybrain web only). The key must reach the brain with read + write, and be of a contributor or curator. Giving it twice is once.',
     reply: obj({ writer: WRITER }),
   },
   'DELETE /v1/brains/{slug}/wiki/writers/{keyId}': {
@@ -1217,12 +1217,12 @@ const HAND: Record<string, Op> = {
     reply: obj({ removed: s('The key.') }),
   },
   'DELETE /v1/me/tokens/{id}': {
-    summary: 'Revoke one of your tokens (the rsc-brain web only): it stops at its next request.',
+    summary: 'Revoke one of your tokens (the obsybrain web only): it stops at its next request.',
     reply: obj({ revoked: s('The id revoked.') }),
   },
   'GET /v1/me/apps': {
     summary:
-      'Your connected apps: the live connections made with the standard sign-in (the rsc-brain web only).',
+      'Your connected apps: the live connections made with the standard sign-in (the obsybrain web only).',
     reply: obj({
       apps: list(
         obj({
@@ -1250,17 +1250,17 @@ const HAND: Record<string, Op> = {
     }),
   },
   'DELETE /v1/me/apps/{id}': {
-    summary: 'Revoke a connected app (the rsc-brain web only): its keys stop at their next request.',
+    summary: 'Revoke a connected app (the obsybrain web only): its keys stop at their next request.',
     reply: obj({ revoked: s('The id revoked.') }),
   },
   'PUT /v1/brains/{slug}/notify': {
-    summary: 'Whether new proposals of this brain reach you by email (curators, in the rsc-brain web).',
+    summary: 'Whether new proposals of this brain reach you by email (curators, in the obsybrain web).',
     body: obj({ notifyProposals: b('true to get them.') }),
     reply: obj({ notifyProposals: b('What is set now.') }),
   },
   'POST /v1/me/password': {
     summary:
-      'Change your password (the rsc-brain web only), with the current one. Ends your pending reset links and your other web sessions. Wrong current passwords count toward the same brake as signing in.',
+      'Change your password (the obsybrain web only), with the current one. Ends your pending reset links and your other web sessions. Wrong current passwords count toward the same brake as signing in.',
     status: 204,
     body: obj(
       {
@@ -1273,12 +1273,12 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/me/revoke-all': {
     summary:
-      'Revoke every personal token and every connected app of yours at once (the rsc-brain web only). Web sessions stay.',
+      'Revoke every personal token and every connected app of yours at once (the obsybrain web only). Web sessions stay.',
     reply: obj({ tokens: n('Tokens revoked.'), apps: n('Connected apps revoked.') }),
   },
   'POST /v1/me/totp': {
     summary:
-      'Start setting up a second factor (the rsc-brain web only): a secret for your authenticator app. With one on already, send its current code to replace it.',
+      'Start setting up a second factor (the obsybrain web only): a secret for your authenticator app. With one on already, send its current code to replace it.',
     body: obj({ code: s('The current code, to replace a second factor that is on.') }, ['code']),
     reply: obj({
       secret: s('The secret to type into the authenticator app. Shown only here.'),
@@ -1287,12 +1287,12 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/me/totp/confirm': {
     summary:
-      'Turn the second factor on with a first code from the authenticator app (the rsc-brain web only).',
+      'Turn the second factor on with a first code from the authenticator app (the obsybrain web only).',
     body: obj({ code: s('The 6 digits the app shows now.') }),
     reply: obj({ enabled: b('It is on.') }),
   },
   'DELETE /v1/me/totp': {
-    summary: 'Turn the second factor off with a current code (the rsc-brain web only).',
+    summary: 'Turn the second factor off with a current code (the obsybrain web only).',
     body: obj({ code: s('The 6 digits the app shows now.') }),
     reply: obj({ enabled: b('It is off (false).') }),
   },
@@ -1304,7 +1304,7 @@ const HAND: Record<string, Op> = {
   'GET /v1/brains': { summary: 'The brains this key can use.', reply: obj({ brains: list(BRAIN_ROLE) }) },
   'POST /v1/brains': {
     summary:
-      'Create a brain (with the right to create brains). A service account names its first curator; an email without an account gets an invitation, whose mail spends the service hourly quota (429 invite_quota: nothing is made). An open invitation for that email made by someone else: 409 invitation_pending_elsewhere before anything is written (no brain, no mail, no quota spent); an administrator of rsc-brain resends or withdraws it. One this service made gains the brain, its link kept.',
+      'Create a brain (with the right to create brains). A service account names its first curator; an email without an account gets an invitation, whose mail spends the service hourly quota (429 invite_quota: nothing is made). An open invitation for that email made by someone else: 409 invitation_pending_elsewhere before anything is written (no brain, no mail, no quota spent); an administrator of obsybrain resends or withdraws it. One this service made gains the brain, its link kept.',
     status: 201,
     body: obj(
       {
@@ -1375,7 +1375,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/invitations': {
     summary:
-      'Invite people by email (the rsc-brain web only): the administration anywhere; a curator, when allowed, to brains they curate.',
+      'Invite people by email (the obsybrain web only): the administration anywhere; a curator, when allowed, to brains they curate.',
     status: 201,
     body: obj(
       {
@@ -1466,7 +1466,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/accounts/{id}/reset-link': {
     summary:
-      'A password reset link for a person, to give by hand (the rsc-brain web only, administration). Works once, for 1 hour.',
+      'A password reset link for a person, to give by hand (the obsybrain web only, administration). Works once, for 1 hour.',
     status: 201,
     reply: obj({
       link: s('The single-use link. Shown only in this answer.'),
@@ -2110,7 +2110,7 @@ const HAND: Record<string, Op> = {
     summary:
       'The health of the service (administration): version, start, database, meaning search, streams, mail, disk and maintenance.',
     reply: obj({
-      version: s('The version of rsc-brain.'),
+      version: s('The version of obsybrain.'),
       startedAt: s('When this process started.', { format: 'date-time' }),
       database: obj({ ok: b('It answers.'), migration: nul(s('The last migration applied.')) }),
       meaning: obj({
@@ -2145,7 +2145,7 @@ const HAND: Record<string, Op> = {
       ),
       update: obj({
         mode: s(
-          'off (no updater runs: update on the server with `rsc-brain.sh update`), on (the updater runs: the button works) or companion (installed by rsc-factory: update it there).',
+          'off (no updater runs: update on the server with `obsybrain.sh update`), on (the updater runs: the button works) or companion (installed by rsc-factory: update it there).',
           { enum: ['off', 'on', 'companion'] },
         ),
         factoryUrl: nul(s('companion: the address of rsc-factory.')),
@@ -2208,7 +2208,7 @@ const HAND: Record<string, Op> = {
         checkedAt: nul(s('When the repository last answered about its versions.', { format: 'date-time' })),
         error: nul(
           s(
-            'What went wrong the last time it was asked: no_access (a private repository: `rsc-brain.sh update --check` has the access of the server), network, or none (no version published). Null when that went well. Never means up to date.',
+            'What went wrong the last time it was asked: no_access (a private repository: `obsybrain.sh update --check` has the access of the server), network, or none (no version published). Null when that went well. Never means up to date.',
           ),
         ),
         lastAttemptAt: nul(s('When the repository was last asked.', { format: 'date-time' })),
@@ -2220,7 +2220,7 @@ const HAND: Record<string, Op> = {
   // The copies, the installation key and the release from the web (B7 PR30, plan §3.4).
   'GET /v1/admin/backups': {
     summary:
-      'The copies of this installation, newest first, with the id of the key each needs; the last good copy, the last failure or warning, the schedule (administration, in the rsc-brain web).',
+      'The copies of this installation, newest first, with the id of the key each needs; the last good copy, the last failure or warning, the schedule (administration, in the obsybrain web).',
     reply: obj({
       configured: b('A folder for the copies is set (OBSY_BRAIN_BACKUPS).'),
       items: list(
@@ -2250,13 +2250,13 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/backups': {
     summary:
-      'Make a copy now (administration, in the rsc-brain web). 202 at once with its id; the copy runs in the service, and the list says when it ended or why it failed. 409 backup_running; 409 backups_not_set_up.',
+      'Make a copy now (administration, in the obsybrain web). 202 at once with its id; the copy runs in the service, and the list says when it ended or why it failed. 409 backup_running; 409 backups_not_set_up.',
     status: 202,
     reply: obj({ id: s('The copy being made.') }),
   },
   'GET /v1/admin/backups/{id}/download': {
     summary:
-      'Download a copy, encrypted as it is (administration, in the rsc-brain web). Without the installation key it was made with, it cannot be restored. Recorded in the audit.',
+      'Download a copy, encrypted as it is (administration, in the obsybrain web). Without the installation key it was made with, it cannot be restored. Recorded in the audit.',
     file: true,
   },
   'GET /v1/admin/backups/{id}/impact': {
@@ -2271,7 +2271,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/backups/{id}/restore': {
     summary:
-      'Restore a copy of this list over everything (administration, in the rsc-brain web). Asks the password again (401 reauth_failed) and the name of the installation (400 confirm_mismatch); first makes a copy of what is there (pre-restore). Every key, session and connection ends, this session too: the answer comes first. 409 wrong_key (with "needs", the key id), newer_copy, backup_running.',
+      'Restore a copy of this list over everything (administration, in the obsybrain web). Asks the password again (401 reauth_failed) and the name of the installation (400 confirm_mismatch); first makes a copy of what is there (pre-restore). Every key, session and connection ends, this session too: the answer comes first. 409 wrong_key (with "needs", the key id), newer_copy, backup_running.',
     body: obj(
       {
         confirm: s('The name of this installation, exactly.'),
@@ -2292,7 +2292,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/installation-key': {
     summary:
-      'The installation key (OBSY_BRAIN_SECRET), to keep: copies are restored with it. Administration, in the rsc-brain web, with the password again (and the code); never with a key of a program. Not cached; recorded in the audit.',
+      'The installation key (OBSY_BRAIN_SECRET), to keep: copies are restored with it. Administration, in the obsybrain web, with the password again (and the code); never with a key of a program. Not cached; recorded in the audit.',
     body: obj(
       { password: s('Your password.'), code: s('The code of your authenticator app, with a second factor.') },
       ['code'],
@@ -2301,7 +2301,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/update': {
     summary:
-      'Update to the newest published version (administration, in the rsc-brain web, with the password again and the code). It only leaves a request for the updater, which finds the version itself: nothing else in the request is read. 202 requested. 409 updates_off (no updater runs), companion (installed by rsc-factory), rollback_failed (a way back could not restore: restore on the server first), nothing_to_update, update_failed (use /update/retry), update_running; 503 update_not_started.',
+      'Update to the newest published version (administration, in the obsybrain web, with the password again and the code). It only leaves a request for the updater, which finds the version itself: nothing else in the request is read. 202 requested. 409 updates_off (no updater runs), companion (installed by rsc-factory), rollback_failed (a way back could not restore: restore on the server first), nothing_to_update, update_failed (use /update/retry), update_running; 503 update_not_started.',
     status: 202,
     body: obj(
       { password: s('Your password.'), code: s('The code of your authenticator app, with a second factor.') },
@@ -2314,7 +2314,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/update/retry': {
     summary:
-      'Try the update that failed again (administration, in the rsc-brain web, with the password again). Only for the newest version when it failed; at most 3 times, 15 minutes apart. 409 nothing_to_retry, retry_later, retry_limit; the rest as /update.',
+      'Try the update that failed again (administration, in the obsybrain web, with the password again). Only for the newest version when it failed; at most 3 times, 15 minutes apart. 409 nothing_to_retry, retry_later, retry_limit; the rest as /update.',
     status: 202,
     body: obj(
       { password: s('Your password.'), code: s('The code of your authenticator app, with a second factor.') },
@@ -2324,7 +2324,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/setup/key': {
     summary:
-      'The installation key, once, for the step «Installation key» of the first-time setup: to whoever ran the setup in the web, within an hour of it (the rsc-brain web only). Then 404 not_found (download it again in Admin › Backups & system).',
+      'The installation key, once, for the step «Installation key» of the first-time setup: to whoever ran the setup in the web, within an hour of it (the obsybrain web only). Then 404 not_found (download it again in Admin › Backups & system).',
     reply: obj({ key: s('The installation key.'), keyId: s('Its id.') }),
   },
   'PUT /v1/admin/branding/logo': {
@@ -2350,7 +2350,7 @@ const HAND: Record<string, Op> = {
   },
   'PUT /v1/brains/{slug}/wiki/settings': {
     summary:
-      'Change the settings of a brain (curators, in the rsc-brain web). With "base" (each field as you read it), a save of a field someone changed since is refused (settings_changed, with "current"); fields not sent are never touched.',
+      'Change the settings of a brain (curators, in the obsybrain web). With "base" (each field as you read it), a save of a field someone changed since is refused (settings_changed, with "current"); fields not sent are never touched.',
     body: obj(
       {
         base: {
@@ -2407,13 +2407,13 @@ const HAND: Record<string, Op> = {
     }),
   },
   'POST /v1/brains/{slug}/repos': {
-    summary: 'Link a repository address to a brain (curators, in the rsc-brain web).',
+    summary: 'Link a repository address to a brain (curators, in the obsybrain web).',
     status: 201,
     body: obj({ repo: s('A remote, such as https://github.com/org/repo or git@github.com:org/repo.') }),
     reply: obj({ repo: s('The address as it matches: host and path.') }),
   },
   'DELETE /v1/brains/{slug}/repos': {
-    summary: 'Unlink a repository address from a brain (curators, in the rsc-brain web).',
+    summary: 'Unlink a repository address from a brain (curators, in the obsybrain web).',
     body: obj({ repo: s('The address, as linked or as a remote.') }),
     reply: obj({ unlinked: b('Done.') }),
   },
@@ -2717,7 +2717,7 @@ export function openapi(routes: Route[], serverUrl: string | null): Schema {
   return {
     openapi: '3.1.0',
     info: {
-      title: 'rsc-brain API',
+      title: 'obsybrain API',
       version: '1',
       description:
         'The same operations as the MCP tools, with the same keys and permissions. Every refusal says what happened and how to proceed. Each key may make a limited number of requests per minute (429 with Retry-After beyond it). No answer passes 256000 characters: lists go by pages, and an answer that would pass the limit is cut and says so.',

@@ -60,7 +60,7 @@ async function mailInvitation(
   outbox: Outbox | undefined,
   o: { email: string; link: string; by: string; grants: Grant[]; isAdmin: boolean },
 ): Promise<{ sent: boolean; error: string | null }> {
-  const inst = (await installation(db)).name || 'rsc-brain'
+  const inst = (await installation(db)).name || 'obsybrain'
   const names = await brainNames(db, o.grants)
   const lines = o.grants
     .map((g) => names.get(g.brainId))
@@ -94,7 +94,7 @@ async function mailInvitation(
 //   one is made.
 // A closed expired invitation passes on the first-curator places of brains still waiting for this
 // email, never the administrator rights.
-export const INVITATION_LOCK = "SELECT pg_advisory_xact_lock(hashtext('rsc-brain invitation ' || $1))"
+export const INVITATION_LOCK = "SELECT pg_advisory_xact_lock(hashtext('obsybrain invitation ' || $1))"
 // add: the grants this service adds; merged again, raise only, onto the invitation as it is when it is taken over,
 // so a grant someone added meanwhile (the own path of the service that holds it keeps the link) is not lost.
 export type Takeover = { previousBy: string; expectHash: string; add: Grant[] }
@@ -306,9 +306,9 @@ export async function takeOver(
     const lines = await brainLines(ctx.db, t.add)
     await send(ctx.db, ctx.clock, ctx.mail, 'invitation', {
       to: t.email,
-      subject: 'The rsc-brain invitation you just received is no longer valid',
+      subject: 'The obsybrain invitation you just received is no longer valid',
       text: [
-        'The rsc-brain invitation you just received is no longer valid.',
+        'The obsybrain invitation you just received is no longer valid.',
         ...(lines.length ? ['', 'It was for:', ...lines] : []),
         '',
         'You will get a new one if needed; nothing else needs doing.',
@@ -321,10 +321,10 @@ export async function takeOver(
   if (done === 'merged') {
     await send(ctx.db, ctx.clock, ctx.mail, 'invitation', {
       to: t.email,
-      subject: 'Use the most recent rsc-brain invitation link',
+      subject: 'Use the most recent obsybrain invitation link',
       text: [
-        'The link in one of the rsc-brain invitations you just received does not work.',
-        'Use the most recent working link from rsc-brain; it also covers:',
+        'The link in one of the obsybrain invitations you just received does not work.',
+        'Use the most recent working link from obsybrain; it also covers:',
         ...(await brainLines(ctx.db, t.add)),
       ].join('\n'),
     })
@@ -337,7 +337,7 @@ export async function takeOver(
       kind: 'invitation.taken_over',
       brainId: null,
       subject: `Your invitation of ${t.email} was taken over`,
-      text: `The service account "${ctx.who.name}" took over your invitation of ${t.email}: it mailed them a new link, and the one you had no longer works. The administration of rsc-brain can still see and withdraw it.`,
+      text: `The service account "${ctx.who.name}" took over your invitation of ${t.email}: it mailed them a new link, and the one you had no longer works. The administration of obsybrain can still see and withdraw it.`,
     })
   }
   return true

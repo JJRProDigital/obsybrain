@@ -408,7 +408,7 @@ describe('the checker', () => {
     assert.equal(calls.length, 2)
     for (const call of calls) {
       assert.deepEqual([...new Headers(call.init?.headers).keys()], ['user-agent'])
-      assert.equal(new Headers(call.init?.headers).get('user-agent'), 'rsc-brain/0.1.0')
+      assert.equal(new Headers(call.init?.headers).get('user-agent'), 'obsybrain/0.1.0')
       assert.equal(call.init?.body, undefined)
       assert.equal(call.init?.method ?? 'GET', 'GET')
     }
@@ -430,7 +430,7 @@ describe('the checker', () => {
     assert.equal(repoUrl({}), DEFAULT_REPO_URL)
     assert.equal(repoUrl({ OBSY_BRAIN_RELEASES_URL: 'https://example.com/list' }), DEFAULT_REPO_URL)
     assert.equal(repoUrl({ OBSY_BRAIN_REPO_URL: ` ${REPO} ` }), REPO)
-    assert.equal(DEFAULT_REPO_URL, 'https://github.com/ericrisco/rsc-brain')
+    assert.equal(DEFAULT_REPO_URL, 'https://github.com/obsessive-solutions/obsybrain')
     const { fetch, calls } = stub({})
     const c = releaseChecker({ repo: null, version: '0.1.0', clock: at(T0), fetch })
     await c.check()

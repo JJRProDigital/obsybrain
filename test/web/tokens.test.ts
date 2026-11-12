@@ -1,4 +1,4 @@
-// Plan canvas-ui §0, B1 and S.0 (shared.css v2): the shared tokens (the same file in rsc-brain and
+// Plan canvas-ui §0, B1 and S.0 (shared.css v2): the shared tokens (the same file in obsybrain and
 // rsc-factory) hold the contract's names in both themes, dark on :root (the default) and light when the person
 // chooses it (data-theme on <html>); the seven family colours, each with a dim variant; the monospaced stack
 // with its self-hosted font; the panel classes with their coloured corners; the glow and pulse tokens. Brain's

@@ -21,7 +21,7 @@ Test runner: `bash scripts/verify.sh` en WSL Ubuntu, Node 25 en `~/tools/node-v2
 
 - [x] T1 (S9) — Importar árbol v0.7.0 sin historial, LICENSE intacto, `.gitattributes` LF. Commit `17dc767` en `main`.
 - [x] T2 — Toolchain WSL: Node v25.9.0 instalado en `~/tools/node-v25.9.0-linux-x64`.
-- [ ] T3 (S2, S10) — Rename env prefix `RSC_BRAIN_*` → `OBSY_BRAIN_*` en todo el repo (excl. LICENSE). Route: inline.
+- [x] T3 (S2, S10) — Rename env prefix `RSC_BRAIN_*` → `OBSY_BRAIN_*` en todo el repo (excl. LICENSE). 82 archivos, 850+/812-. Commit `aba7128`. Verificación typecheck+suites pendiente (npm ci corriendo); guardia de restore `not_rsc_brain_database` y rol `rsc_brain` quedan para T4 (nombre, no env).
 - [ ] T4 (S3, S4, S10) — Rename de nombre: package/bin/MCP/launcher/compose/docker/ruta `~/.config`, rol BD, dir de estado. Route: inline.
 - [ ] T5 (S5, S6) — Identidad visual: tokens.css con paleta Obsessive Solutions, fuentes, branding seed. Route: inline.
 - [ ] T6 (S7) — Traducción completa de UI a español + tests Playwright. Route: inline (grande, por screens; 1 solo pase al final del resto).

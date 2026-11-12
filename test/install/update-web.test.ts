@@ -33,14 +33,14 @@ import { promisify } from 'node:util'
 
 const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const ID = randomBytes(4).toString('hex')
 const PREFIX = process.env.OBSY_BRAIN_INSTALL_PREFIX ?? 'rscb-b3-test'
 const NAME = `${PREFIX}-${ID}`
 const BASE_IMAGE = `${PREFIX}-image:${ID}`
 const UPDATER = `${NAME}-updater`
-const UPDATER_IMAGE = `rsc-brain-updater:${NAME}`
-const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/json' }
+const UPDATER_IMAGE = `obsybrain-updater:${NAME}`
+const WEB = { 'x-requested-with': 'obsybrain-web', 'content-type': 'application/json' }
 const PASSWORD = 'a long test password b3'
 const NEXT = '98.0.0'
 const INSTALLED = (JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')) as { version: string })
@@ -137,7 +137,7 @@ describe('updating from the web with real containers (CA27)', { skip: why ?? fal
     dir = join(base, 'install')
     let started = Date.now()
     await run('docker', ['build', '-q', '-t', BASE_IMAGE, ROOT], { maxBuffer: 64 << 20 })
-    measured(`docker build of rsc-brain ${((Date.now() - started) / 1000).toFixed(1)} s`)
+    measured(`docker build of obsybrain ${((Date.now() - started) / 1000).toFixed(1)} s`)
     // The repository: this tree (as it is, tracked and new files, none ignored), once as installed and once as 98.0.0.
     const repo = join(base, 'repo.git')
     const work = join(base, 'work')
@@ -232,7 +232,7 @@ describe('updating from the web with real containers (CA27)', { skip: why ?? fal
     // The images this test built or the update built, by exact name.
     const built = (await docker('image', 'ls', '--format', '{{.Repository}}:{{.Tag}}').catch(() => ''))
       .split('\n')
-      .filter((i) => i.startsWith(`rsc-brain:`) && i.includes(NAME))
+      .filter((i) => i.startsWith(`obsybrain:`) && i.includes(NAME))
     for (const i of [BASE_IMAGE, UPDATER_IMAGE, ...built])
       await docker('image', 'rm', '-f', i).catch(() => {})
     if (base) rmSync(base, { recursive: true, force: true })
@@ -368,7 +368,7 @@ describe('an installation made by rsc-factory has no button of its own (CA28)', 
   it('web-updates enable exits 2, names rsc-factory, and starts nothing', async () => {
     const r = launch(['web-updates', 'enable', '--yes', '--dir', dir])
     assert.equal(r.status, 2, r.stderr)
-    assert.match(r.stderr, /rsc-brain was installed by rsc-factory: update it from there\./)
+    assert.match(r.stderr, /obsybrain was installed by rsc-factory: update it from there\./)
     assert.equal(
       await docker('ps', '-aq', '--filter', `label=com.docker.compose.project=${NAME}-c-updater`),
       '',

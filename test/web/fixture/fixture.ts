@@ -291,7 +291,7 @@ const err = (status: number, code: string, message: string, howToProceed: string
   status,
   body: { error: { code, message, howToProceed } },
 })
-// The setup of the web while rsc-factory is to set rsc-brain up (companion mode, src/domain/companion.ts).
+// The setup of the web while rsc-factory is to set obsybrain up (companion mode, src/domain/companion.ts).
 const companionPending = (s: Scen): Answer => {
   const factoryUrl = s.factoryUrl ?? 'https://factory.example.test'
   return {
@@ -300,7 +300,7 @@ const companionPending = (s: Scen): Answer => {
       error: {
         code: 'companion_pending',
         message: 'Finish the setup in rsc-factory.',
-        howToProceed: `rsc-brain was installed with rsc-factory: open rsc-factory at ${factoryUrl} and finish its first-time setup. rsc-brain is set up with the same administration.`,
+        howToProceed: `obsybrain was installed with rsc-factory: open rsc-factory at ${factoryUrl} and finish its first-time setup. obsybrain is set up with the same administration.`,
         factoryUrl,
       },
     },
@@ -333,8 +333,8 @@ const INTERNAL = err(
 const CSRF = err(
   403,
   'csrf',
-  'This request lacks the header of the rsc-brain web.',
-  'Use the rsc-brain web to do this.',
+  'This request lacks the header of the obsybrain web.',
+  'Use the obsybrain web to do this.',
 )
 const SHORT = err(
   400,
@@ -461,7 +461,7 @@ function freshScenario(id: string, preset: Preset): Scen {
     setupDone: preset !== 'fresh' && preset !== 'insecure',
     insecure: preset === 'insecure',
     mail: true,
-    name: preset === 'fresh' || preset === 'insecure' ? '' : 'rsc-brain',
+    name: preset === 'fresh' || preset === 'insecure' ? '' : 'obsybrain',
     // Never the address the browser is on: the web must show the installation's own.
     publicUrl: preset === 'fresh' || preset === 'insecure' ? '' : 'https://brain.example.test',
     accounts: [
@@ -712,8 +712,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           403,
           'insecure_connection',
-          'This connection is not encrypted, so rsc-brain does not accept a password over it.',
-          'Open rsc-brain over HTTPS (a domain with a certificate, or a tunnel), or on its local address from the same machine.',
+          'This connection is not encrypted, so obsybrain does not accept a password over it.',
+          'Open obsybrain over HTTPS (a domain with a certificate, or a tunnel), or on its local address from the same machine.',
         )
       const admin = (body.admin ?? {}) as Record<string, unknown>
       const name = typeof body.name === 'string' ? body.name.trim() : ''
@@ -722,7 +722,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           400,
           'invalid_request',
           'The installation needs a name of 1 to 80 characters.',
-          'For example "Acme rsc-brain".',
+          'For example "Acme obsybrain".',
         )
       if (typeof body.publicUrl !== 'string' || !/^https?:\/\/[^\s#?]+$/.test(body.publicUrl))
         return err(
@@ -1241,7 +1241,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
             last4: secret.slice(-4),
             expiresAt: '2027-01-27T10:00:00.000Z',
           },
-          message: 'Copy it now: rsc-brain shows it only this once.',
+          message: 'Copy it now: obsybrain shows it only this once.',
           ...(slugs
             ? {}
             : {
@@ -1422,7 +1422,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         status: 200,
         body: {
           secret: TOTP_SECRET,
-          otpauthUrl: `otpauth://totp/${encodeURIComponent(`${s.name || 'rsc-brain'}:${who.email}`)}?secret=${TOTP_SECRET}&issuer=${encodeURIComponent(s.name || 'rsc-brain')}`,
+          otpauthUrl: `otpauth://totp/${encodeURIComponent(`${s.name || 'obsybrain'}:${who.email}`)}?secret=${TOTP_SECRET}&issuer=${encodeURIComponent(s.name || 'obsybrain')}`,
         },
       }
     },
@@ -1575,7 +1575,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         raw: exportZip(format, forgotten === '1'),
         headers: {
           'content-type': 'application/zip',
-          'content-disposition': `attachment; filename="rsc-brain-${b.slug}-${format}-${stamp}.zip"`,
+          'content-disposition': `attachment; filename="obsybrain-${b.slug}-${format}-${stamp}.zip"`,
         },
       }
     },
@@ -1613,7 +1613,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           422,
           'invalid_archive',
-          'This is not a zip rsc-brain can read: its end record is missing.',
+          'This is not a zip obsybrain can read: its end record is missing.',
           'Make the zip again from the folder (with no links in it) and import it.',
         )
       c.s.life.set(b.slug, { ...life, imported: true })
@@ -1665,8 +1665,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           403,
           'web_only',
-          'Deciding about the wiki is done in the rsc-brain web, signed in as a person.',
-          'Open the rsc-brain web.',
+          'Deciding about the wiki is done in the obsybrain web, signed in as a person.',
+          'Open the obsybrain web.',
         )
       if (b.role !== 'curator')
         return err(
@@ -2156,7 +2156,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         body: {
           account: { id },
           key: { id: keyId, secret },
-          message: 'Copy the key now: rsc-brain shows it only this once.',
+          message: 'Copy the key now: obsybrain shows it only this once.',
         },
       }
     },
@@ -2199,7 +2199,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
       })
       return {
         status: 201,
-        body: { key: { id: keyId, secret }, message: 'Copy the key now: rsc-brain shows it only this once.' },
+        body: { key: { id: keyId, secret }, message: 'Copy the key now: obsybrain shows it only this once.' },
       }
     },
   },
@@ -2968,8 +2968,8 @@ const WEB_ONLY = (what: string) =>
   err(
     403,
     'web_only',
-    `${what} is done in the rsc-brain web, signed in as a person.`,
-    'Open the rsc-brain web. Keys of agents and programs cannot manage people or keys.',
+    `${what} is done in the obsybrain web, signed in as a person.`,
+    'Open the obsybrain web. Keys of agents and programs cannot manage people or keys.',
   )
 const ARCHIVED = err(
   403,
@@ -3654,7 +3654,7 @@ export async function startFixture(
       const def = OPS[m.op] as (typeof OPS)[string]
       const session = c.rscb_session && s.sessions.has(c.rscb_session) ? c.rscb_session : null
       const who = session ? (s.accounts.find((a) => `fx.${a.id}` === session) ?? null) : null
-      const isWeb = req.headers['x-requested-with'] === 'rsc-brain-web'
+      const isWeb = req.headers['x-requested-with'] === 'obsybrain-web'
       const raw = await rawOf(req)
       const body = parsed(raw)
       const state = def.screen ? s.states.get(def.screen) : undefined

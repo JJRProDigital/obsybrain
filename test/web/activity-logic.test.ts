@@ -78,7 +78,7 @@ describe('activity in words', () => {
     assert.equal(describeEvent(ev('wiki.changed')).did, 'applied to the wiki:')
     assert.equal(describeEvent(ev('wiki.changed', { target: null })).did, 'changed the wiki')
     // The installation itself (a session closed for being idle).
-    assert.equal(describeEvent(ev('session.closed', { who: null, client: null })).who, 'rsc-brain')
+    assert.equal(describeEvent(ev('session.closed', { who: null, client: null })).who, 'obsybrain')
     // An unknown kind still reads.
     assert.equal(describeEvent(ev('something.new')).did, 'something.new')
   })

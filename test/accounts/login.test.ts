@@ -9,7 +9,7 @@ import { newReset } from '../../src/domain/login.ts'
 import { skipPg } from '../helpers/pg.ts'
 import { type World, world } from '../helpers/world.ts'
 
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 const PW = 'correct horse battery staple'
 const sessionOf = (h: Headers) => /rscb_session=([^;]+)/.exec(h.get('set-cookie') ?? '')?.[1] ?? ''
 
@@ -198,7 +198,7 @@ describe('signing in', { skip: skipPg }, () => {
     })
     // The emailed path, held between making its link and committing it.
     const emailed = w.db.tx(async (tx) => {
-      await tx.query("SELECT pg_advisory_xact_lock(hashtext('rsc-brain reset ' || $1))", [eve.id])
+      await tx.query("SELECT pg_advisory_xact_lock(hashtext('obsybrain reset ' || $1))", [eve.id])
       await newReset(tx, eve.id, null, w.clock())
       made()
       await gate

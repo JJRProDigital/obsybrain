@@ -1,4 +1,4 @@
-// How many invitation mails a service account may make rsc-brain send in an hour (F1-PR2 review): every mail of
+// How many invitation mails a service account may make obsybrain send in an hour (F1-PR2 review): every mail of
 // a service counts, from POST /v1/brains/{slug}/invitations and from a brain made with a first curator to invite.
 // Counted in the audit (one invitation.mail per mail) while the service holds its own turn, so two requests of
 // the same service never both spend the last place.
@@ -13,7 +13,7 @@ export const SERVICE_INVITES_PER_HOUR = 100
 const HOUR_MS = 3_600_000
 
 export async function serviceTurn(db: Db, accountId: string): Promise<void> {
-  await db.query("SELECT pg_advisory_xact_lock(hashtext('rsc-brain service invites ' || $1))", [accountId])
+  await db.query("SELECT pg_advisory_xact_lock(hashtext('obsybrain service invites ' || $1))", [accountId])
 }
 
 // Past the quota the request is refused (429 invite_quota) and, thrown inside its transaction, nothing changes.
@@ -31,7 +31,7 @@ export async function checkQuota(c: Ctx, needed: number, perHour: number): Promi
   const e = new AppError(
     429,
     'invite_quota',
-    `This service account may have rsc-brain mail at most ${perHour} invitations an hour.`,
+    `This service account may have obsybrain mail at most ${perHour} invitations an hour.`,
     wait === null
       ? `Invite at most ${perHour} people without an account in an hour.`
       : `Try again in ${Math.ceil(wait / 60)} minutes; people who already have an account can be added now.`,

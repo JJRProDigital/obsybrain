@@ -1,10 +1,10 @@
 // Companion mode with real containers (plan F1 T049, the B7 container lane): local only, never in CI (plan §5.1). Runs
 // with OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). It stands in for rsc-factory's installer:
-// a shared network and a PostgreSQL on it (as rsc-factory's), then `rsc-brain.sh install --companion`, then the
+// a shared network and a PostgreSQL on it (as rsc-factory's), then `obsybrain.sh install --companion`, then the
 // handshake from a container on that network, as rsc-factory's setup makes it. Every Docker resource carries the
 // prefix rscb-f1c- and a random id, and is removed after.
 //
-// What only real containers show: the app is reachable as rsc-brain on the shared network; the handshake is not
+// What only real containers show: the app is reachable as obsybrain on the shared network; the handshake is not
 // reachable from this machine through the published port; two calls at once set up once; and «this machine only»
 // still holds with two networks (the default route stays on the installation's own network), so the administration
 // signs in from this machine afterwards.
@@ -20,7 +20,7 @@ import { promisify } from 'node:util'
 
 const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const ID = randomBytes(4).toString('hex')
 const IMAGE = `rscb-f1c-image:${ID}`
 const NAME = `rscb-f1c-${ID}`
@@ -28,7 +28,7 @@ const NET = `rscb-f1c-shared-${ID}`
 const PG = `rscb-f1c-pg-${ID}`
 const PG_IMAGE =
   'postgres:17.11-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b'
-const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/json' }
+const WEB = { 'x-requested-with': 'obsybrain-web', 'content-type': 'application/json' }
 const ADMIN = { name: 'Eric', email: 'eric@example.com', password: 'a long enough password' }
 
 const why = (() => {
@@ -66,7 +66,7 @@ const fromShared = (
   new Promise((resolve, reject) => {
     const script =
       "let s='';process.stdin.on('data',d=>s+=d).on('end',async()=>{const i=JSON.parse(s);" +
-      `const r=await fetch('http://rsc-brain:8090${path}',{method:'POST',` +
+      `const r=await fetch('http://obsybrain:8090${path}',{method:'POST',` +
       "headers:{'content-type':'application/json',authorization:'Bearer '+i.token},body:JSON.stringify(i.body)});" +
       'process.stdout.write(JSON.stringify({status:r.status,body:await r.text()}))})'
     const p = spawn(
@@ -192,7 +192,7 @@ describe('companion mode with real containers', { skip: why ?? false }, () => {
 
   it('the summary carries the one-time key and the internal address; .env keeps the key for its owner only', () => {
     assert.match(summary.companionToken, /^[0-9a-f]{64}$/)
-    assert.equal(summary.internalUrl, 'http://rsc-brain:8090')
+    assert.equal(summary.internalUrl, 'http://obsybrain:8090')
     assert.equal(summary.url, `http://localhost:${port}`)
     assert.match(
       readFileSync(join(dir, '.env'), 'utf8'),

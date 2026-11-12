@@ -28,7 +28,7 @@ function run(
   })
 }
 
-describe('rsc-brain admin bootstrap', { skip: skipPg }, () => {
+describe('obsybrain admin bootstrap', { skip: skipPg }, () => {
   let t: TestDb
   before(async () => {
     t = await freshDatabase()
@@ -82,7 +82,7 @@ describe('rsc-brain admin bootstrap', { skip: skipPg }, () => {
   })
 })
 
-describe('rsc-brain setup --from-env (companion mode)', { skip: skipPg }, () => {
+describe('obsybrain setup --from-env (companion mode)', { skip: skipPg }, () => {
   it('review: names what is missing; prepares once and prints the service key as JSON; then refuses', async () => {
     const t = await freshDatabase()
     try {

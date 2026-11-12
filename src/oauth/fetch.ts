@@ -105,7 +105,7 @@ export async function fetchJson(address: string, policy: FetchPolicy = {}): Prom
   if (url.protocol !== 'https:' && !plainOk) throw new FetchRefused('Only https addresses are fetched.')
   if (url.username || url.password) throw new FetchRefused('Addresses with credentials are not fetched.')
   if (isIP(host) && forbiddenAddress(host) && !(policy.allowLoopbackHttp && LOOPBACK.has(host))) {
-    throw new FetchRefused(`${host} is an address rsc-brain does not reach.`)
+    throw new FetchRefused(`${host} is an address obsybrain does not reach.`)
   }
   const request = url.protocol === 'https:' ? httpsRequest : httpRequest
   return new Promise((resolve, reject) => {
@@ -113,7 +113,7 @@ export async function fetchJson(address: string, policy: FetchPolicy = {}): Prom
       url,
       {
         method: 'GET',
-        headers: { accept: 'application/json', 'user-agent': 'rsc-brain' },
+        headers: { accept: 'application/json', 'user-agent': 'obsybrain' },
         lookup: guardedLookup(policy),
         timeout: FETCH_TIMEOUT_MS,
       },

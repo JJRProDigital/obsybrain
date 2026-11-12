@@ -16,7 +16,7 @@ const unicodeUnzip =
   hasUnzip && /UNICODE_SUPPORT/.test(spawnSync('unzip', ['-v'], { encoding: 'utf8' }).stdout)
 const hasPython = spawnSync('python3', ['-I', '-c', 'import zipfile']).status === 0
 const PY_NAMES = 'import json,sys,zipfile; print(json.dumps(zipfile.ZipFile(sys.argv[1]).namelist()))'
-const dir = mkdtempSync(join(tmpdir(), 'rsc-brain-zip-'))
+const dir = mkdtempSync(join(tmpdir(), 'obsybrain-zip-'))
 after(() => rmSync(dir, { recursive: true, force: true }))
 
 // A sink that keeps what it is given: what an export streams to the client.

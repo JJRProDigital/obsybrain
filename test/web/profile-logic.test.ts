@@ -62,10 +62,10 @@ describe('a token in the list', () => {
     // The bridge says who it is; never «an API client».
     assert.equal(
       lastUseLabel(
-        token({ lastUsedAt: '2026-11-01T11:59:50.000Z', lastClient: 'rsc-brain-bridge/0.1.0' }),
+        token({ lastUsedAt: '2026-11-01T11:59:50.000Z', lastClient: 'obsybrain-bridge/0.1.0' }),
         NOW,
       ),
-      'Used just now by the rsc-brain bridge',
+      'Used just now by the obsybrain bridge',
     )
   })
 })
@@ -158,7 +158,12 @@ describe('the key of the second factor', () => {
 
 describe('the configuration with the token filled in', () => {
   const blocks = [
-    { title: 'env', where: 'terminal', format: 'shell', text: 'export OBSY_BRAIN_TOKEN="<paste-your-token>"' },
+    {
+      title: 'env',
+      where: 'terminal',
+      format: 'shell',
+      text: 'export OBSY_BRAIN_TOKEN="<paste-your-token>"',
+    },
     {
       title: 'file',
       where: '.mcp.json',

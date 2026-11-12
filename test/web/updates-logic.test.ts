@@ -148,8 +148,8 @@ describe('a refusal and a way back that failed (closing review, findings 2 and 3
   const wrecked = {
     from: '0.2.0',
     to: '0.3.0',
-    copy: 'rsc-brain-1-pre-update.rscb',
-    restore: 'sh rsc-brain.sh restore --file x.rscb --confirm <name> --dir "/srv/b"',
+    copy: 'obsybrain-1-pre-update.rscb',
+    restore: 'sh obsybrain.sh restore --file x.rscb --confirm <name> --dir "/srv/b"',
   }
   it('a refusal of the newest version: the button stays, and the reason is shown with it', () => {
     assert.deepEqual(updateView(newer, on({ refused }), NOW), {

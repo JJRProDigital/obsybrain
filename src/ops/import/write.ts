@@ -11,7 +11,7 @@ import type { DocsPlan } from './docs.ts'
 
 const sha = (s: string) => createHash('sha256').update(s).digest('hex')
 // The client the journal names for what an import wrote.
-export const IMPORT_CLIENT = 'rsc-brain import'
+export const IMPORT_CLIENT = 'obsybrain import'
 
 // The closed session everything an import writes into the journal belongs to.
 export async function importSession(

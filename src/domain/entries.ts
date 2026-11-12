@@ -519,7 +519,7 @@ export async function webCorrection(
   o: { decidedByKey?: boolean } = {},
 ): Promise<Receipt> {
   if (!o.decidedByKey && (ctx.who.credential.kind !== 'web' || ctx.who.kind !== 'person')) {
-    throw invalid('Only a person in the web writes corrections this way.', 'Use the rsc-brain web.')
+    throw invalid('Only a person in the web writes corrections this way.', 'Use the obsybrain web.')
   }
   return write(
     { ...ctx, db },

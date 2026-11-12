@@ -8,8 +8,8 @@ export function inWeb(ctx: Ctx, what = 'This'): void {
     throw new AppError(
       403,
       'web_only',
-      `${what} is done in the rsc-brain web, signed in as a person.`,
-      'Open the rsc-brain web. Keys of agents and programs cannot manage people or keys.',
+      `${what} is done in the obsybrain web, signed in as a person.`,
+      'Open the obsybrain web. Keys of agents and programs cannot manage people or keys.',
     )
   }
 }

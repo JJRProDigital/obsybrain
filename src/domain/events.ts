@@ -170,7 +170,7 @@ export async function lastSeq(db: Db): Promise<number> {
 // deploy) from numbering at once: otherwise a number could become visible after a later one was read.
 export async function sequenceEvents(db: Db, limit: number): Promise<number[]> {
   const rows = await db.tx(async (t) => {
-    await t.query("SELECT pg_advisory_xact_lock(hashtext('rsc-brain:events-seq'))")
+    await t.query("SELECT pg_advisory_xact_lock(hashtext('obsybrain:events-seq'))")
     return t.query<{ seq: string }>(
       `UPDATE events e SET seq = n.seq
        FROM (SELECT id, nextval('events_seq') AS seq

@@ -1,11 +1,11 @@
-// The consumer contract of rsc-factory (plan rsc-factory-brain §3.2, T010): every call its rsc-brain client
+// The consumer contract of rsc-factory (plan rsc-factory-brain §3.2, T010): every call its obsybrain client
 // makes, sent with a body that fits the request shape rsc-factory sends (brain-shapes.json "requests"),
 // answered by the real server with the reply shapes it reads. brain-shapes.json is a reviewed copy of
-// rsc-factory's test/memory/brain-shapes.json: its fake rsc-brain answers with the same replies and refuses a
+// rsc-factory's test/memory/brain-shapes.json: its fake obsybrain answers with the same replies and refuses a
 // body that breaks the same requests. Both sides pin the SHA-256 of their copy to the same constant (below):
 // an edit to one copy fails its own side until the constant changes, and the constant changes in both
 // repositories in the same pair of PRs. That catches a one-sided edit; it cannot see the other repository.
-// It also pins what that fake models of rsc-brain's behaviour: relayed corrections and their refusals,
+// It also pins what that fake models of obsybrain's behaviour: relayed corrections and their refusals,
 // request keys per credential, the start-up context of each agent, and "mine" among the pending proposals.
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'

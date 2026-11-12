@@ -97,7 +97,7 @@ describe('when the daily copy runs', () => {
 describe('CA8: 15 days of the daily copy', () => {
   let dir: string
   before(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-schedule-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-schedule-'))
   })
   after(async () => rm(dir, { recursive: true, force: true }))
 
@@ -270,7 +270,7 @@ describe('CA8: 15 days of the daily copy', () => {
 describe('prune and list', () => {
   let dir: string
   before(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-prune-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-prune-'))
   })
   after(async () => rm(dir, { recursive: true, force: true }))
 

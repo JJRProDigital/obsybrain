@@ -448,10 +448,10 @@ describe('the administration of the installation (PR25b)', { skip: skipPg }, () 
       assert.match(String(m.subject), /Acme <Brain> & Co/)
       assert.match(String(m.html), /Acme &lt;Brain&gt; &amp; Co/)
       assert.ok(!String(m.html).includes('<Brain>'))
-      assert.match(String(m.html), /<img [^>]*src="cid:logo@rsc-brain"/)
+      assert.match(String(m.html), /<img [^>]*src="cid:logo@obsybrain"/)
       assert.ok(!/src="https?:/.test(String(m.html)))
       const att = (m.attachments as Array<Json>)[0] as Json
-      assert.equal(att.cid, 'logo@rsc-brain')
+      assert.equal(att.cid, 'logo@obsybrain')
       assert.equal(att.contentType, 'image/png')
       assert.deepEqual(Buffer.from(att.content as Buffer), img)
       // The link is in the html too, escaped.

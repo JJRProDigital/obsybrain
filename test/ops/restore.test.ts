@@ -42,7 +42,7 @@ const OTHER = 'the-key-of-another-installation-thirty-two-plus'
 const PW = 'correct horse battery staple'
 const MAIL_PW = 'mail-password-canary-41c9'
 const PROVIDER_KEY = 'sk-provider-canary-key-0f3e'
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 // A restore that moves the epoch ends every pending invitation and unused reset link of the copy.
 const LINKS = { invitations: ['revoked_at'], password_resets: ['used_at'] }
 
@@ -94,7 +94,7 @@ async function sectionsOf(path: string, key = TEST_SECRET): Promise<{ header: He
   return { header: opened.header, sections }
 }
 
-// A copy made by hand from sections (changed by a test), encrypted as rsc-brain encrypts them.
+// A copy made by hand from sections (changed by a test), encrypted as obsybrain encrypts them.
 async function craft(
   path: string,
   header: Header,
@@ -143,7 +143,7 @@ describe('restore on PostgreSQL', { skip: skipPg }, () => {
 
   before(async () => {
     source = await world()
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-restore-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-restore-'))
     const a = await source.person('Ada', { isAdmin: true })
     await source.db.query('UPDATE accounts SET password_hash = $2 WHERE id = $1', [
       a.id,
@@ -525,7 +525,7 @@ describe('restore on PostgreSQL', { skip: skipPg }, () => {
 
   it('--keep-keys (CA7, the rollback of an update): keys and sessions keep working, no epoch move, the old schema back', async () => {
     const t = await world()
-    const d = await mkdtemp(join(tmpdir(), 'rsc-brain-rollback-'))
+    const d = await mkdtemp(join(tmpdir(), 'obsybrain-rollback-'))
     try {
       const p = await t.person('Pia', { isAdmin: true })
       const web = await t.web(p.id)
@@ -717,7 +717,7 @@ describe('restore on PostgreSQL', { skip: skipPg }, () => {
   })
 
   it('a copy before a restore needs maintenance on, like one before an update', async () => {
-    const d = await mkdtemp(join(tmpdir(), 'rsc-brain-prerestore-'))
+    const d = await mkdtemp(join(tmpdir(), 'obsybrain-prerestore-'))
     try {
       await assert.rejects(
         backup.create(source.db, { dir: d, secret: TEST_SECRET, reason: 'pre-restore', clock: source.clock }),
@@ -732,7 +732,7 @@ describe('restore on PostgreSQL', { skip: skipPg }, () => {
     }
   })
 
-  it('a database that is not rsc-brain’s is refused; nothing changes', async () => {
+  it('a database that is not obsybrain’s is refused; nothing changes', async () => {
     const t = await freshDatabase()
     try {
       await t.db.query('CREATE TABLE someone_elses (id int)')
@@ -744,7 +744,7 @@ describe('restore on PostgreSQL', { skip: skipPg }, () => {
           keepKeys: false,
           clock: () => new Date(),
         }),
-        isCode('not_rsc_brain_database'),
+        isCode('not_obsybrain_database'),
       )
       assert.ok(await t.db.one("SELECT 1 FROM pg_tables WHERE tablename = 'someone_elses'"))
     } finally {
@@ -789,7 +789,7 @@ describe('restore on PostgreSQL', { skip: skipPg }, () => {
 describe('restore: links within a table across batches', { skip: skipPg }, () => {
   it('more than a thousand rows, each pointing to one that comes after it', async () => {
     const w = await world()
-    const d = await mkdtemp(join(tmpdir(), 'rsc-brain-selflinks-'))
+    const d = await mkdtemp(join(tmpdir(), 'obsybrain-selflinks-'))
     try {
       const p = await w.person('Lia', { isAdmin: true })
       assert.equal((await w.call(p.key, 'POST', '/v1/brains', { slug: 'links' })).status, 201)
@@ -923,7 +923,7 @@ describe('restore: a copy larger than the memory of the process', { skip: skipPg
   it('restores a copy of some 150 MB of text with a 128 MB heap', { timeout: 600_000 }, async () => {
     const source = await freshDatabase()
     const target = await freshDatabase()
-    const d = await mkdtemp(join(tmpdir(), 'rsc-brain-bigcopy-'))
+    const d = await mkdtemp(join(tmpdir(), 'obsybrain-bigcopy-'))
     try {
       await migrate(source.db)
       await source.db.query(

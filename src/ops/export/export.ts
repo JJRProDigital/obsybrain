@@ -36,7 +36,7 @@ export const EXPORT_LIMITS = {
 export const EXPORT_STATE = { building: 0, abandoned: 0 }
 
 // The name an export's transaction carries (settle() in backup.ts does not wait for it: it only reads).
-export const EXPORT_APP_NAME = 'rsc-brain export'
+export const EXPORT_APP_NAME = 'obsybrain export'
 // What a crash left behind is this old at least (a live export is never this long in the making).
 const STALE_MS = 3_600_000
 
@@ -90,8 +90,8 @@ const unsafe = () =>
   new AppError(
     500,
     'export_folder_unsafe',
-    'The folder where exports are prepared is not a private folder of rsc-brain.',
-    'Ask an administrator: it must be a folder (not a link) owned by the user rsc-brain runs as, with mode 700.',
+    'The folder where exports are prepared is not a private folder of obsybrain.',
+    'Ask an administrator: it must be a folder (not a link) owned by the user obsybrain runs as, with mode 700.',
   )
 
 // The folder of the server's data (next to the copies) where exports are prepared: made private when it is not
@@ -113,7 +113,7 @@ export async function exportFolder(dir: string): Promise<string> {
 // Without a data folder: one private folder of the system's temporary space for this process (mkdtemp: 700).
 let own: Promise<string> | null = null
 const processFolder = () => {
-  own ??= mkdtemp(join(tmpdir(), 'rsc-brain-exports-'))
+  own ??= mkdtemp(join(tmpdir(), 'obsybrain-exports-'))
   return own
 }
 
@@ -222,7 +222,7 @@ export async function exportBrain(
     fh = null
     let closed = false
     return {
-      name: `rsc-brain-${brain.slug}-${o.format}-${stamp(at)}.zip`,
+      name: `obsybrain-${brain.slug}-${o.format}-${stamp(at)}.zip`,
       type: 'application/zip',
       fh: file,
       bytes,

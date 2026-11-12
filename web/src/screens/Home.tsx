@@ -248,7 +248,7 @@ export function Home() {
   const r = brainsResource()
   const who = me().data.value
   const data = r.data.value
-  // "rsc-brain is set up." is said once, on the first home after the setup.
+  // "obsybrain is set up." is said once, on the first home after the setup.
   const [setUp] = useState(() => justSetUp.value)
   // "Welcome — you joined …" is said once, on the first home after accepting an invitation.
   const [joined] = useState(() => justJoined.value)

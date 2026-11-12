@@ -1,4 +1,4 @@
-// The product is called rsc-brain (Eric, 2026-10-30): never by an older or a personal name, and never a
+// The product is called obsybrain (Eric, 2026-10-30): never by an older or a personal name, and never a
 // bare «Brain» (review of PR18). The common noun stays: a brain is a knowledge container ("Create brain",
 // "Your brains"). The source, the web, the README and the built web (where a name could arrive through a
 // bundled string) are checked.
@@ -111,7 +111,7 @@ describe('the product name', () => {
   it('a wrong name is caught, and the right one passes', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'brain-name-'))
     try {
-      await writeFile(join(dir, 'a.ts'), "const title = 'rsc-brain'; const env = 'OBSY_BRAIN_TOKEN'")
+      await writeFile(join(dir, 'a.ts'), "const title = 'obsybrain'; const env = 'OBSY_BRAIN_TOKEN'")
       assert.deepEqual(await wrongNames(dir), [])
       for (const bad of ['RSC Brain', 'Risco Brain', 'rsc  brain']) {
         await writeFile(join(dir, 'a.ts'), `const title = '${bad}'`)
@@ -122,7 +122,7 @@ describe('the product name', () => {
     }
   })
 
-  it('is rsc-brain everywhere in the source, the web and the README', async () => {
+  it('is obsybrain everywhere in the source, the web and the README', async () => {
     const hits = [
       ...(await wrongNames(join(ROOT, 'src'))),
       ...(await wrongNames(join(ROOT, 'web', 'src'))),
@@ -148,7 +148,7 @@ describe('the product name', () => {
       "const e = 'OBSY_BRAIN_TOKEN'",
       '// Brain does this in a comment',
       "const t = 'Your brains'",
-      "const t = 'rsc-brain is set up.'",
+      "const t = 'obsybrain is set up.'",
     ])
       assert.deepEqual(bareNames('a.tsx', fine), [], fine)
     assert.deepEqual(bareNames('a.md', 'Send the header `X-Brain-Cut: true` and `Brain`.'), [])
@@ -159,7 +159,7 @@ describe('the product name', () => {
       // The launcher and its files are read line by line, like the README (code spans aside).
       ...(
         await Promise.all(
-          ['rsc-brain.sh', 'compose.yaml', 'Caddyfile'].map(async (f) =>
+          ['obsybrain.sh', 'compose.yaml', 'Caddyfile'].map(async (f) =>
             bareNames(`${f}.md`, await readFile(join(ROOT, 'deploy', f), 'utf8')).map(
               (t) => `deploy/${f}: ${t}`,
             ),
@@ -178,7 +178,7 @@ describe('the product name', () => {
     assert.deepEqual(hits, [])
   })
 
-  it('is rsc-brain in the built web (dist/web)', {
+  it('is obsybrain in the built web (dist/web)', {
     skip: existsSync(WEB_DIST) ? false : 'dist/web is not built: run npm run build first (verify.sh does)',
   }, async () => {
     assert.deepEqual(await wrongNames(WEB_DIST), [])

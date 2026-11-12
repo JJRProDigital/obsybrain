@@ -26,7 +26,7 @@ const notThisKey = () =>
     403,
     'web_only',
     'Approval happens in the web.',
-    'Open the proposal in the rsc-brain web, as a curator; or ask a curator of the brain to give this key the permission to write to the wiki, and it decides over MCP (brain_decide) and the API.',
+    'Open the proposal in the obsybrain web, as a curator; or ask a curator of the brain to give this key the permission to write to the wiki, and it decides over MCP (brain_decide) and the API.',
   )
 
 // Who decided through a key, as the log and the activity say it: the key's owner and the key's name.

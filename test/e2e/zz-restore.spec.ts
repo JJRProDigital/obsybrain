@@ -14,10 +14,10 @@ test.describe.configure({ mode: 'serial' })
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up rsc-brain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up rsc-brain') {
-    await page.getByLabel('Name of this installation').fill('rsc-brain')
+  if (where === 'Set up obsybrain') {
+    await page.getByLabel('Name of this installation').fill('obsybrain')
     await page.getByLabel('Address people open').fill(baseURL)
     await page.getByLabel('Your name').fill(ADMIN.name)
     await page.getByLabel('Your email').fill(ADMIN.email)
@@ -51,7 +51,7 @@ test('CA10 (web): a copy that fails shows the band of the administration until a
   try {
     await makeCopy(page, /The copy did not finish/)
     await expect(page.getByRole('note').filter({ hasText: 'The last copy failed' })).toContainText(
-      'rsc-brain cannot write in the folder of the copies',
+      'obsybrain cannot write in the folder of the copies',
     )
     await page.goto('/admin/people')
     await expect(page.getByRole('alert').filter({ hasText: 'The last copy failed' })).toBeVisible()
@@ -84,7 +84,7 @@ test('risk 9: restoring with the name and the password answers first; then every
     .getByRole('button', { name: /Restore the copy of/ })
     .click()
   const dialog = page.getByRole('dialog')
-  await expect(dialog).toContainText('First, rsc-brain makes a copy of what is here now')
+  await expect(dialog).toContainText('First, obsybrain makes a copy of what is here now')
   await dialog.getByLabel('Name of this installation').fill(name)
   await dialog.getByLabel('Your password').fill(ADMIN.password)
   await dialog.getByRole('button', { name: 'Restore this copy' }).click()

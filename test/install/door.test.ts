@@ -18,13 +18,13 @@ import { promisify } from 'node:util'
 
 const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const ID = randomBytes(4).toString('hex')
 const PREFIX = `rscb-b1-door-${ID}`
 const IMAGE = `${PREFIX}-image:test`
 const BROKEN = `${PREFIX}-broken:test`
 const PASSWORD = 'a long test password for the door'
-const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/json' }
+const WEB = { 'x-requested-with': 'obsybrain-web', 'content-type': 'application/json' }
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
@@ -87,11 +87,11 @@ const ask = async (url: string, accept: string, extra: string[], phase: string):
 // What the update says it is doing, from its own lines.
 const phaseOf = (stderr: string) => {
   const marks: Array<[string, string]> = [
-    ['Stopping rsc-brain', 'stopping'],
+    ['Stopping obsybrain', 'stopping'],
     ['Migrating the data', 'migrating'],
-    ['Going back to rsc-brain', 'going-back'],
+    ['Going back to obsybrain', 'going-back'],
     ['Restoring the copy', 'restoring'],
-    ['Starting rsc-brain', 'starting'],
+    ['Starting obsybrain', 'starting'],
   ]
   let at = -1
   let phase = 'before'
@@ -144,7 +144,7 @@ describe('the stand-in door with real containers', { skip: why ?? false }, () =>
       ].join('\n'),
     )
     await run('docker', ['build', '-q', '-t', BROKEN, ctx])
-    assert.equal(await docker('run', '--rm', BROKEN, 'rsc-brain', 'version'), '99.0.0')
+    assert.equal(await docker('run', '--rm', BROKEN, 'obsybrain', 'version'), '99.0.0')
   })
   after(async () => {
     for (const name of made) await sweep(name)

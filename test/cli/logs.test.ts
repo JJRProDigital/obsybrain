@@ -1,4 +1,4 @@
-// CA17 (spec B7 «Salud y registros»; plan §3.11, §5.2): a day of use of a real `rsc-brain serve` — entries,
+// CA17 (spec B7 «Salud y registros»; plan §3.11, §5.2): a day of use of a real `obsybrain serve` — entries,
 // searches, signing in with a password, a new token, an agent over MCP — and nothing of it reaches the
 // process's output: no content, no searched text, no password, no key, no authorization header, not even a
 // prefix of one. What it does write is one JSON line per event with only the fields of src/core/log.ts.
@@ -16,7 +16,7 @@ import { MODERN } from '../../src/mcp/server.ts'
 import { freshDatabase, skipPg, type TestDb } from '../helpers/pg.ts'
 
 const CLI = new URL('../../src/cli/main.ts', import.meta.url).pathname
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 
 const CANARY = {
   title: 'canary-title-5d1e7b',

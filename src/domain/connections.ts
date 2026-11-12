@@ -185,7 +185,7 @@ export async function clientOf(
       now.getTime() - (row.fetched_at as Date).getTime() < CIMD_REFRESH_HOURS * 3_600_000
     if (!fresh) return fetchClient(db, now, clientId, policy)
   }
-  if (!row) throw bad('invalid_client', 'This client is not known to rsc-brain.')
+  if (!row) throw bad('invalid_client', 'This client is not known to obsybrain.')
   return {
     clientId: String(row.client_id),
     kind: row.kind as Client['kind'],
@@ -213,7 +213,7 @@ export async function registerClient(db: Db, clock: Clock, body: Record<string, 
   if (method !== undefined && method !== 'none') {
     throw bad(
       'invalid_client_metadata',
-      'rsc-brain registers public clients only (token_endpoint_auth_method "none").',
+      'obsybrain registers public clients only (token_endpoint_auth_method "none").',
     )
   }
   const name = clientName(body.client_name, 'Unnamed app')
@@ -614,7 +614,7 @@ export async function revokeByToken(db: Db, clock: Clock, b: Record<string, unkn
 
 const appView = async (db: Db, r: Row, now: Date) => {
   const slugs = await db.query('SELECT slug FROM brains WHERE id = ANY($1) ORDER BY slug', [r.brain_ids])
-  // The grant counts as used from the code exchange; its keys say when it really reached rsc-brain.
+  // The grant counts as used from the code exchange; its keys say when it really reached obsybrain.
   const used = await db.one<{ at: Date | null }>(
     'SELECT max(last_used_at) AS at FROM credentials WHERE grant_id = $1',
     [r.id],

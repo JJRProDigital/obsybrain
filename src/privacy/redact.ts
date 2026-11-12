@@ -32,7 +32,7 @@ const RULES: Rule[] = [
   { name: 'sendgrid', re: /\bSG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}\b/g },
   { name: 'telegram-bot', re: /\b\d{8,10}:AA[A-Za-z0-9_-]{33}\b/g },
   { name: 'jwt', re: /\beyJ[A-Za-z0-9_-]{8,2048}\.eyJ[A-Za-z0-9_-]{8,4096}\.[A-Za-z0-9_-]{8,2048}/g },
-  { name: 'rsc-brain', re: new RegExp(KEY_SHAPE.source, 'g') },
+  { name: 'obsybrain', re: new RegExp(KEY_SHAPE.source, 'g') },
   // user:password@ (or :password@) inside an address keeps the address and loses the password.
   {
     name: 'url-credentials',

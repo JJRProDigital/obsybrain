@@ -474,7 +474,7 @@ export const ROWS: Row[] = [
     route: '/setup',
     preset: 'fresh',
     key: 'setup',
-    ready: (p) => p.getByRole('heading', { name: 'Set up rsc-brain' }),
+    ready: (p) => p.getByRole('heading', { name: 'Set up obsybrain' }),
     empty: { na: DOOR },
     filtered: { na: DOOR },
     much: { na: DOOR },

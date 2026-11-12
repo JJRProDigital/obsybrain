@@ -1,4 +1,4 @@
-// `rsc-brain update record` (plan §3.9, T042): what the launcher runs at the end of an update, in the service that
+// `obsybrain update record` (plan §3.9, T042): what the launcher runs at the end of an update, in the service that
 // answers then (the new one, or the old one after the rollback), so Admin › Backups & system can say how the last
 // update went (CA7: «the failure is seen on the web»). It writes `lastUpdate` into status.json next to the copies,
 // keeping everything else there. The log of a failed update arrives on the standard input; the installation key and
@@ -34,22 +34,22 @@ function run(
   })
 }
 
-describe('rsc-brain update record (no database needed)', () => {
+describe('obsybrain update record (no database needed)', () => {
   let dir: string
   let env: Record<string, string>
   const status = async () => JSON.parse(await readFile(join(dir, 'status.json'), 'utf8'))
   before(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-cli-update-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-cli-update-'))
     env = {
       OBSY_BRAIN_BACKUPS: dir,
       OBSY_BRAIN_SECRET: KEY,
-      OBSY_BRAIN_DATABASE_URL: `postgres://rsc_brain:${DB_PASSWORD}@postgres:5432/rsc_brain`,
+      OBSY_BRAIN_DATABASE_URL: `postgres://obsybrain:${DB_PASSWORD}@postgres:5432/obsybrain`,
     }
   })
   after(async () => rm(dir, { recursive: true, force: true }))
 
   it('a good update: lastUpdate { ok, from, to, at } and everything else in status.json kept', async () => {
-    const lastOk = { at: '2026-11-03T03:00:00.000Z', file: 'rsc-brain-20261103T030000Z-scheduled.rscb' }
+    const lastOk = { at: '2026-11-03T03:00:00.000Z', file: 'obsybrain-20261103T030000Z-scheduled.rscb' }
     await writeFile(
       join(dir, 'status.json'),
       JSON.stringify({ lastOk, lastFailure: null, keyId: 'abc123abc123' }),
@@ -71,7 +71,7 @@ describe('rsc-brain update record (no database needed)', () => {
   it('a failed update: its log from the standard input, without the key or a database password, and short', async () => {
     const lines = [
       `boot failed: key ${KEY}`,
-      `connecting to postgres://rsc_brain:${DB_PASSWORD}@postgres:5432/rsc_brain`,
+      `connecting to postgres://obsybrain:${DB_PASSWORD}@postgres:5432/obsybrain`,
       ...Array.from({ length: 400 }, (_, i) => `migration 0024 line ${i}: relation "nowhere" does not exist`),
       // Near the end too, where the log is kept: the key, the database password alone, and another URL's password.
       `retrying with key ${KEY}`,

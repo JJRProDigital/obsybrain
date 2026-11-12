@@ -23,7 +23,7 @@ import { promisify } from 'node:util'
 
 const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const ID = randomBytes(4).toString('hex')
 // The version of the tree, which is what the first image says.
 const INSTALLED = (JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')) as { version: string })
@@ -35,7 +35,7 @@ const NEXT = `${PREFIX}-next:${ID}`
 const BROKEN = `${PREFIX}-broken:${ID}`
 const NAME = `${PREFIX}-update-${ID}`
 const DB = NAME.replaceAll('-', '_')
-const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/json' }
+const WEB = { 'x-requested-with': 'obsybrain-web', 'content-type': 'application/json' }
 const PASSWORD = 'a long test password 35'
 
 const CANARY = {
@@ -151,14 +151,14 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
     dir = join(BASE, 'install')
     let started = Date.now()
     await run('docker', ['build', '-q', '-t', BASE_IMAGE, ROOT], { maxBuffer: 64 << 20 })
-    measured(`docker build of rsc-brain ${((Date.now() - started) / 1000).toFixed(1)} s`)
+    measured(`docker build of obsybrain ${((Date.now() - started) / 1000).toFixed(1)} s`)
     // next: one more migration, added and harmless; it says 98.0.0. broken: next and a migration that fails; 99.0.0.
     started = Date.now()
     const ctx = join(BASE, 'images')
     mkdirSync(ctx)
     writeFileSync(
       join(ctx, '0024_test_next.sql'),
-      "COMMENT ON TABLE installation IS 'rsc-brain next (test)';\n",
+      "COMMENT ON TABLE installation IS 'obsybrain next (test)';\n",
     )
     writeFileSync(join(ctx, '0025_test_broken.sql'), 'SELECT 1 / 0;\n')
     const derive = (from: string, version: string, files: string[]) =>
@@ -174,8 +174,8 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
     await run('docker', ['build', '-q', '-t', NEXT, '-f', join(ctx, 'Dockerfile.next'), ctx])
     await run('docker', ['build', '-q', '-t', BROKEN, '-f', join(ctx, 'Dockerfile.broken'), ctx])
     measured(`images next and broken ${((Date.now() - started) / 1000).toFixed(1)} s`)
-    assert.equal(await docker('run', '--rm', NEXT, 'rsc-brain', 'version'), '98.0.0')
-    assert.equal(await docker('run', '--rm', BROKEN, 'rsc-brain', 'version'), '99.0.0')
+    assert.equal(await docker('run', '--rm', NEXT, 'obsybrain', 'version'), '98.0.0')
+    assert.equal(await docker('run', '--rm', BROKEN, 'obsybrain', 'version'), '99.0.0')
 
     // An installation with data: the administrator, a brain, entries, a token, the audit.
     const port = await freePort()
@@ -260,7 +260,7 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
     const s = JSON.parse(r.stdout)
     assert.equal(s.from, INSTALLED)
     assert.equal(s.to, '98.0.0')
-    assert.match(s.copy, /^rsc-brain-\d{8}T\d{6}Z-pre-update\.rscb$/)
+    assert.match(s.copy, /^obsybrain-\d{8}T\d{6}Z-pre-update\.rscb$/)
     assert.ok(readdirSync(join(dir, 'backups')).includes(s.copy))
     const afterUpdate = await tables()
     assert.deepEqual(diff(before, afterUpdate), [], 'every table as it was')
@@ -330,7 +330,7 @@ describe('updating with real containers (CA6, CA7, CA7b, CA17)', { skip: why ?? 
           ]
         })()
       }
-      if (!seen.atCopy && all.includes('==> Stopping rsc-brain 98.0.0')) seen.atCopy = tables()
+      if (!seen.atCopy && all.includes('==> Stopping obsybrain 98.0.0')) seen.atCopy = tables()
       if (all.includes('==> Going back to')) paused = true
     })
     const duringMaintenance = await seen.during

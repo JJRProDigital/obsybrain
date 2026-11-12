@@ -38,7 +38,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
   const tokenOf = (v: unknown) => /#token=([A-Za-z0-9_-]+)/.exec(String(v))?.[1] ?? ''
   const accept = (token: string, name: string) =>
     w.raw('POST', '/v1/invitations/accept', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: { token, name, password: 'correct horse battery staple' },
     })
   const brainId = async (slug: string) =>
@@ -137,7 +137,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     const link = (await w.mailTo(email, /invited you/)).text
     const token = /#token=([A-Za-z0-9_-]+)/.exec(link)?.[1] ?? ''
     const ok = await w.raw('POST', '/v1/invitations/accept', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: { token, name: 'Joins', password: 'correct horse battery staple' },
     })
     assert.equal(ok.status, 201, ok.text)

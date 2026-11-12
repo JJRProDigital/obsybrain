@@ -81,7 +81,7 @@ describe('what the gate counts as a write', () => {
     assert.equal(retryAfter(m(5), now), 5)
     assert.equal(retryAfter(m(4), now), 5)
     assert.equal(retryAfter({ ...m(0), until: new Date(now.getTime() + 30_500) }, now), 31)
-    assert.equal(MAINTENANCE_MESSAGE(42), 'rsc-brain is under maintenance, retry after 42 seconds')
+    assert.equal(MAINTENANCE_MESSAGE(42), 'obsybrain is under maintenance, retry after 42 seconds')
   })
 })
 
@@ -219,8 +219,8 @@ describe('the maintenance gate', { skip: skipPg }, () => {
       const res = await w.raw(r.method, path, {
         ...(r.method === 'GET' ? {} : { body: {} }),
         headers: r.public
-          ? { 'x-requested-with': 'rsc-brain-web' }
-          : { cookie: `rscb_session=${web}`, 'x-requested-with': 'rsc-brain-web' },
+          ? { 'x-requested-with': 'obsybrain-web' }
+          : { cookie: `rscb_session=${web}`, 'x-requested-with': 'obsybrain-web' },
       })
       refused(op, res)
       if (r.path.startsWith('/oauth/')) {
@@ -233,7 +233,7 @@ describe('the maintenance gate', { skip: skipPg }, () => {
         assert.ok(String(e.howToProceed).length > 0, op)
         // Ending access cannot wait silently: the way out is ending the maintenance (review of PR27).
         assert.equal(
-          String(e.howToProceed).includes('`rsc-brain maintenance off`'),
+          String(e.howToProceed).includes('`obsybrain maintenance off`'),
           ENDS_ACCESS.has(op),
           `${op}: ${e.howToProceed}`,
         )
@@ -262,7 +262,7 @@ describe('the maintenance gate', { skip: skipPg }, () => {
   it('signing in and renewing a connection are writes (C12)', async () => {
     const login = await w.raw('POST', '/v1/auth/login', {
       body: { email: 'eric@example.com', password: 'whatever whatever' },
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
     })
     refused('login', login)
     const res = await fetch(`${w.base}/oauth/token`, {
@@ -361,7 +361,7 @@ describe('the maintenance gate', { skip: skipPg }, () => {
         const path = r.path.replace(/[:*](\w+)/g, (_, k) => paramOf(r.path, k, slug)) + (query[r.path] ?? '')
         for (const headers of [
           { authorization: `Bearer ${key}` },
-          { cookie: `rscb_session=${session}`, 'x-requested-with': 'rsc-brain-web' },
+          { cookie: `rscb_session=${session}`, 'x-requested-with': 'obsybrain-web' },
         ]) {
           const res = await fetch(`${w.base}${path}`, { headers, redirect: 'manual' })
           await res.arrayBuffer()
@@ -463,7 +463,7 @@ describe('the maintenance gate', { skip: skipPg }, () => {
       assert.equal(res.status, 503, `${path}: ${html}`)
       assert.equal(res.headers.get('retry-after'), '120', path)
       assert.match(res.headers.get('content-type') ?? '', /text\/html/, path)
-      assert.match(html, /rsc-brain is updating\. Try again in 120 seconds\./, path)
+      assert.match(html, /obsybrain is updating\. Try again in 120 seconds\./, path)
       const back = /<a href="([^"]+)"/.exec(html)?.[1]?.replace(/&amp;/g, '&') ?? ''
       assert.ok(back.startsWith('/oauth/authorize?'), `${path}: ${back}`)
       assert.equal(new URLSearchParams(back.split('?')[1]).get('client_id'), clientId, path)

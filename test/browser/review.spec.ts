@@ -16,7 +16,7 @@ test.describe('R1: the first steps point at the installation, not at the browser
     await expect(page.getByRole('heading', { name: 'Get started' })).toBeVisible()
     const command = page.locator('pre.command')
     await expect(command).toHaveText(
-      'claude mcp add --transport http rsc-brain https://brain.example.test/mcp --scope user\nclaude mcp login rsc-brain',
+      'claude mcp add --transport http obsybrain https://brain.example.test/mcp --scope user\nclaude mcp login obsybrain',
     )
     await expect(command).not.toContainText(baseURL as string)
   })
@@ -258,7 +258,7 @@ test.describe('R6: the small things', () => {
     await scenario(context, baseURL as string, 'fresh')
     await page.goto('/setup')
     await page.evaluate(() => localStorage.setItem('rscb.theme', 'light'))
-    await page.getByLabel('Name of this installation').fill('rsc-brain')
+    await page.getByLabel('Name of this installation').fill('obsybrain')
     await page.getByLabel('Your name').fill('Eric')
     await page.getByLabel('Your email').fill('eric@example.test')
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
@@ -279,7 +279,7 @@ test.describe('R6: the small things', () => {
     await context.setOffline(true)
     await page.getByRole('link', { name: 'Support' }).click()
     const alert = page.getByRole('alert')
-    await expect(alert).toContainText('rsc-brain could not be reached')
+    await expect(alert).toContainText('obsybrain could not be reached')
     await expect(alert.getByText(/could not be reached/i)).toHaveCount(1)
     await context.setOffline(false)
   })

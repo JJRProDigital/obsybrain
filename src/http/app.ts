@@ -251,7 +251,7 @@ const uploadTimeout = () => {
   const e = new AppError(
     408,
     'upload_timeout',
-    'The upload stopped or took too long, so rsc-brain stopped waiting for it. Nothing was changed.',
+    'The upload stopped or took too long, so obsybrain stopped waiting for it. Nothing was changed.',
     'Check your connection and upload the zip again.',
   )
   e.headers = { connection: 'close' }
@@ -620,7 +620,7 @@ export function createHandler(deps: AppDeps) {
             503,
             'setup_required',
             'This installation is not set up yet.',
-            'Open the rsc-brain web address to run the first-time setup.',
+            'Open the obsybrain web address to run the first-time setup.',
           )
         }
       }
@@ -676,7 +676,7 @@ export function createHandler(deps: AppDeps) {
           403,
           'csrf',
           'This request from the web lacks its "X-Requested-With" header.',
-          'Use the rsc-brain web to do this.',
+          'Use the obsybrain web to do this.',
         )
       }
       const who = await resolveKey(deps.db, key ?? cookie, deps.clock(), key ? 'bearer' : 'cookie', conn)

@@ -202,7 +202,7 @@ describe('reading a documentation folder (CA14, CI)', () => {
   })
 
   it('walks a folder without following links, and only wiki/, raw/ and the root of a 02-DOCS folder', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'rsc-brain-import-walk-'))
+    const dir = await mkdtemp(join(tmpdir(), 'obsybrain-import-walk-'))
     try {
       for (const f of ['wiki/a.md', 'raw/n.md', 'archive/x/deep.md']) {
         await mkdir(join(dir, f, '..'), { recursive: true })
@@ -248,7 +248,7 @@ describe('review of PR32: limits and the fine print of a folder (CI)', () => {
       ])
       const t = treeFromZip(z)
       assert.equal(t.files.find((f) => f.path === 'wiki/big.md')?.tooLarge, true, manifest)
-      const dir = await mkdtemp(join(tmpdir(), 'rsc-brain-import-manifest-'))
+      const dir = await mkdtemp(join(tmpdir(), 'obsybrain-import-manifest-'))
       try {
         await mkdir(join(dir, 'wiki'))
         await writeFile(join(dir, 'manifest.json'), manifest)
@@ -263,7 +263,7 @@ describe('review of PR32: limits and the fine print of a folder (CI)', () => {
     const { rawZip } = await import('../helpers/rawzip.ts')
     const faithful = treeFromZip(
       rawZip([
-        { name: 'manifest.json', data: '{"format":"rsc-brain-faithful","version":1}' },
+        { name: 'manifest.json', data: '{"format":"obsybrain-faithful","version":1}' },
         { name: 'entries.ndjson', data: big },
       ]),
     )

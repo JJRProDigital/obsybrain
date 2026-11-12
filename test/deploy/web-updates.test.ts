@@ -27,7 +27,7 @@ import { dirname, join } from 'node:path'
 import { after, before, describe, it } from 'node:test'
 
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const FAKE = join(ROOT, 'test', 'deploy', 'fake-docker.sh')
 const TOKEN = 'ghp_SecretTokenValue0123456789'
 const KEY =
@@ -70,9 +70,9 @@ const TOOLS = [
   'perl',
   'stat',
 ]
-const VERSIONS = 'rsc-brain:test=0.1.0 rsc-brain:next=0.2.0'
-const IMG = 'rsc-brain-updater:rsc-brain'
-const PROJECT = 'rsc-brain-updater'
+const VERSIONS = 'obsybrain:test=0.1.0 obsybrain:next=0.2.0'
+const IMG = 'obsybrain-updater:obsybrain'
+const PROJECT = 'obsybrain-updater'
 
 let BASE = ''
 let SYSBIN = ''
@@ -190,7 +190,7 @@ const installed = async (extra: string[] = []) => {
     '--port',
     port,
     '--image',
-    'rsc-brain:test',
+    'obsybrain:test',
     ...extra,
   ])
   assert.equal(r.code, 0, r.stderr)
@@ -248,7 +248,7 @@ describe('web-updates enable', () => {
     for (const more of [[], ['--yes']]) {
       const r = launch(c, ['web-updates', 'enable', '--dir', c.dir, ...more, ...(more.length ? [] : [])])
       assert.equal(r.code, 2, r.stderr)
-      assert.match(r.stderr, /rsc-brain was installed by rsc-factory: update it from there\./)
+      assert.match(r.stderr, /obsybrain was installed by rsc-factory: update it from there\./)
       assert.deepEqual(r.calls, [], 'not even a question to docker')
     }
     assert.deepEqual(readdirSync(c.dir).sort(), before)
@@ -342,7 +342,7 @@ describe('web-updates enable', () => {
     for (const f of [
       'loop.sh',
       'credentials.sh',
-      'rsc-brain.sh',
+      'obsybrain.sh',
       'Dockerfile',
       'compose.updater.yaml',
       'updater.env',
@@ -361,7 +361,7 @@ describe('web-updates enable', () => {
     assert.match(e, new RegExp(`OBSY_BRAIN_UPDATER_UID='${owner.uid}'`))
     assert.match(e, new RegExp(`OBSY_BRAIN_UPDATER_GID='${owner.gid}'`))
     assert.match(e, /OBSY_BRAIN_UPDATER_SOCKET_GID='999'/)
-    assert.match(e, /OBSY_BRAIN_UPDATER_HOSTNAME='rsc-brain-updater'/)
+    assert.match(e, /OBSY_BRAIN_UPDATER_HOSTNAME='obsybrain-updater'/)
     assert.match(e, new RegExp(`OBSY_BRAIN_UPDATER_IMAGE='${IMG}'`))
     assert.match(
       readFileSync(join(u, 'passwd'), 'utf8'),
@@ -487,7 +487,7 @@ describe('web-updates enable', () => {
         '--port',
         port,
         '--image',
-        'rsc-brain:test',
+        'obsybrain:test',
       ])
       assert.equal(made.code, 0, made.stderr)
       const r = launch(c, ['web-updates', 'enable', '--yes', '--dir', odd])
@@ -574,7 +574,7 @@ describe('web-updates enable', () => {
     const c = await installed()
     assert.equal(launch(c, enable(c, '--repo-token-file', tokenFile(c))).code, 0)
     await killedEnable(c, OTHER)
-    rmSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true, force: true })
+    rmSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true, force: true })
     const r = launch(c, ['web-updates', 'disable', '--dir', c.dir])
     assert.equal(r.code, 0, r.stderr)
     for (const secret of [TOKEN, 'AnotherToken']) assert.deepEqual(filesWith(c.dir, secret), [], secret)
@@ -585,7 +585,7 @@ describe('web-updates enable', () => {
     const c = await installed()
     assert.equal(launch(c, enable(c, '--repo-token-file', tokenFile(c))).code, 0)
     await killedEnable(c, OTHER)
-    rmSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true, force: true })
+    rmSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true, force: true })
     assert.equal(launch(c, ['uninstall', '--dir', c.dir]).code, 0)
     for (const secret of [TOKEN, 'AnotherToken']) assert.deepEqual(filesWith(c.dir, secret), [], secret)
   })
@@ -594,7 +594,7 @@ describe('web-updates enable', () => {
     const c = await installed()
     assert.equal(launch(c, enable(c, '--repo-token-file', tokenFile(c))).code, 0)
     await killedEnable(c, OTHER)
-    rmSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true, force: true })
+    rmSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true, force: true })
     const r = launch(c, enable(c))
     assert.equal(r.code, 0, r.stderr)
     assert.equal(
@@ -614,9 +614,9 @@ describe('web-updates enable', () => {
       mkdirSync(join(c.dir, 'updater', left), { recursive: true })
       writeFileSync(join(c.dir, 'updater', left, 'token'), `${OTHER}\n`)
     }
-    mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
+    mkdirSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true })
     writeFileSync(
-      join(c.dir, '.rsc-brain', 'lock', 'owner'),
+      join(c.dir, '.obsybrain', 'lock', 'owner'),
       `${process.pid} ${spawnSync('uname', ['-n'], { encoding: 'utf8' }).stdout.trim()}\n`,
     )
     const busy = launch(c, ['web-updates', 'disable', '--dir', c.dir])
@@ -698,9 +698,9 @@ describe('web-updates enable', () => {
     const c = await installed()
     launch(c, enable(c))
     mkdirSync(join(c.dir, 'updater', 'previous.tmp'), { recursive: true })
-    mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
+    mkdirSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true })
     writeFileSync(
-      join(c.dir, '.rsc-brain', 'lock', 'owner'),
+      join(c.dir, '.obsybrain', 'lock', 'owner'),
       `${process.pid} ${spawnSync('uname', ['-n'], { encoding: 'utf8' }).stdout.trim()}\n`,
     )
     assert.equal(launch(c, ['web-updates', 'disable', '--dir', c.dir]).code, 3)
@@ -807,9 +807,9 @@ describe('web-updates enable', () => {
 
   it('another launcher at work: exit 3, nothing made', async () => {
     const c = await installed()
-    mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
+    mkdirSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true })
     writeFileSync(
-      join(c.dir, '.rsc-brain', 'lock', 'owner'),
+      join(c.dir, '.obsybrain', 'lock', 'owner'),
       `${process.pid} ${spawnSync('uname', ['-n'], { encoding: 'utf8' }).stdout.trim()}\n`,
     )
     const r = launch(c, enable(c))
@@ -851,7 +851,7 @@ describe('web-updates status and disable (CA26)', () => {
     const off = launch(c, ['web-updates', 'disable', '--dir', c.dir])
     assert.equal(off.code, 0, off.stderr)
     assert.match(off.stdout, /Updates from the web are off\./)
-    assert.match(off.stdout, /sh rsc-brain\.sh update/)
+    assert.match(off.stdout, /sh obsybrain\.sh update/)
     assert.match(launch(c, ['web-updates', 'status', '--dir', c.dir]).stdout, /are off\./)
   })
 
@@ -930,9 +930,9 @@ describe('web-updates status and disable (CA26)', () => {
   it('disable with another launcher at work: exit 3, and the credential is already gone', async () => {
     const c = await installed()
     launch(c, enable(c, '--repo-token-file', tokenFile(c)))
-    mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
+    mkdirSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true })
     writeFileSync(
-      join(c.dir, '.rsc-brain', 'lock', 'owner'),
+      join(c.dir, '.obsybrain', 'lock', 'owner'),
       `${process.pid} ${spawnSync('uname', ['-n'], { encoding: 'utf8' }).stdout.trim()}\n`,
     )
     const r = launch(c, ['web-updates', 'disable', '--dir', c.dir])
@@ -941,9 +941,9 @@ describe('web-updates status and disable (CA26)', () => {
   })
 
   const busyLock = (c: Case) => {
-    mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
+    mkdirSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true })
     writeFileSync(
-      join(c.dir, '.rsc-brain', 'lock', 'owner'),
+      join(c.dir, '.obsybrain', 'lock', 'owner'),
       `${process.pid} ${spawnSync('uname', ['-n'], { encoding: 'utf8' }).stdout.trim()}\n`,
     )
   }
@@ -983,7 +983,7 @@ describe('web-updates status and disable (CA26)', () => {
     const blocked = launch(c, enable(c))
     assert.equal(blocked.code, 3, blocked.stderr)
     assert.equal(existsSync(join(c.dir, 'updater', 'disabling')), true)
-    rmSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true, force: true })
+    rmSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true, force: true })
     const again = launch(c, enable(c))
     assert.equal(again.code, 0, again.stderr)
     assert.equal(existsSync(join(c.dir, 'updater', 'disabling')), false)
@@ -994,7 +994,7 @@ describe('web-updates status and disable (CA26)', () => {
     launch(c, enable(c, '--repo-token-file', tokenFile(c)))
     busyLock(c)
     launch(c, ['web-updates', 'disable', '--dir', c.dir])
-    rmSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true, force: true })
+    rmSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true, force: true })
     // The credential is gone, and the repository does not answer without it.
     const r = launch(c, enable(c), { env: { FAKE_ACCESS_EXIT: '1' } })
     assert.equal(r.code, 3, r.stderr)
@@ -1004,7 +1004,7 @@ describe('web-updates status and disable (CA26)', () => {
 
   it('uninstall --delete-data removes the folders of the marks and the report too', async () => {
     const c = await installed()
-    const r = launch(c, ['uninstall', '--delete-data', '--confirm', 'rsc-brain', '--dir', c.dir])
+    const r = launch(c, ['uninstall', '--delete-data', '--confirm', 'obsybrain', '--dir', c.dir])
     assert.equal(r.code, 0, r.stderr)
     assert.equal(existsSync(join(c.dir, 'update')), false)
   })
@@ -1027,7 +1027,7 @@ describe('an update keeps the updater current (§3.7)', () => {
     const deploy = join(ROOT, 'deploy')
     writeFileSync(
       join(gitBin, 'git'),
-      `#!/bin/sh\nprintf 'git %s\\n' "$*" >>"$FAKE_LOG"\nfor last; do :; done\nmkdir -p "$last/deploy/updater"\ncp "${deploy}/compose.yaml" "${deploy}/Caddyfile" "${deploy}/compose.updater.yaml" "${deploy}/rsc-brain.sh" "$last/deploy/"\ncp "${deploy}/updater/"* "$last/deploy/updater/"\necho '# ${marker}' >>"$last/deploy/updater/loop.sh"\n`,
+      `#!/bin/sh\nprintf 'git %s\\n' "$*" >>"$FAKE_LOG"\nfor last; do :; done\nmkdir -p "$last/deploy/updater"\ncp "${deploy}/compose.yaml" "${deploy}/Caddyfile" "${deploy}/compose.updater.yaml" "${deploy}/obsybrain.sh" "$last/deploy/"\ncp "${deploy}/updater/"* "$last/deploy/updater/"\necho '# ${marker}' >>"$last/deploy/updater/loop.sh"\n`,
     )
     chmodSync(join(gitBin, 'git'), 0o755)
     return gitBin
@@ -1039,8 +1039,8 @@ describe('an update keeps the updater current (§3.7)', () => {
       {
         env: {
           PATH: `${gitBin}:${FAKEBIN}:${SYSBIN}`,
-          FAKE_IMAGES: 'rsc-brain:test',
-          FAKE_IMAGE_VERSIONS: `${VERSIONS} rsc-brain:v0.2.0=0.2.0`,
+          FAKE_IMAGES: 'obsybrain:test',
+          FAKE_IMAGE_VERSIONS: `${VERSIONS} obsybrain:v0.2.0=0.2.0`,
           ...env,
         },
       },
@@ -1063,7 +1063,7 @@ describe('an update keeps the updater current (§3.7)', () => {
     const c = await installed()
     launch(c, enable(c))
     const before = readFileSync(join(c.dir, 'updater', 'loop.sh'), 'utf8')
-    const r = bump(c, gitWith(c, 'v0.2.0'), { FAKE_MIGRATE_FAIL: 'rsc-brain:v0.2.0' })
+    const r = bump(c, gitWith(c, 'v0.2.0'), { FAKE_MIGRATE_FAIL: 'obsybrain:v0.2.0' })
     assert.equal(r.code, 4, r.stderr)
     assert.equal(readFileSync(join(c.dir, 'updater', 'loop.sh'), 'utf8'), before)
   })
@@ -1071,17 +1071,17 @@ describe('an update keeps the updater current (§3.7)', () => {
   it('an update by --image does not refresh the updater from a source left by an earlier build', async () => {
     const c = await installed()
     launch(c, enable(c))
-    const old = join(c.dir, '.rsc-brain', 'src', 'deploy')
+    const old = join(c.dir, '.obsybrain', 'src', 'deploy')
     mkdirSync(join(old, 'updater'), { recursive: true })
     for (const f of ['loop.sh', 'credentials.sh', 'Dockerfile'])
       writeFileSync(join(old, 'updater', f), '# stale\n')
     writeFileSync(join(old, 'compose.updater.yaml'), '# stale\n')
-    writeFileSync(join(old, 'rsc-brain.sh'), '# stale\n')
+    writeFileSync(join(old, 'obsybrain.sh'), '# stale\n')
     const before = readFileSync(join(c.dir, 'updater', 'loop.sh'), 'utf8')
-    const r = launch(c, ['update', '--yes', '--dir', c.dir, '--image', 'rsc-brain:next'])
+    const r = launch(c, ['update', '--yes', '--dir', c.dir, '--image', 'obsybrain:next'])
     assert.equal(r.code, 0, r.stderr)
     assert.equal(readFileSync(join(c.dir, 'updater', 'loop.sh'), 'utf8'), before)
-    for (const f of ['compose.updater.yaml', 'rsc-brain.sh']) {
+    for (const f of ['compose.updater.yaml', 'obsybrain.sh']) {
       assert.equal(readFileSync(join(c.dir, 'updater', f), 'utf8').includes('# stale'), false, f)
     }
   })

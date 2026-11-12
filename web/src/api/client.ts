@@ -4,7 +4,7 @@
 import { signInPath } from '../lib/nav.ts'
 import { type OpName, ROUTE_TABLE } from './routes.ts'
 
-export const WEB_HEADER = 'rsc-brain-web'
+export const WEB_HEADER = 'obsybrain-web'
 
 export class ApiError extends Error {
   readonly status: number
@@ -92,7 +92,7 @@ export type Client = {
 }
 
 const nameOf = (disposition: string | null | undefined) =>
-  /filename="([^"]+)"/.exec(disposition ?? '')?.[1] ?? 'rsc-brain-export.zip'
+  /filename="([^"]+)"/.exec(disposition ?? '')?.[1] ?? 'obsybrain-export.zip'
 
 function urlOf(route: string, o: CallOptions): { method: string; url: string } {
   const [method, template] = route.split(' ') as [string, string]
@@ -128,7 +128,7 @@ function errorOf(status: number, text: string): ApiError {
   return new ApiError(
     status,
     'bad_answer',
-    `rsc-brain answered with an unexpected reply (HTTP ${status}).`,
+    `obsybrain answered with an unexpected reply (HTTP ${status}).`,
     'Try again in a moment; if it keeps failing, tell an administrator.',
   )
 }
@@ -146,7 +146,7 @@ export function createClient(o: {
     return err
   }
   const offline = () =>
-    new ApiError(0, 'offline', 'rsc-brain could not be reached.', 'Check your connection and try again.')
+    new ApiError(0, 'offline', 'obsybrain could not be reached.', 'Check your connection and try again.')
   return {
     async upload<T>(
       op: OpName,

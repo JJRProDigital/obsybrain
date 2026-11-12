@@ -60,7 +60,7 @@ for (const theme of ['dark', 'light'] as const) {
     await scenario(context, baseURL as string, 'fresh')
     await page.addInitScript((t) => localStorage.setItem('rscb.theme', t), theme)
     await page.goto('/setup')
-    await expect(page.getByRole('heading', { name: 'Set up rsc-brain' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Set up obsybrain' })).toBeVisible()
     await audit(page, `${theme} setup`)
   })
 

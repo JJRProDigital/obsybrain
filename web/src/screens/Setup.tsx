@@ -106,7 +106,7 @@ export function Setup() {
     if (problems[f]) setProblems({ ...problems, [f]: undefined })
   }
 
-  // Installed with rsc-factory: asking again whether it set rsc-brain up, and what the last ask found.
+  // Installed with rsc-factory: asking again whether it set obsybrain up, and what the last ask found.
   const [checking, setChecking] = useState(false)
   const [stillWaiting, setStillWaiting] = useState(false)
   const look = async (url: string): Promise<ApiError | null> => {

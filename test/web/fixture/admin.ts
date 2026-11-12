@@ -121,7 +121,7 @@ export const FIXTURE_KEY = 'fixture-installation-key-0123456789abcdefghijklmnop'
 export const FIXTURE_KEY_ID = 'fx12ab34cd56'
 const OLD_KEY_ID = 'old9876fedcb'
 const copyName = (at: string, reason: string) =>
-  `rsc-brain-${at.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')}-${reason}`
+  `obsybrain-${at.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')}-${reason}`
 const seedCopies = (s: AdminScen): Copy[] => {
   if (s.states.get('admin-backups') === 'empty') return []
   const n = s.states.get('admin-backups') === 'much-data' ? 40 : 3
@@ -151,8 +151,8 @@ const ADMIN_ONLY = err(
 const CSRF = err(
   403,
   'csrf',
-  'This request lacks the header of the rsc-brain web.',
-  'Use the rsc-brain web to do this.',
+  'This request lacks the header of the obsybrain web.',
+  'Use the obsybrain web to do this.',
 )
 const invalid = (message: string, how: string) => err(400, 'invalid_request', message, how)
 const changed = (moved: string[], current: unknown): Answer => ({
@@ -324,7 +324,7 @@ export const MAINTENANCE_REFUSAL: Answer = {
   body: {
     error: {
       code: 'under_maintenance',
-      message: 'rsc-brain is under maintenance, retry after 20 seconds',
+      message: 'obsybrain is under maintenance, retry after 20 seconds',
       howToProceed: 'Send it again after that time; reading keeps working meanwhile.',
       retryAfter: 20,
     },
@@ -388,7 +388,7 @@ function updateAsk(c: AdminCtx, retry: boolean): Answer {
     return err(
       409,
       'companion',
-      'rsc-brain was installed by rsc-factory: update it from there.',
+      'obsybrain was installed by rsc-factory: update it from there.',
       `Open rsc-factory at ${u.factoryUrl} and update from Admin › Updates.`,
     )
   if (u.mode === 'off')
@@ -396,7 +396,7 @@ function updateAsk(c: AdminCtx, retry: boolean): Answer {
       409,
       'updates_off',
       'Updating from the web is off on this installation.',
-      'On the server, run: rsc-brain.sh update.',
+      'On the server, run: obsybrain.sh update.',
     )
   if (u.rollbackFailed)
     return err(
@@ -1046,14 +1046,14 @@ export const ADMIN_OPS: Record<string, Op> = {
             409,
             'backups_not_set_up',
             'This installation has no folder for its copies.',
-            'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain.',
+            'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart obsybrain.',
           )
         if (f.running)
           return err(
             409,
             'backup_running',
             'A copy is being made right now.',
-            'Wait for it to finish (rsc-brain backups list shows it when it is done), then try again.',
+            'Wait for it to finish (obsybrain backups list shows it when it is done), then try again.',
           )
         const id = copyName(new Date().toISOString().replace(/\.\d{3}Z$/, '.000Z'), 'manual')
         f.running = { id, doneAt: Date.now() + 700 }
@@ -1118,7 +1118,7 @@ export const ADMIN_OPS: Record<string, Op> = {
               error: {
                 code: 'wrong_key',
                 message: `This copy was made with another installation key (id ${copy.keyId}).`,
-                howToProceed: 'Restore it with that key, on the machine: rsc-brain restore --key-file.',
+                howToProceed: 'Restore it with that key, on the machine: obsybrain restore --key-file.',
                 needs: copy.keyId,
               },
             },

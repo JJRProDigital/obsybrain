@@ -1,5 +1,5 @@
 {
-  "name": "@ericrisco/rsc-brain",
+  "name": "obsybrain",
   "version": "0.7.0",
   "description": "Self-hosted knowledge server for AI agents: a journal agents write freely, a wiki people approve, searchable over MCP and HTTP.",
   "license": "MIT",
@@ -7,7 +7,7 @@
   "type": "module",
   "private": true,
   "bin": {
-    "rsc-brain": "./dist/cli/main.js"
+    "obsybrain": "./dist/cli/main.js"
   },
   "files": [
     "dist",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ericrisco/rsc-brain.git"
+    "url": "git+https://github.com/obsessive-solutions/obsybrain.git"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && vite build --config web/vite.config.ts",

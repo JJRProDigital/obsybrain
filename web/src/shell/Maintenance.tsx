@@ -1,4 +1,4 @@
-// The band of every page while rsc-brain is under maintenance (B7 PR35; spec «Actualizar»): an update or a restore
+// The band of every page while obsybrain is under maintenance (B7 PR35; spec «Actualizar»): an update or a restore
 // refuses writes and keeps serving reads. The web asks GET /v1/health when it starts and once a minute; a write refused
 // with 503 under_maintenance turns the band on at once; while it lasts the web looks again every few seconds, and the
 // band goes when the server takes writes again.

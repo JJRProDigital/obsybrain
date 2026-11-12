@@ -23,7 +23,7 @@ export function serviceMainKey(ctx: Ctx, what: string): void {
     403,
     'key_not_allowed',
     `${what} takes the main key of a service account.`,
-    'Call it with the main key of the service account (rsc-brain › Admin › Service accounts).',
+    'Call it with the main key of the service account (obsybrain › Admin › Service accounts).',
   )
 }
 

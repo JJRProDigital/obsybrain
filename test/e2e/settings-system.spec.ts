@@ -12,7 +12,7 @@ import { expect, type Page, test } from '@playwright/test'
 import { keepTheKey } from './key.ts'
 
 const ADMIN = { name: 'Eric', email: 'eric@example.test', password: 'correct horse battery staple' }
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 const ORIGINAL_MAIL = {
   host: 'smtp.test',
   port: 587,
@@ -26,10 +26,10 @@ test.describe.configure({ mode: 'serial' })
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up rsc-brain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up rsc-brain') {
-    await page.getByLabel('Name of this installation').fill('rsc-brain')
+  if (where === 'Set up obsybrain') {
+    await page.getByLabel('Name of this installation').fill('obsybrain')
     await page.getByLabel('Address people open').fill(baseURL)
     await page.getByLabel('Your name').fill(ADMIN.name)
     await page.getByLabel('Your email').fill(ADMIN.email)
@@ -99,7 +99,7 @@ test.afterAll(async () => {
   // What other files of this run rely on: the name, no logo, the mail settings, no Factory address.
   await admin.request.put('/v1/admin/settings', {
     headers: WEB,
-    data: { name: 'rsc-brain', factoryUrl: null },
+    data: { name: 'obsybrain', factoryUrl: null },
   })
   await admin.request.delete('/v1/admin/branding/logo', { headers: WEB })
   await admin.request.put('/v1/admin/mail', { headers: WEB, data: ORIGINAL_MAIL })
@@ -135,10 +135,10 @@ test('CA18: a new logo and name show in the header for anyone, and in the invita
   expect(made.status()).toBe(201)
   const m = await mailTo(admin, email, /invited you to Acme Brain/)
   expect(m.html).toContain('Acme Brain')
-  expect(m.html).toMatch(/<img [^>]*src="cid:logo@rsc-brain"/)
+  expect(m.html).toMatch(/<img [^>]*src="cid:logo@obsybrain"/)
   expect(m.html).not.toMatch(/src="https?:/)
   const att = m.attachments?.[0]
-  expect(att?.cid).toBe('logo@rsc-brain')
+  expect(att?.cid).toBe('logo@obsybrain')
   expect(att?.contentType).toBe('image/png')
   expect(Buffer.from(att?.content.data ?? []).equals(logo)).toBe(true)
 })

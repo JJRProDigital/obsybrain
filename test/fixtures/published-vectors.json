@@ -1,5 +1,5 @@
 {
-  "about": "The definition of a published version, one file for every place that decides it: the launcher, update.sh and the web, in both products. rsc-brain keeps a copy with the same SHA-256. Add sections; do not change what a vector says without changing the definition.",
+  "about": "The definition of a published version, one file for every place that decides it: the launcher, update.sh and the web, in both products. obsybrain keeps a copy with the same SHA-256. Add sections; do not change what a vector says without changing the definition.",
   "pattern": "^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
   "notesMaxChars": 4000,
   "newest": [

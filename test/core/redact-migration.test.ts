@@ -30,7 +30,7 @@ const MINIMAL: Record<string, string> = {
   sendgrid: `SG.${'a'.repeat(22)}.${'a'.repeat(43)}`,
   'telegram-bot': `12345678:AA${'a'.repeat(33)}`,
   jwt: 'eyJabcdefgh.eyJabcdefgh.abcdefgh',
-  'rsc-brain': `rscb_${'a'.repeat(43)}`,
+  obsybrain: `rscb_${'a'.repeat(43)}`,
   'url-credentials': 'a://:b@',
   authorization: 'authorization: bearer abcdefgh',
   assignment: 'pwd=abcdefgh',

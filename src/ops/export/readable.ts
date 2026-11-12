@@ -342,7 +342,7 @@ export async function writeReadable(db: Db, zip: Zip, o: ExportOptions): Promise
     `${[
       `# ${plain(oneLine(o.brain.name))}`,
       '',
-      `An export of the rsc-brain brain "${o.brain.slug}", made ${minute(o.at)} by rsc-brain ${o.release}. Open this folder as a vault in a markdown editor that reads [[wiki links]]: every link opens its page.`.replace(
+      `An export of the obsybrain brain "${o.brain.slug}", made ${minute(o.at)} by obsybrain ${o.release}. Open this folder as a vault in a markdown editor that reads [[wiki links]]: every link opens its page.`.replace(
         '[[wiki links]]',
         '\\[\\[wiki links]]',
       ),

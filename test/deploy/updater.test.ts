@@ -1,4 +1,4 @@
-// The updater of rsc-brain (rsc-updates §3.7, §3.9; T059 for CA27): the loop that runs inside its own container and
+// The updater of obsybrain (rsc-updates §3.7, §3.9; T059 for CA27): the loop that runs inside its own container and
 // starts `update` when the web leaves a request mark, and what it may reach. No Docker here: the loop runs on this
 // machine with a stand-in launcher that records how it was called, one tick at a time (OBSY_BRAIN_UPDATER_ONCE=1), with
 // a clock the test sets (OBSY_BRAIN_UPDATER_NOW). What this pins is the rules of CA20 and CA21: a mark is only looked at
@@ -85,9 +85,9 @@ type Case = { dir: string; log: string }
 const fresh = (): Case => {
   const c = join(BASE, `case-${++n}`)
   const dir = join(c, 'install')
-  for (const d of ['update/request', 'update/report', 'update/state', 'updater/credentials', '.rsc-brain'])
+  for (const d of ['update/request', 'update/report', 'update/state', 'updater/credentials', '.obsybrain'])
     mkdirSync(join(dir, d), { recursive: true })
-  writeFileSync(join(dir, '.env'), "OBSY_BRAIN_LAUNCHER='1'\nOBSY_BRAIN_NAME='rsc-brain'\n")
+  writeFileSync(join(dir, '.env'), "OBSY_BRAIN_LAUNCHER='1'\nOBSY_BRAIN_NAME='obsybrain'\n")
   writeFileSync(join(c, 'launcher.log'), '')
   return { dir, log: join(c, 'launcher.log') }
 }
@@ -149,7 +149,7 @@ for (const shell of SHELLS) {
   describe(`the updater loop, under ${shell} (CA12b, CA20, CA21)`, () => {
     it('starts by taking back what an interrupted update left: the launcher is asked for its status first', () => {
       const c = fresh()
-      writeFileSync(join(c.dir, '.rsc-brain', 'update.pending'), "OBSY_BRAIN_UPDATE_PHASE='switched'\n")
+      writeFileSync(join(c.dir, '.obsybrain', 'update.pending'), "OBSY_BRAIN_UPDATE_PHASE='switched'\n")
       const t = tick(c, {}, sh)
       assert.equal(t.code, 0, t.stderr)
       assert.match(t.calls[0] ?? '', new RegExp(`^status --dir ${c.dir}$`))
@@ -903,12 +903,12 @@ describe('the updater: what a refusal and a way back that failed say (closing re
 
   const wreck = (c: Case) =>
     writeFileSync(
-      join(c.dir, '.rsc-brain', 'rollback.failed'),
+      join(c.dir, '.obsybrain', 'rollback.failed'),
       [
         "OBSY_BRAIN_ROLLBACK_FROM='0.2.0'",
         "OBSY_BRAIN_ROLLBACK_TO='0.3.0'",
-        "OBSY_BRAIN_ROLLBACK_COPY='rsc-brain-1-pre-update.rscb'",
-        `OBSY_BRAIN_ROLLBACK_RESTORE='sh rsc-brain.sh restore --file rsc-brain-1-pre-update.rscb --confirm <the installation's name> --dir "${c.dir}"'`,
+        "OBSY_BRAIN_ROLLBACK_COPY='obsybrain-1-pre-update.rscb'",
+        `OBSY_BRAIN_ROLLBACK_RESTORE='sh obsybrain.sh restore --file obsybrain-1-pre-update.rscb --confirm <the installation's name> --dir "${c.dir}"'`,
         '',
       ].join('\n'),
     )
@@ -925,7 +925,7 @@ describe('the updater: what a refusal and a way back that failed say (closing re
     const u = report(c, 'updater.json')
     assert.equal(u.rollbackFailed.from, '0.2.0')
     assert.equal(u.rollbackFailed.to, '0.3.0')
-    assert.match(u.rollbackFailed.restore, /restore --file rsc-brain-1-pre-update\.rscb/)
+    assert.match(u.rollbackFailed.restore, /restore --file obsybrain-1-pre-update\.rscb/)
     assert.deepEqual(u.attempts, {})
   })
 
@@ -933,7 +933,7 @@ describe('the updater: what a refusal and a way back that failed say (closing re
     const c = fresh()
     wreck(c)
     tick(c, {})
-    rmSync(join(c.dir, '.rsc-brain', 'rollback.failed'))
+    rmSync(join(c.dir, '.obsybrain', 'rollback.failed'))
     writeFileSync(mark(c), '')
     const t = tick(c, {}, { at: NOW + 1 })
     assert.equal(updates(t.calls).length, 1)
@@ -953,7 +953,7 @@ describe('the updater: what a refusal and a way back that failed say (closing re
 
   it('a rollback.failed that is empty or unreadable still blocks, and is reported with empty details', () => {
     const c = fresh()
-    writeFileSync(join(c.dir, '.rsc-brain', 'rollback.failed'), '')
+    writeFileSync(join(c.dir, '.obsybrain', 'rollback.failed'), '')
     writeFileSync(mark(c), '')
     const t = tick(c, {})
     assert.equal(updates(t.calls).length, 0)
@@ -962,7 +962,7 @@ describe('the updater: what a refusal and a way back that failed say (closing re
 
   it('a rollback.failed that is a link is not read and blocks nothing (the launcher never makes one)', () => {
     const c = fresh()
-    symlinkSync('/etc/hostname', join(c.dir, '.rsc-brain', 'rollback.failed'))
+    symlinkSync('/etc/hostname', join(c.dir, '.obsybrain', 'rollback.failed'))
     writeFileSync(mark(c), '')
     const t = tick(c, {})
     assert.equal(updates(t.calls).length, 1)

@@ -1,9 +1,9 @@
 #!/bin/sh
-# rsc-brain.sh: install and run rsc-brain with containers, on this machine or on a server with a domain.
-# Needs Docker with Compose v2 (and git to build from the source). Run `sh rsc-brain.sh help` for the commands.
+# obsybrain.sh: install and run obsybrain with containers, on this machine or on a server with a domain.
+# Needs Docker with Compose v2 (and git to build from the source). Run `sh obsybrain.sh help` for the commands.
 #
 # It only arranges containers and files: everything that touches data (copies, restoring, creating the database)
-# is the rsc-brain command inside the image. Secrets never go on a command line: the installation key and database
+# is the obsybrain command inside the image. Secrets never go on a command line: the installation key and database
 # passwords live in <dir>/.env (only its owner reads it) and reach containers through it or their standard input.
 #
 # Exit codes: 0 done, 2 wrong usage, 3 a requirement is missing (nothing was changed), 4 failed and put back what was
@@ -16,8 +16,8 @@
 set -u
 umask 077
 
-PROG=rsc-brain.sh
-REPO=${OBSY_BRAIN_REPO:-https://github.com/ericrisco/rsc-brain.git}
+PROG=obsybrain.sh
+REPO=${OBSY_BRAIN_REPO:-https://github.com/obsessive-solutions/obsybrain.git}
 # Whether this run was told where the repository is; if not, the installation's own address counts (OBSY_BRAIN_REPO_URL).
 REPO_GIVEN=0
 [ -n "${OBSY_BRAIN_REPO:-}" ] && REPO_GIVEN=1
@@ -38,7 +38,7 @@ TAIL_WAIT=${OBSY_BRAIN_TEST_TAIL_WAIT:-60}
 USAGE="Usage: sh $PROG <command> [options]
 
 Commands:
-  install           install rsc-brain, or apply new settings to an installation (its key and data are kept)
+  install           install obsybrain, or apply new settings to an installation (its key and data are kept)
   update [--version vX.Y.Z | --image I]
                     move to a newer version (default: the latest published): writes wait, a copy is made, the
                     data is migrated and the new version started; if anything fails, the copy is restored and
@@ -47,7 +47,7 @@ Commands:
   update --check [--json] [--repo URL]
                     only look: the version running, the newest published and what it changes, with this machine's
                     access to the repository. Nothing is stopped or written. Exit 3 when it cannot say
-  status [--json]   whether rsc-brain runs and answers
+  status [--json]   whether obsybrain runs and answers
   backup [--json]   make an encrypted copy of everything now
   backups [--json]  list the copies
   restore --file F --confirm NAME [--key-file K]
@@ -55,7 +55,7 @@ Commands:
                     installation's name as the web shows it; K holds the key the copy was made with (default: this
                     installation's). Everyone signs in again afterwards
   web-updates enable [--repo-key F | --repo-token-file F]
-                    let an administrator update rsc-brain from its web: a container of its own runs update when
+                    let an administrator update obsybrain from its web: a container of its own runs update when
                     asked. It has full control of Docker on this machine, so whoever controls it controls this
                     server; it is off until you turn it on. F holds the read access to a private repository
                     (an SSH private key, or a token); it is copied for the updater alone. Not for an
@@ -65,33 +65,33 @@ Commands:
   web-updates status
                     whether updates from the web are on
   key show          print the installation key (it opens the copies; keep it safe)
-  key rotate        make a new installation key and seal everything with it (rsc-brain stops for a moment).
+  key rotate        make a new installation key and seal everything with it (obsybrain stops for a moment).
                     Copies made before need the previous key: it is kept in installation-key-<id>.txt.
                     A rotation stopped halfway is finished by running key rotate again
-  uninstall         stop rsc-brain and remove its containers; the data, the copies and the key are kept
+  uninstall         stop obsybrain and remove its containers; the data, the copies and the key are kept
     --delete-data --confirm NAME [--db-admin-url-file F]
-                    also remove the database and the copies (NAME: the name given at install, default rsc-brain)
+                    also remove the database and the copies (NAME: the name given at install, default obsybrain)
 
 Install options:
   --local | --domain D      this machine only (http://localhost:PORT), or a server with HTTPS for the domain D
   --db bundled|existing|shared
-                            the PostgreSQL: rsc-brain's own (default), an existing one, or the one rsc-factory uses
-  --db-url-file F           existing: the URL of a database for rsc-brain alone (F, or - for the standard input)
-  --db-admin-url-file F     existing or shared: an administration login, used once to make rsc-brain's database
+                            the PostgreSQL: obsybrain's own (default), an existing one, or the one rsc-factory uses
+  --db-url-file F           existing: the URL of a database for obsybrain alone (F, or - for the standard input)
+  --db-admin-url-file F     existing or shared: an administration login, used once to make obsybrain's database
                             and role; never kept
   --factory-db NAME         shared: the other program's database; neither can connect to the other's
   --port N                  the port of the web on this machine (default 8090; published on 127.0.0.1 only)
   --http-port N, --https-port N
                             server: the ports Caddy publishes (default 80 and 443)
-  --dir D                   where the installation lives (default ~/rsc-brain, or /opt/rsc-brain for a server)
-  --name N                  the installation's name on this machine (default rsc-brain)
+  --dir D                   where the installation lives (default ~/obsybrain, or /opt/obsybrain for a server)
+  --name N                  the installation's name on this machine (default obsybrain)
   --version vX.Y.Z | --image I
                             build that version from the source (default: the latest), or use an image already built
   --repo URL                where the source is fetched from (default the public repository); while it is
                             private, an address git can read with your access (SSH, or git's credential helper)
   --companion               installed by rsc-factory (needs --attach-network and --factory-url): no Caddy of its
                             own, and the first-time setup is rsc-factory's, with a one-time key (companionToken)
-  --attach-network NAME     companion: the Docker network shared with rsc-factory; rsc-brain joins it as rsc-brain
+  --attach-network NAME     companion: the Docker network shared with rsc-factory; obsybrain joins it as obsybrain
   --factory-url URL         companion: the address of rsc-factory (https, or http://localhost on this machine)
   --trusted-proxy IP        companion with --domain: the fixed address of rsc-factory's Caddy on that network
   --yes                     ask nothing; whatever is missing is an error that names the option giving it
@@ -251,7 +251,7 @@ if [ "$CMD" = install ] || [ "$CMD" = update ]; then
   case $REPO in *"'"* | *"$NL"*) usage '--repo cannot hold a quote or a line break.' ;; esac
   [ -z "$VERSION" ] || matches "$VERSION" '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$' ||
     usage '--version takes a published version such as v1.2.0.'
-  [ -z "$IMAGE" ] || matches "$IMAGE" '^[A-Za-z0-9][A-Za-z0-9._/:@-]*$' || usage '--image takes an image name such as rsc-brain:v1.2.0.'
+  [ -z "$IMAGE" ] || matches "$IMAGE" '^[A-Za-z0-9][A-Za-z0-9._/:@-]*$' || usage '--image takes an image name such as obsybrain:v1.2.0.'
 fi
 if [ "$CMD" = install ]; then
   [ -n "$MODE" ] && [ -n "$DOMAIN" ] && usage 'Pass --local or --domain D, not both.'
@@ -270,7 +270,7 @@ if [ "$CMD" = install ]; then
     usage '--name takes lower-case letters, digits, - and _ (up to 40), starting with a letter or a digit.'
   [ -z "$FACTORY_DB" ] || matches "$FACTORY_DB" '^[a-z_][a-z0-9_]{0,62}$' || usage '--factory-db takes a database name such as rsc_factory.'
   if [ "$DB" = existing ] && [ -z "$DB_URL_FILE" ] && [ -z "$ADMIN_URL_FILE" ] && [ "$YES" = 1 ]; then
-    usage '--db existing needs --db-url-file F (a database for rsc-brain alone) or --db-admin-url-file F (a login that can make one).'
+    usage '--db existing needs --db-url-file F (a database for obsybrain alone) or --db-admin-url-file F (a login that can make one).'
   fi
   [ -n "$DB_URL_FILE" ] && [ -n "$ADMIN_URL_FILE" ] && usage 'Pass --db-url-file or --db-admin-url-file, not both.'
   if [ "$DB" = shared ] && { [ -z "$FACTORY_DB" ] || [ -z "$ADMIN_URL_FILE" ]; } && [ "$YES" = 1 ]; then
@@ -283,7 +283,7 @@ if [ "$CMD" = install ]; then
   # Companion mode (installed by rsc-factory): its options go with --companion, and are checked before anything runs.
   if [ "$COMPANION" = 0 ]; then
     for o in "--attach-network:$SHARED_NET" "--factory-url:$FACTORY_URL" "--trusted-proxy:$TRUSTED_PROXY"; do
-      [ -z "${o#*:}" ] || usage "${o%%:*} goes with --companion (rsc-brain installed by rsc-factory)."
+      [ -z "${o#*:}" ] || usage "${o%%:*} goes with --companion (obsybrain installed by rsc-factory)."
     done
   else
     [ -z "$SHARED_NET" ] || matches "$SHARED_NET" '^[A-Za-z0-9][A-Za-z0-9_.-]{0,62}$' ||
@@ -303,7 +303,7 @@ if [ "$CMD" = install ]; then
     [ "$DB" = bundled ] &&
       usage '--companion uses the PostgreSQL of rsc-factory (--db shared) or an existing one (--db existing), not --db bundled.'
     [ -n "$HTTP_PORT$HTTPS_PORT" ] &&
-      usage "--http-port and --https-port do not go with --companion: rsc-factory's Caddy serves rsc-brain."
+      usage "--http-port and --https-port do not go with --companion: rsc-factory's Caddy serves obsybrain."
   fi
 fi
 if [ "$CMD" = 'web-updates enable' ]; then
@@ -322,10 +322,10 @@ if [ -n "$DIR" ]; then
 fi
 
 # ----------------------------------------------------------------------------------------------- the installation
-# Everything the launcher keeps for itself lives in <dir>/.rsc-brain (the source it builds from, an install still in
+# Everything the launcher keeps for itself lives in <dir>/.obsybrain (the source it builds from, an install still in
 # progress, the settings before a change). An installation is a folder whose .env the launcher wrote (it carries
 # OBSY_BRAIN_LAUNCHER='1'); .env is written only once an install has completed.
-STATE=.rsc-brain
+STATE=.obsybrain
 ENV_FILE='' PROFILES=''
 # file_get FILE NAME: a value of a settings file (.env, or a journal) as say_env wrote it.
 file_get() { sed -n "s/^$2='\\(.*\\)'\$/\\1/p" "$1" 2>/dev/null | head -n 1; }
@@ -365,19 +365,19 @@ is_installation() { [ -f "$1/.env" ] && grep -q "^OBSY_BRAIN_LAUNCHER='1'\$" "$1
 # Where an installation is when --dir is not given: the one for this machine, or the one for a server.
 find_dir() {
   [ -n "$DIR" ] && return
-  for d in "${HOME:-/nonexistent}/rsc-brain" /opt/rsc-brain; do
+  for d in "${HOME:-/nonexistent}/obsybrain" /opt/obsybrain; do
     if is_installation "$d"; then
       DIR=$d
       return
     fi
   done
-  DIR=${HOME:-/nonexistent}/rsc-brain
+  DIR=${HOME:-/nonexistent}/obsybrain
 }
 need_installation() {
   find_dir
   if ! is_installation "$DIR"; then
     [ "$CHECK" = 1 ] && [ "$JSON" = 1 ] && check_answer '' false '' missing
-    say "No rsc-brain installation in \"$DIR\". Pass --dir with the folder it was installed in. Nothing was changed."
+    say "No obsybrain installation in \"$DIR\". Pass --dir with the folder it was installed in. Nothing was changed."
     exit 3
   fi
   ENV_FILE=$DIR/.env
@@ -385,7 +385,7 @@ need_installation() {
   PROFILES=$(env_get COMPOSE_PROFILES)
 }
 
-# One launcher at a time per folder: <dir>/.rsc-brain/lock, made atomically, names the process and the machine. A lock
+# One launcher at a time per folder: <dir>/.obsybrain/lock, made atomically, names the process and the machine. A lock
 # whose process is gone (on this machine) is taken over; the journal of an interrupted install is then taken back.
 LOCKED=0 LOCK_MADE_DIR=0 LOCK_MADE_STATE=0
 host_name() { uname -n 2>/dev/null; }
@@ -416,15 +416,15 @@ take_lock() {
     if [ -z "$owner" ]; then
       # Just made by another launcher, which has not written its name yet.
       tries=$((tries + 1))
-      [ "$tries" -gt 5 ] && lock_refused "Another rsc-brain launcher is working on \"$DIR\". Wait for it to finish."
+      [ "$tries" -gt 5 ] && lock_refused "Another obsybrain launcher is working on \"$DIR\". Wait for it to finish."
       sleep 1
       continue
     fi
     pid=${owner%% *} who=${owner#* }
     [ "$who" = "$(host_name)" ] ||
-      lock_refused "Another rsc-brain launcher, on $who, is working on \"$DIR\" (process $pid). Wait for it to finish; if it is not running any more, remove \"$lock\"."
+      lock_refused "Another obsybrain launcher, on $who, is working on \"$DIR\" (process $pid). Wait for it to finish; if it is not running any more, remove \"$lock\"."
     kill -0 "$pid" 2>/dev/null &&
-      lock_refused "Another rsc-brain launcher is working on \"$DIR\" (process $pid). Wait for it to finish."
+      lock_refused "Another obsybrain launcher is working on \"$DIR\" (process $pid). Wait for it to finish."
     say "Taking over from a launcher that stopped (process $pid)."
     rm -rf "${lock:?}"
   done
@@ -466,7 +466,7 @@ warn_shell_vars() {
     eval "isset=\${$v+x}"
     [ -n "$isset" ] && set_here="$set_here $v"
   done
-  [ -n "$set_here" ] && say "Ignored, set in this shell:$set_here. rsc-brain takes its settings from its own .env only."
+  [ -n "$set_here" ] && say "Ignored, set in this shell:$set_here. obsybrain takes its settings from its own .env only."
   return 0
 }
 
@@ -672,7 +672,7 @@ pick_subnet() {
     fi
     c=$((c + 1))
   done
-  missing 'No free 192.168.200-254.0/24 network for rsc-brain: remove unused Docker networks (docker network prune) and run this again.'
+  missing 'No free 192.168.200-254.0/24 network for obsybrain: remove unused Docker networks (docker network prune) and run this again.'
 }
 
 # Companion mode: Docker new enough to keep the default route on the installation's own network (gw_priority), and the
@@ -699,8 +699,8 @@ companion_requirements() {
       missing 'Companion mode on this machine needs Docker Engine 28 or newer (and Docker Compose 2.33 or newer). Update Docker and run this again.'
   fi
   info=$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}}|{{.Gateway}} {{end}}{{if .EnableIPv6}}ipv6{{end}}' "$SHARED_NET" 2>/dev/null </dev/null) ||
-    missing "There is no Docker network $SHARED_NET. rsc-factory's installer makes it before it installs rsc-brain; pass --attach-network with the network rsc-factory uses."
-  # IPv4 only: the handshake answers by the IPv4 subnet, and over IPv6 rsc-factory could reach rsc-brain from an address
+    missing "There is no Docker network $SHARED_NET. rsc-factory's installer makes it before it installs obsybrain; pass --attach-network with the network rsc-factory uses."
+  # IPv4 only: the handshake answers by the IPv4 subnet, and over IPv6 rsc-factory could reach obsybrain from an address
   # it does not know.
   for e in $info; do
     case $e in ipv6 | *:*)
@@ -729,12 +729,12 @@ companion_requirements() {
     fi
   fi
 }
-# The app joins the shared network as rsc-brain; its own network keeps the default route (OBSY_BRAIN_LOCAL_ONLY trusts
+# The app joins the shared network as obsybrain; its own network keeps the default route (OBSY_BRAIN_LOCAL_ONLY trusts
 # that gateway as this machine).
 write_companion_compose() {
   {
-    echo '# Companion mode, written by rsc-brain.sh install --companion (do not edit: install writes it again). The app'
-    echo "# joins the Docker network it shares with rsc-factory, which reaches it there as http://rsc-brain:8090; rsc-factory's"
+    echo '# Companion mode, written by obsybrain.sh install --companion (do not edit: install writes it again). The app'
+    echo "# joins the Docker network it shares with rsc-factory, which reaches it there as http://obsybrain:8090; rsc-factory's"
     echo '# Caddy serves its web address. Its own network keeps the default route.'
     echo 'services:'
     echo '  app:'
@@ -747,7 +747,7 @@ write_companion_compose() {
     fi
     echo '      shared:'
     echo '        aliases:'
-    echo '          - rsc-brain'
+    echo '          - obsybrain'
     # The stand-in door answers there under the same name; only where the compose file has one (a service without an
     # image would stop every compose call).
     if grep -q '^  door:$' "$DIR/compose.yaml" 2>/dev/null; then
@@ -765,12 +765,12 @@ write_companion_compose() {
       fi
       echo '      shared:'
       echo '        aliases:'
-      echo '          - rsc-brain'
+      echo '          - obsybrain'
     fi
     echo 'networks:'
     echo '  shared:'
     # shellcheck disable=SC2016
-    echo '    name: ${OBSY_BRAIN_SHARED_NETWORK:?run rsc-brain.sh install}'
+    echo '    name: ${OBSY_BRAIN_SHARED_NETWORK:?run obsybrain.sh install}'
     echo '    external: true'
   } >"$DIR/compose.companion.yaml.new" && chmod 644 "$DIR/compose.companion.yaml.new" &&
     mv -f "$DIR/compose.companion.yaml.new" "$DIR/compose.companion.yaml"
@@ -778,7 +778,7 @@ write_companion_compose() {
 
 # ---------------------------------------------------------------------------------------------------------- install
 # What this run made, so a failure (or a stop) takes back exactly that. During a first install the same is kept in
-# <dir>/.rsc-brain/install.pending, so a run that was killed can be taken back by the next one.
+# <dir>/.obsybrain/install.pending, so a run that was killed can be taken back by the next one.
 MADE_DIR=0 MADE_IMAGE=0 MADE_FILES='' PROVISIONED=0 STARTED=0 REINSTALL=0 RESUME=0 FAILURE_LOG=''
 
 take_back() {
@@ -794,7 +794,7 @@ take_back() {
   fi
   if [ "$PROVISIONED" = 1 ] && [ "$DB" != bundled ]; then
     step "Removing the database $DB_NAME it made"
-    printf '%s\n' "$ADMIN_URL" | dc run --rm -T --no-deps app rsc-brain db drop --database "$DB_NAME" --role "$DB_NAME" \
+    printf '%s\n' "$ADMIN_URL" | dc run --rm -T --no-deps app obsybrain db drop --database "$DB_NAME" --role "$DB_NAME" \
       --confirm "$DB_NAME" >&2 || say "Could not remove the database $DB_NAME and the role $DB_NAME: remove them by hand."
   fi
   if [ "$STARTED" = 1 ]; then
@@ -843,8 +843,8 @@ say_env() { printf "%s='%s'\n" "$1" "$2"; }
 # write_env FILE [pending]: the settings, whole, written beside and moved into place.
 write_env() {
   {
-    echo '# rsc-brain settings, written by rsc-brain.sh. Only its owner may read this file: it holds the'
-    echo '# installation key, which opens every copy. Change settings by running rsc-brain.sh install again.'
+    echo '# obsybrain settings, written by obsybrain.sh. Only its owner may read this file: it holds the'
+    echo '# installation key, which opens every copy. Change settings by running obsybrain.sh install again.'
     say_env OBSY_BRAIN_LAUNCHER 1
     say_env OBSY_BRAIN_NAME "$NAME"
     say_env COMPOSE_PROJECT_NAME "$NAME"
@@ -938,7 +938,7 @@ foreign_files() {
   for f in "$1"/* "$1"/.[!.]* "$1"/..?*; do
     [ -e "$f" ] || [ -L "$f" ] || continue
     case ${f##*/} in
-    compose.override.yaml | last-failure.log | installation-key.txt | installation-key-*.txt | rsc-brain.sh | .rsc-brain | \
+    compose.override.yaml | last-failure.log | installation-key.txt | installation-key-*.txt | obsybrain.sh | .obsybrain | \
       .DS_Store | lost+found | ._* | Thumbs.db) ;;
     *)
       echo "${f##*/}"
@@ -952,8 +952,8 @@ install() {
   # Where, and what is there already.
   if [ -z "$DIR" ]; then
     case $MODE in
-    local) DIR=${HOME:-/nonexistent}/rsc-brain ;;
-    server) DIR=/opt/rsc-brain ;;
+    local) DIR=${HOME:-/nonexistent}/obsybrain ;;
+    server) DIR=/opt/obsybrain ;;
     *) find_dir ;;
     esac
   fi
@@ -969,7 +969,7 @@ install() {
     [ -n "$DB" ] && [ "$DB" != "$OLD_DB" ] &&
       usage "The installation in \"$DIR\" uses the $OLD_DB database, and install keeps it. To move to another one: make a copy (backup), uninstall, install anew and restore the copy."
     DB=$OLD_DB
-    if { [ -n "$IMAGE" ] && [ "$IMAGE" != "$OLD_IMAGE" ]; } || { [ -n "$VERSION" ] && [ "rsc-brain:$VERSION" != "$OLD_IMAGE" ]; }; then
+    if { [ -n "$IMAGE" ] && [ "$IMAGE" != "$OLD_IMAGE" ]; } || { [ -n "$VERSION" ] && [ "obsybrain:$VERSION" != "$OLD_IMAGE" ]; }; then
       usage "The installation in \"$DIR\" runs $OLD_IMAGE. Changing the version is an update (a copy first, then the new version, and back if it fails); install keeps the version."
     fi
     IMAGE=$OLD_IMAGE VERSION=''
@@ -995,16 +995,16 @@ install() {
     # A first install that was killed: the next one takes it back, then installs as a first install.
     RESUME=1
   elif [ -n "$(foreign_files "$DIR")" ]; then
-    usage "\"$DIR\" already holds files that are not an rsc-brain installation. Choose another folder with --dir."
+    usage "\"$DIR\" already holds files that are not an obsybrain installation. Choose another folder with --dir."
   fi
-  [ -n "$NAME" ] || NAME=rsc-brain
+  [ -n "$NAME" ] || NAME=obsybrain
 
   # Questions, only for what the options did not say.
   if ! can_ask && [ "$YES" = 0 ]; then
     usage 'There is no terminal to ask on. Pass the answers as options and --yes (see help).'
   fi
   if [ -z "$MODE" ]; then
-    can_ask || usage 'Say where rsc-brain runs: pass --local or --domain D (--local: this machine only; --domain: a server with HTTPS).'
+    can_ask || usage 'Say where obsybrain runs: pass --local or --domain D (--local: this machine only; --domain: a server with HTTPS).'
     while [ -z "$MODE" ]; do
       ask 'Domain name for a server with HTTPS (leave empty to run on this machine only): '
       if [ -z "$ANSWER" ]; then MODE=local; else
@@ -1015,10 +1015,10 @@ install() {
       fi
     done
     if [ "$MODE" = server ] && [ "$DIR_GIVEN" = 0 ] && [ "$REINSTALL" = 0 ] && [ "$RESUME" = 0 ]; then
-      DIR=/opt/rsc-brain
+      DIR=/opt/obsybrain
       PENDING=$DIR/$STATE/install.pending
       [ -n "$(foreign_files "$DIR")" ] &&
-        usage "\"$DIR\" already holds files that are not an rsc-brain installation. Choose another folder with --dir."
+        usage "\"$DIR\" already holds files that are not an obsybrain installation. Choose another folder with --dir."
     fi
   fi
   if [ "$COMPANION" = 1 ]; then
@@ -1028,21 +1028,21 @@ install() {
       [ -n "$TRUSTED_PROXY" ] ||
         usage "--companion with --domain needs --trusted-proxy IP: the fixed address of rsc-factory's Caddy on $SHARED_NET."
     else
-      [ -z "$TRUSTED_PROXY" ] || usage '--trusted-proxy goes with --domain: on this machine only, nothing stands in front of rsc-brain.'
+      [ -z "$TRUSTED_PROXY" ] || usage '--trusted-proxy goes with --domain: on this machine only, nothing stands in front of obsybrain.'
     fi
     [ -n "$DB" ] || DB=shared
   fi
   if [ -z "$DB" ]; then
     if can_ask; then
       while [ -z "$DB" ]; do
-        ask 'Database: 1) rsc-brain runs its own PostgreSQL  2) an existing PostgreSQL  3) the PostgreSQL rsc-factory uses [1]: '
+        ask 'Database: 1) obsybrain runs its own PostgreSQL  2) an existing PostgreSQL  3) the PostgreSQL rsc-factory uses [1]: '
         case $ANSWER in '' | 1) DB=bundled ;; 2) DB=existing ;; 3) DB=shared ;; *) say 'Answer 1, 2 or 3.' ;; esac
       done
     else DB=bundled; fi
   fi
   if [ "$REINSTALL" = 0 ] && [ "$DB" = existing ] && [ -z "$DB_URL_FILE$ADMIN_URL_FILE" ]; then
     can_ask || usage '--db existing needs --db-url-file F or --db-admin-url-file F.'
-    ask 'File holding the URL of a database for rsc-brain alone (leave empty to give an administration login instead): '
+    ask 'File holding the URL of a database for obsybrain alone (leave empty to give an administration login instead): '
     if [ -n "$ANSWER" ]; then DB_URL_FILE=$ANSWER; else
       ask 'File holding the URL of an administration login (used once, never kept): '
       ADMIN_URL_FILE=$ANSWER
@@ -1089,7 +1089,7 @@ install() {
   fi
 
   # Requirements: nothing is changed until all of them are met.
-  step 'Checking what rsc-brain needs'
+  step 'Checking what obsybrain needs'
   need_docker
   [ "$COMPANION" = 1 ] && companion_requirements
   [ "$REINSTALL" = 1 ] && interrupted_work
@@ -1119,20 +1119,20 @@ install() {
     [ "$adopt_dir" = 1 ] && LOCK_MADE_DIR=1
     [ "$adopt_state" = 1 ] && LOCK_MADE_STATE=1
     [ -n "$(foreign_files "$DIR")" ] &&
-      usage "\"$DIR\" still holds files that are not an rsc-brain installation. Choose another folder with --dir."
+      usage "\"$DIR\" still holds files that are not an obsybrain installation. Choose another folder with --dir."
   fi
   BUILD=0
   if [ -z "$IMAGE" ]; then
     command -v git >/dev/null 2>&1 ||
-      missing 'git is not installed (it fetches the source to build rsc-brain). Install it: https://git-scm.com/downloads, or pass --image with an image already built.'
+      missing 'git is not installed (it fetches the source to build obsybrain). Install it: https://git-scm.com/downloads, or pass --image with an image already built.'
     if [ -z "$VERSION" ]; then
       VERSION=$(latest_version)
       if [ -z "$VERSION" ]; then
-        say "No published version of rsc-brain at $(repo_public "$REPO") yet: building its main branch."
+        say "No published version of obsybrain at $(repo_public "$REPO") yet: building its main branch."
         VERSION=main
       fi
     fi
-    IMAGE=rsc-brain:$VERSION
+    IMAGE=obsybrain:$VERSION
     BUILD=1
   elif ! docker image inspect "$IMAGE" >/dev/null 2>&1 </dev/null; then
     missing "The image $IMAGE is not on this machine. Build or pull it first, or pass --version to build one from the source."
@@ -1142,7 +1142,7 @@ install() {
   free_kb=$(df -Pk "$probe" 2>/dev/null | tail -n 1 | tr -s ' ' | cut -d' ' -f4)
   case $free_kb in '' | *[!0-9]*) free_kb=$MIN_FREE_KB ;; esac
   [ "$free_kb" -ge "$MIN_FREE_KB" ] ||
-    missing "Only $((free_kb / 1024)) MB are free on the disk of \"$DIR\"; rsc-brain needs at least 2 GB (images, database and copies). Free some space, or pass --dir on another disk."
+    missing "Only $((free_kb / 1024)) MB are free on the disk of \"$DIR\"; obsybrain needs at least 2 GB (images, database and copies). Free some space, or pass --dir on another disk."
   # Its own running installation holds its ports: those are not «in use».
   OWN=0
   [ "$REINSTALL" = 1 ] && PROFILES=$(env_get COMPOSE_PROFILES) && running && OWN=1
@@ -1183,8 +1183,8 @@ install() {
     fi
   fi
   if can_ask; then
-    if [ "$REINSTALL" = 1 ]; then q="Apply these settings to rsc-brain in \"$DIR\" ($MODE, $SITE)? Its key and data are kept."; else
-      q="Install rsc-brain in \"$DIR\" ($MODE, $SITE, $DB database)?"
+    if [ "$REINSTALL" = 1 ]; then q="Apply these settings to obsybrain in \"$DIR\" ($MODE, $SITE)? Its key and data are kept."; else
+      q="Install obsybrain in \"$DIR\" ($MODE, $SITE, $DB database)?"
     fi
     yes_no "$q" y || {
       say 'Nothing was changed.'
@@ -1204,7 +1204,7 @@ install() {
     SECRET=${REUSED:-$(random_hex 48)}
     PG_PASSWORD=$(random_hex 32)
     DATABASE_URL=$DB_URL
-    # The one-time key of the companion setup: for rsc-factory, which sets rsc-brain up with it (POST
+    # The one-time key of the companion setup: for rsc-factory, which sets obsybrain up with it (POST
     # /v1/setup/companion); once set up it serves nothing.
     [ "$COMPANION" = 1 ] && COMPANION_TOKEN=$(random_hex 32)
   fi
@@ -1237,7 +1237,7 @@ install() {
   if [ "$BUILD" = 1 ]; then
     docker image inspect "$IMAGE" >/dev/null 2>&1 </dev/null || MADE_IMAGE=1
     save_state
-    step "Fetching the source of rsc-brain $VERSION"
+    step "Fetching the source of obsybrain $VERSION"
     rm -rf "${DIR:?}/${STATE:?}/src"
     # The image is built from these files: they must be readable by all, whatever this shell's umask.
     (umask 022 && git clone --depth 1 --branch "$VERSION" "$REPO" "$DIR/$STATE/src") >&2 </dev/null ||
@@ -1253,8 +1253,8 @@ install() {
     # In companion mode the PostgreSQL is reached on the shared network, as the service will.
     set -- --rm -i --add-host host.docker.internal:host-gateway
     [ "$COMPANION" = 1 ] && set -- "$@" --network "$SHARED_NET"
-    printf '%s\n' "$check_url" | docker run "$@" "$IMAGE" rsc-brain db check --url-stdin --json >/dev/null ||
-      failed 3 'That PostgreSQL cannot hold rsc-brain (the line above says why).'
+    printf '%s\n' "$check_url" | docker run "$@" "$IMAGE" obsybrain db check --url-stdin --json >/dev/null ||
+      failed 3 'That PostgreSQL cannot hold obsybrain (the line above says why).'
   fi
 
   # Each thing it makes is written in the journal first: a run killed in between leaves nothing unnamed.
@@ -1275,7 +1275,7 @@ install() {
   ensure_update_dirs
   case $? in
   0) ;;
-  2) say 'rsc-brain itself goes on; only updates from the web are affected.' ;;
+  2) say 'obsybrain itself goes on; only updates from the web are affected.' ;;
   *) failed 4 "Cannot create \"$DIR/update\"." ;;
   esac
   # The compose file and the Caddyfiles of the version installed (a version from before has no door).
@@ -1319,7 +1319,7 @@ install() {
     save_state
     set --
     [ "$DB" = shared ] && set -- --isolate-from "$FACTORY_DB"
-    made=$(printf '%s\n' "$ADMIN_URL" | dc run --rm -T --no-deps app rsc-brain db provision --database "$DB_NAME" \
+    made=$(printf '%s\n' "$ADMIN_URL" | dc run --rm -T --no-deps app obsybrain db provision --database "$DB_NAME" \
       --role "$DB_NAME" "$@" --json)
     code=$?
     case $code in
@@ -1332,12 +1332,12 @@ install() {
     save_state
   fi
 
-  step 'Starting rsc-brain'
-  dc up -d --remove-orphans >&2 </dev/null || failed 4 'rsc-brain did not start: the lines above say why.'
-  step 'Waiting for rsc-brain to answer'
-  wait_healthy || failed 4 'rsc-brain did not answer within 2 minutes.'
-  version=$(dc exec -T app rsc-brain version </dev/null 2>/dev/null)
-  key_id=$(printf '%s' "$SECRET" | dc exec -T app rsc-brain key id 2>/dev/null)
+  step 'Starting obsybrain'
+  dc up -d --remove-orphans >&2 </dev/null || failed 4 'obsybrain did not start: the lines above say why.'
+  step 'Waiting for obsybrain to answer'
+  wait_healthy || failed 4 'obsybrain did not answer within 2 minutes.'
+  version=$(dc exec -T app obsybrain version </dev/null 2>/dev/null)
+  key_id=$(printf '%s' "$SECRET" | dc exec -T app obsybrain key id 2>/dev/null)
   # Done: only now is there an installation (.env), and nothing left to take back.
   if [ "$REINSTALL" = 0 ]; then
     write_env "$DIR/.env" || failed 4 "Could not write \"$DIR/.env\"."
@@ -1350,21 +1350,21 @@ install() {
   if [ "$JSON" = 1 ]; then
     companion_json=''
     [ "$COMPANION" = 1 ] &&
-      companion_json=",\"companionToken\":$(json_str "$COMPANION_TOKEN"),\"internalUrl\":\"http://rsc-brain:8090\""
+      companion_json=",\"companionToken\":$(json_str "$COMPANION_TOKEN"),\"internalUrl\":\"http://obsybrain:8090\""
     printf '{"url":%s,"mode":%s,"db":%s,"installationKey":%s,"keyId":%s,"version":%s,"dir":%s%s}\n' \
       "$(json_str "$SITE")" "$(json_str "$MODE")" "$(json_str "$DB")" "$(json_str "$SECRET")" \
       "$(json_str "$key_id")" "$(json_str "$version")" "$(json_str "$DIR")" "$companion_json"
     return 0
   fi
   out ''
-  out "rsc-brain $version is running at $SITE"
+  out "obsybrain $version is running at $SITE"
   if [ "$REINSTALL" = 1 ]; then
     out 'Its settings were applied; the installation key, the data and the copies are as they were.'
     return 0
   fi
   if [ "$COMPANION" = 1 ]; then
-    out "It waits for rsc-factory ($FACTORY_URL): finish the first-time setup of rsc-factory, and rsc-brain is set up"
-    out "with the same administration. rsc-factory reaches it as http://rsc-brain:8090 on the network $SHARED_NET."
+    out "It waits for rsc-factory ($FACTORY_URL): finish the first-time setup of rsc-factory, and obsybrain is set up"
+    out "with the same administration. rsc-factory reaches it as http://obsybrain:8090 on the network $SHARED_NET."
   else
     out 'Open it to finish the first-time setup: there you make the administration account.'
   fi
@@ -1401,7 +1401,7 @@ status() {
   if running; then
     is_running=true
     healthy && is_healthy=true
-    version=$(dc exec -T app rsc-brain version </dev/null 2>/dev/null)
+    version=$(dc exec -T app obsybrain version </dev/null 2>/dev/null)
   fi
   site=$(env_get OBSY_BRAIN_SITE) mode=$(env_get OBSY_BRAIN_MODE) db=$(env_get OBSY_BRAIN_DB) image=$(env_get OBSY_BRAIN_IMAGE)
   if [ "$JSON" = 1 ]; then
@@ -1409,10 +1409,10 @@ status() {
       "$(json_str "$site")" "$(json_str "$mode")" "$(json_str "$db")" "$(json_str "$DIR")" "$(json_str "$image")" \
       "$(json_str "$version")" "$is_running" "$is_healthy"
   else
-    out "rsc-brain in \"$DIR\": $site ($mode, $db database, $image)"
+    out "obsybrain in \"$DIR\": $site ($mode, $db database, $image)"
     if [ "$is_healthy" = true ]; then
       out "Running version $version and answering."
-      dc exec -T app rsc-brain maintenance status </dev/null 2>/dev/null
+      dc exec -T app obsybrain maintenance status </dev/null 2>/dev/null
     elif [ "$is_running" = true ]; then
       out "Running but not answering. See why with: docker compose --project-directory \"$DIR\" logs app"
     else
@@ -1424,7 +1424,7 @@ status() {
 
 need_running() {
   running || {
-    say "rsc-brain is not running. Start it with: sh $PROG install --dir \"$DIR\""
+    say "obsybrain is not running. Start it with: sh $PROG install --dir \"$DIR\""
     exit 1
   }
 }
@@ -1437,7 +1437,7 @@ backup() {
   need_running
   set --
   [ "$JSON" = 1 ] && set -- --json
-  dc exec -T app rsc-brain backup "$@" </dev/null
+  dc exec -T app obsybrain backup "$@" </dev/null
 }
 
 backups() {
@@ -1446,7 +1446,7 @@ backups() {
   need_running
   set --
   [ "$JSON" = 1 ] && set -- --json
-  dc exec -T app rsc-brain backups list "$@" </dev/null
+  dc exec -T app obsybrain backups list "$@" </dev/null
 }
 
 restore() {
@@ -1457,7 +1457,7 @@ restore() {
   [ -f "$COPY_FILE" ] && [ -r "$COPY_FILE" ] || usage "The copy \"$COPY_FILE\" cannot be read."
   if [ "$CONFIRM_SET" = 0 ]; then
     can_ask || usage "Pass --confirm with the installation's name (as the web shows it; on a new installation, the name in the copy)."
-    ask "Restoring replaces everything in rsc-brain with the copy. Type the installation's name to go on: "
+    ask "Restoring replaces everything in obsybrain with the copy. Type the installation's name to go on: "
     CONFIRM=$ANSWER
   fi
   take_lock
@@ -1473,37 +1473,37 @@ restore() {
     brought=1
     [ "$(id -u)" = 0 ] && chown 1000:1000 "$target"
   fi
-  # The name, the key and the version, checked by rsc-brain itself before anything stops.
+  # The name, the key and the version, checked by obsybrain itself before anything stops.
   step "Checking $base"
   if running; then set -- exec -T app; else set -- run --rm -T --no-deps app; fi
   if [ -n "$KEY_FILE" ]; then
-    dc "$@" rsc-brain restore --check --file "/backups/$base" --confirm "$CONFIRM" <"$KEY_FILE" >&2
+    dc "$@" obsybrain restore --check --file "/backups/$base" --confirm "$CONFIRM" <"$KEY_FILE" >&2
   else
-    dc "$@" rsc-brain restore --check --file "/backups/$base" --confirm "$CONFIRM" </dev/null >&2
+    dc "$@" obsybrain restore --check --file "/backups/$base" --confirm "$CONFIRM" </dev/null >&2
   fi
   code=$?
   if [ "$code" != 0 ]; then
     [ "$brought" = 1 ] && rm -f "${target:?}"
-    say 'Nothing was changed: rsc-brain kept running.'
+    say 'Nothing was changed: obsybrain kept running.'
     [ "$code" = 2 ] && exit 2
     exit 1
   fi
-  step 'Stopping rsc-brain'
+  step 'Stopping obsybrain'
   dc stop app >&2 </dev/null
   step "Restoring $base"
   set --
   [ "$JSON" = 1 ] && set -- --json
   if [ -n "$KEY_FILE" ]; then
-    dc run --rm -T --no-deps app rsc-brain restore --file "/backups/$base" --confirm "$CONFIRM" "$@" <"$KEY_FILE"
+    dc run --rm -T --no-deps app obsybrain restore --file "/backups/$base" --confirm "$CONFIRM" "$@" <"$KEY_FILE"
   else
-    dc run --rm -T --no-deps app rsc-brain restore --file "/backups/$base" --confirm "$CONFIRM" "$@" </dev/null
+    dc run --rm -T --no-deps app obsybrain restore --file "/backups/$base" --confirm "$CONFIRM" "$@" </dev/null
   fi
   code=$?
   # A copy brought in only for a restore that did not happen is not left among the copies.
   [ "$code" != 0 ] && [ "$brought" = 1 ] && rm -f "${target:?}"
-  step 'Starting rsc-brain again'
+  step 'Starting obsybrain again'
   if ! { dc up -d >&2 </dev/null && wait_healthy; }; then
-    say "rsc-brain did not answer after the restore. See why with: docker compose --project-directory \"$DIR\" logs app"
+    say "obsybrain did not answer after the restore. See why with: docker compose --project-directory \"$DIR\" logs app"
   fi
   if [ "$code" = 0 ]; then
     rm -f "${DIR:?}/${STATE:?}/rollback.failed"
@@ -1515,7 +1515,7 @@ restore() {
 }
 
 # ----------------------------------------------------------------------------------------------------------- update
-# Versions are X.Y.Z (or vX.Y.Z), maybe with a -preview part. rsc-brain only moves forward: migrations go one way.
+# Versions are X.Y.Z (or vX.Y.Z), maybe with a -preview part. obsybrain only moves forward: migrations go one way.
 version_ok() { matches "$1" '^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; }
 # number_after A B: the number A is larger, whatever its length.
 number_after() {
@@ -1575,10 +1575,10 @@ preview_after() {
 same_version() { [ "${1#v}" = "${2#v}" ]; }
 
 # The size of the newest copy, in KB (0 without copies).
-# Copies are named by their UTC date (rsc-brain-<yyyymmddThhmmssZ>-<reason>.rscb): the last name is the newest.
+# Copies are named by their UTC date (obsybrain-<yyyymmddThhmmssZ>-<reason>.rscb): the last name is the newest.
 last_copy_kb() {
   newest=''
-  for f in "$DIR"/backups/rsc-brain-*.rscb; do [ -f "$f" ] && newest=$f; done
+  for f in "$DIR"/backups/obsybrain-*.rscb; do [ -f "$f" ] && newest=$f; done
   bytes=0
   [ -n "$newest" ] && bytes=$(wc -c <"$newest" 2>/dev/null | tr -d ' ')
   case $bytes in '' | *[!0-9]*) bytes=0 ;; esac
@@ -1594,10 +1594,10 @@ drop_next() { [ -n "$NEXT_SRC" ] && rm -rf "${NEXT_SRC:?}"; return 0; }
 update_abort() {
   trap '' HUP INT TERM
   say "$1"
-  [ "$UPDATE_PHASE" = maintenance ] && dc exec -T app rsc-brain maintenance off </dev/null >&2
+  [ "$UPDATE_PHASE" = maintenance ] && dc exec -T app obsybrain maintenance off </dev/null >&2
   rm -f "${DIR:?}/${STATE:?}/update.pending" "${DIR:?}/${STATE:?}/update.pending.new"
   drop_next
-  say "Nothing was changed: rsc-brain $UPDATE_FROM keeps running."
+  say "Nothing was changed: obsybrain $UPDATE_FROM keeps running."
   exit 1
 }
 # The new version's output and the service's last lines, without the key or a password, for the person and the web.
@@ -1639,7 +1639,7 @@ door_up() {
   mkdir -p "$DIR/$STATE/door" && chmod 755 "$DIR/$STATE/door"
   door_step "$1"
   dc --profile door up -d --no-deps door >&2 </dev/null ||
-    say 'The stand-in for the service did not start: until rsc-brain is back, its address does not answer.'
+    say 'The stand-in for the service did not start: until obsybrain is back, its address does not answer.'
   checkpoint door-up
   return 0
 }
@@ -1661,7 +1661,7 @@ rollback() {
   door_companion
   say "$1"
   update_failure_log
-  step "Going back to rsc-brain $UPDATE_FROM"
+  step "Going back to obsybrain $UPDATE_FROM"
   dc stop app >&2 </dev/null
   door_up 'Going back to the version before.'
   for f in compose.yaml Caddyfile door.Caddyfile; do
@@ -1673,7 +1673,7 @@ rollback() {
   door_step 'Restoring the copy made before the update. Everything comes back as it was.'
   step "Restoring the copy made before the update ($PRE_COPY), keys and sessions kept"
   restored=0
-  dc run --rm -T --no-deps app rsc-brain restore --file "/backups/$PRE_COPY" --keep-keys </dev/null >&2 && restored=1
+  dc run --rm -T --no-deps app obsybrain restore --file "/backups/$PRE_COPY" --keep-keys </dev/null >&2 && restored=1
   # A restore that failed leaves a mark every later command shows (and status fails on) until a restore goes well,
   # this one done again (a launcher killed after a failed restore leaves the journal too) or a restore by hand. Written
   # before the journal goes, so a stop in between leaves one or the other.
@@ -1687,7 +1687,7 @@ rollback() {
       say_env OBSY_BRAIN_ROLLBACK_RESTORE "sh $PROG restore --file $PRE_COPY --confirm <the installation's name> --dir \"$DIR\""
     } >"$DIR/$STATE/rollback.failed.new" && mv -f "$DIR/$STATE/rollback.failed.new" "$DIR/$STATE/rollback.failed"
   fi
-  step "Starting rsc-brain $UPDATE_FROM"
+  step "Starting obsybrain $UPDATE_FROM"
   door_down
   started=0
   dc up -d --remove-orphans >&2 </dev/null && wait_healthy && started=1
@@ -1696,23 +1696,23 @@ rollback() {
   rm -f "${DIR:?}/${STATE:?}/update.pending"
   if [ "$restored" = 1 ] && [ "$started" = 1 ]; then
     rm -f "${UPDATE_LOG:?}"
-    dc exec -T app rsc-brain maintenance off </dev/null >&2
+    dc exec -T app obsybrain maintenance off </dev/null >&2
     if [ -n "$FAILURE_LOG" ]; then
-      dc exec -T app rsc-brain update record --failed --from "$UPDATE_FROM" --to "$UPDATE_TO" <"$FAILURE_LOG" >&2
+      dc exec -T app obsybrain update record --failed --from "$UPDATE_FROM" --to "$UPDATE_TO" <"$FAILURE_LOG" >&2
     else
-      dc exec -T app rsc-brain update record --failed --from "$UPDATE_FROM" --to "$UPDATE_TO" </dev/null >&2
+      dc exec -T app obsybrain update record --failed --from "$UPDATE_FROM" --to "$UPDATE_TO" </dev/null >&2
     fi
-    say "The update to $UPDATE_TO failed, and rsc-brain went back to $UPDATE_FROM with its data as it was just before"
+    say "The update to $UPDATE_TO failed, and obsybrain went back to $UPDATE_FROM with its data as it was just before"
     say "the update (the copy $PRE_COPY). Sessions and keys still work. Admin > Backups & system shows the failure."
     [ -n "$FAILURE_LOG" ] && say "The last lines of the service are in \"$FAILURE_LOG\"."
     exit 4
   fi
   if [ "$restored" = 1 ]; then
     say "The data is back as it was just before the update (the copy $PRE_COPY), with sessions and keys kept, and the"
-    say "settings of $UPDATE_FROM are back, but rsc-brain $UPDATE_FROM did not start. See why with: docker compose --project-directory \"$DIR\" logs app"
+    say "settings of $UPDATE_FROM are back, but obsybrain $UPDATE_FROM did not start. See why with: docker compose --project-directory \"$DIR\" logs app"
     say "Then start it with: sh $PROG install --dir \"$DIR\""
   else
-    say "rsc-brain could not go back to $UPDATE_FROM by itself. Everything up to the update is in the copy $PRE_COPY."
+    say "obsybrain could not go back to $UPDATE_FROM by itself. Everything up to the update is in the copy $PRE_COPY."
     say "Restore it by hand (everyone signs in again afterwards): sh $PROG restore --file $PRE_COPY --confirm <the installation's name> --dir \"$DIR\""
     say "What the update printed is kept in \"$UPDATE_LOG\"."
   fi
@@ -1743,7 +1743,7 @@ interrupted_work() {
     UPDATE_LOG=$DIR/$STATE/update.log
     [ -d "$DIR/$STATE/src.next" ] && NEXT_SRC=$DIR/$STATE/src.next
     case $PRE_COPY in
-    rsc-brain-*-pre-update.rscb) ;;
+    obsybrain-*-pre-update.rscb) ;;
     *)
       say "An update in \"$DIR\" was interrupted, and its journal \"$journal\" cannot be read. Restore the copy made"
       say "before it by hand (the newest *-pre-update.rscb in \"$DIR/backups\"): sh $PROG restore --file F --confirm <the installation's name> --dir \"$DIR\""
@@ -1769,7 +1769,7 @@ rollback_failed_notice() {
   [ "$ROLLBACK_FAILED" = 1 ] && return 0
   ROLLBACK_FAILED=1
   say ''
-  say "!! An update to $(file_get "$mark" OBSY_BRAIN_ROLLBACK_TO) failed, and rsc-brain could not go back to"
+  say "!! An update to $(file_get "$mark" OBSY_BRAIN_ROLLBACK_TO) failed, and obsybrain could not go back to"
   say "!! $(file_get "$mark" OBSY_BRAIN_ROLLBACK_FROM) by itself: the data may not be as it was. Everything up to that update is in the"
   say "!! copy $(file_get "$mark" OBSY_BRAIN_ROLLBACK_COPY). Restore it by hand (everyone signs in again afterwards):"
   say "!!   $(file_get "$mark" OBSY_BRAIN_ROLLBACK_RESTORE)"
@@ -1853,16 +1853,16 @@ update_check() {
     missing 'git is not installed (it asks the repository for its versions). Install it: https://git-scm.com/downloads'
   if ! running; then
     if [ -f "$DIR/$STATE/update.pending" ]; then
-      lock_held && check_failed updating "An update is running in \"$DIR\": rsc-brain is stopped for now. Run this again when it ends."
+      lock_held && check_failed updating "An update is running in \"$DIR\": obsybrain is stopped for now. Run this again when it ends."
       check_failed updating "An update in \"$DIR\" was interrupted. This takes it back: sh $PROG status --dir \"$DIR\". Then run this again."
     fi
-    check_failed not_running "rsc-brain is not running, so its version cannot be read. Start it with: sh $PROG install --dir \"$DIR\""
+    check_failed not_running "obsybrain is not running, so its version cannot be read. Start it with: sh $PROG install --dir \"$DIR\""
   fi
-  ci_said=$(dc exec -T app rsc-brain version </dev/null 2>/dev/null)
+  ci_said=$(dc exec -T app obsybrain version </dev/null 2>/dev/null)
   version_ok "$ci_said" ||
-    check_failed no_version "rsc-brain in \"$DIR\" does not say its version. Check it with: sh $PROG status --dir \"$DIR\""
+    check_failed no_version "obsybrain in \"$DIR\" does not say its version. Check it with: sh $PROG status --dir \"$DIR\""
   CHECK_INSTALLED=v${ci_said#v}
-  CHECK_TMP=$(mktemp -d "${TMPDIR:-/tmp}/rsc-brain-check.XXXXXX") || missing 'Could not make a temporary folder.'
+  CHECK_TMP=$(mktemp -d "${TMPDIR:-/tmp}/obsybrain-check.XXXXXX") || missing 'Could not make a temporary folder.'
   trap '[ -z "$CHECK_PID" ] || kill "$CHECK_PID" 2>/dev/null; rm -rf "${CHECK_TMP:?}"' EXIT
   trap 'exit 130' HUP INT TERM
   shown=$(repo_public "$REPO")
@@ -1909,15 +1909,15 @@ update() {
   interrupted_work
   need_running
   old_image=$(env_get OBSY_BRAIN_IMAGE)
-  UPDATE_FROM=$(dc exec -T app rsc-brain version </dev/null 2>/dev/null)
+  UPDATE_FROM=$(dc exec -T app obsybrain version </dev/null 2>/dev/null)
   version_ok "$UPDATE_FROM" || {
-    say "rsc-brain in \"$DIR\" does not say its version. Check it with: sh $PROG status --dir \"$DIR\". Nothing was changed."
+    say "obsybrain in \"$DIR\" does not say its version. Check it with: sh $PROG status --dir \"$DIR\". Nothing was changed."
     exit 1
   }
   BUILD=0
   if [ -n "$IMAGE" ]; then
     if [ "$IMAGE" = "$old_image" ]; then
-      out "rsc-brain runs $IMAGE already. Nothing to update."
+      out "obsybrain runs $IMAGE already. Nothing to update."
       exit 0
     fi
     docker image inspect "$IMAGE" >/dev/null 2>&1 </dev/null ||
@@ -1928,15 +1928,15 @@ update() {
     asked=$VERSION
     if [ -z "$VERSION" ]; then
       VERSION=$(latest_version)
-      [ -n "$VERSION" ] || missing "No published version of rsc-brain at $(repo_public "$REPO"). Pass --version or --image."
+      [ -n "$VERSION" ] || missing "No published version of obsybrain at $(repo_public "$REPO"). Pass --version or --image."
     fi
     if same_version "$VERSION" "$UPDATE_FROM" || { [ -z "$asked" ] && ! newer "$VERSION" "$UPDATE_FROM"; }; then
-      out "rsc-brain $UPDATE_FROM is installed and $VERSION is the newest asked for. Nothing to update."
+      out "obsybrain $UPDATE_FROM is installed and $VERSION is the newest asked for. Nothing to update."
       exit 0
     fi
     newer "$VERSION" "$UPDATE_FROM" ||
-      usage "$VERSION is not newer than $UPDATE_FROM (installed). rsc-brain only moves forward: its migrations go one way. Nothing was changed."
-    IMAGE=rsc-brain:$VERSION
+      usage "$VERSION is not newer than $UPDATE_FROM (installed). obsybrain only moves forward: its migrations go one way. Nothing was changed."
+    IMAGE=obsybrain:$VERSION
     BUILD=1
   fi
   # Room for the copy made before, twice over, and 1 GB more.
@@ -1946,7 +1946,7 @@ update() {
   [ "$free_kb" -ge "$need_kb" ] ||
     missing "Only $((free_kb / 1024)) MB are free on the disk of \"$DIR\"; an update needs twice the last copy and 1 GB: $((need_kb / 1024)) MB. Free some space and run this again."
   if can_ask; then
-    yes_no "Update rsc-brain in \"$DIR\" from $UPDATE_FROM to ${VERSION:-$IMAGE}? Writes wait meanwhile; a copy is made first, and if anything fails the version before comes back." y || {
+    yes_no "Update obsybrain in \"$DIR\" from $UPDATE_FROM to ${VERSION:-$IMAGE}? Writes wait meanwhile; a copy is made first, and if anything fails the version before comes back." y || {
       say 'Nothing was changed.'
       exit 1
     }
@@ -1955,7 +1955,7 @@ update() {
   if [ "$BUILD" = 1 ]; then
     NEXT_SRC=$DIR/$STATE/src.next
     rm -rf "${NEXT_SRC:?}"
-    step "Fetching the source of rsc-brain $VERSION (rsc-brain $UPDATE_FROM keeps running)"
+    step "Fetching the source of obsybrain $VERSION (obsybrain $UPDATE_FROM keeps running)"
     (umask 022 && git clone --depth 1 --branch "$VERSION" "$REPO" "$NEXT_SRC") >&2 </dev/null || {
       drop_next
       missing "Could not fetch $VERSION from $(repo_public "$REPO"). Check the version (git tags) and the network."
@@ -1963,11 +1963,11 @@ update() {
     step "Building the image $IMAGE"
     docker build -t "$IMAGE" "$NEXT_SRC" >&2 </dev/null || update_abort 'The image did not build: the lines above say why.'
   fi
-  UPDATE_TO=$(docker run --rm "$IMAGE" rsc-brain version </dev/null 2>/dev/null)
-  version_ok "$UPDATE_TO" || update_abort "The image $IMAGE does not say its version: it is not an rsc-brain image."
+  UPDATE_TO=$(docker run --rm "$IMAGE" obsybrain version </dev/null 2>/dev/null)
+  version_ok "$UPDATE_TO" || update_abort "The image $IMAGE does not say its version: it is not an obsybrain image."
   if ! newer "$UPDATE_TO" "$UPDATE_FROM"; then
     drop_next
-    usage "$IMAGE is rsc-brain $UPDATE_TO, not newer than $UPDATE_FROM (installed). rsc-brain only moves forward: its migrations go one way. Nothing was changed."
+    usage "$IMAGE is obsybrain $UPDATE_TO, not newer than $UPDATE_FROM (installed). obsybrain only moves forward: its migrations go one way. Nothing was changed."
   fi
 
   # The door's image is here before anything moves: once the service stops is no time to fetch it.
@@ -1977,18 +1977,18 @@ update() {
   if [ -n "$door_img" ] && ! docker image inspect "$door_img" >/dev/null 2>&1 </dev/null &&
     ! docker pull "$door_img" >&2 </dev/null; then
     drop_next
-    missing "Could not fetch the image $door_img, which answers while rsc-brain is stopped. Check the network and run this again."
+    missing "Could not fetch the image $door_img, which answers while obsybrain is stopped. Check the network and run this again."
   fi
 
   step 'Turning maintenance on: writes wait («retry after»); reads keep working'
-  dc exec -T app rsc-brain maintenance on --reason update </dev/null >&2 ||
+  dc exec -T app obsybrain maintenance on --reason update </dev/null >&2 ||
     update_abort 'Maintenance could not be turned on (the lines above say why).'
   UPDATE_PHASE=maintenance
   step 'Making a copy of everything before the update'
-  made=$(dc exec -T app rsc-brain backup --reason pre-update --json </dev/null)
+  made=$(dc exec -T app obsybrain backup --reason pre-update --json </dev/null)
   PRE_COPY=$(printf '%s\n' "$made" | sed -n 's/.*"file":"\([^"]*\)".*/\1/p' | head -n 1)
   case $PRE_COPY in
-  rsc-brain-*-pre-update.rscb) ;;
+  obsybrain-*-pre-update.rscb) ;;
   *) update_abort 'The copy before the update failed (the lines above say why). Maintenance is off again.' ;;
   esac
   { cp -p "$DIR/.env" "$DIR/$STATE/env.previous" && cp -p "$DIR/compose.yaml" "$DIR/$STATE/compose.yaml.previous"; } ||
@@ -2030,20 +2030,20 @@ update() {
   2) say 'The update itself goes on; only updates from the web are affected.' ;;
   *) rollback "Could not create \"$DIR/update\"." ;;
   esac
-  step "Stopping rsc-brain $UPDATE_FROM"
-  dc stop app >&2 </dev/null || rollback "rsc-brain $UPDATE_FROM could not be stopped."
+  step "Stopping obsybrain $UPDATE_FROM"
+  dc stop app >&2 </dev/null || rollback "obsybrain $UPDATE_FROM could not be stopped."
   door_up 'Migrating the data.'
-  step "Migrating the data for rsc-brain $UPDATE_TO"
-  dc run --rm -T --no-deps app rsc-brain migrate </dev/null >"$UPDATE_LOG" 2>&1
+  step "Migrating the data for obsybrain $UPDATE_TO"
+  dc run --rm -T --no-deps app obsybrain migrate </dev/null >"$UPDATE_LOG" 2>&1
   code=$?
   cat "$UPDATE_LOG" >&2
   [ "$code" = 0 ] || rollback "The migration of $UPDATE_TO failed (the lines above say why)."
-  step "Starting rsc-brain $UPDATE_TO"
+  step "Starting obsybrain $UPDATE_TO"
   door_down
-  dc up -d --remove-orphans >&2 </dev/null || rollback "rsc-brain $UPDATE_TO did not start."
-  wait_healthy || rollback "rsc-brain $UPDATE_TO did not answer within $WAIT_SECONDS seconds."
-  now=$(dc exec -T app rsc-brain version </dev/null 2>/dev/null)
-  [ "$now" = "$UPDATE_TO" ] || rollback "The service answers as rsc-brain ${now:-(no version)}, not $UPDATE_TO."
+  dc up -d --remove-orphans >&2 </dev/null || rollback "obsybrain $UPDATE_TO did not start."
+  wait_healthy || rollback "obsybrain $UPDATE_TO did not answer within $WAIT_SECONDS seconds."
+  now=$(dc exec -T app obsybrain version </dev/null 2>/dev/null)
+  [ "$now" = "$UPDATE_TO" ] || rollback "The service answers as obsybrain ${now:-(no version)}, not $UPDATE_TO."
 
   # The new version runs. The tail is not cut: a signal here (a Ctrl-C reaches the whole foreground group) must neither
   # take back an update that has finished nor leave maintenance on (writes refused for up to 30 minutes, the journal
@@ -2056,10 +2056,10 @@ update() {
   [ ! -e "$journal" ] || rollback 'The journal could not be removed, so the update was not confirmed.'
   checkpoint update-journal-gone
   step 'Turning maintenance off: writes are taken again'
-  dc_bounded exec -T app rsc-brain maintenance off </dev/null >&2 ||
+  dc_bounded exec -T app obsybrain maintenance off </dev/null >&2 ||
     say "Maintenance could not be turned off; it ends by itself within 30 minutes."
   checkpoint update-maintenance-off
-  dc_bounded exec -T app rsc-brain update record --ok --from "$UPDATE_FROM" --to "$UPDATE_TO" </dev/null >&2 ||
+  dc_bounded exec -T app obsybrain update record --ok --from "$UPDATE_FROM" --to "$UPDATE_TO" </dev/null >&2 ||
     say 'The web could not be told about this update (Admin > Backups & system); the update itself went well.'
   # What is left changes state still (the previous files, the new source: a stop between the two leaves no source), so
   # it is done with signals ignored too.
@@ -2081,7 +2081,7 @@ update() {
       "$(json_str "$UPDATE_TO")" "$(json_str "$IMAGE")" "$(json_str "$PRE_COPY")" "$(json_str "$DIR")"
     return 0
   fi
-  out "rsc-brain was updated from $UPDATE_FROM to $UPDATE_TO and answers at $(env_get OBSY_BRAIN_SITE)."
+  out "obsybrain was updated from $UPDATE_FROM to $UPDATE_TO and answers at $(env_get OBSY_BRAIN_SITE)."
   out "A copy of everything from just before is kept in \"$DIR/backups\": $PRE_COPY"
   return 0
 }
@@ -2100,10 +2100,10 @@ UPD_FILES='loop.sh credentials.sh Dockerfile'
 # the files that hold no secret (updater/previous) and, by a rename, the credential (updater/credentials.old): there is
 # never a second copy of a credential. UPD_WAS_ON: there was one.
 UPD_WAS_ON=0
-UPD_KEPT='compose.updater.yaml rsc-brain.sh loop.sh credentials.sh Dockerfile updater.env passwd'
+UPD_KEPT='compose.updater.yaml obsybrain.sh loop.sh credentials.sh Dockerfile updater.env passwd'
 updater_names() {
   UPD_PROJECT=$NAME-updater
-  UPD_IMAGE=rsc-brain-updater:$NAME
+  UPD_IMAGE=obsybrain-updater:$NAME
 }
 # The service's folders for the marks and the report, made before the service starts (a bind mount of a folder that is
 # not there would be made by Docker, for root). 0 when they are ready; 1 when one cannot be made; 2 when a folder is
@@ -2161,7 +2161,7 @@ updater_install_file() {
 # The files of the updater from a folder with the launcher's files (deploy/): 0 when all were put.
 updater_files() {
   updater_install_file "$1/compose.updater.yaml" "$DIR/updater/compose.updater.yaml" 644 || return 1
-  updater_install_file "$1/rsc-brain.sh" "$DIR/updater/rsc-brain.sh" 755 || return 1
+  updater_install_file "$1/obsybrain.sh" "$DIR/updater/obsybrain.sh" 755 || return 1
   for f in $UPD_FILES; do
     updater_install_file "$1/updater/$f" "$DIR/updater/$f" 755 || return 1
   done
@@ -2169,7 +2169,7 @@ updater_files() {
 }
 updater_source() {
   for d in "$HERE" "$DIR/$STATE/src/deploy"; do
-    if [ -f "$d/compose.updater.yaml" ] && [ -f "$d/rsc-brain.sh" ] && [ -f "$d/updater/loop.sh" ] &&
+    if [ -f "$d/compose.updater.yaml" ] && [ -f "$d/obsybrain.sh" ] && [ -f "$d/updater/loop.sh" ] &&
       [ -f "$d/updater/credentials.sh" ] && [ -f "$d/updater/Dockerfile" ]; then
       echo "$d"
       return 0
@@ -2271,7 +2271,7 @@ check_key_file() {
 web_updates_enable() {
   need_installation
   if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
-    say 'rsc-brain was installed by rsc-factory: update it from there.'
+    say 'obsybrain was installed by rsc-factory: update it from there.'
     say 'Nothing was changed.'
     exit 2
   fi
@@ -2303,7 +2303,7 @@ web_updates_enable() {
   need_docker
   take_lock
   src=$(updater_source) ||
-    missing 'The updater files (updater/, compose.updater.yaml) are not next to the launcher. Run it from a copy of the repository (deploy/), or update rsc-brain to a version that has them.'
+    missing 'The updater files (updater/, compose.updater.yaml) are not next to the launcher. Run it from a copy of the repository (deploy/), or update obsybrain to a version that has them.'
   # An enable that was cut short (killed, a power cut) left things aside: back to how it was before anything else.
   # A copy that was being made is not whole, and the live files are: it is thrown away. `previous` exists only whole.
   rm -rf "${DIR:?}/updater/previous.tmp"
@@ -2411,7 +2411,7 @@ web_updates_enable() {
   if ! {
     {
       printf 'root:x:0:0:root:/root:/bin/sh\n'
-      [ "$we_uid" = 0 ] || printf 'updater:x:%s:%s:rsc-brain updater:%s/updater/home:/bin/sh\n' "$we_uid" "$we_gid" "$DIR"
+      [ "$we_uid" = 0 ] || printf 'updater:x:%s:%s:obsybrain updater:%s/updater/home:/bin/sh\n' "$we_uid" "$we_gid" "$DIR"
     } >"$DIR/updater/passwd.new" && chmod 644 "$DIR/updater/passwd.new" && mv -f "$DIR/updater/passwd.new" "$DIR/updater/passwd"
   }; then
     updater_take_back
@@ -2438,7 +2438,7 @@ web_updates_enable() {
   rm -rf "${DIR:?}/updater/previous" "${DIR:?}/updater/credentials.old"
   trap - HUP INT TERM
   out 'Updates from the web are on.'
-  out 'An administrator signed in on the web can now update rsc-brain; the updater takes the request and runs the update.'
+  out 'An administrator signed in on the web can now update obsybrain; the updater takes the request and runs the update.'
   out "It controls Docker on this machine. Turn it off with: sh $PROG web-updates disable --dir \"$DIR\""
   return 0
 }
@@ -2465,7 +2465,7 @@ web_updates_status() {
   need_installation
   updater_names
   if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
-    out 'Updates from the web are off. rsc-brain was installed by rsc-factory: update it from there.'
+    out 'Updates from the web are off. obsybrain was installed by rsc-factory: update it from there.'
     return 0
   fi
   if [ -f "$DIR/updater/disabling" ]; then
@@ -2489,13 +2489,13 @@ web_updates_status() {
 key_id_of() {
   kio_key=$1
   if running; then set -- exec -T app; else set -- run --rm -T --no-deps app; fi
-  printf '%s\n' "$kio_key" | dc "$@" rsc-brain key id 2>/dev/null
+  printf '%s\n' "$kio_key" | dc "$@" obsybrain key id 2>/dev/null
 }
 key_rotate() {
   need_installation
   [ "$YES" = 1 ] || can_ask || usage 'There is no terminal to confirm on. Pass --yes to rotate the installation key.'
   if [ "$YES" = 0 ]; then
-    yes_no "Make a new installation key for rsc-brain in \"$DIR\"? It stops for a moment. Copies made before keep needing the current key, which is kept in a file next to .env." n || {
+    yes_no "Make a new installation key for obsybrain in \"$DIR\"? It stops for a moment. Copies made before keep needing the current key, which is kept in a file next to .env." n || {
       say 'Nothing was changed.'
       exit 1
     }
@@ -2506,7 +2506,7 @@ key_rotate() {
   old=$(env_get OBSY_BRAIN_SECRET)
   old_id=$(key_id_of "$old")
   case $old_id in '' | *[!0-9A-Za-z_-]*)
-    say 'Could not read the id of the key in use (see: sh rsc-brain.sh status). Nothing was changed.'
+    say 'Could not read the id of the key in use (see: sh obsybrain.sh status). Nothing was changed.'
     exit 1
     ;;
   esac
@@ -2539,24 +2539,24 @@ key_rotate() {
   # Between the reseal and the new .env nothing may stop it halfway.
   trap '' HUP INT TERM
   SHIELD=1
-  step 'Stopping rsc-brain'
+  step 'Stopping obsybrain'
   dc stop app >&2 </dev/null
   step 'Sealing everything sealed with the new key'
   # The reseal goes from the key in the settings it runs with to the key on its standard input; done again, it finds
   # what is sealed with the new key already and changes nothing more.
-  if ! printf '%s\n' "$new" | dc run --rm -T --no-deps app rsc-brain key reseal >&2; then
+  if ! printf '%s\n' "$new" | dc run --rm -T --no-deps app obsybrain key reseal >&2; then
     # It may have written before it failed: the new key is dropped only once everything is sealed with the old one
     # again (that reseal, from the new key to the old, finds nothing to do when nothing was written).
     step 'Making sure everything is sealed with the key in use'
     ENV_FILE=$rotated
-    printf '%s\n' "$old" | dc run --rm -T --no-deps app rsc-brain key reseal >&2
+    printf '%s\n' "$old" | dc run --rm -T --no-deps app obsybrain key reseal >&2
     back=$?
     ENV_FILE=$DIR/.env
     if [ "$back" = 0 ]; then rm -f "${rotated:?}"; fi
-    step 'Starting rsc-brain again'
-    { dc up -d --remove-orphans >&2 </dev/null && wait_healthy; } || say "rsc-brain did not answer. See why with: docker compose --project-directory \"$DIR\" logs app"
+    step 'Starting obsybrain again'
+    { dc up -d --remove-orphans >&2 </dev/null && wait_healthy; } || say "obsybrain did not answer. See why with: docker compose --project-directory \"$DIR\" logs app"
     if [ "$back" = 0 ]; then
-      say 'The key was not changed (the lines above say why). rsc-brain runs with the key it had.'
+      say 'The key was not changed (the lines above say why). obsybrain runs with the key it had.'
     else
       say "The key was not changed, but it cannot be told which key the data is sealed with: the new one is kept in"
       say "\"$rotated\". Run sh $PROG key rotate --dir \"$DIR\" again to finish the rotation once the lines above are dealt with."
@@ -2564,14 +2564,14 @@ key_rotate() {
     exit 1
   fi
   mv -f "$rotated" "$DIR/.env" || {
-    say "Everything is sealed with the new key, but \"$DIR/.env\" could not be replaced. Move \"$rotated\" to \"$DIR/.env\" before starting rsc-brain."
+    say "Everything is sealed with the new key, but \"$DIR/.env\" could not be replaced. Move \"$rotated\" to \"$DIR/.env\" before starting obsybrain."
     exit 1
   }
   trap - HUP INT TERM
   SHIELD=0
-  step 'Starting rsc-brain'
+  step 'Starting obsybrain'
   { dc up -d --remove-orphans >&2 </dev/null && wait_healthy; } ||
-    say "rsc-brain did not answer after the rotation. See why with: docker compose --project-directory \"$DIR\" logs app"
+    say "obsybrain did not answer after the rotation. See why with: docker compose --project-directory \"$DIR\" logs app"
   new_id=$(key_id_of "$new")
   say "Copies made before need the previous key (id $old_id), kept in \"$old_file\" (only you can read it): the web marks"
   say 'them «Needs the older key». Copies from now on use the new key. Sessions, tokens and connections keep working.'
@@ -2625,9 +2625,9 @@ uninstall() {
   updater_names
   updater_remove || say 'The updater could not be fully removed (the lines above say why).'
   if [ "$DELETE_DATA" = 0 ]; then
-    step 'Stopping rsc-brain and removing its containers'
+    step 'Stopping obsybrain and removing its containers'
     dc down --remove-orphans >&2 </dev/null || exit 1
-    out "rsc-brain was removed from this machine's containers. Its database, the copies in \"$DIR/backups\" and the"
+    out "obsybrain was removed from this machine's containers. Its database, the copies in \"$DIR/backups\" and the"
     out "installation key (\"$DIR/.env\") are kept: sh $PROG install --dir \"$DIR\" brings it back as it was."
     return 0
   fi
@@ -2635,21 +2635,21 @@ uninstall() {
   if [ "$db" != bundled ] && [ -n "$ADMIN_URL_FILE" ]; then
     read_url "$ADMIN_URL_FILE"
     step "Removing the database $db_name and the role $db_name"
-    printf '%s\n' "$RU" | dc run --rm -T --no-deps app rsc-brain db drop --database "$db_name" --role "$db_name" \
+    printf '%s\n' "$RU" | dc run --rm -T --no-deps app obsybrain db drop --database "$db_name" --role "$db_name" \
       --confirm "$db_name" >&2 || {
       say 'The database was not removed (the line above says why). Nothing else was deleted.'
       exit 1
     }
   fi
-  step 'Stopping rsc-brain and removing its containers, network and volumes'
+  step 'Stopping obsybrain and removing its containers, network and volumes'
   dc down -v --remove-orphans >&2 </dev/null || exit 1
   printf '%s\n' "$(env_get OBSY_BRAIN_SECRET)" >"$DIR/installation-key.txt"
   chmod 600 "$DIR/installation-key.txt"
   rm -rf "${DIR:?}/backups" "${DIR:?}/${STATE:?}" "${DIR:?}/compose.yaml" "${DIR:?}/Caddyfile" "${DIR:?}/door.Caddyfile" "${DIR:?}/.env" \
     "${DIR:?}/compose.companion.yaml" "${DIR:?}/last-failure.log" "${DIR:?}/update"
-  out "rsc-brain and its copies were deleted from \"$DIR\"."
+  out "obsybrain and its copies were deleted from \"$DIR\"."
   if [ "$db" != bundled ] && [ -z "$ADMIN_URL_FILE" ]; then
-    out "Its database is on your PostgreSQL and was not touched: remove the database rsc-brain used (and its role) there,"
+    out "Its database is on your PostgreSQL and was not touched: remove the database obsybrain used (and its role) there,"
     out "or run this again with --db-admin-url-file."
   fi
   out "The installation key is kept in \"$DIR/installation-key.txt\" (copies you downloaded need it). Delete it when"

@@ -23,14 +23,14 @@ import { download } from '../helpers/download.ts'
 import { skipPg } from '../helpers/pg.ts'
 import { type World, world } from '../helpers/world.ts'
 
-const root = mkdtempSync(join(tmpdir(), 'rsc-brain-export-send-'))
+const root = mkdtempSync(join(tmpdir(), 'obsybrain-export-send-'))
 // Made by the server itself, as it would be.
 const dir = join(root, 'exports')
 after(() => rmSync(root, { recursive: true, force: true }))
 
 describe('a crash leaves no export behind (the next start sweeps)', () => {
   it('removes prepared files older than an hour, keeps the fresh one', async () => {
-    const d = mkdtempSync(join(tmpdir(), 'rsc-brain-export-sweep-'))
+    const d = mkdtempSync(join(tmpdir(), 'obsybrain-export-sweep-'))
     try {
       writeFileSync(join(d, 'old.zip.part'), 'x')
       writeFileSync(join(d, 'fresh.zip.part'), 'y')
@@ -189,7 +189,7 @@ describe('preparing and sending an export', { skip: skipPg }, () => {
       while (!seen && Date.now() < end) {
         const r = await w.db.one(
           `SELECT count(*)::int AS n FROM pg_stat_activity
-            WHERE datname = current_database() AND application_name = 'rsc-brain export' AND xact_start IS NOT NULL`,
+            WHERE datname = current_database() AND application_name = 'obsybrain export' AND xact_start IS NOT NULL`,
         )
         if (Number(r?.n) > 0) seen = true
         else await new Promise((r2) => setTimeout(r2, 5))
@@ -197,7 +197,7 @@ describe('preparing and sending an export', { skip: skipPg }, () => {
     })()
     await download(w, { session: web }, path)
     await watching
-    assert.ok(seen, 'no transaction named "rsc-brain export" while it was prepared')
+    assert.ok(seen, 'no transaction named "obsybrain export" while it was prepared')
   })
 
   it('a whole download is the whole file, sized, and its file goes', async () => {

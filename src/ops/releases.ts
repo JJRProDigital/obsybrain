@@ -2,12 +2,12 @@
 // version is a `vX.Y.Z` tag of the repository, in numeric order, and what it changes is the `## vX.Y.Z` section of the
 // CHANGELOG.md in that tag: the same definition as the launcher's and as rsc-factory's, written again here (there is
 // no shared package) and pinned by test/fixtures/published-vectors.json. The repository is asked the way git does, with
-// no credential at all and nothing but `User-Agent: rsc-brain/<version>`, so a private one answers no_access and the
-// web sends the operator to `rsc-brain.sh update --check`, which has the server's own access. An error never carries a
+// no credential at all and nothing but `User-Agent: obsybrain/<version>`, so a private one answers no_access and the
+// web sends the operator to `obsybrain.sh update --check`, which has the server's own access. An error never carries a
 // version: nothing here can turn a failed check into «up to date». OBSY_BRAIN_REPO_URL says where to ask; empty, as an
 // empty OBSY_BRAIN_RELEASES_URL, nothing is ever asked. What it learns stays in this process's memory.
 //
-// With the updater on (rsc-brain.sh web-updates enable) the web asks nobody: the updater has the server's access, asks
+// With the updater on (obsybrain.sh web-updates enable) the web asks nobody: the updater has the server's access, asks
 // the repository through the launcher and leaves update/report/check.json, which is read here, read only, for as long as
 // the updater says it is alive (update/report/updater.json, a beat every 5 seconds). When it is not, as before.
 //
@@ -17,7 +17,7 @@ import { lstatSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Clock } from '../core/clock.ts'
 
-export const DEFAULT_REPO_URL = 'https://github.com/ericrisco/rsc-brain'
+export const DEFAULT_REPO_URL = 'https://github.com/obsessive-solutions/obsybrain'
 export const NOTES_MAX = 4000
 export const MAX_BYTES = 2 * 1024 * 1024
 const TIMEOUT_MS = 10_000
@@ -214,7 +214,7 @@ export async function check(repoUrl: string, o: CheckOptions = {}): Promise<Chec
   const at = (o.now?.() ?? new Date()).toISOString()
   const send = o.fetch ?? fetch
   const ms = o.timeoutMs ?? TIMEOUT_MS
-  const agent = o.userAgent ?? 'rsc-brain'
+  const agent = o.userAgent ?? 'obsybrain'
   const repo = repository(repoUrl)
   if (!repo) return { error: 'no_access', at }
   try {
@@ -371,7 +371,7 @@ export function releaseChecker(o: {
       const when = new Date(now).toISOString()
       const got = await check(repo, {
         now: () => new Date(now),
-        userAgent: `rsc-brain/${o.version}`,
+        userAgent: `obsybrain/${o.version}`,
         ...(o.fetch ? { fetch: o.fetch } : {}),
       })
       s.lastAttemptAt = when

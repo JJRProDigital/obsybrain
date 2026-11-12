@@ -1,4 +1,4 @@
-// `rsc-brain backup` and `rsc-brain backups list` (plan §3.3): what the launcher runs in the container to make a
+// `obsybrain backup` and `obsybrain backups list` (plan §3.3): what the launcher runs in the container to make a
 // copy (by hand, before an update) and to see the copies. The key is read from the environment, never from the
 // command line, and never printed: only its id.
 import assert from 'node:assert/strict'
@@ -34,10 +34,10 @@ function run(
   })
 }
 
-describe('rsc-brain backups list (no database needed)', () => {
+describe('obsybrain backups list (no database needed)', () => {
   let dir: string
   before(async () => {
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-cli-list-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-cli-list-'))
   })
   after(async () => rm(dir, { recursive: true, force: true }))
 
@@ -70,14 +70,14 @@ describe('rsc-brain backups list (no database needed)', () => {
   })
 })
 
-describe('rsc-brain backup', { skip: skipPg }, () => {
+describe('obsybrain backup', { skip: skipPg }, () => {
   let t: TestDb
   let dir: string
   let env: Record<string, string>
   before(async () => {
     t = await freshDatabase()
     await migrate(t.db)
-    dir = await mkdtemp(join(tmpdir(), 'rsc-brain-cli-backup-'))
+    dir = await mkdtemp(join(tmpdir(), 'obsybrain-cli-backup-'))
     env = { OBSY_BRAIN_DATABASE_URL: t.url, OBSY_BRAIN_BACKUPS: dir, OBSY_BRAIN_SECRET: KEY }
   })
   after(async () => {
@@ -88,7 +88,7 @@ describe('rsc-brain backup', { skip: skipPg }, () => {
   it('makes a copy, says where and with which key id, never the key', async () => {
     const r = await run(['backup'], env)
     assert.equal(r.code, 0, r.err)
-    assert.match(r.out, /Copy written: rsc-brain-\d{8}T\d{6}Z-manual\.rscb/)
+    assert.match(r.out, /Copy written: obsybrain-\d{8}T\d{6}Z-manual\.rscb/)
     assert.match(r.out, new RegExp(`key id ${keyId(KEY)}`))
     assert.ok(!r.out.includes(KEY) && !r.err.includes(KEY))
     // Names are by the second: a second copy within it is refused, and the first is left as it was.

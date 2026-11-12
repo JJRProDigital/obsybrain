@@ -149,7 +149,7 @@ describe('the readable export (CA11, CA12)', { skip: skipPg }, () => {
     assert.equal(got.headers.get('content-type'), 'application/zip')
     assert.match(
       String(got.headers.get('content-disposition')),
-      /^attachment; filename="rsc-brain-vault-readable-\d{8}T\d{6}Z\.zip"$/,
+      /^attachment; filename="obsybrain-vault-readable-\d{8}T\d{6}Z\.zip"$/,
     )
     assert.equal(got.headers.get('cache-control'), 'no-store')
     for (const f of ['README.md', 'index.md', 'decisions.md', 'log.md']) assert.ok(files.has(f), f)

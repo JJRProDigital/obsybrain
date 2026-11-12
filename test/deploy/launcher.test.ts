@@ -1,4 +1,4 @@
-// The launcher, deploy/rsc-brain.sh (plan §3.8, T037; spec B7 «Modos de instalación», «Desinstalar»), with a fake
+// The launcher, deploy/obsybrain.sh (plan §3.8, T037; spec B7 «Modos de instalación», «Desinstalar»), with a fake
 // `docker` on the PATH (test/deploy/fake-docker.sh): no daemon, no containers, so it runs in CI (plan §5.1). The real
 // containers are test/install/launcher.test.ts. The launcher runs with a PATH made of the few tools it may use, never
 // with this machine's: a missing `docker`, `docker compose` or `git` is really missing. The terminal it asks on is
@@ -29,7 +29,7 @@ import { join } from 'node:path'
 import { after, before, describe, it } from 'node:test'
 
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const FAKE = join(ROOT, 'test', 'deploy', 'fake-docker.sh')
 // Every tool the launcher may use. Anything else it calls is missing here, and the test that needs it fails.
 const TOOLS = [
@@ -199,7 +199,7 @@ const readEnv = (dir: string): Record<string, string> => {
   return out
 }
 const mode = (p: string) => statSync(p).mode & 0o777
-const IMAGE = ['--image', 'rsc-brain:test']
+const IMAGE = ['--image', 'obsybrain:test']
 const local = async (c: Case, ...more: string[]) => [
   'install',
   '--local',
@@ -274,7 +274,7 @@ describe('the launcher: requirements (CA4)', () => {
     const c = fresh()
     const r = launch(c, await local(c), { env: { FAKE_IMAGES: 'other:1' } })
     assert.equal(r.code, 3)
-    assert.match(r.stderr, /rsc-brain:test/)
+    assert.match(r.stderr, /obsybrain:test/)
     assert.equal(existsSync(c.dir), false)
   })
 
@@ -454,11 +454,11 @@ describe('the launcher: a local installation', () => {
     assert.equal(env.OBSY_BRAIN_PUBLISH, `127.0.0.1:${port}`)
     assert.equal(env.OBSY_BRAIN_LOCAL_ONLY, '1')
     assert.equal(env.OBSY_BRAIN_TRUSTED_PROXIES, '')
-    assert.equal(env.OBSY_BRAIN_IMAGE, 'rsc-brain:test')
+    assert.equal(env.OBSY_BRAIN_IMAGE, 'obsybrain:test')
     assert.equal(env.OBSY_BRAIN_DB, 'bundled')
     assert.equal(
       env.OBSY_BRAIN_DATABASE_URL,
-      'postgres://rsc_brain:provisioned-pw@postgres:5432/rsc_brain?sslmode=disable',
+      'postgres://obsybrain:provisioned-pw@postgres:5432/obsybrain?sslmode=disable',
     )
     assert.match(env.POSTGRES_PASSWORD ?? '', /^[0-9a-f]{64}$/)
     // The compose file publishes exactly the value the service is told (one value for both: risk 7).
@@ -471,7 +471,7 @@ describe('the launcher: a local installation', () => {
     const up = r.calls.find((l) => /^compose /.test(l) && / up /.test(l)) ?? ''
     assert.match(up, /--profile bundled/)
     assert.doesNotMatch(up, /--profile server/)
-    assert.match(up, /-p rsc-brain /)
+    assert.match(up, /-p obsybrain /)
   })
 
   it('the database role is made with the administration login on the standard input, never on a command line', async () => {
@@ -479,8 +479,8 @@ describe('the launcher: a local installation', () => {
     const r = launch(c, await local(c))
     assert.equal(r.code, 0, r.stderr)
     const env = readEnv(c.dir)
-    const provision = r.calls.find((l) => / rsc-brain db provision /.test(l)) ?? ''
-    assert.match(provision, /--database rsc_brain --role rsc_brain/)
+    const provision = r.calls.find((l) => / obsybrain db provision /.test(l)) ?? ''
+    assert.match(provision, /--database obsybrain --role obsybrain/)
     assert.match(r.piped, new RegExp(`postgres://postgres:${env.POSTGRES_PASSWORD}@postgres:5432/postgres`))
   })
 
@@ -569,7 +569,7 @@ describe('the launcher: reinstalling (spec «Volver a ejecutar el instalador»)'
     const first = launch(c, await local(c, '--json'))
     assert.equal(first.code, 0, first.stderr)
     const before = readEnv(c.dir)
-    writeFileSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-scheduled.rscb'), 'copy')
+    writeFileSync(join(c.dir, 'backups', 'obsybrain-20261101T030000Z-scheduled.rscb'), 'copy')
     const port2 = String(await freePort())
     const second = launch(c, ['install', '--local', '--yes', '--json', '--dir', c.dir, '--port', port2])
     assert.equal(second.code, 0, second.stderr)
@@ -579,7 +579,7 @@ describe('the launcher: reinstalling (spec «Volver a ejecutar el instalador»)'
     assert.equal(afterEnv.OBSY_BRAIN_PUBLISH, `127.0.0.1:${port2}`)
     assert.equal(JSON.parse(second.stdout).installationKey, before.OBSY_BRAIN_SECRET)
     assert.equal(
-      readFileSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-scheduled.rscb'), 'utf8'),
+      readFileSync(join(c.dir, 'backups', 'obsybrain-20261101T030000Z-scheduled.rscb'), 'utf8'),
       'copy',
     )
     // The role was made once; the second run never asks for a new one, and never takes anything down with -v.
@@ -652,7 +652,7 @@ describe('the launcher: reinstalling (spec «Volver a ejecutar el instalador»)'
     writeFileSync(join(c.dir, 'compose.override.yaml'), 'services: {}\n')
     const r = launch(c, await local(c), { env: { FAKE_UP_EXIT: '1' } })
     assert.equal(r.code, 4, r.stderr)
-    assert.ok(r.calls.some((l) => / down /.test(l) && / -v /.test(l) && /-p rsc-brain /.test(l)))
+    assert.ok(r.calls.some((l) => / down /.test(l) && / -v /.test(l) && /-p obsybrain /.test(l)))
     assert.deepEqual(readdirSync(c.dir).sort(), ['compose.override.yaml', 'last-failure.log'])
     assert.equal(readFileSync(join(c.dir, 'compose.override.yaml'), 'utf8'), 'services: {}\n')
   })
@@ -661,7 +661,7 @@ describe('the launcher: reinstalling (spec «Volver a ejecutar el instalador»)'
     const c = fresh()
     assert.equal(launch(c, await local(c)).code, 0)
     const before = readFileSync(join(c.dir, '.env'), 'utf8')
-    const r = launch(c, ['install', '--local', '--yes', '--dir', c.dir, '--image', 'rsc-brain:newer'])
+    const r = launch(c, ['install', '--local', '--yes', '--dir', c.dir, '--image', 'obsybrain:newer'])
     assert.equal(r.code, 2)
     assert.match(r.stderr, /update/)
     assert.equal(readFileSync(join(c.dir, '.env'), 'utf8'), before)
@@ -672,11 +672,11 @@ describe('the launcher: reinstalling (spec «Volver a ejecutar el instalador»)'
   })
 
   it('a new installation under a name Docker already holds (another folder): exit 3, nothing taken down', async () => {
-    for (const env of [{ FAKE_VOLUMES: 'rsc-brain_pgdata' }, { FAKE_PROJECTS: '1' }]) {
+    for (const env of [{ FAKE_VOLUMES: 'obsybrain_pgdata' }, { FAKE_PROJECTS: '1' }]) {
       const c = fresh()
       const r = launch(c, await local(c), { env })
       assert.equal(r.code, 3, r.stderr)
-      assert.match(r.stderr, /already holds an installation called rsc-brain/)
+      assert.match(r.stderr, /already holds an installation called obsybrain/)
       assert.equal(
         r.calls.some((l) => / down /.test(l) || / up /.test(l)),
         false,
@@ -708,7 +708,7 @@ describe('the launcher: reinstalling (spec «Volver a ejecutar el instalador»)'
 })
 
 describe('the launcher: databases', () => {
-  it('an existing database for rsc-brain alone: checked with the URL on the standard input, kept in .env', async () => {
+  it('an existing database for obsybrain alone: checked with the URL on the standard input, kept in .env', async () => {
     const c = fresh()
     const url = join(c.state, 'db-url')
     writeFileSync(url, 'postgres://brain:s3cret-db-pw@db.internal:5432/brain\n')
@@ -717,7 +717,7 @@ describe('the launcher: databases', () => {
     const env = readEnv(c.dir)
     assert.equal(env.OBSY_BRAIN_DATABASE_URL, 'postgres://brain:s3cret-db-pw@db.internal:5432/brain')
     assert.equal(env.POSTGRES_PASSWORD, undefined)
-    assert.ok(r.calls.some((l) => / rsc-brain db check --url-stdin /.test(l)))
+    assert.ok(r.calls.some((l) => / obsybrain db check --url-stdin /.test(l)))
     assert.match(r.piped, /<<< db check\npostgres:\/\/brain:s3cret-db-pw@/)
     assert.equal(r.calls.join('\n').includes('s3cret-db-pw'), false)
     const up = r.calls.find((l) => /^compose /.test(l) && / up /.test(l)) ?? ''
@@ -734,7 +734,7 @@ describe('the launcher: databases', () => {
     assert.equal(existsSync(c.dir), false)
   })
 
-  it('shared with another program: its database is closed to rsc-brain; the login is used once and never kept', async () => {
+  it('shared with another program: its database is closed to obsybrain; the login is used once and never kept', async () => {
     const c = fresh()
     const admin = join(c.state, 'admin-url')
     writeFileSync(admin, 'postgres://admin:adm1n-pw@db.internal:5432/postgres\n')
@@ -753,7 +753,7 @@ describe('the launcher: databases', () => {
     const env = readEnv(c.dir)
     assert.equal(
       env.OBSY_BRAIN_DATABASE_URL,
-      'postgres://rsc_brain:provisioned-pw@db.internal:5432/rsc_brain?sslmode=disable',
+      'postgres://obsybrain:provisioned-pw@db.internal:5432/obsybrain?sslmode=disable',
     )
     assert.equal(readFileSync(join(c.dir, '.env'), 'utf8').includes('adm1n-pw'), false)
     assert.equal(r.calls.join('\n').includes('adm1n-pw'), false)
@@ -769,7 +769,7 @@ describe('the launcher: databases', () => {
     assert.equal(r.code, 4, r.stderr)
     assert.ok(
       r.calls.some((l) =>
-        / rsc-brain db drop --database rsc_brain --role rsc_brain --confirm rsc_brain/.test(l),
+        / obsybrain db drop --database obsybrain --role obsybrain --confirm obsybrain/.test(l),
       ),
     )
     assert.match(r.piped, /<<< db drop\npostgres:\/\/admin:adm1n-pw@/)
@@ -846,7 +846,7 @@ describe('the launcher: a server', () => {
 })
 
 describe('the launcher: building from the source', () => {
-  it('clones the version asked into its own <dir>/.rsc-brain/src and builds rsc-brain:<version> from it', async () => {
+  it('clones the version asked into its own <dir>/.obsybrain/src and builds obsybrain:<version> from it', async () => {
     const c = fresh()
     const gitBin = join(c.state, 'gitbin')
     mkdirSync(gitBin)
@@ -881,10 +881,10 @@ describe('the launcher: building from the source', () => {
       r.calls.join('\n'),
     )
     assert.ok(
-      r.calls.some((l) => new RegExp(`^build -t rsc-brain:v0\\.1\\.0 ${c.dir}/\\.rsc-brain/src$`).test(l)),
+      r.calls.some((l) => new RegExp(`^build -t obsybrain:v0\\.1\\.0 ${c.dir}/\\.obsybrain/src$`).test(l)),
     )
-    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'rsc-brain:v0.1.0')
-    assert.ok(existsSync(join(c.dir, '.rsc-brain', 'src', 'deploy', 'compose.yaml')))
+    assert.equal(readEnv(c.dir).OBSY_BRAIN_IMAGE, 'obsybrain:v0.1.0')
+    assert.ok(existsSync(join(c.dir, '.obsybrain', 'src', 'deploy', 'compose.yaml')))
   })
 })
 
@@ -912,14 +912,14 @@ describe('the launcher: day to day', () => {
     const c = fresh()
     const r = launch(c, ['status', '--dir', c.dir])
     assert.equal(r.code, 3)
-    assert.match(r.stderr, /No rsc-brain installation/)
+    assert.match(r.stderr, /No obsybrain installation/)
   })
 
   it('backup and backups run in the service', async () => {
     const c = await installed()
     const b = launch(c, ['backup', '--dir', c.dir])
     assert.equal(b.code, 0, b.stderr)
-    assert.ok(b.calls.some((l) => / exec -T app rsc-brain backup/.test(l)))
+    assert.ok(b.calls.some((l) => / exec -T app obsybrain backup/.test(l)))
     const l = launch(c, ['backups', '--dir', c.dir])
     assert.equal(l.code, 0)
     assert.match(l.stdout, /\.rscb/)
@@ -941,7 +941,7 @@ describe('the launcher: day to day', () => {
 
   it('restore: the copy goes into the copies, the key on the standard input; the service stops and starts again', async () => {
     const c = await installed()
-    const copy = join(c.state, 'rsc-brain-20261101T030000Z-manual.rscb')
+    const copy = join(c.state, 'obsybrain-20261101T030000Z-manual.rscb')
     writeFileSync(copy, 'copy')
     const key = join(c.state, 'old-key')
     writeFileSync(key, 'the-old-installation-key-0123456789abcdef\n')
@@ -958,14 +958,14 @@ describe('the launcher: day to day', () => {
     ])
     assert.equal(r.code, 0, r.stderr)
     assert.equal(
-      readFileSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-manual.rscb'), 'utf8'),
+      readFileSync(join(c.dir, 'backups', 'obsybrain-20261101T030000Z-manual.rscb'), 'utf8'),
       'copy',
     )
-    const i = r.calls.findIndex((l) => / rsc-brain restore --file /.test(l))
+    const i = r.calls.findIndex((l) => / obsybrain restore --file /.test(l))
     assert.ok(i > 0)
     assert.match(
       r.calls[i] as string,
-      /--file \/backups\/rsc-brain-20261101T030000Z-manual\.rscb --confirm My brain/,
+      /--file \/backups\/obsybrain-20261101T030000Z-manual\.rscb --confirm My brain/,
     )
     assert.ok(
       r.calls.slice(0, i).some((l) => / stop app/.test(l)),
@@ -988,7 +988,7 @@ describe('the launcher: day to day', () => {
       env: { FAKE_RESTORE_EXIT: '2' },
     })
     assert.equal(r.code, 2)
-    const i = r.calls.findIndex((l) => / rsc-brain restore --file /.test(l))
+    const i = r.calls.findIndex((l) => / obsybrain restore --file /.test(l))
     assert.ok(r.calls.slice(i).some((l) => / up -d/.test(l)))
   })
 
@@ -1008,7 +1008,7 @@ describe('the launcher: uninstall (CA16, spec «Desinstalar»)', () => {
     const c = fresh()
     const r = launch(c, await local(c, ...more))
     assert.equal(r.code, 0, r.stderr)
-    writeFileSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-scheduled.rscb'), 'copy')
+    writeFileSync(join(c.dir, 'backups', 'obsybrain-20261101T030000Z-scheduled.rscb'), 'copy')
     return c
   }
 
@@ -1018,10 +1018,10 @@ describe('the launcher: uninstall (CA16, spec «Desinstalar»)', () => {
     const r = launch(c, ['uninstall', '--dir', c.dir])
     assert.equal(r.code, 0, r.stderr)
     const down = r.calls.find((l) => / down/.test(l)) ?? ''
-    assert.match(down, /-p rsc-brain /)
+    assert.match(down, /-p obsybrain /)
     assert.doesNotMatch(down, / -v\b|--volumes/)
     assert.equal(readFileSync(join(c.dir, '.env'), 'utf8'), before)
-    assert.ok(existsSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-scheduled.rscb')))
+    assert.ok(existsSync(join(c.dir, 'backups', 'obsybrain-20261101T030000Z-scheduled.rscb')))
     assert.match(r.stdout, /kept/)
   })
 
@@ -1034,7 +1034,7 @@ describe('the launcher: uninstall (CA16, spec «Desinstalar»)', () => {
         r.calls.some((l) => / down/.test(l)),
         false,
       )
-      assert.ok(existsSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-scheduled.rscb')))
+      assert.ok(existsSync(join(c.dir, 'backups', 'obsybrain-20261101T030000Z-scheduled.rscb')))
     }
     // --yes is no confirmation of a deletion.
     const y = launch(c, ['uninstall', '--delete-data', '--yes', '--dir', c.dir])
@@ -1052,10 +1052,10 @@ describe('the launcher: uninstall (CA16, spec «Desinstalar»)', () => {
     const c = await installed()
     const env = readEnv(c.dir)
     writeFileSync(join(c.dir, 'compose.override.yaml'), 'services: {}\n')
-    const r = launch(c, ['uninstall', '--delete-data', '--confirm', 'rsc-brain', '--dir', c.dir])
+    const r = launch(c, ['uninstall', '--delete-data', '--confirm', 'obsybrain', '--dir', c.dir])
     assert.equal(r.code, 0, r.stderr)
     const down = r.calls.find((l) => / down/.test(l)) ?? ''
-    assert.match(down, /-p rsc-brain .* down -v --remove-orphans/)
+    assert.match(down, /-p obsybrain .* down -v --remove-orphans/)
     assert.equal(existsSync(join(c.dir, 'backups')), false)
     assert.equal(existsSync(join(c.dir, '.env')), false)
     const keyFile = join(c.dir, 'installation-key.txt')
@@ -1080,7 +1080,7 @@ describe('the launcher: uninstall (CA16, spec «Desinstalar»)', () => {
       'uninstall',
       '--delete-data',
       '--confirm',
-      'rsc-brain',
+      'obsybrain',
       '--dir',
       c.dir,
       '--db-admin-url-file',
@@ -1089,12 +1089,12 @@ describe('the launcher: uninstall (CA16, spec «Desinstalar»)', () => {
     assert.equal(r.code, 0, r.stderr)
     assert.ok(
       r.calls.some((l) =>
-        / rsc-brain db drop --database rsc_brain --role rsc_brain --confirm rsc_brain/.test(l),
+        / obsybrain db drop --database obsybrain --role obsybrain --confirm obsybrain/.test(l),
       ),
     )
     assert.match(r.piped, /<<< db drop\npostgres:\/\/admin:adm1n-pw@/)
 
-    const w = launch(without, ['uninstall', '--delete-data', '--confirm', 'rsc-brain', '--dir', without.dir])
+    const w = launch(without, ['uninstall', '--delete-data', '--confirm', 'obsybrain', '--dir', without.dir])
     assert.equal(w.code, 0, w.stderr)
     assert.equal(
       w.calls.some((l) => / db drop /.test(l)),
@@ -1122,7 +1122,7 @@ describe('the launcher: only its own (review of PR #35)', () => {
     assert.equal(r.code, 2, r.stderr)
     assert.match(
       r.stderr,
-      /already holds files that are not an rsc-brain installation\. Choose another folder with --dir/,
+      /already holds files that are not an obsybrain installation\. Choose another folder with --dir/,
     )
     assert.equal(readFileSync(join(c.dir, 'src', 'work.ts'), 'utf8'), 'uncommitted work')
     assert.deepEqual(readdirSync(c.dir), ['src'])
@@ -1253,7 +1253,7 @@ describe('the launcher: only its own (review of PR #35)', () => {
     assert.equal(r.code, 4, r.stderr)
     assert.match(r.stderr, /Interrupted/)
     const calls = readFileSync(c.log, 'utf8')
-    assert.match(calls, / rsc-brain db drop --database rsc_brain --role rsc_brain --confirm rsc_brain/)
+    assert.match(calls, / obsybrain db drop --database obsybrain --role obsybrain --confirm obsybrain/)
     assert.match(readFileSync(c.stdin, 'utf8'), /<<< db drop\npostgres:\/\/admin:adm1n-pw@/)
     assert.equal(existsSync(c.dir), false)
   })
@@ -1274,7 +1274,7 @@ describe('the launcher: only its own (review of PR #35)', () => {
     // A first install: the onboarding, and the new key in the summary.
     assert.match(again.stdout, /first-time setup/)
     assert.match(readFileSync(join(c.dir, '.env'), 'utf8'), /OBSY_BRAIN_LAUNCHER='1'/)
-    assert.equal(existsSync(join(c.dir, '.rsc-brain', 'install.pending')), false)
+    assert.equal(existsSync(join(c.dir, '.obsybrain', 'install.pending')), false)
   })
 
   it('an interrupted install that made a database cannot resume without the login that removes it: exit 2', async () => {
@@ -1297,7 +1297,7 @@ describe('the launcher: only its own (review of PR #35)', () => {
     ])
     assert.equal(r.code, 2, r.stderr)
     assert.match(r.stderr, /--db-admin-url-file/)
-    assert.ok(existsSync(join(c.dir, '.rsc-brain', 'install.pending')))
+    assert.ok(existsSync(join(c.dir, '.obsybrain', 'install.pending')))
   })
 })
 
@@ -1311,19 +1311,19 @@ describe('the launcher: restore and ports (review of PR #35)', () => {
 
   it('restore takes a copy by the name backups prints, from <dir>/backups', async () => {
     const c = await installed()
-    writeFileSync(join(c.dir, 'backups', 'rsc-brain-20261101T030000Z-manual.rscb'), 'copy')
+    writeFileSync(join(c.dir, 'backups', 'obsybrain-20261101T030000Z-manual.rscb'), 'copy')
     const r = launch(c, [
       'restore',
       '--dir',
       c.dir,
       '--file',
-      'rsc-brain-20261101T030000Z-manual.rscb',
+      'obsybrain-20261101T030000Z-manual.rscb',
       '--confirm',
       'x',
     ])
     assert.equal(r.code, 0, r.stderr)
     assert.ok(
-      r.calls.some((l) => / restore --file \/backups\/rsc-brain-20261101T030000Z-manual\.rscb /.test(l)),
+      r.calls.some((l) => / restore --file \/backups\/obsybrain-20261101T030000Z-manual\.rscb /.test(l)),
     )
   })
 
@@ -1428,20 +1428,20 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
     assert.match(
       b.stderr,
       new RegExp(
-        `Another rsc-brain launcher is working on "${c.dir}" \\(process ${a.p.pid}\\)\\. Wait for it to finish\\.`,
+        `Another obsybrain launcher is working on "${c.dir}" \\(process ${a.p.pid}\\)\\. Wait for it to finish\\.`,
       ),
     )
     const first = await a.done
     assert.equal(first.code, 0, first.stderr)
     assert.equal(JSON.parse(first.stdout).installationKey, readEnv(c.dir).OBSY_BRAIN_SECRET)
-    assert.equal(existsSync(join(c.dir, '.rsc-brain', 'lock')), false, 'the lock is let go')
+    assert.equal(existsSync(join(c.dir, '.obsybrain', 'lock')), false, 'the lock is let go')
   })
 
   it('install, uninstall, restore, backup, update and key rotate wait their turn; status does not', async () => {
     const c = fresh()
     assert.equal(launch(c, await local(c)).code, 0)
-    mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
-    writeFileSync(join(c.dir, '.rsc-brain', 'lock', 'owner'), `${process.pid} ${host}\n`)
+    mkdirSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true })
+    writeFileSync(join(c.dir, '.obsybrain', 'lock', 'owner'), `${process.pid} ${host}\n`)
     const copy = join(c.state, 'x.rscb')
     writeFileSync(copy, 'copy')
     for (const cmd of [
@@ -1449,7 +1449,7 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
       ['uninstall'],
       ['restore', '--file', copy, '--confirm', 'x'],
       ['backup'],
-      ['update', '--yes', '--image', 'rsc-brain:test'],
+      ['update', '--yes', '--image', 'obsybrain:test'],
       ['key', 'rotate', '--yes'],
     ]) {
       const r = launch(c, [...cmd, '--dir', c.dir])
@@ -1469,18 +1469,18 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
     assert.equal(launch(c, await local(c)).code, 0)
     // A process number nobody has: spawn one that ends, and take its number.
     const gone = spawnSync('sh', ['-c', 'echo $$'], { encoding: 'utf8' }).stdout.trim()
-    mkdirSync(join(c.dir, '.rsc-brain', 'lock'), { recursive: true })
-    writeFileSync(join(c.dir, '.rsc-brain', 'lock', 'owner'), `${gone} ${host}\n`)
+    mkdirSync(join(c.dir, '.obsybrain', 'lock'), { recursive: true })
+    writeFileSync(join(c.dir, '.obsybrain', 'lock', 'owner'), `${gone} ${host}\n`)
     const r = launch(c, ['backup', '--dir', c.dir])
     assert.equal(r.code, 0, r.stderr)
     assert.match(r.stderr, new RegExp(`stopped \\(process ${gone}\\)`))
-    assert.equal(existsSync(join(c.dir, '.rsc-brain', 'lock')), false)
+    assert.equal(existsSync(join(c.dir, '.obsybrain', 'lock')), false)
   })
 
   for (const name of [
     'installation-key.txt',
     'installation-key-id0123456789.txt',
-    'rsc-brain.sh',
+    'obsybrain.sh',
     '.DS_Store',
     'lost+found',
     '._compose.override.yaml',
@@ -1504,7 +1504,7 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
     const c = fresh()
     assert.equal(launch(c, await local(c)).code, 0)
     const key = readEnv(c.dir).OBSY_BRAIN_SECRET
-    assert.equal(launch(c, ['uninstall', '--delete-data', '--confirm', 'rsc-brain', '--dir', c.dir]).code, 0)
+    assert.equal(launch(c, ['uninstall', '--delete-data', '--confirm', 'obsybrain', '--dir', c.dir]).code, 0)
     const again = launch(c, await local(c, '--json'))
     assert.equal(again.code, 0, again.stderr)
     assert.equal(readEnv(c.dir).OBSY_BRAIN_SECRET, key)
@@ -1548,9 +1548,9 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
       const args = await local(c)
       const killed = launch(c, args, { env: { OBSY_BRAIN_TEST_STOP_AT: at } })
       assert.equal(killed.signal, 'SIGKILL', killed.stderr)
-      const pending = readFileSync(join(c.dir, '.rsc-brain', 'install.pending'), 'utf8')
+      const pending = readFileSync(join(c.dir, '.obsybrain', 'install.pending'), 'utf8')
       const made = /^OBSY_BRAIN_PENDING_MADE='(.*)'$/m.exec(pending)?.[1] ?? ''
-      assert.ok(made.split(' ').includes(at === 'state' ? '.rsc-brain' : at), made)
+      assert.ok(made.split(' ').includes(at === 'state' ? '.obsybrain' : at), made)
       const again = launch(c, args)
       assert.equal(again.code, 0, again.stderr)
       assert.match(again.stderr, /interrupted/)
@@ -1572,7 +1572,7 @@ describe('the launcher: one at a time, and the rest (second pass on PR #35)', ()
     )
     assert.ok(
       r.calls.some((l) =>
-        / exec -T app rsc-brain restore --check --file \/backups\/brought\.rscb --confirm wrong/.test(l),
+        / exec -T app obsybrain restore --check --file \/backups\/brought\.rscb --confirm wrong/.test(l),
       ),
     )
     assert.equal(existsSync(join(c.dir, 'backups', 'brought.rscb')), false)
@@ -1627,7 +1627,7 @@ describe('the launcher: the folder changed while it asked (second pass on PR #35
 })
 
 // Companion mode (plan F1 §3.1, T048): rsc-factory's installer runs `install --companion --attach-network NAME
-// --factory-url URL` and reads the --json summary. The app joins the network shared with rsc-factory as `rsc-brain`,
+// --factory-url URL` and reads the --json summary. The app joins the network shared with rsc-factory as `obsybrain`,
 // has no Caddy of its own (rsc-factory's serves it), and waits with a one-time key for rsc-factory's setup.
 describe('the launcher: companion mode (F1)', () => {
   const NET = 'rsc-shared=192.168.230.0/24|192.168.230.1'
@@ -1682,7 +1682,7 @@ describe('the launcher: companion mode (F1)', () => {
       assert.match(s.companionToken, /^[0-9a-f]{64}$/)
       assert.notEqual(s.companionToken, s.installationKey)
       assert.equal(env.OBSY_BRAIN_COMPANION_TOKEN, s.companionToken)
-      assert.equal(s.internalUrl, 'http://rsc-brain:8090')
+      assert.equal(s.internalUrl, 'http://obsybrain:8090')
       assert.deepEqual([s.mode, s.db], ['local', 'shared'])
       assert.equal(mode(join(c.dir, '.env')), 0o600)
       assert.deepEqual(
@@ -1696,11 +1696,11 @@ describe('the launcher: companion mode (F1)', () => {
         ],
         ['rsc-shared', '192.168.230.0/24', '192.168.230.1', 'http://localhost:3000', '1', ''],
       )
-      // The app joins the shared network, external, as rsc-brain; the compose file names the service's settings.
+      // The app joins the shared network, external, as obsybrain; the compose file names the service's settings.
       const extra = readFileSync(join(c.dir, 'compose.companion.yaml'), 'utf8')
       assert.match(extra, /name: \$\{OBSY_BRAIN_SHARED_NETWORK/)
       assert.match(extra, /external: true/)
-      assert.match(extra, /aliases:\s*\n\s*- rsc-brain/)
+      assert.match(extra, /aliases:\s*\n\s*- obsybrain/)
       // Its own network keeps the default route: «this machine only» trusts that gateway, never the shared one.
       assert.match(extra, /default:\s*\n\s*gw_priority: 1/)
       const compose = readFileSync(join(c.dir, 'compose.yaml'), 'utf8')
@@ -1710,7 +1710,7 @@ describe('the launcher: companion mode (F1)', () => {
       assert.match(up, new RegExp(`-f ${join(c.dir, 'compose.companion.yaml')}`))
       assert.doesNotMatch(up, /--profile (server|bundled)/)
       // The database is checked from the shared network (where rsc-factory's PostgreSQL is).
-      const check = r.calls.find((l) => / rsc-brain db check /.test(l)) ?? ''
+      const check = r.calls.find((l) => / obsybrain db check /.test(l)) ?? ''
       assert.match(check, /--network rsc-shared/)
       // The one-time key never on a command line.
       assert.equal(r.calls.join('\n').includes(s.companionToken), false)
@@ -1726,7 +1726,7 @@ describe('the launcher: companion mode (F1)', () => {
     const s = JSON.parse(r.stdout)
     assert.deepEqual(
       [s.mode, s.url, s.internalUrl],
-      ['server', 'https://brain.example.com', 'http://rsc-brain:8090'],
+      ['server', 'https://brain.example.com', 'http://obsybrain:8090'],
     )
     const env = readEnv(c.dir)
     assert.deepEqual(
@@ -1858,7 +1858,7 @@ describe('the launcher: companion mode (F1)', () => {
       /--factory-url/,
     ],
     [
-      'rsc-brain’s own PostgreSQL',
+      'obsybrain’s own PostgreSQL',
       ['--companion', '--attach-network', 'n', '--factory-url', 'http://localhost:3000', '--db', 'bundled'],
       /--db/,
     ],
@@ -1987,7 +1987,7 @@ describe('the launcher: companion mode (F1)', () => {
   it('uninstall --delete-data removes its compose file for the shared network too', async () => {
     const c = fresh()
     assert.equal(launch(c, await companion(c), { env: { FAKE_NETWORKS: NET } }).code, 0)
-    const r = launch(c, ['uninstall', '--dir', c.dir, '--delete-data', '--confirm', 'rsc-brain', '--yes'], {
+    const r = launch(c, ['uninstall', '--dir', c.dir, '--delete-data', '--confirm', 'obsybrain', '--yes'], {
       env: { FAKE_NETWORKS: NET },
     })
     assert.equal(r.code, 0, r.stderr)

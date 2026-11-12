@@ -1,4 +1,4 @@
-// `rsc-brain db check|provision|drop` (plan §3.7): what the launcher runs to prepare an existing or shared PostgreSQL.
+// `obsybrain db check|provision|drop` (plan §3.7): what the launcher runs to prepare an existing or shared PostgreSQL.
 // A connection URL holds a password, so it never comes on the command line: from a file (`-` is the standard input),
 // or for check OBSY_BRAIN_DATABASE_URL; provision and drop also read an administration URL piped in. The password of the new role is generated here and leaves once: written to a new
 // file only its owner reads (0600), or printed on standard output. Exit codes: 0 done, 2 usage, 3 a missing
@@ -10,9 +10,9 @@ import { AppError } from '../core/errors.ts'
 import { db, tooOldError } from '../ops/db.ts'
 
 const USAGE = `Usage:
-  rsc-brain db check [--db-url-file F | --url-stdin] [--json]
-  rsc-brain db provision --database D --role R [--isolate-from NAME] [--db-admin-url-file F] [--url-file OUT] [--json]
-  rsc-brain db drop --database D --role R --confirm D [--db-admin-url-file F]
+  obsybrain db check [--db-url-file F | --url-stdin] [--json]
+  obsybrain db provision --database D --role R [--isolate-from NAME] [--db-admin-url-file F] [--url-file OUT] [--json]
+  obsybrain db drop --database D --role R --confirm D [--db-admin-url-file F]
 A connection URL is read from a file (- for the standard input), never from the command line.`
 
 const MISSING = new Set(['too_old', 'cannot_create_database', 'cannot_isolate'])

@@ -20,7 +20,7 @@ import { skipPg } from '../helpers/pg.ts'
 import { type Call, type World, world } from '../helpers/world.ts'
 import { ERROR_STATUS, V1 } from './v1.ts'
 
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 const PW = 'correct horse battery staple'
 const tokenOf = (link: unknown) => /#token=([A-Za-z0-9_-]+)/.exec(String(link))?.[1] ?? ''
 
@@ -689,7 +689,7 @@ describe('the v1 contract', { skip: skipPg }, () => {
     assert.match(r.headers.get('content-type') ?? '', /application\/json/)
     doc = r.body
     assert.equal(doc.openapi, '3.1.0')
-    assert.equal((doc.info as Json).title, 'rsc-brain API')
+    assert.equal((doc.info as Json).title, 'obsybrain API')
     assert.equal((doc.servers as Json[])[0]?.url, 'http://localhost')
   })
 
@@ -994,7 +994,7 @@ describe('the v1 contract', { skip: skipPg }, () => {
       await says(o)
       got.push(['nothing_to_retry', await asked(o, '/v1/admin/update/retry', web)])
       await says(o, {
-        rollbackFailed: { from: '0.1.0', to: '9.9.9', copy: 'c.rscb', restore: 'sh rsc-brain.sh restore' },
+        rollbackFailed: { from: '0.1.0', to: '9.9.9', copy: 'c.rscb', restore: 'sh obsybrain.sh restore' },
       })
       got.push(['rollback_failed', await asked(o, '/v1/admin/update', web)])
     } finally {
@@ -1665,7 +1665,7 @@ describe('the v1 contract', { skip: skipPg }, () => {
         method: 'POST',
         headers: {
           cookie: `rscb_session=${ericWeb}`,
-          'x-requested-with': 'rsc-brain-web',
+          'x-requested-with': 'obsybrain-web',
           'content-type': 'application/zip',
         },
         body: new Uint8Array(bytes),
@@ -1687,7 +1687,7 @@ describe('the v1 contract', { skip: skipPg }, () => {
         let got = ''
         const s = connect(Number(u.port), u.hostname, () =>
           s.write(
-            `POST /v1/brains/${slug}/import?name=x.zip HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: rsc-brain-web\r\nCookie: rscb_session=${ericWeb}\r\nContent-Length: 100\r\n\r\nPK`,
+            `POST /v1/brains/${slug}/import?name=x.zip HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: obsybrain-web\r\nCookie: rscb_session=${ericWeb}\r\nContent-Length: 100\r\n\r\nPK`,
           ),
         )
         s.on('data', (d) => {

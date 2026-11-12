@@ -1,6 +1,6 @@
 // The database of an installation (plan §3.7, spec B7 CA3, CA21, C13, C14). `check` says whether a PostgreSQL can hold
-// rsc-brain (version 17 or newer, `unaccent` available) and what the given user may do there. `provision` creates the
-// role and the database of rsc-brain with an administration login: a role that is no superuser and cannot create
+// obsybrain (version 17 or newer, `unaccent` available) and what the given user may do there. `provision` creates the
+// role and the database of obsybrain with an administration login: a role that is no superuser and cannot create
 // databases or roles, a database only it (and its administration) can connect to, and, on a server shared with another
 // program, that program's database closed to it and the other way round. `drop` removes both, and only those.
 import assert from 'node:assert/strict'
@@ -143,16 +143,16 @@ describe('the connection URL of the new role', () => {
   it('is made from scratch: a user or password in the query of the admin URL never reaches it', () => {
     const u = connectionUrl(
       'postgres://localhost:5432/postgres?user=admin&password=admin-canary&sslmode=require&sslrootcert=%2Fca.pem&options=-c%20x&database=other',
-      'rsc_brain',
+      'obsybrain',
       'new-pass',
-      'rsc_brain',
+      'obsybrain',
     )
     assert.ok(!u.includes('admin') && !u.includes('options') && !u.includes('other'), u)
     // (The driver opens sslrootcert while parsing: read without it.)
     const p = parsed(u.replace(/&?sslrootcert=[^&]*/, ''))
     assert.deepEqual(
       [p.user, p.password, p.host, p.port, p.database],
-      ['rsc_brain', 'new-pass', 'localhost', '5432', 'rsc_brain'],
+      ['obsybrain', 'new-pass', 'localhost', '5432', 'obsybrain'],
     )
     assert.equal(new URL(u).searchParams.get('sslmode'), 'require')
     assert.equal(new URL(u).searchParams.get('sslrootcert'), '/ca.pem')
@@ -240,7 +240,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
   const factoryReader = name('factoryreader')
   const foreignRole = name('foreign')
   const foreignDb = name('foreigndb')
-  // A role marked as rsc-brain's with a database that is not; a database marked but owned by a role that is not.
+  // A role marked as obsybrain's with a database that is not; a database marked but owned by a role that is not.
   const markedRole = name('markedrole')
   const unmarkedDb = name('unmarkeddb')
   const markedOnlyDb = name('markedonlydb')
@@ -258,14 +258,14 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
     await sql(`CREATE ROLE ${noCreate} LOGIN`)
     // Another login of the other program, with no privilege of its own: it entered through PUBLIC.
     await sql(`CREATE ROLE ${factoryReader} LOGIN`)
-    // A database someone else made for a role of theirs: not rsc-brain's, whatever the names.
+    // A database someone else made for a role of theirs: not obsybrain's, whatever the names.
     await sql(`CREATE ROLE ${foreignRole} LOGIN`)
     await sql(`CREATE DATABASE ${foreignDb} OWNER ${foreignRole}`)
     await sql(`CREATE ROLE ${markedRole} LOGIN`)
-    await sql(`COMMENT ON ROLE ${markedRole} IS 'rsc-brain'`)
+    await sql(`COMMENT ON ROLE ${markedRole} IS 'obsybrain'`)
     await sql(`CREATE DATABASE ${unmarkedDb} OWNER ${markedRole}`)
     await sql(`CREATE DATABASE ${markedOnlyDb} OWNER ${foreignRole}`)
-    await sql(`COMMENT ON DATABASE ${markedOnlyDb} IS 'rsc-brain'`)
+    await sql(`COMMENT ON DATABASE ${markedOnlyDb} IS 'obsybrain'`)
   })
   after(async () => {
     // Every database first (a role with privileges on one cannot be removed), then every role; one failure never
@@ -315,7 +315,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
     } finally {
       await pool.close()
     }
-    // Across: rsc-brain cannot enter Factory's database, nor Factory rsc-brain's, nor anyone else rsc-brain's.
+    // Across: obsybrain cannot enter Factory's database, nor Factory obsybrain's, nor anyone else obsybrain's.
     assert.match(String(await connectError(as(role, factoryDb))), /permission denied for database/)
     assert.match(String(await connectError(as(factoryRole, database))), /permission denied for database/)
     assert.match(String(await connectError(as(outsider, database))), /permission denied for database/)
@@ -333,12 +333,12 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
     assert.ok(!r.granted.includes(factoryRole), String(r.granted))
     assert.ok(!r.granted.includes(role))
     assert.match(String(await connectError(as(factoryReader, database))), /permission denied for database/)
-    // Both are marked as rsc-brain's (what drop requires).
+    // Both are marked as obsybrain's (what drop requires).
     const marks = await sql(
       `SELECT shobj_description((SELECT oid FROM pg_database WHERE datname = '${database}'), 'pg_database') AS d,
               shobj_description((SELECT oid FROM pg_roles WHERE rolname = '${role}'), 'pg_authid') AS r`,
     )
-    assert.deepEqual([marks[0]?.d, marks[0]?.r], ['rsc-brain', 'rsc-brain'])
+    assert.deepEqual([marks[0]?.d, marks[0]?.r], ['obsybrain', 'obsybrain'])
     // The password is stored as a SCRAM verifier made from it (sent hashed, never in clear).
     const stored = String(
       (await sql(`SELECT rolpassword FROM pg_authid WHERE rolname = '${role}'`))[0]?.rolpassword,
@@ -423,7 +423,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
       dbOps.provision(
         PG_URL as string,
         { database, role, password: randomBytes(18).toString('base64url'), isolateFrom: other },
-        // Something opens rsc-brain's database again before the final check: the check fails.
+        // Something opens obsybrain's database again before the final check: the check fails.
         { afterIsolation: async () => void (await sql(`GRANT CONNECT ON DATABASE ${database} TO PUBLIC`)) },
       ),
       (err: Error & { code?: string }) => err.code === 'cannot_isolate',
@@ -443,7 +443,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
       password: randomBytes(18).toString('base64url'),
       isolateFrom: superOwnedDb,
     })
-    // Another installation's role (the one of CA3, marked as rsc-brain's) is not let into the other program's database.
+    // Another installation's role (the one of CA3, marked as obsybrain's) is not let into the other program's database.
     assert.ok(!r.granted.includes(name('brainrole')), String(r.granted))
     assert.match(
       String(await connectError(as(name('brainrole'), superOwnedDb))),
@@ -474,7 +474,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
     )
     assert.equal(await connectError(as(role, database)), null)
     assert.match(String(await connectError(as(outsider, database))), /permission denied for database/)
-    // The administration login is not left a member of rsc-brain's role.
+    // The administration login is not left a member of obsybrain's role.
     const member = await sql(
       `SELECT 1 FROM pg_auth_members m JOIN pg_roles r ON r.oid = m.roleid JOIN pg_roles u ON u.oid = m.member
         WHERE r.rolname = '${role}' AND u.rolname = '${limitedAdmin}' AND (m.set_option OR m.inherit_option)`,
@@ -634,11 +634,11 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
       (err: Error & { code?: string }) => err.code === 'not_ours',
     )
     assert.equal(await exists('database', factoryDb), true)
-    // A database owned by its role but not made by rsc-brain: refused too.
+    // A database owned by its role but not made by obsybrain: refused too.
     await assert.rejects(
       dbOps.drop(PG_URL as string, { database: foreignDb, role: foreignRole }),
       (err: Error & { code?: string }) =>
-        err.code === 'not_ours' && /not made by rsc-brain/.test(err.message),
+        err.code === 'not_ours' && /not made by obsybrain/.test(err.message),
     )
     assert.deepEqual([await exists('database', foreignDb), await exists('role', foreignRole)], [true, true])
     // Either mark missing is enough to refuse: the role's, or the database's.
@@ -649,7 +649,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
       await assert.rejects(
         dbOps.drop(PG_URL as string, { database, role }),
         (err: Error & { code?: string }) =>
-          err.code === 'not_ours' && /not made by rsc-brain/.test(err.message),
+          err.code === 'not_ours' && /not made by obsybrain/.test(err.message),
       )
       assert.deepEqual([await exists('database', database), await exists('role', role)], [true, true])
     }

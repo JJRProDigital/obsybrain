@@ -34,8 +34,8 @@ export function fromWeb(r: PublicReq): void {
     throw new AppError(
       403,
       'csrf',
-      'This request lacks the header of the rsc-brain web.',
-      'Use the rsc-brain web to do this.',
+      'This request lacks the header of the obsybrain web.',
+      'Use the obsybrain web to do this.',
     )
   }
 }
@@ -90,9 +90,9 @@ export const authRoutes: Route[] = [
     await requestReset(r.db, r.clock, r.conn, obj(r.body).email, async (to, link) => {
       await send(r.db, r.clock, r.mail, 'reset', {
         to,
-        subject: 'Reset your rsc-brain password',
+        subject: 'Reset your obsybrain password',
         text: [
-          'Someone asked to reset the password of your rsc-brain account.',
+          'Someone asked to reset the password of your obsybrain account.',
           'Open this link to choose a new one. It works once, for 1 hour:',
           link,
           '',

@@ -69,7 +69,7 @@ function smtp(s: MailSettings, secret: string | undefined): Transport {
   }
 }
 
-export const LOGO_CID = 'logo@rsc-brain'
+export const LOGO_CID = 'logo@obsybrain'
 
 const esc = (t: string) =>
   t
@@ -86,7 +86,7 @@ export async function branded(db: Db, m: Message): Promise<Message> {
   const r = await db.one<{ name: string; logo: Buffer | null; logo_type: string | null }>(
     'SELECT name, logo, logo_type FROM installation WHERE id = 1',
   )
-  const name = r?.name?.trim() || 'rsc-brain'
+  const name = r?.name?.trim() || 'obsybrain'
   const logo: Inline | null =
     r?.logo && r.logo_type
       ? {
@@ -164,7 +164,7 @@ export async function send(
     const name =
       s.from.name ||
       (await db.one<{ name: string }>('SELECT name FROM installation WHERE id = 1'))?.name ||
-      'rsc-brain'
+      'obsybrain'
     await t.send({ ...(await branded(db, m)), from: { name, address: s.from.address } })
     await log('sent')
     return { sent: true, error: null }

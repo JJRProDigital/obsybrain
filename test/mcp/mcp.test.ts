@@ -122,7 +122,7 @@ describe('the MCP endpoint', { skip: skipPg }, () => {
       instructions: string
       serverInfo: { name: string }
     }
-    assert.deepEqual([res.protocolVersion, res.serverInfo.name], ['2025-06-18', 'rsc-brain'])
+    assert.deepEqual([res.protocolVersion, res.serverInfo.name], ['2025-06-18', 'obsybrain'])
     assert.ok(res.instructions.includes('mem_search'))
     const note = await fetch(`${w.base}/mcp`, {
       method: 'POST',

@@ -11,7 +11,7 @@ import { isMaintenance, nextLook, POLL_OFF_MS } from '../../web/src/lib/maintena
 const refused = {
   error: {
     code: 'under_maintenance',
-    message: 'rsc-brain is under maintenance, retry after 40 seconds',
+    message: 'obsybrain is under maintenance, retry after 40 seconds',
     howToProceed: 'Send it again after that time; reading keeps working meanwhile.',
     retryAfter: 40,
   },

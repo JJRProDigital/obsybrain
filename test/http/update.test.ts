@@ -220,7 +220,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
     await clean()
     const never = await asked(adaWeb)
     assert.deepEqual([never.status, never.body.error?.code], [409, 'updates_off'], never.text)
-    assert.match(never.body.error?.howToProceed ?? '', /rsc-brain\.sh update/)
+    assert.match(never.body.error?.howToProceed ?? '', /obsybrain\.sh update/)
     await updaterSays({ beatAt: new Date(w.now.getTime() - 10 * 60_000).toISOString() })
     const stale = await asked(adaWeb)
     assert.deepEqual([stale.status, stale.body.error?.code], [409, 'updates_off'], stale.text)
@@ -296,7 +296,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
     await updaterSays(failure(NEWER, 3, null))
     const spent = await asked(adaWeb, '/v1/admin/update/retry')
     assert.deepEqual([spent.status, spent.body.error?.code], [409, 'retry_limit'], spent.text)
-    assert.match(spent.body.error?.howToProceed ?? '', /rsc-brain\.sh update/)
+    assert.match(spent.body.error?.howToProceed ?? '', /obsybrain\.sh update/)
 
     // Another version's failure is not this one's.
     await updaterSays(failure('v9.9.8', 0, new Date(w.now.getTime() - 60_000).toISOString()))
@@ -386,7 +386,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
         from: '0.1.0',
         to: '9.9.9',
         copy: 'c.rscb',
-        restore: 'sh rsc-brain.sh restore --file c.rscb',
+        restore: 'sh obsybrain.sh restore --file c.rscb',
       },
       ...failure(NEWER, 0, '2026-10-29T09:45:00.000Z'),
     })
@@ -554,7 +554,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
     const r = await asked(adaWeb)
     assert.deepEqual([r.status, r.body.error?.code], [409, 'update_failed'], r.text)
     assert.doesNotMatch(r.body.error?.howToProceed ?? '', /Try again/)
-    assert.match(r.body.error?.howToProceed ?? '', /rsc-brain\.sh update/)
+    assert.match(r.body.error?.howToProceed ?? '', /obsybrain\.sh update/)
     await updaterSays(failure(NEWER, 3, new Date(w.now.getTime() - 60_000).toISOString()))
     const past = await asked(adaWeb)
     assert.doesNotMatch(past.body.error?.howToProceed ?? '', /Try again/)

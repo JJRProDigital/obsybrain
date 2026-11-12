@@ -53,7 +53,7 @@ function trickle(
     let tick: NodeJS.Timeout | undefined
     const s = connect(Number(u.port), u.hostname, () => {
       s.write(
-        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: rsc-brain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${length}\r\n\r\n`,
+        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: obsybrain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${length}\r\n\r\n`,
       )
       tick = setInterval(() => {
         if (!s.destroyed) s.write(Buffer.alloc(16384, 0x20))
@@ -85,7 +85,7 @@ function hold(base: string, path: string, cookie: string): Promise<{ stop(): voi
     let tick: NodeJS.Timeout | undefined
     const s = connect(Number(u.port), u.hostname, () => {
       s.write(
-        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: rsc-brain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${40 * MB}\r\n\r\n`,
+        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: obsybrain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${40 * MB}\r\n\r\n`,
       )
       tick = setInterval(() => {
         if (!s.destroyed) s.write(Buffer.alloc(1024, 0x20))
@@ -118,7 +118,7 @@ function sendAndLeave(
   return new Promise((resolve) => {
     const s = connect(Number(u.port), u.hostname, () => {
       s.write(
-        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: rsc-brain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${body.length}\r\n\r\n`,
+        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: obsybrain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${body.length}\r\n\r\n`,
       )
       s.write(body)
       setTimeout(() => {
@@ -144,7 +144,7 @@ function stalled(
     let tick: NodeJS.Timeout | undefined
     const s = connect(Number(u.port), u.hostname, () => {
       s.write(
-        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: rsc-brain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${MB}\r\n\r\nPK`,
+        `POST ${path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/zip\r\nX-Requested-With: obsybrain-web\r\nCookie: rscb_session=${cookie}\r\nContent-Length: ${MB}\r\n\r\nPK`,
       )
       if (every) tick = setInterval(() => !s.destroyed && s.write(Buffer.alloc(8, 0x20)), every)
     })
@@ -478,7 +478,7 @@ describe('the import route and the command (CA19)', { skip: skipPg }, () => {
     assert.deepEqual([report.kind, report.pages], ['docs', 5])
     const { writeFile, mkdtemp, rm } = await import('node:fs/promises')
     const { tmpdir } = await import('node:os')
-    const dir = await mkdtemp(`${tmpdir()}/rsc-brain-import-cli-`)
+    const dir = await mkdtemp(`${tmpdir()}/obsybrain-import-cli-`)
     try {
       await writeFile(`${dir}/docs.zip`, zip)
       const z = await run(['import', '--brain', 'cli-zip', '--from', `${dir}/docs.zip`, '--as', email], env)

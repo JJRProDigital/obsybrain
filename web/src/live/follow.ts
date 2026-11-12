@@ -50,7 +50,7 @@ export function useLive(
           else invalidateByEvent(e.kind, slug)
           hear.current?.(e as LiveEvent)
         } catch {
-          // Not an event of rsc-brain: nothing to update.
+          // Not an event of obsybrain: nothing to update.
         }
       }
       // Missed more than the server keeps: the lists catch up.

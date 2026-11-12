@@ -11,7 +11,7 @@ test.describe('U1: home with no brains', () => {
   }) => {
     await scenario(context, baseURL as string, 'fresh')
     await page.goto('/setup')
-    await page.getByLabel('Name of this installation').fill('rsc-brain')
+    await page.getByLabel('Name of this installation').fill('obsybrain')
     await page.getByLabel('Your name').fill('Eric')
     await page.getByLabel('Your email').fill('eric@example.test')
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
@@ -135,7 +135,7 @@ test.describe('U4: the setup form', () => {
       if (r.method() === 'POST' && r.url().endsWith('/v1/setup')) sent++
     })
     await page.goto('/setup')
-    await expect(page.getByRole('heading', { name: 'Set up rsc-brain' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Set up obsybrain' })).toBeVisible()
     const top = await page.getByLabel('Name of this installation').boundingBox()
     await page.getByRole('button', { name: 'Set up and sign in' }).click()
     const name = page.getByLabel('Name of this installation')
@@ -150,7 +150,7 @@ test.describe('U4: the setup form', () => {
     // No banner pushes the form down.
     await expect(page.getByRole('alert')).toHaveCount(0)
     expect((await name.boundingBox())?.y).toBe(top?.y)
-    await name.fill('rsc-brain')
+    await name.fill('obsybrain')
     await page.getByLabel('Your name').fill('Eric')
     await page.getByLabel('Your email').fill('eric@')
     await page.getByLabel('Password', { exact: true }).fill('too short')
@@ -181,9 +181,9 @@ test.describe('U5: the small things', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/')
-    await expect(page).toHaveTitle('Your brains · rsc-brain')
+    await expect(page).toHaveTitle('Your brains · obsybrain')
     await page.getByRole('link', { name: 'Growth' }).click()
-    await expect(page).toHaveTitle('Growth · rsc-brain')
+    await expect(page).toHaveTitle('Growth · obsybrain')
     await expect(page.getByRole('heading', { level: 1, name: 'Growth' })).toBeFocused()
     await expect(page.getByRole('banner')).toContainText('You are a curator')
     await page
@@ -257,7 +257,7 @@ test.describe('U5: the small things', () => {
   test('the setup page logo is not a link to sign in', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'fresh')
     await page.goto('/setup')
-    await expect(page.getByRole('heading', { name: 'Set up rsc-brain' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Set up obsybrain' })).toBeVisible()
     await expect(page.locator('header').getByRole('link')).toHaveCount(0)
   })
 })

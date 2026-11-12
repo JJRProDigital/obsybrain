@@ -26,14 +26,14 @@ const MAX_HEADER = 1024 * 1024
 // The one key derivation this format uses (32 MiB of memory). A header asking for anything else is refused
 // before running it: the header is not authenticated until the first frame opens.
 const KDF = { name: 'scrypt', N: 2 ** 15, r: 8, p: 1 } as const
-const KEY_ID_LABEL = 'rsc-brain installation key id'
+const KEY_ID_LABEL = 'obsybrain installation key id'
 
 export const BACKUP_REASONS = ['scheduled', 'manual', 'pre-update', 'pre-restore'] as const
 export type BackupReason = (typeof BACKUP_REASONS)[number]
 
 export type Header = {
   format: 1
-  product: 'rsc-brain'
+  product: 'obsybrain'
   release: string
   migrations: string[]
   createdAt: string
@@ -90,8 +90,8 @@ export const corruptCopy = () =>
   new AppError(
     422,
     'corrupt_copy',
-    'This file is not a complete rsc-brain copy: it was cut, changed or not written to the end.',
-    'Use another copy from the list (rsc-brain backups list); this one cannot be restored.',
+    'This file is not a complete obsybrain copy: it was cut, changed or not written to the end.',
+    'Use another copy from the list (obsybrain backups list); this one cannot be restored.',
   )
 
 export const wrongKey = (needs: string) => {
@@ -99,7 +99,7 @@ export const wrongKey = (needs: string) => {
     409,
     'wrong_key',
     `This copy was made with another installation key (key id ${needs}).`,
-    `Pass the installation key whose id is ${needs}; rsc-brain key id prints the id of a key.`,
+    `Pass the installation key whose id is ${needs}; obsybrain key id prints the id of a key.`,
   )
   e.extra = { needs }
   return e
@@ -138,7 +138,7 @@ export async function writeBackup(
   const salt = randomBytes(16)
   const header: Header = {
     format: 1,
-    product: 'rsc-brain',
+    product: 'obsybrain',
     release: input.release,
     migrations: input.migrations,
     createdAt: input.createdAt,
@@ -202,7 +202,7 @@ function validHeader(h: unknown): h is Header {
   const kdf = x.kdf
   return (
     x.format === 1 &&
-    x.product === 'rsc-brain' &&
+    x.product === 'obsybrain' &&
     isText(x.release, 64) &&
     Array.isArray(x.migrations) &&
     x.migrations.every((m) => isText(m, 120)) &&

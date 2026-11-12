@@ -111,7 +111,7 @@ describe('copies, the installation key and versions from the web (§3.4)', { ski
     const first = await w.callWeb(adminWeb, 'POST', '/v1/admin/backups', {})
     const second = await w.callWeb(adminWeb, 'POST', '/v1/admin/backups', {})
     assert.equal(first.status, 202, first.text)
-    assert.match(String(first.body.id), /^rsc-brain-\d{8}T\d{6}Z-manual$/)
+    assert.match(String(first.body.id), /^obsybrain-\d{8}T\d{6}Z-manual$/)
     assert.deepEqual([second.status, second.body.error?.code], [409, 'backup_running'])
     const done = await settle()
     assert.ok((done.body.items as Array<{ id: string }>).some((i) => i.id === first.body.id))
@@ -137,7 +137,7 @@ describe('copies, the installation key and versions from the web (§3.4)', { ski
       "SELECT detail FROM audit WHERE action = 'backup.download' ORDER BY at DESC, id DESC LIMIT 1",
     )
     assert.match(String(line?.detail), new RegExp(id))
-    for (const bad of ['nope', '..%2Fstatus.json', 'rsc-brain-20991231T000000Z-manual', `${id}.rscb`]) {
+    for (const bad of ['nope', '..%2Fstatus.json', 'obsybrain-20991231T000000Z-manual', `${id}.rscb`]) {
       const r = await w.callWeb(adminWeb, 'GET', `/v1/admin/backups/${bad}/download`)
       assert.deepEqual([r.status, r.body.error?.code], [404, 'not_found'], `${bad}: ${r.text}`)
     }
@@ -158,12 +158,12 @@ describe('copies, the installation key and versions from the web (§3.4)', { ski
     await dl.arrayBuffer()
     // Signing in, a refusal and a search write too, but nothing a restore would lose (it ends every session anyway).
     const signedIn = await w.raw('POST', '/v1/auth/login', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: { email: admin.email, password: PW },
     })
     assert.equal(signedIn.status, 200, signedIn.text)
     await w.raw('POST', '/v1/auth/login', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: { email: admin.email, password: 'not it at all' },
     })
     await w.call(admin.key, 'GET', '/v1/search?q=anything')
@@ -219,7 +219,7 @@ describe('copies, the installation key and versions from the web (§3.4)', { ski
       method: 'POST',
       headers: {
         cookie: `rscb_session=${adminWeb}`,
-        'x-requested-with': 'rsc-brain-web',
+        'x-requested-with': 'obsybrain-web',
         'content-type': 'application/json',
       },
       body: JSON.stringify({ password: PW }),
@@ -424,7 +424,7 @@ describe('the installation key of the first-time setup (wizard step «Installati
 
   const setup = async () => {
     const r = await w.raw('POST', '/v1/setup', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: {
         name: 'Fresh',
         publicUrl: 'http://localhost',
@@ -464,7 +464,7 @@ describe('the installation key of the first-time setup (wizard step «Installati
     const v = await world({ fresh: true })
     try {
       const r = await v.raw('POST', '/v1/setup', {
-        headers: { 'x-requested-with': 'rsc-brain-web' },
+        headers: { 'x-requested-with': 'obsybrain-web' },
         body: {
           name: 'Late',
           publicUrl: 'http://localhost',

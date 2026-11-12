@@ -23,7 +23,7 @@ export type Config = {
   // The daily copy: at HH:MM of the time zone, keeping this many (spec B7 C2).
   backupAt: string
   backupKeep: number
-  // How many invitation mails one service account may make rsc-brain send in an hour (F1-PR2 review).
+  // How many invitation mails one service account may make obsybrain send in an hour (F1-PR2 review).
   serviceInvitesPerHour: number
   // Companion mode (plan F1 §3.1): installed by rsc-factory, which sets it up with the one-time key; null otherwise.
   companion: CompanionConfig | null
@@ -45,7 +45,7 @@ export type CompanionConfig = {
 export function readConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const databaseUrl = env.OBSY_BRAIN_DATABASE_URL
   if (!databaseUrl) {
-    throw new Error('OBSY_BRAIN_DATABASE_URL is not set. Point it at the PostgreSQL database for rsc-brain.')
+    throw new Error('OBSY_BRAIN_DATABASE_URL is not set. Point it at the PostgreSQL database for obsybrain.')
   }
   const port = Number(env.OBSY_BRAIN_PORT ?? 8090)
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
@@ -101,7 +101,7 @@ function readCompanion(env: NodeJS.ProcessEnv): CompanionConfig | null {
   if (token === '') return null
   if (token.length < 32 || token.length > 200 || !/^[A-Za-z0-9_-]+$/.test(token)) {
     throw new Error(
-      'OBSY_BRAIN_COMPANION_TOKEN must have 32 to 200 letters, digits, - or _. rsc-brain.sh install --companion makes one.',
+      'OBSY_BRAIN_COMPANION_TOKEN must have 32 to 200 letters, digits, - or _. obsybrain.sh install --companion makes one.',
     )
   }
   const network = env.OBSY_BRAIN_COMPANION_NETWORK ?? ''
@@ -136,7 +136,7 @@ function readLocalOnly(env: NodeJS.ProcessEnv): boolean {
     throw new Error(
       'OBSY_BRAIN_LOCAL_ONLY=1 needs OBSY_BRAIN_PUBLISH set to 127.0.0.1:<port> (or [::1]:<port>): this machine only ' +
         'is true only when the port is published on the loopback address alone. Publish it there, or remove ' +
-        'OBSY_BRAIN_LOCAL_ONLY and give rsc-brain a domain with HTTPS.',
+        'OBSY_BRAIN_LOCAL_ONLY and give obsybrain a domain with HTTPS.',
     )
   }
   return true

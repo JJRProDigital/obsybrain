@@ -4,8 +4,8 @@ const plural = (n: number, one: string, many = `${one}s`) => `${fmt(n)} ${n === 
 // Every word of the web, in one place, so it can be translated later (spec B6 «Clarificaciones»: English
 // only in this version). Screens import from here; they do not hold sentences of their own.
 export const T = {
-  product: 'rsc-brain',
-  brandFallback: 'rsc-brain',
+  product: 'obsybrain',
+  brandFallback: 'obsybrain',
   skip: 'Skip to content',
 
   shell: {
@@ -53,7 +53,7 @@ export const T = {
     offline:
       'You are offline. What you see may be out of date; changes are off until the connection is back.',
     maintenance:
-      'rsc-brain is being updated or restored. Reading works; anything you save is refused until it ends, usually in a few minutes.',
+      'obsybrain is being updated or restored. Reading works; anything you save is refused until it ends, usually in a few minutes.',
   },
 
   // The kind of an alert or a state, as a word in sentence case.
@@ -74,7 +74,7 @@ export const T = {
     loading: 'Loading…',
     tryAgain: 'Try again',
     errorTitle: 'This did not load',
-    offlineTitle: 'rsc-brain could not be reached',
+    offlineTitle: 'obsybrain could not be reached',
     offlineLead: 'No answer came back: this device is offline, or the server is down.',
     forbiddenTitle: 'You cannot open this',
     noBrain: 'This brain does not exist, or you are not one of its members.',
@@ -98,7 +98,7 @@ export const T = {
     submit: 'Sign in',
     submitting: 'Signing in…',
     forgot: 'Forgot your password?',
-    noAccount: 'No account? rsc-brain is by invitation: ask an administrator for one.',
+    noAccount: 'No account? obsybrain is by invitation: ask an administrator for one.',
     signedOut: 'Signed out.',
     sessionEnded: 'Your session ended. Sign in again.',
     restored: 'Restored. Everyone signs in again, you too.',
@@ -118,12 +118,12 @@ export const T = {
   },
 
   setup: {
-    title: 'Set up rsc-brain',
+    title: 'Set up obsybrain',
     lead: 'Three things, then the installation key to keep: what this installation is called, where people open it, and your administrator account.',
     stepInstallation: 'This installation',
     stepAccount: 'Your administrator account',
     name: 'Name of this installation',
-    nameHint: 'People see it in the header and in invitation emails. For example "Acme rsc-brain".',
+    nameHint: 'People see it in the header and in invitation emails. For example "Acme obsybrain".',
     publicUrl: 'Address people open',
     publicUrlHint: 'The address of this page, as people will reach it. Links in emails use it.',
     adminName: 'Your name',
@@ -136,9 +136,9 @@ export const T = {
     submitting: 'Setting up…',
     insecureTitle: 'This connection is not safe for a password',
     insecureLead:
-      'You opened rsc-brain over a connection that is neither encrypted nor on this machine, so it will not take a password.',
+      'You opened obsybrain over a connection that is neither encrypted nor on this machine, so it will not take a password.',
     insecureHow:
-      'Open rsc-brain on its local address (http://localhost:…) from the machine it runs on, or over HTTPS, and set it up there.',
+      'Open obsybrain on its local address (http://localhost:…) from the machine it runs on, or over HTTPS, and set it up there.',
     // What to fix, next to each field (checked in the browser before sending).
     need: {
       name: 'Enter a name for this installation.',
@@ -157,14 +157,14 @@ export const T = {
     keyStep: 'Installation key',
     keyTitle: 'Keep the installation key',
     keyLead:
-      'rsc-brain encrypts every copy of this installation with this key. Without it, no copy can be restored, not even by you. It is shown here once.',
+      'obsybrain encrypts every copy of this installation with this key. Without it, no copy can be restored, not even by you. It is shown here once.',
     keyWhere: 'Keep it outside this machine, in a password manager. Never send it in a message.',
     keyIdIs: (id: string) => `Key id: ${id}`,
     copyKey: 'Copy the key',
     downloadKey: 'Download the key (.txt)',
     keySaved: 'I saved the installation key somewhere safe, outside this machine',
     keyNeedsSaved: 'Tick that you saved the key first.',
-    keyContinue: 'Continue to rsc-brain',
+    keyContinue: 'Continue to obsybrain',
     keyLoading: 'Getting the key…',
     keyGoneTitle: 'The key was already shown',
     keyGone:
@@ -175,13 +175,13 @@ export const T = {
     // Companion mode (F1-PR11): installed with rsc-factory, which makes the administration in its own setup.
     companionTitle: 'Finish the setup in rsc-factory',
     companionLead:
-      'rsc-brain was installed with rsc-factory. Its administration is made when you finish the first-time setup of rsc-factory; then sign in here with the same email and password.',
+      'obsybrain was installed with rsc-factory. Its administration is made when you finish the first-time setup of rsc-factory; then sign in here with the same email and password.',
     companionOpen: 'Open rsc-factory',
     companionNoLink: 'Open rsc-factory at the address it was installed on.',
     companionCheck: 'Check again',
     companionChecking: 'Checking…',
     companionStill: 'Still waiting for rsc-factory.',
-    doneTitle: 'rsc-brain is already set up',
+    doneTitle: 'obsybrain is already set up',
     doneLead: 'The first-time setup runs once. Sign in with your account.',
     goSignIn: 'Go to sign in',
   },
@@ -245,7 +245,7 @@ export const T = {
     emptyAsk: 'Ask the person who invited you, and give them the email of your account:',
     copyEmail: 'Copy my email',
     wrongAccount: 'Signed in with the wrong account?',
-    setUp: 'rsc-brain is set up.',
+    setUp: 'obsybrain is set up.',
     welcome: (brains: ReadonlyArray<{ name: string; role: string }>) => {
       if (!brains.length) return 'Welcome — your account is ready.'
       const parts = brains.map((b) => `${b.name} as ${b.role}`)
@@ -264,7 +264,7 @@ export const T = {
     otherAgents: 'Other agents',
     copyCommand: 'Copy the command',
     readme: 'How it works, in the README',
-    readmeUrl: 'https://github.com/ericrisco/rsc-brain#connect-your-agent',
+    readmeUrl: 'https://github.com/obsessive-solutions/obsybrain#connect-your-agent',
     count: (n: number) => (n === 1 ? '1 brain' : `${n} brains`),
     totals: 'Across your brains',
     totalsTitle: 'In numbers',
@@ -319,7 +319,7 @@ export const T = {
     tokenName: (agent: string) => `${agent} (from Connect your agent)`,
     yourToken: 'Your new token',
     tokenOnce:
-      'Copy it now: rsc-brain shows this token only this once. Paste it at the hidden prompt of the first command below.',
+      'Copy it now: obsybrain shows this token only this once. Paste it at the hidden prompt of the first command below.',
     tokenUntil: (date: string) => `It works until ${date}.`,
     copyToken: 'Copy the token',
     done: 'Done, hide the token',
@@ -332,11 +332,11 @@ export const T = {
     liveFor: (agent: string) => `Live check: ${agent}`,
     waiting: 'Waiting for your agent…',
     waitingLead:
-      'Start or restart your agent so it connects. This turns green on its first request to rsc-brain.',
+      'Start or restart your agent so it connects. This turns green on its first request to obsybrain.',
     connected: 'Connected',
     reached: (client: string | null, at: string) => {
       const who = client ?? 'Your agent'
-      return `${who.slice(0, 1).toUpperCase()}${who.slice(1)} reached rsc-brain at ${at}.`
+      return `${who.slice(0, 1).toUpperCase()}${who.slice(1)} reached obsybrain at ${at}.`
     },
     connectedNext: 'Now ask it something about your brain, as below.',
     paused: 'Offline: the check carries on when the connection is back.',
@@ -348,11 +348,11 @@ export const T = {
     tipVariable: (env: string) =>
       `With a token: in the terminal that starts your agent, run echo \${#${env}}. It should print a number above 0 (the length of the token, never the token).`,
     tipList: {
-      'claude-code': 'In Claude Code, run /mcp: rsc-brain should be listed as connected.',
-      codex: 'Run "codex mcp list": rsc-brain should be there.',
-      opencode: 'Run "opencode mcp list": rsc-brain should be there.',
-      cursor: 'In Cursor, open the MCP settings: rsc-brain should be on.',
-      other: "Open your agent's list of MCP servers: rsc-brain should be there.",
+      'claude-code': 'In Claude Code, run /mcp: obsybrain should be listed as connected.',
+      codex: 'Run "codex mcp list": obsybrain should be there.',
+      opencode: 'Run "opencode mcp list": obsybrain should be there.',
+      cursor: 'In Cursor, open the MCP settings: obsybrain should be on.',
+      other: "Open your agent's list of MCP servers: obsybrain should be there.",
     } as Record<string, string>,
   },
 
@@ -387,7 +387,7 @@ export const T = {
     creating: 'Creating…',
     cancel: 'Cancel',
     yourToken: 'Your new token',
-    tokenOnce: 'Copy it now: rsc-brain shows it only this once.',
+    tokenOnce: 'Copy it now: obsybrain shows it only this once.',
     copyToken: 'Copy the token',
     done: 'Done, hide the token',
     hidden: (name: string) => `The token ${name} is hidden now. Its last 4 characters stay in the list.`,
@@ -755,12 +755,12 @@ export const T = {
     longHint: 'A page longer than this is suggested for a split.',
     import: {
       title: 'Import a documentation folder',
-      lead: 'Fill this brain from a folder: a 02-DOCS folder (wiki/ and raw/) or an Obsidian vault, as a .zip, or a faithful export of another rsc-brain installation.',
+      lead: 'Fill this brain from a folder: a 02-DOCS folder (wiki/ and raw/) or an Obsidian vault, as a .zip, or a faithful export of another obsybrain installation.',
       what: [
         'Each markdown file of wiki/ (of the vault) becomes a page; links between files become links between pages.',
         'Each text file of raw/ becomes a note in the journal; the index, decisions and log are read too.',
         'Images, files over 1 MB, hidden folders and files named like keys are left out, and the report says so.',
-        'Private parts and anything shaped like a secret are removed, as everywhere in rsc-brain.',
+        'Private parts and anything shaped like a secret are removed, as everywhere in obsybrain.',
       ],
       emptyOnly: 'Only into an empty brain: one with no pages, entries or proposals yet.',
       peopleLead:
@@ -813,7 +813,7 @@ export const T = {
       'Markdown files to read or open as an Obsidian vault: wiki pages with their links, the journal as one note per session, the map, the decisions and the log.',
     exportFaithful: 'Faithful',
     exportFaithfulHint:
-      'Everything, with its history, to import into another rsc-brain installation. People are named by email.',
+      'Everything, with its history, to import into another obsybrain installation. People are named by email.',
     exportForgotten: 'Include forgotten entries',
     exportForgottenHint: 'They are marked as forgotten. Purged entries are never exported.',
     exportButton: 'Download the export',
@@ -978,7 +978,7 @@ export const T = {
     theirs: 'Their values',
     // Email.
     mailServer: 'Outgoing mail',
-    mailLead: 'The account rsc-brain sends invitations, reset links and notices from.',
+    mailLead: 'The account obsybrain sends invitations, reset links and notices from.',
     mailOff:
       'Mail is not set up: invitations and reset links are not sent by email. Fill in your mail server.',
     host: 'Mail server',
@@ -1155,9 +1155,9 @@ export const T = {
     backups: 'Backups',
     backupsLead:
       'A copy holds everything: brains, accounts, settings, audit. It is encrypted with the installation key and kept in the folder of the copies.',
-    backupsOff: 'No folder for copies is set, so rsc-brain makes no copies.',
+    backupsOff: 'No folder for copies is set, so obsybrain makes no copies.',
     backupsOffHow:
-      'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart rsc-brain. Until then, back up the PostgreSQL database with your usual tools.',
+      'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart obsybrain. Until then, back up the PostgreSQL database with your usual tools.',
     schedule: 'Schedule',
     scheduleText: (at: string, tz: string, keep: number) =>
       `Every day at ${at} (${tz}), keeping the newest ${keep} daily copies. Copies made by hand or before an update or a restore are kept until you remove them on the machine.`,
@@ -1192,7 +1192,7 @@ export const T = {
       `What was written after it is lost: the last write here was ${when} (${ago}).`,
     restoreNothingLost: 'Nothing was written here after this copy.',
     restoreFirst:
-      'First, rsc-brain makes a copy of what is here now («Before a restore»), so you can come back to it.',
+      'First, obsybrain makes a copy of what is here now («Before a restore»), so you can come back to it.',
     restoreEnds:
       'Then every session, token and connection ends, yours too: everyone signs in again, and service accounts need new main keys. Pending invitations and password links end too.',
     restoreConfirm: 'Name of this installation',
@@ -1241,19 +1241,19 @@ export const T = {
     releaseNotCheckedHow: 'The check is off on this installation, or has not run yet. On the server:',
     releaseNotes: (v: string) => `What changes in ${v}`,
     releaseHow:
-      'Update on the machine: rsc-brain.sh update (it makes a copy first and rolls back if anything fails).',
+      'Update on the machine: obsybrain.sh update (it makes a copy first and rolls back if anything fails).',
     // Updating from the web (rsc-updates B3).
     updateTo: (y: string) => `Update to ${y}`,
     updateLead:
-      'rsc-brain makes a copy of everything first, stops for a few minutes and starts the new version. If anything fails, it goes back to the version you have now with your data as it was.',
+      'obsybrain makes a copy of everything first, stops for a few minutes and starts the new version. If anything fails, it goes back to the version you have now with your data as it was.',
     updateAskPassword: 'Type your password to confirm.',
     updateTryAgain: 'Try again',
     updateSending: 'Asking…',
     updateRequested:
-      'Update requested. rsc-brain stops for a few minutes while it updates; this page keeps checking and shows how it ends.',
+      'Update requested. obsybrain stops for a few minutes while it updates; this page keeps checking and shows how it ends.',
     updateWaiting: 'The update is requested and waits for the updater to start it.',
     updateRunning: (y: string) =>
-      `Updating to ${y}. rsc-brain is unavailable while it restarts; this page keeps checking.`,
+      `Updating to ${y}. obsybrain is unavailable while it restarts; this page keeps checking.`,
     updateFailedAt: (y: string, when: string) => `The update to ${y} failed at ${when}.`,
     updateReason: 'What the updater said',
     updateRetryFrom: (when: string) => `You can try again ${when}.`,
@@ -1262,15 +1262,15 @@ export const T = {
     updateCannot: (why: string) => `Cannot update: ${why}`,
     updateCannotHow: 'Fix that and ask again, or update on the server:',
     updateUnsafe: (to: string) =>
-      `The last update${to ? ` to ${to}` : ''} failed, and rsc-brain could not go back by itself: the data may not be as it was.`,
+      `The last update${to ? ` to ${to}` : ''} failed, and obsybrain could not go back by itself: the data may not be as it was.`,
     updateUnsafeHow:
       'Do not update again until it is restored. On the server, restore the copy made before that update (everyone signs in again afterwards):',
     updateUnsafeUnreadable:
       'The details of that update could not be read. On the server, run this: it says what to restore.',
-    updateCompanion: 'rsc-brain was installed by rsc-factory: update it from there.',
+    updateCompanion: 'obsybrain was installed by rsc-factory: update it from there.',
     updateOpenFactory: 'Open rsc-factory',
     lastUpdate: 'Last update',
-    noUpdateYet: 'None yet: rsc-brain.sh update records each one here.',
+    noUpdateYet: 'None yet: obsybrain.sh update records each one here.',
     updateFailedTitle: 'Update failed',
     updateLog: 'What the service said',
     databaseSize: 'Database size',
@@ -1279,7 +1279,7 @@ export const T = {
     maintenanceOff: 'Off',
     // Branding.
     nameTitle: 'Name',
-    nameLead: 'Shown in the header, on the sign-in page and in every email, in place of rsc-brain.',
+    nameLead: 'Shown in the header, on the sign-in page and in every email, in place of obsybrain.',
     nameLabel: 'Name of this installation',
     nameHint_: '1 to 80 characters.',
     saveName: 'Save the name',
@@ -2306,7 +2306,7 @@ export const T = {
       'brain.exported': 'exported the brain',
       'brain.imported': 'imported into the brain',
     } as Record<string, string>,
-    installation: 'rsc-brain',
+    installation: 'obsybrain',
     changed: {
       forgot: 'forgot an entry',
       recovered: 'recovered an entry',
@@ -2422,7 +2422,7 @@ export const T = {
 
   notFound: {
     title: 'Nothing here',
-    lead: 'This address is not a page of the rsc-brain web.',
+    lead: 'This address is not a page of the obsybrain web.',
     home: 'Go home',
   },
 

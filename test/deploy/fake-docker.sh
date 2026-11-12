@@ -49,8 +49,8 @@ if [ "$1" = compose ]; then
 fi
 
 # What the page of the stand-in door says at each compose call.
-if [ "$1" = compose ] && [ -f "$project_dir/.rsc-brain/door/step.txt" ]; then
-  echo "any: $(cat "$project_dir/.rsc-brain/door/step.txt")" >>"$state/door-steps.log"
+if [ "$1" = compose ] && [ -f "$project_dir/.obsybrain/door/step.txt" ]; then
+  echo "any: $(cat "$project_dir/.obsybrain/door/step.txt")" >>"$state/door-steps.log"
 fi
 
 # Whatever the call is given on its standard input (the launcher closes it, or pipes a secret in).
@@ -63,31 +63,31 @@ take_stdin() {
 }
 
 case "$args" in
-*" rsc-brain db check "*)
+*" obsybrain db check "*)
   take_stdin db check
   if [ "${FAKE_DB_CHECK_EXIT:-0}" = 3 ]; then
-    echo 'PostgreSQL 16.4 is too old: rsc-brain needs PostgreSQL 17 or newer.' >&2
+    echo 'PostgreSQL 16.4 is too old: obsybrain needs PostgreSQL 17 or newer.' >&2
     exit 3
   fi
   echo '{"version":"17.11","unaccent":true,"canCreate":true,"isSuper":false,"ownsDb":true}'
   exit "${FAKE_DB_CHECK_EXIT:-0}"
   ;;
-*" rsc-brain db provision "*)
+*" obsybrain db provision "*)
   take_stdin db provision
   [ -n "${FAKE_PROVISION_SLEEP:-}" ] && echo provisioning >>"$FAKE_STATE/provision-started" && sleep "$FAKE_PROVISION_SLEEP"
   [ -n "${FAKE_PROVISION_WARNING:-}" ] && echo "Warning: $FAKE_PROVISION_WARNING" >&2
   [ "${FAKE_PROVISION_EXIT:-0}" != 0 ] && exit "$FAKE_PROVISION_EXIT"
   host=postgres
   case "$args" in *" --isolate-from "*) host=db.internal ;; esac
-  echo "{\"database\":\"x\",\"role\":\"x\",\"url\":\"postgres://rsc_brain:provisioned-pw@$host:5432/rsc_brain?sslmode=disable\",\"warnings\":[],\"granted\":[]}"
+  echo "{\"database\":\"x\",\"role\":\"x\",\"url\":\"postgres://obsybrain:provisioned-pw@$host:5432/obsybrain?sslmode=disable\",\"warnings\":[],\"granted\":[]}"
   exit 0
   ;;
-*" rsc-brain db drop "*)
+*" obsybrain db drop "*)
   take_stdin db drop
   echo 'Removed the database and the role.'
   exit 0
   ;;
-*" rsc-brain key id "*)
+*" obsybrain key id "*)
   if [ -n "${FAKE_KEY_ID_BY_KEY:-}" ]; then
     # An id that follows the key (rotation): its checksum.
     key=$(cat)
@@ -99,7 +99,7 @@ case "$args" in
   echo 'k3yid0123456'
   exit 0
   ;;
-*" rsc-brain key reseal"*)
+*" obsybrain key reseal"*)
   # The key the data is sealed with is kept in $FAKE_STATE/sealed (at first, the installation's own). The reseal goes
   # from the key in the env file (the container's OBSY_BRAIN_SECRET) to the key on the standard input, as the real one
   # does: already sealed with the new key, nothing to do; sealed with neither, refused. FAKE_RESEAL_EXIT fails it
@@ -133,13 +133,13 @@ case "$args" in
   echo 'Resealed 3 values.'
   exit 0
   ;;
-*" rsc-brain version "*)
+*" obsybrain version "*)
   if [ "$1" = run ]; then
-    # docker run --rm IMAGE rsc-brain version
+    # docker run --rm IMAGE obsybrain version
     img=''
     prev=''
     for a in "$@"; do
-      [ "$a" = rsc-brain ] && img=$prev && break
+      [ "$a" = obsybrain ] && img=$prev && break
       prev=$a
     done
     version_of "$img"
@@ -154,8 +154,8 @@ case "$args" in
   fi
   exit 0
   ;;
-*" rsc-brain migrate "*)
-  [ -f "$project_dir/.rsc-brain/door/step.txt" ] && echo "migrate: $(cat "$project_dir/.rsc-brain/door/step.txt")" >>"$state/door-steps.log"
+*" obsybrain migrate "*)
+  [ -f "$project_dir/.obsybrain/door/step.txt" ] && echo "migrate: $(cat "$project_dir/.obsybrain/door/step.txt")" >>"$state/door-steps.log"
   # FAKE_MIGRATE_SLEEP: a long migration (it says when it started, so a test can stop the launcher then).
   if [ -n "${FAKE_MIGRATE_SLEEP:-}" ]; then
     : >"$state/migrate-started"
@@ -168,10 +168,10 @@ case "$args" in
   echo 'Applied: 0024_next'
   exit 0
   ;;
-*" rsc-brain maintenance on "*)
+*" obsybrain maintenance on "*)
   exit "${FAKE_MAINTENANCE_EXIT:-0}"
   ;;
-*" rsc-brain maintenance off"*)
+*" obsybrain maintenance off"*)
   # FAKE_MAINT_OFF_HANG: a call that does not end by itself (20 s at most). It says its process id; it is this process.
   # FAKE_MAINT_OFF_FORK: as docker compose with its plugin: a child that holds the standard streams, and the hang.
   if [ -n "${FAKE_MAINT_OFF_FORK:-}" ]; then
@@ -191,7 +191,7 @@ case "$args" in
   fi
   exit 0
   ;;
-*" rsc-brain update record "*)
+*" obsybrain update record "*)
   if [ -n "${FAKE_RECORD_HANG:-}" ]; then
     echo $$ >"$state/record.pid"
     exec sleep 20
@@ -199,14 +199,14 @@ case "$args" in
   take_stdin update record
   exit 0
   ;;
-*" rsc-brain restore --check "*)
+*" obsybrain restore --check "*)
   take_stdin restore check
   [ "${FAKE_RESTORE_CHECK_EXIT:-0}" = 2 ] && echo 'The name given to confirm does not match this installation.' >&2
   exit "${FAKE_RESTORE_CHECK_EXIT:-0}"
   ;;
-*" rsc-brain restore "*)
+*" obsybrain restore "*)
   take_stdin restore
-  [ -f "$project_dir/.rsc-brain/door/step.txt" ] && echo "restore: $(cat "$project_dir/.rsc-brain/door/step.txt")" >>"$state/door-steps.log"
+  [ -f "$project_dir/.obsybrain/door/step.txt" ] && echo "restore: $(cat "$project_dir/.obsybrain/door/step.txt")" >>"$state/door-steps.log"
   # FAKE_RESTORE_SLEEP: a long restore of the copy made before an update (the rollback's).
   case "$args" in *" --keep-keys "*)
     if [ -n "${FAKE_RESTORE_SLEEP:-}" ]; then
@@ -217,22 +217,22 @@ case "$args" in
   echo 'Restored the copy.'
   exit "${FAKE_RESTORE_EXIT:-0}"
   ;;
-*" rsc-brain backup "*)
+*" obsybrain backup "*)
   take_stdin backup
   [ "${FAKE_BACKUP_EXIT:-0}" != 0 ] && echo 'The copy failed: writes_in_progress.' >&2 && exit "$FAKE_BACKUP_EXIT"
   case "$args" in
   *" --reason pre-update "*)
-    echo '{"id":"rsc-brain-20261103T120000Z-pre-update","file":"rsc-brain-20261103T120000Z-pre-update.rscb","bytes":4096,"keyId":"k3yid0123456","createdAt":"2026-11-03T12:00:00.000Z"}'
+    echo '{"id":"obsybrain-20261103T120000Z-pre-update","file":"obsybrain-20261103T120000Z-pre-update.rscb","bytes":4096,"keyId":"k3yid0123456","createdAt":"2026-11-03T12:00:00.000Z"}'
     ;;
-  *) echo 'Made the copy rsc-brain-20261103T030000Z-manual.rscb.' ;;
+  *) echo 'Made the copy obsybrain-20261103T030000Z-manual.rscb.' ;;
   esac
   exit 0
   ;;
-*" rsc-brain backups list "*)
-  echo 'rsc-brain-20261103T030000Z-manual.rscb'
+*" obsybrain backups list "*)
+  echo 'obsybrain-20261103T030000Z-manual.rscb'
   exit 0
   ;;
-*" rsc-brain maintenance status "*)
+*" obsybrain maintenance status "*)
   echo '{"on":false}'
   exit 0
   ;;

@@ -1,10 +1,10 @@
-# The rsc-brain web
+# The obsybrain web
 
-The web is how people use rsc-brain: they read the wiki and its graph, follow what agents do, approve or
+The web is how people use obsybrain: they read the wiki and its graph, follow what agents do, approve or
 return proposals, correct the journal, connect their agents and run the installation. Agents use the
 same server over MCP and HTTP; the web is for the people around them.
 
-It is one page application (Preact, Vite) that the rsc-brain process serves on the same address as the
+It is one page application (Preact, Vite) that the obsybrain process serves on the same address as the
 API. It calls only the public API at `/v1` and the live events, with the same permissions a program has:
 there are no private routes. Anything the web can do, a program with the same role can do.
 
@@ -36,7 +36,7 @@ Open <http://127.0.0.1:4173/__fixture/use?preset=signed-in> (or `fresh`, `signed
 Browsers and `fetch` refuse some ports outright (the «bad ports» of the Fetch standard), whatever the
 server says. Among them: 4190, 5060, 5061, 6000, 6566, 6665–6669, 6697 and 10080. An installation on one of
 those ports answers `curl` but not the web, the bridge or the Claude Code hooks. Use another port, such as
-the default 8090, or put rsc-brain behind a reverse proxy on 443.
+the default 8090, or put obsybrain behind a reverse proxy on 443.
 
 ## How the code is laid out
 

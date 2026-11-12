@@ -1,5 +1,5 @@
-// Companion mode (plan F1 §3.1, T047; spec F1 C24, CA1): rsc-factory's installer leaves rsc-brain installed but not
-// set up, with a one-time key both share. While it waits, rsc-brain's own setup says to finish in rsc-factory; when
+// Companion mode (plan F1 §3.1, T047; spec F1 C24, CA1): rsc-factory's installer leaves obsybrain installed but not
+// set up, with a one-time key both share. While it waits, obsybrain's own setup says to finish in rsc-factory; when
 // rsc-factory's setup is done, it calls POST /v1/setup/companion with that key from the shared network and gets the
 // main key of its service account. Once set up, the key serves nothing.
 import assert from 'node:assert/strict'
@@ -11,7 +11,7 @@ import { bumpKeyEpoch } from '../../src/domain/installation.ts'
 import { skipPg } from '../helpers/pg.ts'
 import { type World, world } from '../helpers/world.ts'
 
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 const TOKEN = 'c0ffee'.repeat(11)
 const FACTORY = 'https://factory.example.com'
 const admin = { name: 'Eric', email: 'eric@example.com', password: 'a long enough password' }
@@ -60,7 +60,7 @@ describe('companion mode: waiting for rsc-factory', { skip: skipPg }, () => {
   })
   after(async () => w.close())
 
-  it('the setup of rsc-brain says to finish in rsc-factory, with its address, and takes no password', async () => {
+  it('the setup of obsybrain says to finish in rsc-factory, with its address, and takes no password', async () => {
     const state = await w.raw('GET', '/v1/setup')
     assert.deepEqual([state.status, state.body.error?.code], [409, 'companion_pending'], state.text)
     assert.equal(errorOf(state).message, 'Finish the setup in rsc-factory.')
@@ -105,7 +105,7 @@ describe('companion mode: waiting for rsc-factory', { skip: skipPg }, () => {
     assert.equal(await setUp(w), false)
   })
 
-  it('400 with the password rule of rsc-brain, or an address of rsc-factory it cannot keep; nothing set up', async () => {
+  it('400 with the password rule of obsybrain, or an address of rsc-factory it cannot keep; nothing set up', async () => {
     const weak = await w.raw('POST', '/v1/setup/companion', {
       headers: auth(),
       body: { ...body, admin: { ...admin, password: 'short' } },
@@ -194,7 +194,7 @@ describe('companion mode: defaults from the launcher', { skip: skipPg }, () => {
     const row = await w.db.one<{ public_url: string; name: string }>(
       'SELECT public_url, name FROM installation',
     )
-    assert.deepEqual([row?.public_url, row?.name], ['http://localhost:8090', 'rsc-brain'])
+    assert.deepEqual([row?.public_url, row?.name], ['http://localhost:8090', 'obsybrain'])
   })
 })
 
@@ -276,7 +276,7 @@ describe('companion mode: the setup takes its row lock (deterministic)', { skip:
   })
 })
 
-// After the setup (spec F1 C24 «Finish connecting rsc-brain»): a lost answer, or a restore that killed every key,
+// After the setup (spec F1 C24 «Finish connecting obsybrain»): a lost answer, or a restore that killed every key,
 // leaves rsc-factory without its main key. With the one-time key and an administrator's email and password it gets a
 // new one; the one before stops working.
 describe('companion mode: reconnecting rsc-factory', { skip: skipPg }, () => {
@@ -424,7 +424,7 @@ describe('companion mode: reconnecting rsc-factory', { skip: skipPg }, () => {
   })
 })
 
-// Set up without the handshake (rsc-brain admin bootstrap, say): no account was ever made for rsc-factory, so
+// Set up without the handshake (obsybrain admin bootstrap, say): no account was ever made for rsc-factory, so
 // reconnecting makes one, and from then on it is that one.
 describe('companion mode: reconnecting when no account was ever made', { skip: skipPg }, () => {
   let w: World

@@ -198,7 +198,7 @@ export const peopleRoutes: Route[] = [
       body: {
         account: { id: s.id },
         key: { id: s.key.id, secret: s.key.secret },
-        message: 'Copy the key now: rsc-brain shows it only this once.',
+        message: 'Copy the key now: obsybrain shows it only this once.',
       },
     }
   }),
@@ -208,7 +208,7 @@ export const peopleRoutes: Route[] = [
       status: 201,
       body: {
         key: { id: k.id, secret: k.secret },
-        message: 'Copy the key now: rsc-brain shows it only this once.',
+        message: 'Copy the key now: obsybrain shows it only this once.',
       },
     }
   }),

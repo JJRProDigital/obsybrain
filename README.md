@@ -1,4 +1,4 @@
-# rsc-brain
+# obsybrain
 
 **The memory your AI agents are missing, and the one your company can keep.**
 
@@ -7,7 +7,7 @@ already fixed twice, the customer who hates being called before ten, or why the 
 it is. You explain it again. Then another agent, another tool or another colleague needs it, and you explain it
 again. Whatever it learned leaves with the session.
 
-rsc-brain is where that knowledge stays. It runs on your own server. Every agent that connects to it reads what
+obsybrain is where that knowledge stays. It runs on your own server. Every agent that connects to it reads what
 the team already knows before it works, and writes down what it learned after. People decide what becomes the
 company's record.
 
@@ -60,9 +60,9 @@ company's record.
 Install it ([Install](#install) has every option), then connect your agent:
 
 ```sh
-sh rsc-brain.sh install --local                      # PostgreSQL included; the web opens on http://localhost:8090
-claude mcp add --transport http rsc-brain http://localhost:8090/mcp --scope user
-claude mcp login rsc-brain
+sh obsybrain.sh install --local                      # PostgreSQL included; the web opens on http://localhost:8090
+claude mcp add --transport http obsybrain http://localhost:8090/mcp --scope user
+claude mcp login obsybrain
 ```
 
 Then ask your agent: *"What does this brain know about X?"* At the end of the session: *"Save what we learned."*
@@ -75,16 +75,16 @@ MIT. See [LICENSE](LICENSE).
 
 ## Install
 
-rsc-brain runs in containers, on macOS or Linux. You need Docker with Compose v2 and git. One
+obsybrain runs in containers, on macOS or Linux. You need Docker with Compose v2 and git. One
 command installs it; it checks what it needs first and changes nothing when something is missing.
 
 Download the launcher from a published release (replace `vX.Y.Z` with the version), and check it
-against the SHA-256 the release notes give for `rsc-brain.sh` before you run it:
+against the SHA-256 the release notes give for `obsybrain.sh` before you run it:
 
 ```sh
-curl -fsSLO https://github.com/ericrisco/rsc-brain/releases/download/vX.Y.Z/rsc-brain.sh
-shasum -a 256 rsc-brain.sh      # Linux: sha256sum rsc-brain.sh; it must match the release notes
-sh rsc-brain.sh install --local
+curl -fsSLO https://github.com/obsessive-solutions/obsybrain/releases/download/vX.Y.Z/obsybrain.sh
+shasum -a 256 obsybrain.sh      # Linux: sha256sum obsybrain.sh; it must match the release notes
+sh obsybrain.sh install --local
 ```
 
 While the repository is private, installing needs access to it: pass `--repo` with an address git
@@ -94,36 +94,36 @@ address), or `--image` with an image you already have.
 It fetches the latest published version, builds its image, starts it with its own PostgreSQL and
 tells you the address. It only writes in its own folder: an empty folder, or one that holds only
 your `compose.override.yaml`; it refuses any other (a clone of this repository, say). Open it to finish the first-time setup, where you make the administration
-account. `sh rsc-brain.sh help` lists every command and option.
+account. `sh obsybrain.sh help` lists every command and option.
 
 ### On this machine
 
 `install --local` publishes the web on `http://localhost:8090`, on this machine only (`127.0.0.1`).
 `--port N` picks another port; when the port is taken, the installer offers the next free one (or,
-with `--yes`, stops and says which to pass). The installation lives in `~/rsc-brain` (`--dir` moves
+with `--yes`, stops and says which to pass). The installation lives in `~/obsybrain` (`--dir` moves
 it): its settings in `.env`, the copies in `backups/`.
 
 ### On a server with a domain
 
 ```sh
-sh rsc-brain.sh install --domain brain.example.com
+sh obsybrain.sh install --domain brain.example.com
 ```
 
-Point the domain at the server first. Caddy runs in front of rsc-brain on ports 80 and 443 and gets
+Point the domain at the server first. Caddy runs in front of obsybrain on ports 80 and 443 and gets
 the HTTPS certificate by itself (Let's Encrypt), and renews it; there is no certificate step. The
-installation lives in `/opt/rsc-brain`. rsc-brain believes the forwarded headers only from Caddy's
+installation lives in `/opt/obsybrain`. obsybrain believes the forwarded headers only from Caddy's
 fixed address in the installation's own network.
 
 ### An existing PostgreSQL
 
 PostgreSQL 17 or newer, with the `unaccent` extension (it comes with PostgreSQL). Give the installer
-either a database that is for rsc-brain alone, or an administration login it uses once to make one
+either a database that is for obsybrain alone, or an administration login it uses once to make one
 (a role that is no superuser and a database only that role may connect to). Each goes in a file, or
 on the standard input with `-`; never on the command line.
 
 ```sh
-sh rsc-brain.sh install --local --db existing --db-url-file db-url.txt         # a database for rsc-brain
-sh rsc-brain.sh install --local --db existing --db-admin-url-file admin-url.txt # let it make one
+sh obsybrain.sh install --local --db existing --db-url-file db-url.txt         # a database for obsybrain
+sh obsybrain.sh install --local --db existing --db-admin-url-file admin-url.txt # let it make one
 ```
 
 Inside the container, `localhost` is the container itself: a PostgreSQL on this machine is
@@ -133,48 +133,48 @@ before it makes anything.
 ### Sharing PostgreSQL with rsc-factory
 
 ```sh
-sh rsc-brain.sh install --local --db shared --db-admin-url-file admin-url.txt --factory-db rsc_factory
+sh obsybrain.sh install --local --db shared --db-admin-url-file admin-url.txt --factory-db rsc_factory
 ```
 
-rsc-brain gets its own database and role on the same server. Neither program can connect to the
+obsybrain gets its own database and role on the same server. Neither program can connect to the
 other's database. If rsc-factory's login is a superuser, it can still reach everything; the installer
 says so.
 
 ### Installed by rsc-factory (companion mode)
 
-rsc-factory's installer can install rsc-brain next to it. It makes a Docker network both share and
+rsc-factory's installer can install obsybrain next to it. It makes a Docker network both share and
 calls:
 
 ```sh
-sh rsc-brain.sh install --companion --attach-network rsc-shared --factory-url https://factory.example.com \
+sh obsybrain.sh install --companion --attach-network rsc-shared --factory-url https://factory.example.com \
   --domain brain.example.com --trusted-proxy 192.168.210.2 \
   --db shared --db-admin-url-file admin-url.txt --factory-db rscf --yes --json
 ```
 
-- rsc-brain joins the network as `rsc-brain` (`http://rsc-brain:8090` for rsc-factory) and runs no
+- obsybrain joins the network as `obsybrain` (`http://obsybrain:8090` for rsc-factory) and runs no
   Caddy of its own: rsc-factory's Caddy serves its address. `--trusted-proxy` is that Caddy's fixed
-  address on the network, the only proxy rsc-brain believes. With `--local` instead of `--domain`,
+  address on the network, the only proxy obsybrain believes. With `--local` instead of `--domain`,
   the web is at `http://localhost:8090` on this machine and no proxy is believed.
-- rsc-brain stays installed but not set up. Its first-time setup page says "Finish the setup in
+- obsybrain stays installed but not set up. Its first-time setup page says "Finish the setup in
   rsc-factory" and links there. rsc-factory's own setup makes the administration of both, with the
   same name, email and password, and the service account rsc-factory uses.
 - It does that with a one-time key, `companionToken` in the `--json` summary (also in `.env`, which
   only its owner reads): `POST /v1/setup/companion` with `Authorization: Bearer <companionToken>`.
-  rsc-brain answers that call only while it is not set up, only from the shared network (never
+  obsybrain answers that call only while it is not set up, only from the shared network (never
   through a proxy or from this machine), and only once: two calls at once set it up once.
 - If rsc-factory loses its main key afterwards (an answer that never arrived, a restore), it gets a
   new one with `POST /v1/setup/companion/reconnect`: the same one-time key plus the email and
-  password of an administrator of rsc-brain (wrong passwords wait as signing in does). It reaches
+  password of an administrator of obsybrain (wrong passwords wait as signing in does). It reaches
   only the account the first handshake made; the main key before, and the keys made from it, stop
   working. If an administrator removed that account, it says so (`service_removed`): reactivate it
   in Admin › People first.
 - The shared network is IPv4 only: one with IPv6 on is refused (exit 2).
-- It needs a PostgreSQL that is not rsc-brain's own (`--db shared` by default, or `--db existing`).
+- It needs a PostgreSQL that is not obsybrain's own (`--db shared` by default, or `--db existing`).
   With `--local`, also Docker Engine 28 and Docker Compose 2.33 or newer.
 - Running `install` again keeps companion mode, the network and the key. An installation made
   without `--companion` does not become one.
 
-Day to day, rsc-factory drives it (see rsc-factory's README, «Memory (rsc-brain)»):
+Day to day, rsc-factory drives it (see rsc-factory's README, «Memory (obsybrain)»):
 
 - **Update:** rsc-factory's `update.sh` runs this launcher's `update` first, with everything under
   [Update](#update): maintenance, a copy, and the version before back if it fails. Then rsc-factory
@@ -182,7 +182,7 @@ Day to day, rsc-factory drives it (see rsc-factory's README, «Memory (rsc-brain
 - **Reconnect:** after a `restore`, rsc-factory's keys stop working. In rsc-factory, Administration ›
   Memory takes a new main key for the `rsc-factory` service account (make it in Admin › Service
   accounts here), or reconnects with the one-time key and your administrator's email and password.
-- **Uninstall:** `sh <dir>/.rsc-brain/src/deploy/rsc-brain.sh uninstall --dir <dir>` stops it and
+- **Uninstall:** `sh <dir>/.obsybrain/src/deploy/obsybrain.sh uninstall --dir <dir>` stops it and
   keeps the data; rsc-factory's `install.sh` starts it again. With `--delete-data --confirm <name>
   --db-admin-url-file F` its database and role in rsc-factory's PostgreSQL go too (F: a superuser
   login of that PostgreSQL), and rsc-factory forgets it at its next `update.sh` or `install.sh`.
@@ -204,9 +204,9 @@ keeps its key, its passwords, its data and its copies.
 ### Update
 
 ```sh
-sh rsc-brain.sh update                    # the latest published version
-sh rsc-brain.sh update --version v0.2.0   # or that one (--image I: an image you already have)
-sh rsc-brain.sh update --check            # only look: what runs, the newest published, what it changes
+sh obsybrain.sh update                    # the latest published version
+sh obsybrain.sh update --version v0.2.0   # or that one (--image I: an image you already have)
+sh obsybrain.sh update --check            # only look: what runs, the newest published, what it changes
 ```
 
 A published version is a `vX.Y.Z` tag of the repository. `update --check` (with `--json` for programs:
@@ -216,8 +216,8 @@ web asks once a day, without credentials: on a private repository Administration
 «Could not check for a new version» and gives that command. It asks `OBSY_BRAIN_REPO_URL` in `.env`, which
 `install --repo` sets without credentials; empty, the web never asks.
 
-The new version is fetched and built while the one installed keeps serving. Then rsc-brain goes
-into maintenance: writes are refused with «rsc-brain is under maintenance, retry after N seconds»
+The new version is fetched and built while the one installed keeps serving. Then obsybrain goes
+into maintenance: writes are refused with «obsybrain is under maintenance, retry after N seconds»
 (the web shows a band on every page), reads keep working. A copy of everything is made
 (`…-pre-update.rscb`), the data is migrated, and the new version starts; once it answers as the
 version asked, writes are taken again. If the migration or the start fails, the copy is restored, the
@@ -235,9 +235,9 @@ has no stand-in yet (updated with `--image` from before) gets it with its next u
 
 Ctrl-C during an update goes back the same way (a second Ctrl-C does not stop it). If the launcher
 is killed outright once the new version has taken over (a power cut), the next `status`, or any
-command that changes something, finds the note it left in `.rsc-brain/update.pending` and goes back first. If the copy is
+command that changes something, finds the note it left in `.obsybrain/update.pending` and goes back first. If the copy is
 restored but the version before does not start, the launcher says so: the data is back, and
-`sh rsc-brain.sh install` starts it again. If the copy cannot be restored, every later command says so
+`sh obsybrain.sh install` starts it again. If the copy cannot be restored, every later command says so
 (and `status` fails) until a `restore` of that copy goes well.
 
 The way back runs in a session of its own, so a Ctrl-C at the terminal cannot cut it short: with
@@ -249,7 +249,7 @@ other step: there, do not press Ctrl-C while it goes back.
 By default only the terminal updates. To let an administrator do it from the web:
 
 ```sh
-sh rsc-brain.sh web-updates enable [--repo-token-file F | --repo-key F]   # then: status, disable
+sh obsybrain.sh web-updates enable [--repo-token-file F | --repo-key F]   # then: status, disable
 ```
 
 This starts a container of its own, the updater, as a compose project apart from the service's
@@ -287,30 +287,30 @@ it from rsc-factory.
 
 The installer makes the installation key and keeps it in `.env`, which only its owner can read. It
 opens every copy: without it a copy cannot be restored. Save it in a password manager.
-`sh rsc-brain.sh key show` prints it again (it asks first); the first-time setup and Administration ›
+`sh obsybrain.sh key show` prints it again (it asks first); the first-time setup and Administration ›
 Backups & system also give it to you.
 
 ```sh
-sh rsc-brain.sh key rotate
+sh obsybrain.sh key rotate
 ```
 
-makes a new key: rsc-brain stops for a moment, everything sealed (second factors, the mail password,
+makes a new key: obsybrain stops for a moment, everything sealed (second factors, the mail password,
 the key of the meaning provider) is sealed again with the new key, and it starts again. Sessions,
 tokens and connections keep working. Copies made before need the previous key: it is kept in
 `installation-key-<id>.txt` next to `.env` (only its owner reads it), and the web marks those copies
 «Needs the older key». Save the new key in place of the old one. If a rotation is stopped halfway,
-the new key stays in `.rsc-brain/env.rotated` (the data may already be sealed with it): run
+the new key stays in `.obsybrain/env.rotated` (the data may already be sealed with it): run
 `key rotate` again and it finishes with that key. Until then `install`, `update`, `backup`,
 `restore` and `uninstall` refuse, and `status` warns.
 
 ### Copies
 
-rsc-brain makes an encrypted copy every day at 03:00 and keeps the last 14, in `backups/`.
+obsybrain makes an encrypted copy every day at 03:00 and keeps the last 14, in `backups/`.
 
 ```sh
-sh rsc-brain.sh backup                    # a copy now
-sh rsc-brain.sh backups                   # the list
-sh rsc-brain.sh restore --file rsc-brain-20261101T030000Z-manual.rscb --confirm "<installation name>"
+sh obsybrain.sh backup                    # a copy now
+sh obsybrain.sh backups                   # the list
+sh obsybrain.sh restore --file obsybrain-20261101T030000Z-manual.rscb --confirm "<installation name>"
 ```
 
 `--file` takes a name as `backups` prints it (a copy in `backups/`) or the path of a copy from
@@ -322,17 +322,17 @@ before stops working: everyone signs in again, and the administration issues new
 ### Uninstall
 
 ```sh
-sh rsc-brain.sh uninstall
+sh obsybrain.sh uninstall
 ```
 
-This stops rsc-brain and removes its containers. The database, the copies and the key stay: running
+This stops obsybrain and removes its containers. The database, the copies and the key stay: running
 `install` again brings everything back as it was. To delete the data too:
 
 ```sh
-sh rsc-brain.sh uninstall --delete-data --confirm rsc-brain
+sh obsybrain.sh uninstall --delete-data --confirm obsybrain
 ```
 
-`--confirm` takes the installation's name on this machine (`--name` at install; `rsc-brain` by
+`--confirm` takes the installation's name on this machine (`--name` at install; `obsybrain` by
 default). With its own PostgreSQL, the database and the copies go. With an existing PostgreSQL, pass
 `--db-admin-url-file` to remove its database and role as well; without it, the uninstaller tells you
 what to remove. The installation key is kept in `installation-key.txt` for the copies you downloaded.
@@ -365,13 +365,13 @@ throwaway database and times 100 varied searches; 95 % must answer in under a se
 
 ## The web
 
-`rsc-brain serve` also serves the rsc-brain web, on the same address as the API: open it in a browser to
+`obsybrain serve` also serves the obsybrain web, on the same address as the API: open it in a browser to
 run the first-time setup, sign in, accept an invitation or reset a password. `npm run build` builds it
 into `dist/web`; without that folder the server answers the API as usual and says the web is not built.
 The web only calls the API at `/v1` (with the same permissions a program has) and never answers on
 `/v1`, `/mcp`, `/oauth` or `/.well-known`. Press `?` on any screen for the keyboard shortcuts.
 
-For work on the web: `rsc-brain serve` on port 4100, then `npm run web:dev` (Vite on port 5173, which
+For work on the web: `obsybrain serve` on port 4100, then `npm run web:dev` (Vite on port 5173, which
 forwards the API to 4100).
 
 The tests of the web run in Chromium. `npm run test:web` uses a fixture of the API (no database; each of
@@ -397,7 +397,7 @@ A curator can exclude a brain: its vectors are deleted and nothing more of it is
 ## Better ranking with optional extensions
 
 Search works on any PostgreSQL 17 or newer with `unaccent`. Two optional extensions improve the order of
-results; rsc-brain uses them when they are installed in its database and works as before when they are not:
+results; obsybrain uses them when they are installed in its database and works as before when they are not:
 
 - **`pg_search`**: results are ranked by BM25, so a rare word counts more than a common one repeated, and a
   word in the title counts twice as much as the same word in the text. Words still match without accents and
@@ -405,17 +405,17 @@ results; rsc-brain uses them when they are installed in its database and works a
 - **`pgvector`**: with search by meaning on, closeness is worked out by its operator. Words and meaning are
   mixed by reciprocal rank fusion, so a result found both ways comes before one found only one way.
 
-rsc-brain never installs them (its database role is no superuser). An administrator creates them in the
-database of rsc-brain, as a superuser:
+obsybrain never installs them (its database role is no superuser). An administrator creates them in the
+database of obsybrain, as a superuser:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_search;
 ```
 
-On its next start rsc-brain makes the index it needs, as its own role (no other grant is needed), and says in its
+On its next start obsybrain makes the index it needs, as its own role (no other grant is needed), and says in its
 log what search uses (`"event":"search","code":"bm25"`). If the index cannot be made, the log says
-`"event":"search_index_failed"` with the database's error code, rsc-brain starts anyway, and search keeps its own
+`"event":"search_index_failed"` with the database's error code, obsybrain starts anyway, and search keeps its own
 ranking.
 
 ## People, keys and mail
@@ -477,7 +477,7 @@ was.
 
 ## Connecting agents with the standard sign-in
 
-Agents that support the MCP sign-in (OAuth 2.1 with PKCE) find rsc-brain through
+Agents that support the MCP sign-in (OAuth 2.1 with PKCE) find obsybrain through
 `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server`. They open the
 person's browser. The person signs in, chooses which brains to share (read, or read + write) and goes
 back to the agent, without copying any key.
@@ -486,12 +486,12 @@ back to the agent, without copying any key.
   ends the connection.
 - A connection ends after 90 days without use, or a year in all. Connections show in the profile
   under "Connected apps", where they can be revoked.
-- Clients can name themselves with a metadata document (an https address that rsc-brain fetches with
+- Clients can name themselves with a metadata document (an https address that obsybrain fetches with
   guards against reaching private networks) or register dynamically.
 
 ## Agents over MCP
 
-rsc-brain serves MCP at `/mcp` (Streamable HTTP; protocol `2026-07-28`, and `2025-11-25` / `2025-06-18` for
+obsybrain serves MCP at `/mcp` (Streamable HTTP; protocol `2026-07-28`, and `2025-11-25` / `2025-06-18` for
 older clients). An agent connects with the standard sign-in or a personal token, and on connecting
 receives a short protocol: resolve its brain, read the context, search before deciding, save as it
 works, never save secrets, close with a summary.
@@ -510,18 +510,18 @@ works, never save secrets, close with a summary.
 `GET /v1/connect` (any key) gives, for Claude Code, Codex, OpenCode, Cursor and other agents:
 
 - **Standard sign-in:** only the MCP address (`<your installation>/mcp`); the agent opens the browser.
-  Claude Code: `claude mcp add --transport http rsc-brain <address> --scope user`, then
-  `claude mcp login rsc-brain`. Codex: `codex mcp add rsc-brain --url <address>`, then
-  `codex mcp login rsc-brain`. OpenCode: a `remote` server in `opencode.json`. Cursor: `{"url": …}` in
+  Claude Code: `claude mcp add --transport http obsybrain <address> --scope user`, then
+  `claude mcp login obsybrain`. Codex: `codex mcp add obsybrain --url <address>`, then
+  `codex mcp login obsybrain`. OpenCode: a `remote` server in `opencode.json`. Cursor: `{"url": …}` in
   `.cursor/mcp.json`.
 - **With a token:** a config block per agent. The token is pasted at a hidden prompt into a file only you
-  can read (`~/.config/rsc-brain/<agent>.token`, mode 600), never on a command line. Each agent has a
+  can read (`~/.config/obsybrain/<agent>.token`, mode 600), never on a command line. Each agent has a
   variable of its own, loaded from that file, so two agents never overwrite one token, and a shared
   `.mcp.json` never holds it: Claude Code `.mcp.json`
   (`"Authorization": "Bearer ${OBSY_BRAIN_TOKEN_CLAUDE_CODE}"`), Codex `~/.codex/config.toml`
   (`url` + `bearer_token_env_var = "OBSY_BRAIN_TOKEN_CODEX"`), OpenCode `opencode.json`
   (`{env:OBSY_BRAIN_TOKEN_OPENCODE}`), Cursor `.cursor/mcp.json` (`${env:OBSY_BRAIN_TOKEN_CURSOR}`).
-  Other agents use `OBSY_BRAIN_TOKEN` and `~/.config/rsc-brain/token`, the bridge's. The kit only
+  Other agents use `OBSY_BRAIN_TOKEN` and `~/.config/obsybrain/token`, the bridge's. The kit only
   carries a placeholder (`tokenPlaceholder`); the web fills it once, when you create the token there.
 - **The optional reminder:** for Claude Code, two hooks (below). Other agents get a text for their
   instructions file (`AGENTS.md`) and the server's `close_session` prompt.
@@ -532,16 +532,16 @@ works, never save secrets, close with a summary.
 ### The bridge, for agents that only start local MCP programs
 
 ```sh
-mkdir -p ~/.config/rsc-brain && (umask 077 && printf 'Token: ' && read -rs t && : > ~/.config/rsc-brain/token && chmod 600 ~/.config/rsc-brain/token && printf '%s\n' "$t" > ~/.config/rsc-brain/token && echo saved)
-rsc-brain bridge --url https://brain.example.com/mcp
+mkdir -p ~/.config/obsybrain && (umask 077 && printf 'Token: ' && read -rs t && : > ~/.config/obsybrain/token && chmod 600 ~/.config/obsybrain/token && printf '%s\n' "$t" > ~/.config/obsybrain/token && echo saved)
+obsybrain bridge --url https://brain.example.com/mcp
 ```
 
-As a local MCP server: `{"command": "rsc-brain", "args": ["bridge", "--url", "<address>", "--token-file",
-"~/.config/rsc-brain/token"]}`. The bridge reads one JSON-RPC message per line on stdin and sends each to
+As a local MCP server: `{"command": "obsybrain", "args": ["bridge", "--url", "<address>", "--token-file",
+"~/.config/obsybrain/token"]}`. The bridge reads one JSON-RPC message per line on stdin and sends each to
 `/mcp` with the token and the headers the server checks; answers go to stdout, notifications get none.
 It speaks to modern clients and to older ones that start with `initialize`. The token comes from
-`--token-file`, else `OBSY_BRAIN_TOKEN`, else `~/.config/rsc-brain/token`; there is no option to pass it on the
-command line, and it is never printed. Plain `http` is refused except to this machine. When rsc-brain does
+`--token-file`, else `OBSY_BRAIN_TOKEN`, else `~/.config/obsybrain/token`; there is no option to pass it on the
+command line, and it is never printed. Plain `http` is refused except to this machine. When obsybrain does
 not answer, the request gets a JSON-RPC error that says so and how to proceed; the bridge keeps running.
 
 ### The Claude Code reminder
@@ -550,22 +550,22 @@ not answer, the request gets a JSON-RPC error that says so and how to proceed; t
 {
   "hooks": {
     "SessionStart": [{ "matcher": "startup|resume|clear|compact",
-      "hooks": [{ "type": "command", "command": "rsc-brain hook session-start --url <address>", "timeout": 15 }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "rsc-brain hook stop --url <address>", "timeout": 15 }] }]
+      "hooks": [{ "type": "command", "command": "obsybrain hook session-start --url <address>", "timeout": 15 }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "obsybrain hook stop --url <address>", "timeout": 15 }] }]
   }
 }
 ```
 
-- `hook session-start` runs `git remote get-url origin` in the session's folder, asks rsc-brain which brain
+- `hook session-start` runs `git remote get-url origin` in the session's folder, asks obsybrain which brain
   is linked to it (`/v1/resolve`), and adds that brain's context to the session. `--brain <slug>` is
   used when no brain is linked to the repository.
 - `hook stop` asks `GET /v1/me/sessions` whether the token still has a brain session open (work saved
   without a summary). If so, it asks Claude once, per brain session and Claude Code session, to close it
   with `mem_session_summary`. It lets Claude stop when `stop_hook_active` is set.
-- Both need a token (as for the bridge) and fail open: with no token, a bad input or rsc-brain down, they
+- Both need a token (as for the bridge) and fail open: with no token, a bad input or obsybrain down, they
   print nothing and let the session go on.
 
-The `rsc-brain` command comes with this package: from a clone, `npm install && npm run build && npm link`.
+The `obsybrain` command comes with this package: from a clone, `npm install && npm run build && npm link`.
 
 ## The API for programs
 
@@ -615,7 +615,7 @@ The database refuses to change or delete it.
 
 ## Behind a reverse proxy
 
-rsc-brain takes a password only over an encrypted connection, or from the same machine. A reverse proxy
+obsybrain takes a password only over an encrypted connection, or from the same machine. A reverse proxy
 on the same machine must therefore send `X-Forwarded-For` and `X-Forwarded-Proto` (nginx:
 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` and
 `proxy_set_header X-Forwarded-Proto $scheme;`). List the proxy's own address in
@@ -623,9 +623,9 @@ on the same machine must therefore send `X-Forwarded-For` and `X-Forwarded-Proto
 
 ## In a container
 
-`docker build -t rsc-brain .` builds the image: the server, the web and the migrations on Node 25,
-run by an unprivileged user, healthy when `GET /v1/health` answers. `rsc-brain serve` is its command;
-`docker run --rm rsc-brain rsc-brain version` prints the version. Copies go to `/backups`.
+`docker build -t obsybrain .` builds the image: the server, the web and the migrations on Node 25,
+run by an unprivileged user, healthy when `GET /v1/health` answers. `obsybrain serve` is its command;
+`docker run --rm obsybrain obsybrain version` prints the version. Copies go to `/backups`.
 
 In a container, a browser on the same machine arrives through the container's gateway, not from
 `127.0.0.1`, so the rule above would refuse its password. When the port is published on `127.0.0.1`
@@ -636,11 +636,11 @@ start with `OBSY_BRAIN_LOCAL_ONLY=1` and any other `OBSY_BRAIN_PUBLISH`: publish
 every visitor would arrive from the gateway and a password would cross it in clear. Never publish
 the port elsewhere by hand with the flag on; for access from other machines use a domain with HTTPS.
 
-`rsc-brain db check | provision | drop` prepares an existing PostgreSQL (17 or newer, with
+`obsybrain db check | provision | drop` prepares an existing PostgreSQL (17 or newer, with
 `unaccent`): `provision` takes an administration login (from a file or the standard input, never
 kept) and creates a role that is no superuser and cannot create databases or roles, and a database
 only it may connect to. `--isolate-from <database>` also closes another program's database to it,
-and rsc-brain's to that program: every other login that could connect there is first given that
+and obsybrain's to that program: every other login that could connect there is first given that
 right by name (the command lists them), then the database is closed to everyone else. `db drop`
 removes only a database and a role that `provision` made. The new connection URL goes to a new `0600` file
 (`--url-file`) or is printed once.

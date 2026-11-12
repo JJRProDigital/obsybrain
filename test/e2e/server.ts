@@ -1,4 +1,4 @@
-// The real Brain for `npm run test:e2e` (plan §5.1, local lane): the handler of `rsc-brain serve` with the
+// The real Brain for `npm run test:e2e` (plan §5.1, local lane): the handler of `obsybrain serve` with the
 // built web, on a fresh PostgreSQL database that is not set up yet, with mail captured instead of sent.
 // A test reads the captured mail at /__e2e/mail (test-only; never part of the product).
 

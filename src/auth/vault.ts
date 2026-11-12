@@ -8,7 +8,7 @@ const keys = new Map<string, Buffer>()
 function keyOf(secret: string): Buffer {
   let k = keys.get(secret)
   if (!k) {
-    k = scryptSync(secret, 'rsc-brain vault v1', 32)
+    k = scryptSync(secret, 'obsybrain vault v1', 32)
     keys.set(secret, k)
   }
   return k
@@ -30,7 +30,7 @@ export function seal(secret: string | undefined, text: string, purpose: Purpose)
   if (!secret) throw noVault()
   const iv = randomBytes(12)
   const c = createCipheriv('aes-256-gcm', keyOf(secret), iv, { authTagLength: 16 })
-  c.setAAD(Buffer.from(`rsc-brain:${purpose}`, 'utf8'))
+  c.setAAD(Buffer.from(`obsybrain:${purpose}`, 'utf8'))
   const body = Buffer.concat([c.update(text, 'utf8'), c.final()])
   return `v2.${iv.toString('base64url')}.${c.getAuthTag().toString('base64url')}.${body.toString('base64url')}`
 }
@@ -47,7 +47,7 @@ export function unseal(secret: string | undefined, sealed: string, purpose: Purp
   const d = createDecipheriv('aes-256-gcm', keyOf(secret), Buffer.from(iv, 'base64url'), {
     authTagLength: 16,
   })
-  if (v === 'v2') d.setAAD(Buffer.from(`rsc-brain:${purpose}`, 'utf8'))
+  if (v === 'v2') d.setAAD(Buffer.from(`obsybrain:${purpose}`, 'utf8'))
   d.setAuthTag(Buffer.from(tag, 'base64url'))
   return Buffer.concat([d.update(Buffer.from(body, 'base64url')), d.final()]).toString('utf8')
 }
@@ -59,7 +59,7 @@ export function keyedHash(secret: string | undefined, text: string): string {
   if (!secret) throw noVault()
   let k = markKeys.get(secret)
   if (!k) {
-    k = scryptSync(secret, 'rsc-brain fingerprint v1', 32)
+    k = scryptSync(secret, 'obsybrain fingerprint v1', 32)
     markKeys.set(secret, k)
   }
   return createHmac('sha256', k).update(text, 'utf8').digest('hex').slice(0, 32)

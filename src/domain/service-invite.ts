@@ -64,7 +64,7 @@ export async function serviceInvite(
   if (!ctx.who.canInvite) {
     throw denied(
       'This service account may not invite people.',
-      'Ask the administration of rsc-brain to let it invite (Admin › Service accounts).',
+      'Ask the administration of obsybrain to let it invite (Admin › Service accounts).',
     )
   }
   const people = peopleOf(input.people)

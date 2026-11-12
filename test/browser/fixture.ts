@@ -154,5 +154,5 @@ export async function noSideScroll(page: Page): Promise<void> {
 // The last step of the first-time setup (B7 PR30): the installation key, ticked as saved, then in.
 export async function keepTheKey(page: Page): Promise<void> {
   await page.getByLabel('I saved the installation key somewhere safe, outside this machine').check()
-  await page.getByRole('button', { name: 'Continue to rsc-brain' }).click()
+  await page.getByRole('button', { name: 'Continue to obsybrain' }).click()
 }

@@ -8,7 +8,7 @@ import { skipPg } from '../helpers/pg.ts'
 import { type World, world } from '../helpers/world.ts'
 
 type Json = Record<string, unknown>
-const LOCK = "SELECT pg_advisory_xact_lock(hashtext('rsc-brain invitation ' || $1))"
+const LOCK = "SELECT pg_advisory_xact_lock(hashtext('obsybrain invitation ' || $1))"
 
 describe('service invitations under concurrency', { skip: skipPg }, () => {
   let w: World
@@ -81,7 +81,7 @@ describe('service invitations under concurrency', { skip: skipPg }, () => {
     await other.query('BEGIN')
     await other.query(LOCK, [email])
     const pending = w.raw('POST', '/v1/invitations/accept', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: { token, name: 'Accepts', password: 'correct horse battery staple' },
     })
     try {
@@ -131,7 +131,7 @@ describe('service invitations under concurrency', { skip: skipPg }, () => {
     const invited = invite('waits', [{ email, role: 'reader' }])
     await blocked(1)
     const accepted = w.raw('POST', '/v1/invitations/accept', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       body: { token, name: 'First', password: 'correct horse battery staple' },
     })
     await blocked(2)

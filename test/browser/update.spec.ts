@@ -44,7 +44,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     await behind(baseURL as string, s.id, { release: NEWER })
     await page.goto('/admin/system')
     await expect(service(page)).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
-    await expect(service(page)).toContainText('rsc-brain.sh update')
+    await expect(service(page)).toContainText('obsybrain.sh update')
     await expect(page.getByRole('button', { name: /^Update to/ })).toHaveCount(0)
   })
 
@@ -184,7 +184,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     await behind(baseURL as string, s.id, { update: { attempts: [failure(3, null)] } })
     await page.reload()
     await expect(service(page)).toContainText('only the server can try again')
-    await expect(service(page)).toContainText('rsc-brain.sh update')
+    await expect(service(page)).toContainText('obsybrain.sh update')
     await expect(service(page).getByRole('button', { name: 'Try again' })).toHaveCount(0)
   })
 
@@ -209,7 +209,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     await expect(service(page)).toContainText(
       'Cannot update: there is not enough free disk (needs 2 GB, 1 GB free).',
     )
-    await expect(service(page)).toContainText('rsc-brain.sh update')
+    await expect(service(page)).toContainText('obsybrain.sh update')
     await expect(service(page).getByRole('button', { name: 'Update to v0.2.0' })).toBeVisible()
     await audit(page, 'update refused')
   })
@@ -228,14 +228,14 @@ test.describe('Admin › Backups & system: updating from the web', () => {
         rollbackFailed: {
           from: '0.1.0',
           to: '0.2.0',
-          copy: 'rsc-brain-1-pre-update.rscb',
-          restore: 'sh rsc-brain.sh restore --file rsc-brain-1-pre-update.rscb --dir /srv/b',
+          copy: 'obsybrain-1-pre-update.rscb',
+          restore: 'sh obsybrain.sh restore --file obsybrain-1-pre-update.rscb --dir /srv/b',
         },
       },
     })
     await page.goto('/admin/system')
     await expect(service(page)).toContainText('could not go back by itself')
-    await expect(service(page)).toContainText('restore --file rsc-brain-1-pre-update.rscb')
+    await expect(service(page)).toContainText('restore --file obsybrain-1-pre-update.rscb')
     await expect(service(page).getByRole('button', { name: /^Update to|Try again/ })).toHaveCount(0)
     await audit(page, 'rollback failed')
   })
@@ -284,7 +284,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     })
     await page.goto('/admin/system')
     await expect(service(page)).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
-    await expect(service(page)).toContainText('rsc-brain was installed by rsc-factory: update it from there.')
+    await expect(service(page)).toContainText('obsybrain was installed by rsc-factory: update it from there.')
     await expect(service(page).getByRole('link', { name: 'Open rsc-factory' })).toHaveAttribute(
       'href',
       'https://factory.example.test',
@@ -314,7 +314,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
           from: '0.1.0',
           to: '0.2.0',
           copy: 'c',
-          restore: `sh rsc-brain.sh restore --file ${'x'.repeat(120)}`,
+          restore: `sh obsybrain.sh restore --file ${'x'.repeat(120)}`,
         },
       },
       { mode: 'companion', factoryUrl: 'https://factory.example.test/with/a/long/path/to/admin/updates' },

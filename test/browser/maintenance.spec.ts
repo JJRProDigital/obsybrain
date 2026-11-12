@@ -51,7 +51,7 @@ test.describe('maintenance across the web', () => {
     await behind(baseURL as string, id, { maintenance: true })
     await expect(page.locator('[data-state="maintenance"]')).toHaveCount(0)
     await form.getByRole('button', { name: 'Create token' }).click()
-    await expect(form).toContainText('rsc-brain is under maintenance, retry after 20 seconds')
+    await expect(form).toContainText('obsybrain is under maintenance, retry after 20 seconds')
     await expect(form.getByLabel('Name')).toHaveValue('During the update')
     await expect(page.locator('[data-state="maintenance"]')).toBeVisible()
   })

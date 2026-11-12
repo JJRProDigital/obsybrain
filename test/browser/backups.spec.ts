@@ -112,9 +112,9 @@ test.describe('Admin › Backups & system: the copies', () => {
       .first()
       .getByRole('link', { name: /Download the copy of/ })
     const href = String(await link.getAttribute('href'))
-    expect(href).toMatch(/^\/v1\/admin\/backups\/rsc-brain-\d{8}T\d{6}Z-scheduled\/download$/)
+    expect(href).toMatch(/^\/v1\/admin\/backups\/obsybrain-\d{8}T\d{6}Z-scheduled\/download$/)
     const res = await page.request.get(href)
-    expect(res.headers()['content-disposition']).toMatch(/^attachment; filename="rsc-brain-.*\.rscb"$/)
+    expect(res.headers()['content-disposition']).toMatch(/^attachment; filename="obsybrain-.*\.rscb"$/)
   })
 
   test('every state: loading, error, no copies yet, no folder for copies, many copies', async ({
@@ -218,7 +218,7 @@ test.describe('Admin › Backups & system: restoring', () => {
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('Everything here is replaced by this copy')
     await expect(dialog).toContainText('What was written after it is lost: the last write here was')
-    await expect(dialog).toContainText('First, rsc-brain makes a copy of what is here now')
+    await expect(dialog).toContainText('First, obsybrain makes a copy of what is here now')
     await expect(dialog).toContainText('everyone signs in again')
     await audit(page, 'restore')
     // Nothing goes until the name and the password are there.
@@ -228,16 +228,16 @@ test.describe('Admin › Backups & system: restoring', () => {
     })
     await dialog.getByRole('button', { name: 'Restore this copy' }).click()
     await expect(dialog.getByLabel('Name of this installation')).toBeFocused()
-    await expect(dialog).toContainText('Type the name of this installation: rsc-brain')
+    await expect(dialog).toContainText('Type the name of this installation: obsybrain')
     expect(sent).toBe(0)
     // A name not exactly the installation's.
     await dialog.getByLabel('Name of this installation').fill('RSC-brain')
     await dialog.getByLabel('Your password').fill(PASSWORD)
     await dialog.getByRole('button', { name: 'Restore this copy' }).click()
-    await expect(dialog).toContainText('Type the name exactly as it is: rsc-brain')
+    await expect(dialog).toContainText('Type the name exactly as it is: obsybrain')
     expect(sent).toBe(0)
     // A wrong password: said on the field, nothing restored, still signed in.
-    await dialog.getByLabel('Name of this installation').fill('rsc-brain')
+    await dialog.getByLabel('Name of this installation').fill('obsybrain')
     await dialog.getByLabel('Your password').fill('not the password')
     await dialog.getByRole('button', { name: 'Restore this copy' }).click()
     await expect(dialog).toContainText('The password is not right.')
@@ -285,7 +285,7 @@ test.describe('Admin › Backups & system: restoring', () => {
       .getByRole('button', { name: /Restore the copy of/ })
     await open.click()
     const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Name of this installation').fill('rsc-brain')
+    await dialog.getByLabel('Name of this installation').fill('obsybrain')
     await dialog.getByLabel('Your password').fill(PASSWORD)
     await dialog.getByRole('button', { name: 'Restore this copy' }).click()
     await expect(dialog.getByRole('button', { name: /Restoring/ })).toBeVisible()
@@ -355,7 +355,7 @@ test.describe('Admin › Backups & system: the installation key', () => {
     const download = page.waitForEvent('download')
     await dialog.getByRole('link', { name: 'Download the key (.txt)' }).click()
     const file = await download
-    expect(file.suggestedFilename()).toBe('rsc-brain-key-rsc-brain-fx12ab34cd56.txt')
+    expect(file.suggestedFilename()).toBe('obsybrain-key-obsybrain-fx12ab34cd56.txt')
     const path = await file.path()
     const { readFile } = await import('node:fs/promises')
     expect((await readFile(path, 'utf8')).trim()).toBe(KEY)
@@ -418,7 +418,7 @@ test.describe('Admin › Backups & system: the version', () => {
     await expect(service).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
     await service.getByText('What changes in v0.2.0').click()
     await expect(service).toContainText('- Faster search.')
-    await expect(service).toContainText('rsc-brain.sh update')
+    await expect(service).toContainText('obsybrain.sh update')
   })
 
   test('the newest says so; ahead of what is published says that, not that a new one exists', async ({
@@ -455,7 +455,7 @@ test.describe('Admin › Backups & system: the version', () => {
     const service = page.getByRole('region', { name: 'Service' })
     await expect(service).toContainText('Could not check for a new version')
     await expect(service).toContainText('Version v0.1.0 is running.')
-    await expect(service.locator('code', { hasText: 'rsc-brain.sh update --check' })).toBeVisible()
+    await expect(service.locator('code', { hasText: 'obsybrain.sh update --check' })).toBeVisible()
     // The last answer was days ago, the last try minutes ago: «Tried» says the try.
     const days = new Date(Date.now() - 3 * 86_400_000).toISOString()
     const minutes = new Date(Date.now() - 5 * 60_000).toISOString()
@@ -518,9 +518,9 @@ test.describe('first-time setup: the step «Installation key»', () => {
     await audit(page, 'key step')
     const download = page.waitForEvent('download')
     await page.getByRole('link', { name: 'Download the key (.txt)' }).click()
-    expect((await download).suggestedFilename()).toBe('rsc-brain-key-acme-fx12ab34cd56.txt')
+    expect((await download).suggestedFilename()).toBe('obsybrain-key-acme-fx12ab34cd56.txt')
     // Not before it is saved.
-    const go = page.getByRole('button', { name: 'Continue to rsc-brain' })
+    const go = page.getByRole('button', { name: 'Continue to obsybrain' })
     await expect(go).toHaveAttribute('aria-disabled', 'true')
     await go.click({ force: true })
     await expect(
@@ -532,7 +532,7 @@ test.describe('first-time setup: the step «Installation key»', () => {
     await expect(page.locator('body')).not.toContainText(KEY)
     // Shown once: the server says it was given.
     const again = await page.request.post('/v1/setup/key', {
-      headers: { 'x-requested-with': 'rsc-brain-web' },
+      headers: { 'x-requested-with': 'obsybrain-web' },
       data: {},
     })
     expect(again.status()).toBe(404)
@@ -583,7 +583,7 @@ test.describe('first-time setup: the step «Installation key»', () => {
     await page.getByRole('button', { name: 'Set up and sign in' }).click()
     await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible()
     await expect(page.getByText('You can download the key later in Admin › Backups & system')).toBeVisible()
-    await page.getByRole('button', { name: 'Continue to rsc-brain' }).click()
+    await page.getByRole('button', { name: 'Continue to obsybrain' }).click()
     await expect(page).toHaveURL(/\/$/)
   })
 

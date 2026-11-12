@@ -7,7 +7,7 @@ import { remindExpiringTokens } from '../../src/domain/notices.ts'
 import { skipPg } from '../helpers/pg.ts'
 import { TEST_SECRET, type World, world } from '../helpers/world.ts'
 
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 const PW = 'a long enough password'
 const sessionOf = (h: Headers) => /rscb_session=([^;]+)/.exec(h.get('set-cookie') ?? '')?.[1] ?? ''
 const tokenOf = (text: string) => /#token=(rscb_[A-Za-z0-9_-]+)/.exec(text)?.[1] ?? ''
@@ -573,7 +573,7 @@ describe('people and keys', { skip: skipPg }, () => {
     const email = String((await w.db.one('SELECT email FROM accounts WHERE id = $1', [ana.id]))?.email)
     const r = await w.raw('POST', '/v1/auth/reset', { body: { email } })
     assert.equal(r.status, 202)
-    const m = await w.mailTo(email, /Reset your rsc-brain password/)
+    const m = await w.mailTo(email, /Reset your obsybrain password/)
     assert.match(m.text, /once, for 1 hour/)
     const token = tokenOf(m.text)
     const ok = await w.raw('POST', '/v1/auth/reset/confirm', {

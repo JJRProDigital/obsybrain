@@ -1,6 +1,6 @@
 // The faithful export (spec B7 «Exportar», plan §3.5): everything of a brain that another installation needs to
 // have it as it was, history included, for the import of PR32.
-//   manifest.json   { format: 'rsc-brain-faithful', version: 1, release, exportedAt, includeForgotten, brain,
+//   manifest.json   { format: 'obsybrain-faithful', version: 1, release, exportedAt, includeForgotten, brain,
 //                     counts, people[{ref, kind, name, email}] }
 //   <kind>.ndjson   one JSON object a row, in key order: the original ids, the words as stored
 // People are named by reference ("p1"…): a column that held an account id holds its reference (`author_id`
@@ -16,7 +16,7 @@ import type { Db } from '../../db/db.ts'
 import type { ExportOptions } from './readable.ts'
 import { rowsOf } from './rows.ts'
 
-export const FAITHFUL_FORMAT = 'rsc-brain-faithful'
+export const FAITHFUL_FORMAT = 'obsybrain-faithful'
 export const FAITHFUL_VERSION = 1
 
 // The entries that come: active, and forgotten when asked ($2).

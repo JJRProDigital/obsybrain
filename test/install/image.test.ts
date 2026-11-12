@@ -1,4 +1,4 @@
-// The rsc-brain image (plan T033, spec B7 C19), with real containers: local only, never in CI (plan §5.1). Runs with
+// The obsybrain image (plan T033, spec B7 C19), with real containers: local only, never in CI (plan §5.1). Runs with
 // OBSY_BRAIN_INSTALL_TESTS=1 and Docker answering (npm run test:install). Builds the image from this tree, then: it
 // prints its version; it holds the built server, the web and the migrations, and none of the tests, the local
 // database, .env or the git history; it runs as an unprivileged user and says when it is healthy. And «this machine
@@ -48,7 +48,7 @@ const until = async <T>(what: string, f: () => Promise<T | null>, seconds = 90):
   }
 }
 
-describe('the rsc-brain image', { skip: why ?? false }, () => {
+describe('the obsybrain image', { skip: why ?? false }, () => {
   before(async () => {
     const started = Date.now()
     await run('docker', ['build', '-q', '-t', IMAGE, ROOT], { maxBuffer: 64 << 20 })
@@ -61,7 +61,7 @@ describe('the rsc-brain image', { skip: why ?? false }, () => {
   })
 
   it('prints its version', async () => {
-    assert.equal(await docker('run', '--rm', IMAGE, 'rsc-brain', 'version'), VERSION)
+    assert.equal(await docker('run', '--rm', IMAGE, 'obsybrain', 'version'), VERSION)
   })
 
   it('holds what runs and nothing else; runs unprivileged; has a health check', async () => {

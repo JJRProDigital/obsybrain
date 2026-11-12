@@ -55,7 +55,11 @@ describe('companion mode: the settings', () => {
       { OBSY_BRAIN_COMPANION_GATEWAY: 'gw' },
       /OBSY_BRAIN_COMPANION_GATEWAY/,
     ],
-    ['a gateway off the network', { OBSY_BRAIN_COMPANION_GATEWAY: '10.0.0.1' }, /OBSY_BRAIN_COMPANION_GATEWAY/],
+    [
+      'a gateway off the network',
+      { OBSY_BRAIN_COMPANION_GATEWAY: '10.0.0.1' },
+      /OBSY_BRAIN_COMPANION_GATEWAY/,
+    ],
     ['no address of rsc-factory', { OBSY_BRAIN_FACTORY_URL: '' }, /OBSY_BRAIN_FACTORY_URL/],
     [
       'an address of rsc-factory in clear',

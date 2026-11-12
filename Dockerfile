@@ -1,5 +1,5 @@
-# The rsc-brain image (spec B7 «Modos de instalación»; plan §3.8): the server, its web and its migrations on Node 25,
-# run by an unprivileged user. Built from the repository root: docker build -t rsc-brain .
+# The obsybrain image (spec B7 «Modos de instalación»; plan §3.8): the server, its web and its migrations on Node 25,
+# run by an unprivileged user. Built from the repository root: docker build -t obsybrain .
 # Two stages install from package-lock.json with npm's cache kept between builds (plan risk 6): one with
 # everything to build, one with what runs. Only the built files, the migrations and the running dependencies reach
 # the final image; never the tests, the local database, .env or the git history (.dockerignore).
@@ -36,9 +36,9 @@ COPY --from=deps /app/node_modules node_modules
 COPY --from=build /app/dist dist
 COPY --from=build /app/package.json /app/LICENSE ./
 COPY --from=build /app/migrations migrations
-# `rsc-brain <command>` on the PATH; the copies go to /backups (a volume), owned by the user that runs the service.
+# `obsybrain <command>` on the PATH; the copies go to /backups (a volume), owned by the user that runs the service.
 RUN chmod 0755 dist/cli/main.js \
- && ln -s /app/dist/cli/main.js /usr/local/bin/rsc-brain \
+ && ln -s /app/dist/cli/main.js /usr/local/bin/obsybrain \
  && mkdir -p /backups && chown node:node /backups
 USER node
 VOLUME ["/backups"]
@@ -46,4 +46,4 @@ EXPOSE 8090
 # Healthy when the service answers and its database does (GET /v1/health is 503 otherwise).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -q -O /dev/null "http://127.0.0.1:${OBSY_BRAIN_PORT}/v1/health" || exit 1
-CMD ["rsc-brain", "serve"]
+CMD ["obsybrain", "serve"]

@@ -1,8 +1,8 @@
-# rsc-brain as the launcher (rsc-brain.sh) runs it. Every value comes from .env, which the launcher writes: change a
-# setting by running `rsc-brain.sh install` again with the new option, never by editing this file or .env by hand.
+# obsybrain as the launcher (obsybrain.sh) runs it. Every value comes from .env, which the launcher writes: change a
+# setting by running `obsybrain.sh install` again with the new option, never by editing this file or .env by hand.
 # Your own additions go in compose.override.yaml next to this file; the launcher keeps it and loads it.
 #
-# Profiles: `bundled` (rsc-brain's own PostgreSQL), `server` (Caddy in front, with HTTPS for the domain) and `door` (what
+# Profiles: `bundled` (obsybrain's own PostgreSQL), `server` (Caddy in front, with HTTPS for the domain) and `door` (what
 # answers while an update has the service stopped; only the launcher starts it).
 #
 # The port the web is published on and OBSY_BRAIN_PUBLISH, which tells the service where it is published, are the same
@@ -11,14 +11,14 @@
 
 services:
   app:
-    image: ${OBSY_BRAIN_IMAGE:?run rsc-brain.sh install}
+    image: ${OBSY_BRAIN_IMAGE:?run obsybrain.sh install}
     restart: unless-stopped
     # The owner of ./backups on this machine, so the copies can be written there.
     user: "${OBSY_BRAIN_UID:-1000}:${OBSY_BRAIN_GID:-1000}"
     environment:
       OBSY_BRAIN_DATABASE_URL: ${OBSY_BRAIN_DATABASE_URL:-}
-      OBSY_BRAIN_SECRET: ${OBSY_BRAIN_SECRET:?run rsc-brain.sh install}
-      OBSY_BRAIN_PUBLISH: ${OBSY_BRAIN_PUBLISH:?run rsc-brain.sh install}
+      OBSY_BRAIN_SECRET: ${OBSY_BRAIN_SECRET:?run obsybrain.sh install}
+      OBSY_BRAIN_PUBLISH: ${OBSY_BRAIN_PUBLISH:?run obsybrain.sh install}
       OBSY_BRAIN_LOCAL_ONLY: ${OBSY_BRAIN_LOCAL_ONLY:-0}
       OBSY_BRAIN_TRUSTED_PROXIES: ${OBSY_BRAIN_TRUSTED_PROXIES:-}
       OBSY_BRAIN_SETUP_URL: ${OBSY_BRAIN_SETUP_URL:-}
@@ -29,14 +29,14 @@ services:
       OBSY_BRAIN_FACTORY_URL: ${OBSY_BRAIN_FACTORY_URL:-}
       OBSY_BRAIN_TIMEZONE: ${OBSY_BRAIN_TIMEZONE:-UTC}
       # Where the service asks for new versions; empty, it never asks. An installation from before has no such setting.
-      OBSY_BRAIN_REPO_URL: ${OBSY_BRAIN_REPO_URL-https://github.com/ericrisco/rsc-brain}
+      OBSY_BRAIN_REPO_URL: ${OBSY_BRAIN_REPO_URL-https://github.com/obsessive-solutions/obsybrain}
       OBSY_BRAIN_BACKUPS: /backups
       # What the updater says (read only, from it): the service reads the newest version there while it runs.
       OBSY_BRAIN_UPDATE_REPORT: /update/report
       # Where it leaves the mark that asks the updater to update (empty files, nothing else: it has no Docker).
       OBSY_BRAIN_UPDATE_REQUEST: /update/request
     ports:
-      - "${OBSY_BRAIN_PUBLISH:?run rsc-brain.sh install}:8090"
+      - "${OBSY_BRAIN_PUBLISH:?run obsybrain.sh install}:8090"
     volumes:
       - ./backups:/backups
       - ./update/report:/update/report:ro
@@ -70,10 +70,10 @@ services:
     image: caddy:2.11.7-alpine@sha256:eb4d35b7452d1ab6171fbdbe8d9275b2301dad6dad92115d91e19fb9b24d510f
     restart: "no"
     ports:
-      - "${OBSY_BRAIN_PUBLISH:?run rsc-brain.sh install}:8090"
+      - "${OBSY_BRAIN_PUBLISH:?run obsybrain.sh install}:8090"
     volumes:
       - ./door.Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./.rsc-brain/door:/door:ro
+      - ./.obsybrain/door:/door:ro
     networks:
       default:
         aliases:
@@ -98,15 +98,15 @@ services:
     # A fixed address: the only one whose X-Forwarded-* the service believes (OBSY_BRAIN_TRUSTED_PROXIES).
     networks:
       default:
-        ipv4_address: ${OBSY_BRAIN_PROXY_IP:?run rsc-brain.sh install}
+        ipv4_address: ${OBSY_BRAIN_PROXY_IP:?run obsybrain.sh install}
 
 networks:
   default:
     ipam:
       config:
         # Others get addresses from the upper half; the proxy's fixed one is in the lower half.
-        - subnet: ${OBSY_BRAIN_SUBNET:?run rsc-brain.sh install}
-          ip_range: ${OBSY_BRAIN_IP_RANGE:?run rsc-brain.sh install}
+        - subnet: ${OBSY_BRAIN_SUBNET:?run obsybrain.sh install}
+          ip_range: ${OBSY_BRAIN_IP_RANGE:?run obsybrain.sh install}
 
 volumes:
   pgdata:

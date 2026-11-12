@@ -185,7 +185,7 @@ export const ERROR_STATUS: Record<string, number> = {
   no_logo: 404,
   no_such_route: 404,
   setup_done: 404,
-  // Companion mode (F1-PR11): the setup of the web while rsc-factory is to set rsc-brain up.
+  // Companion mode (F1-PR11): the setup of the web while rsc-factory is to set obsybrain up.
   companion_pending: 409,
   // The wiki (PR19).
   page_not_found: 404,

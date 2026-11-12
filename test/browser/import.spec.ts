@@ -134,7 +134,7 @@ test.describe('importing a documentation folder', () => {
     await expect(input).not.toHaveAttribute('aria-invalid', 'true')
     await p.getByRole('button', { name: 'Import the folder' }).click()
     const alert = p.getByRole('alert')
-    await expect(alert).toContainText('This is not a zip rsc-brain can read')
+    await expect(alert).toContainText('This is not a zip obsybrain can read')
     await expect(alert).toContainText('Make the zip again')
     await expect(alert).toBeFocused()
     await expect(p.getByRole('region', { name: 'What came in' })).toHaveCount(0)

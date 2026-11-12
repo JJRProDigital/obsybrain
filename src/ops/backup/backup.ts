@@ -119,22 +119,22 @@ const diskFiles: FileOps = {
   },
 }
 
-const NAME = /^rsc-brain-(\d{8}T\d{6}Z)-(scheduled|manual|pre-update|pre-restore)\.rscb$/
+const NAME = /^obsybrain-(\d{8}T\d{6}Z)-(scheduled|manual|pre-update|pre-restore)\.rscb$/
 // A copy being written: its name, then the pid and a random part of the process writing it (an older release wrote
 // `.rscb.part` alone). Only one older than PART_STALE_MS is swept: no copy takes an hour to write here, so a younger
 // one may still be some process's work.
-const PART = /^rsc-brain-\d{8}T\d{6}Z-[a-z-]+\.rscb(\.\d+\.[0-9a-f]{16})?\.part$/
+const PART = /^obsybrain-\d{8}T\d{6}Z-[a-z-]+\.rscb(\.\d+\.[0-9a-f]{16})?\.part$/
 const PART_STALE_MS = 3600_000
 // A copy dated more than this ahead of the clock is not taken as the last one (a wrong clock, or a planted file).
 const FUTURE_MS = 5 * 60_000
 
-// rsc-brain-<UTC yyyymmddThhmmssZ>-<reason>.rscb (plan §0).
+// obsybrain-<UTC yyyymmddThhmmssZ>-<reason>.rscb (plan §0).
 export function backupName(at: Date, reason: BackupReason): string {
   const s = at
     .toISOString()
     .replace(/[-:]/g, '')
     .replace(/\.\d{3}Z$/, 'Z')
-  return `rsc-brain-${s}-${reason}.rscb`
+  return `obsybrain-${s}-${reason}.rscb`
 }
 
 const STATUS = 'status.json'
@@ -239,8 +239,8 @@ function failure(cat: FailureCategory, err: unknown): AppError {
     return new AppError(
       500,
       'backup_failed',
-      'rsc-brain cannot write in the folder of the copies.',
-      'Let the user that runs rsc-brain write in OBSY_BRAIN_BACKUPS, then make a copy again.',
+      'obsybrain cannot write in the folder of the copies.',
+      'Let the user that runs obsybrain write in OBSY_BRAIN_BACKUPS, then make a copy again.',
     )
   return new AppError(
     500,
@@ -262,7 +262,7 @@ export const backupRunning = (what?: string) =>
     409,
     'backup_running',
     `A copy is being made right now${what ? (BUSY_WORDS[what] ?? '') : ''}.`,
-    'Try again when it ends (rsc-brain backups list shows it when it is done).',
+    'Try again when it ends (obsybrain backups list shows it when it is done).',
   )
 
 // A copy before an update or a restore: maintenance must be on, and every write that began before it must have ended
@@ -273,7 +273,7 @@ async function settle(db: Db, clock: Clock, settleMs: number, why: 'update' | 'r
       409,
       'not_in_maintenance',
       `A copy before ${why === 'update' ? 'an update' : 'a restore'} is made while writes are refused, and maintenance is off.`,
-      `Run rsc-brain maintenance on --reason ${why} first.`,
+      `Run obsybrain maintenance on --reason ${why} first.`,
     )
   }
   await new Promise((r) => setTimeout(r, settleMs))
@@ -488,7 +488,7 @@ async function create(
             409,
             'schema_mismatch',
             `The database is not at the schema of this release (${VERSION}).`,
-            'Run rsc-brain migrate with this release, or make the copy with the release that migrated the database.',
+            'Run obsybrain migrate with this release, or make the copy with the release that migrated the database.',
           )
         }
         // Under the lock no other copy of this database is writing: what a copy that died (over an hour ago) left

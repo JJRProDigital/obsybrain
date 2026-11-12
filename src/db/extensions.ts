@@ -1,6 +1,6 @@
 // The optional extensions search can use (spec v0.6 «Búsqueda»): pg_search ranks by BM25 and pgvector compares
 // meaning with its operator. Neither is required: without them search works as before. Migrations never create
-// them (the app's role is not a superuser); an administrator does, and rsc-brain uses what it finds. The BM25
+// them (the app's role is not a superuser); an administrator does, and obsybrain uses what it finds. The BM25
 // indexes are made here, after every migration, whenever pg_search is there and they are not: an extension
 // added later is used from the next start.
 import type { Db } from './db.ts'

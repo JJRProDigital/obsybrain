@@ -112,7 +112,7 @@ describe('the live module', () => {
     // A replayed event already shown is not shown twice.
     w.last().onmessage?.({ data: JSON.stringify({ id: '4', kind: 'entry.saved' }), lastEventId: '4' })
     assert.equal(s.events.value.length, 3)
-    // Not an event of rsc-brain: nothing.
+    // Not an event of obsybrain: nothing.
     w.last().onmessage?.({ data: 'not json', lastEventId: '' })
     assert.equal(s.events.value[0]?.id, '5')
     s.stop()

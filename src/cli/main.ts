@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// rsc-brain command line. Each command says what it did, or what to do when it cannot.
+// obsybrain command line. Each command says what it did, or what to do when it cannot.
 import { readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { basename } from 'node:path'
@@ -51,32 +51,32 @@ import { dbCommand } from './db.ts'
 import { sessionStart, stop } from './hooks.ts'
 import { mcpAddress, NO_TOKEN, readToken, UsageError } from './remote.ts'
 
-const HELP = `rsc-brain — self-hosted knowledge server for AI agents
+const HELP = `obsybrain — self-hosted knowledge server for AI agents
 
 Usage:
-  rsc-brain migrate                                   apply pending database migrations
-  rsc-brain serve                                     start the HTTP server
-  rsc-brain setup --from-env                          prepare the installation from OBSY_BRAIN_SETUP_URL,
+  obsybrain migrate                                   apply pending database migrations
+  obsybrain serve                                     start the HTTP server
+  obsybrain setup --from-env                          prepare the installation from OBSY_BRAIN_SETUP_URL,
                                                       OBSY_BRAIN_ADMIN_NAME/_EMAIL/_PASSWORD [OBSY_BRAIN_SETUP_NAME,
                                                       OBSY_BRAIN_SERVICE_NAME]; prints Factory's service key once
-  rsc-brain admin bootstrap --email E --name N        create the first administrator and print a key
-  rsc-brain admin reset-link --email E                print a single-use link to set a password
-  rsc-brain service create --name N [--can-create-brains] [--can-invite]
+  obsybrain admin bootstrap --email E --name N        create the first administrator and print a key
+  obsybrain admin reset-link --email E                print a single-use link to set a password
+  obsybrain service create --name N [--can-create-brains] [--can-invite]
                                                       create a service account and print its main key
-  rsc-brain bridge --url U [--token-file F]           MCP over stdio for local agents, carried to the
+  obsybrain bridge --url U [--token-file F]           MCP over stdio for local agents, carried to the
                                                       installation at U; the token comes from
-                                                      OBSY_BRAIN_TOKEN or a file (~/.config/rsc-brain/token)
-  rsc-brain hook session-start --url U [--brain B]    Claude Code hook: the brain's context at the start
-  rsc-brain hook stop --url U                         Claude Code hook: ask once for the session summary
-  rsc-brain maintenance on [--seconds N] [--reason R] refuse writes for N seconds (60 to 1800, default 1800);
+                                                      OBSY_BRAIN_TOKEN or a file (~/.config/obsybrain/token)
+  obsybrain hook session-start --url U [--brain B]    Claude Code hook: the brain's context at the start
+  obsybrain hook stop --url U                         Claude Code hook: ask once for the session summary
+  obsybrain maintenance on [--seconds N] [--reason R] refuse writes for N seconds (60 to 1800, default 1800);
                                                       R is update, restore or manual (default manual)
-  rsc-brain maintenance off                           take writes again
-  rsc-brain maintenance status [--json]               whether writes are refused, until when and why
-  rsc-brain backup [--reason R] [--json]              make an encrypted copy of everything now, in
+  obsybrain maintenance off                           take writes again
+  obsybrain maintenance status [--json]               whether writes are refused, until when and why
+  obsybrain backup [--reason R] [--json]              make an encrypted copy of everything now, in
                                                       OBSY_BRAIN_BACKUPS; R is manual (default), pre-update
                                                       (under maintenance) or pre-restore
-  rsc-brain backups list [--json]                     the copies, newest first, and whether the last failed
-  rsc-brain restore --file F --confirm NAME [--key-file K] [--keep-keys] [--check] [--json]
+  obsybrain backups list [--json]                     the copies, newest first, and whether the last failed
+  obsybrain restore --file F --confirm NAME [--key-file K] [--keep-keys] [--check] [--json]
                                                       replace everything with the copy F, after a copy of what
                                                       is there (pre-restore). NAME is this installation's name
                                                       (or the copy's, on a new installation). The key the copy
@@ -86,37 +86,37 @@ Usage:
                                                       --keep-keys (only the rollback of an update, with the
                                                       pre-update copy of this installation). --check only checks
                                                       the name, the key and the version, and changes nothing
-  rsc-brain key id [--key-file K]                     the id of a key (K, the standard input or
+  obsybrain key id [--key-file K]                     the id of a key (K, the standard input or
                                                       OBSY_BRAIN_SECRET); never the key
-  rsc-brain key reseal [--from-file OLD] [--to-file NEW]
+  obsybrain key reseal [--from-file OLD] [--to-file NEW]
                                                       seal everything sealed with OLD (default OBSY_BRAIN_SECRET)
                                                       with NEW (default the standard input): rotating the key,
                                                       with the service stopped; then set OBSY_BRAIN_SECRET
-  rsc-brain update record --ok|--failed --from V --to V
+  obsybrain update record --ok|--failed --from V --to V
                                                       what the launcher says about the update it just made, for
                                                       the web (Admin > Backups & system); with --failed, the
                                                       service's last lines on the standard input
-  rsc-brain db check [--db-url-file F | --url-stdin] [--json]
-                                                      whether a PostgreSQL can hold rsc-brain (17 or newer,
+  obsybrain db check [--db-url-file F | --url-stdin] [--json]
+                                                      whether a PostgreSQL can hold obsybrain (17 or newer,
                                                       unaccent) and what the login may do there; the URL comes
                                                       from F (- or --url-stdin: the standard input) or
                                                       OBSY_BRAIN_DATABASE_URL
-  rsc-brain db provision --database D --role R [--isolate-from NAME] [--db-admin-url-file F] [--url-file OUT]
+  obsybrain db provision --database D --role R [--isolate-from NAME] [--db-admin-url-file F] [--url-file OUT]
                                                       with an administration login (F or the standard input; never
                                                       kept): a role that is no superuser and a database only it
                                                       may connect to; NAME, another program's database, is closed
                                                       to it and back (its other logins keep CONNECT by name). The new URL goes to OUT (a new 0600 file) or
                                                       standard output, once
-  rsc-brain db drop --database D --role R --confirm D [--db-admin-url-file F]
+  obsybrain db drop --database D --role R --confirm D [--db-admin-url-file F]
                                                       remove that database and that role, only if provision
                                                       made them
-  rsc-brain import --brain B --from F --as EMAIL [--json]
+  obsybrain import --brain B --from F --as EMAIL [--json]
                                                       fill the empty brain B from F: a documentation folder
                                                       (02-DOCS or an Obsidian vault), a .zip of one, or a faithful
                                                       export; EMAIL is an administrator who joined B and made
                                                       itself its curator. Prints what came in and what did not
-  rsc-brain version                                   print the version of rsc-brain
-  rsc-brain help                                      show this help
+  obsybrain version                                   print the version of obsybrain
+  obsybrain help                                      show this help
 
 Environment:
   OBSY_BRAIN_DATABASE_URL   PostgreSQL connection URL (required)
@@ -339,7 +339,7 @@ async function main(argv: string[]): Promise<number> {
         return 1
       }
       const made = await companionSetup(pool, systemClock, {
-        name: env.OBSY_BRAIN_SETUP_NAME ?? 'rsc-brain',
+        name: env.OBSY_BRAIN_SETUP_NAME ?? 'obsybrain',
         publicUrl: env.OBSY_BRAIN_SETUP_URL,
         admin: {
           name: env.OBSY_BRAIN_ADMIN_NAME,
@@ -358,7 +358,7 @@ async function main(argv: string[]): Promise<number> {
   if (cmd === 'admin' && sub === 'reset-link') {
     const { values } = parseArgs({ args: rest, options: { email: { type: 'string' } } })
     if (!values.email) {
-      process.stderr.write('Pass --email, for example: rsc-brain admin reset-link --email ana@x.com\n')
+      process.stderr.write('Pass --email, for example: obsybrain admin reset-link --email ana@x.com\n')
       return 2
     }
     return withDb(async (pool) => {
@@ -381,7 +381,7 @@ async function main(argv: string[]): Promise<number> {
     })
     if (!values.email || !values.name) {
       process.stderr.write(
-        'Pass --email and --name, for example: rsc-brain admin bootstrap --email ana@x.com --name Ana\n',
+        'Pass --email and --name, for example: obsybrain admin bootstrap --email ana@x.com --name Ana\n',
       )
       return 2
     }
@@ -434,7 +434,7 @@ async function main(argv: string[]): Promise<number> {
       },
     })
     if (!values.name) {
-      process.stderr.write('Pass --name, for example: rsc-brain service create --name "RSC Factory"\n')
+      process.stderr.write('Pass --name, for example: obsybrain service create --name "RSC Factory"\n')
       return 2
     }
     return withDb(async (db) => {
@@ -450,7 +450,7 @@ async function main(argv: string[]): Promise<number> {
       return 0
     })
   }
-  process.stderr.write(`Unknown command "${argv.join(' ')}". Run "rsc-brain help" to see the commands.\n`)
+  process.stderr.write(`Unknown command "${argv.join(' ')}". Run "obsybrain help" to see the commands.\n`)
   return 2
 }
 
@@ -459,7 +459,7 @@ async function main(argv: string[]): Promise<number> {
 async function maintenanceCommand(which: string | undefined, args: string[]): Promise<number> {
   const usage = (why: string) => {
     process.stderr.write(
-      `${why} Usage: rsc-brain maintenance on [--seconds 60..1800] [--reason update|restore|manual] | off | status [--json]\n`,
+      `${why} Usage: obsybrain maintenance on [--seconds 60..1800] [--reason update|restore|manual] | off | status [--json]\n`,
     )
     return 2
   }
@@ -542,7 +542,7 @@ function backupsDir(): string | null {
 // A copy now (plan §3.3). The installation key comes from OBSY_BRAIN_SECRET only; the output says its id.
 async function backupCommand(args: string[]): Promise<number> {
   const usage = (why: string) => {
-    process.stderr.write(`${why} Usage: rsc-brain backup [--reason manual|pre-update|pre-restore] [--json]\n`)
+    process.stderr.write(`${why} Usage: obsybrain backup [--reason manual|pre-update|pre-restore] [--json]\n`)
     return 2
   }
   let values: { reason?: string; json?: boolean }
@@ -580,11 +580,11 @@ async function backupsCommand(which: string | undefined, args: string[]): Promis
   try {
     values = parseArgs({ args, options: { json: { type: 'boolean' } }, strict: true }).values
   } catch (err) {
-    process.stderr.write(`${(err as Error).message}. Usage: rsc-brain backups list [--json]\n`)
+    process.stderr.write(`${(err as Error).message}. Usage: obsybrain backups list [--json]\n`)
     return 2
   }
   if (which !== 'list') {
-    process.stderr.write('Usage: rsc-brain backups list [--json]\n')
+    process.stderr.write('Usage: obsybrain backups list [--json]\n')
     return 2
   }
   const dir = backupsDir()
@@ -650,7 +650,7 @@ function strictArgs<T>(
 // rollback of an update, which restores the copy it made moments before.
 async function restoreCommand(args: string[]): Promise<number> {
   const USAGE =
-    'Usage: rsc-brain restore --file <copy> --confirm <installation name> [--key-file <file>] [--keep-keys] [--check] [--json]'
+    'Usage: obsybrain restore --file <copy> --confirm <installation name> [--key-file <file>] [--keep-keys] [--check] [--json]'
   const usage = (why: string) => {
     process.stderr.write(`${why} ${USAGE}; ${KEY_RULE}.\n`)
     return 2
@@ -704,7 +704,7 @@ async function restoreCommand(args: string[]): Promise<number> {
         ...(dir
           ? {
               async before() {
-                // A database without rsc-brain's schema holds nothing to keep.
+                // A database without obsybrain's schema holds nothing to keep.
                 const has = await db.one<{ ok: boolean }>(
                   "SELECT to_regclass('public.schema_migrations') IS NOT NULL AS ok",
                 )
@@ -751,7 +751,7 @@ async function restoreCommand(args: string[]): Promise<number> {
       )
       if (r.resealed.notResealed)
         out(`${r.resealed.notResealed} sealed values open with neither key and were left as they are.\n`)
-      out('Restart rsc-brain so the service reads the restored settings.\n')
+      out('Restart obsybrain so the service reads the restored settings.\n')
       return 0
     } catch (err) {
       if (err instanceof AppError && (err.code === 'confirm_mismatch' || err.code === 'keep_keys_refused')) {
@@ -769,7 +769,7 @@ const VERSION_TEXT = /^[0-9A-Za-z][0-9A-Za-z.+-]{0,39}$/
 async function updateCommand(which: string | undefined, args: string[]): Promise<number> {
   const usage = (why: string) => {
     process.stderr.write(
-      `${why} Usage: rsc-brain update record --ok|--failed --from <version> --to <version>\n`,
+      `${why} Usage: obsybrain update record --ok|--failed --from <version> --to <version>\n`,
     )
     return 2
   }
@@ -816,7 +816,7 @@ async function updateCommand(which: string | undefined, args: string[]): Promise
 // The installation key: its id, and sealing everything again with another one (rotation; plan §3.3).
 async function keyCommand(which: string | undefined, args: string[]): Promise<number> {
   const USAGE =
-    'Usage: rsc-brain key id [--key-file <file>] | key reseal [--from-file <old>] [--to-file <new>]'
+    'Usage: obsybrain key id [--key-file <file>] | key reseal [--from-file <old>] [--to-file <new>]'
   const usage = (why: string) => {
     process.stderr.write(`${why} ${USAGE}; ${KEY_RULE}.\n`)
     return 2
@@ -862,7 +862,7 @@ async function keyCommand(which: string | undefined, args: string[]): Promise<nu
       if (n.resealed === 0 && n.already === 0 && n.notResealed > 0) {
         process.stderr.write(
           `None of the ${n.notResealed} sealed values opens with key id ${keyId(from)}: it is not the key in use. Nothing was changed. ` +
-            'Pass in --from-file the key in OBSY_BRAIN_SECRET now (rsc-brain key id prints its id).\n',
+            'Pass in --from-file the key in OBSY_BRAIN_SECRET now (obsybrain key id prints its id).\n',
         )
         return 1
       }
@@ -870,7 +870,7 @@ async function keyCommand(which: string | undefined, args: string[]): Promise<nu
       if (n.already) out(`${n.already} were sealed with the new key already.\n`)
       if (n.notResealed) out(`${n.notResealed} open with neither key and were left as they are.\n`)
       out(
-        'Set OBSY_BRAIN_SECRET to the new key and start rsc-brain; copies made from now on need the new key.\n',
+        'Set OBSY_BRAIN_SECRET to the new key and start obsybrain; copies made from now on need the new key.\n',
       )
       return 0
     })
@@ -884,7 +884,7 @@ async function keyCommand(which: string | undefined, args: string[]): Promise<nu
 // made for this one command, a web session ended at once: it never opens anything.
 async function importCommand(args: string[]): Promise<number> {
   const USAGE =
-    'Usage: rsc-brain import --brain <slug> --from <folder or .zip> --as <administrator email> [--json]'
+    'Usage: obsybrain import --brain <slug> --from <folder or .zip> --as <administrator email> [--json]'
   const values = strictArgs<{ brain?: string; from?: string; as?: string; json?: boolean }>(args, {
     brain: { type: 'string' },
     from: { type: 'string' },
@@ -958,7 +958,7 @@ async function importCommand(args: string[]): Promise<number> {
             grantId: null,
           },
           rateLimit: 0,
-          client: 'rsc-brain import',
+          client: 'obsybrain import',
         }
         return importTree({ db: tx, root: db, clock: systemClock, who }, brain, tree, {
           from: basename(from),
@@ -1013,7 +1013,7 @@ async function bridgeCommand(args: string[]): Promise<number> {
     }
     if ((err as { code?: string }).code?.startsWith('ERR_PARSE_ARGS')) {
       process.stderr.write(
-        `${(err as Error).message}. Usage: rsc-brain bridge --url <address> [--token-file <file>]; the token is read from OBSY_BRAIN_TOKEN or a file, never from the command line.\n`,
+        `${(err as Error).message}. Usage: obsybrain bridge --url <address> [--token-file <file>]; the token is read from OBSY_BRAIN_TOKEN or a file, never from the command line.\n`,
       )
       return 2
     }
@@ -1036,10 +1036,10 @@ async function hookCommand(which: string | undefined, args: string[]): Promise<n
     if (which === 'session-start')
       await sessionStart({ url, token, brain: values.brain, input: process.stdin, out })
     else if (which === 'stop') await stop({ url, token, input: process.stdin, out })
-    else throw new UsageError('Use "rsc-brain hook session-start" or "rsc-brain hook stop".')
+    else throw new UsageError('Use "obsybrain hook session-start" or "obsybrain hook stop".')
   } catch (err) {
     process.stderr.write(
-      `rsc-brain hook ${which ?? ''}: ${err instanceof Error ? err.message : String(err)}\n`,
+      `obsybrain hook ${which ?? ''}: ${err instanceof Error ? err.message : String(err)}\n`,
     )
   }
   return 0

@@ -1,4 +1,4 @@
-// Updating rsc-brain from its own web (rsc-updates B3; spec CA27, CA28). Who: the administration. Jobs: see that a newer
+// Updating obsybrain from its own web (rsc-updates B3; spec CA27, CA28). Who: the administration. Jobs: see that a newer
 // version exists, ask for it with the password again (and the code, with a second factor), follow how it goes, try again
 // after a failure. In an installation made by rsc-factory there is no button: it points there. Done when: the result is
 // said in words ("Updated from X to Y."). Risks: an update that goes wrong (it goes back by itself and says so); a
@@ -149,7 +149,7 @@ function Refused({ why }: { why: string }) {
         <strong>{A.updateCannot(why.replace(/^Cannot update:\s*/, ''))}</strong>
       </p>
       <p class="meta">
-        {A.updateCannotHow} <code>rsc-brain.sh update</code>
+        {A.updateCannotHow} <code>obsybrain.sh update</code>
       </p>
     </>
   )
@@ -212,7 +212,7 @@ export function UpdatePart({ view, reload }: { view: UpdateView; reload: () => v
           </p>
           <p class="meta">{view.restore ? A.updateUnsafeHow : A.updateUnsafeUnreadable}</p>
           <p class="meta">
-            <code>{view.restore || 'rsc-brain.sh status'}</code>
+            <code>{view.restore || 'obsybrain.sh status'}</code>
           </p>
         </>
       ) : null}
@@ -251,7 +251,7 @@ export function UpdatePart({ view, reload }: { view: UpdateView; reload: () => v
             <>
               <p class="meta">{A.updateServerOnly}</p>
               <p class="meta">
-                <code>rsc-brain.sh update</code>
+                <code>obsybrain.sh update</code>
               </p>
             </>
           ) : (

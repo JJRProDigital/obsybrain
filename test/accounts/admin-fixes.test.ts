@@ -26,7 +26,7 @@ function rawRequest(
     const t0 = Date.now()
     const s = connect(Number(u.port), u.hostname, () => {
       s.write(
-        `PUT ${o.path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/json\r\nX-Requested-With: rsc-brain-web\r\n` +
+        `PUT ${o.path} HTTP/1.1\r\nHost: ${u.host}\r\nContent-Type: application/json\r\nX-Requested-With: obsybrain-web\r\n` +
           `Cookie: rscb_session=${o.cookie}\r\n${o.length === 'chunked' ? 'Transfer-Encoding: chunked' : `Content-Length: ${o.length}`}\r\n\r\n`,
       )
       if (o.length === 'chunked') s.write(`${o.send.toString(16)}\r\n${' '.repeat(o.send)}\r\n`)
@@ -446,7 +446,7 @@ describe('fixes of PR25b (reviews)', { skip: skipPg }, () => {
 import { createCipheriv, randomBytes, scryptSync } from 'node:crypto'
 
 function sealV1(secret: string, text: string): string {
-  const key = scryptSync(secret, 'rsc-brain vault v1', 32)
+  const key = scryptSync(secret, 'obsybrain vault v1', 32)
   const iv = randomBytes(12)
   const c = createCipheriv('aes-256-gcm', key, iv)
   const body = Buffer.concat([c.update(text, 'utf8'), c.final()])

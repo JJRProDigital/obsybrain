@@ -31,11 +31,11 @@ import { promisify } from 'node:util'
 
 const run = promisify(execFile)
 const ROOT = new URL('../..', import.meta.url).pathname
-const LAUNCHER = join(ROOT, 'deploy', 'rsc-brain.sh')
+const LAUNCHER = join(ROOT, 'deploy', 'obsybrain.sh')
 const ID = randomBytes(4).toString('hex')
 const IMAGE = `rscb-pr34-test-image:${ID}`
 const PEBBLE_IMAGE = 'ghcr.io/letsencrypt/pebble:2.8.0'
-const WEB = { 'x-requested-with': 'rsc-brain-web', 'content-type': 'application/json' }
+const WEB = { 'x-requested-with': 'obsybrain-web', 'content-type': 'application/json' }
 
 const why = (() => {
   if (process.env.CI) return 'CI has no Docker (plan §5.1)'
@@ -117,7 +117,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
     const started = Date.now()
     await run('docker', ['build', '--no-cache', '-q', '-t', IMAGE, ROOT], { maxBuffer: 64 << 20 })
     buildSeconds = (Date.now() - started) / 1000
-    measured(`docker build of rsc-brain ${buildSeconds.toFixed(1)} s`)
+    measured(`docker build of obsybrain ${buildSeconds.toFixed(1)} s`)
   })
   after(async () => {
     for (const name of projects) {
@@ -192,7 +192,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       try {
         const page = await browser.newPage()
         await page.goto(`${site}/`)
-        await page.getByRole('heading', { name: 'Set up rsc-brain' }).waitFor({ timeout: 30_000 })
+        await page.getByRole('heading', { name: 'Set up obsybrain' }).waitFor({ timeout: 30_000 })
       } finally {
         await browser.close()
       }
@@ -464,7 +464,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
 
   describe('from the source, as the README says: the launcher alone, from a 077 shell (review of PR #35)', () => {
     const name = `rscb-pr34-test-src-${ID}`
-    // A version of its own, so the image it builds (rsc-brain:<version>) is this test's alone.
+    // A version of its own, so the image it builds (obsybrain:<version>) is this test's alone.
     const version = `v34.${Number.parseInt(ID.slice(0, 4), 16)}.0`
     let repo = ''
     let alone = ''
@@ -489,10 +489,10 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       await git('tag', version)
       alone = join(BASE, 'launcher-alone')
       mkdirSync(alone)
-      copyFileSync(LAUNCHER, join(alone, 'rsc-brain.sh'))
+      copyFileSync(LAUNCHER, join(alone, 'obsybrain.sh'))
     })
     after(async () => {
-      await docker('image', 'rm', '-f', `rsc-brain:${version}`).catch(() => {})
+      await docker('image', 'rm', '-f', `obsybrain:${version}`).catch(() => {})
     })
 
     it('clones the version, builds its image and answers', async () => {
@@ -514,7 +514,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
           version,
         ],
         {
-          argv: ['-c', 'umask 077 && exec sh "$0" "$@"', join(alone, 'rsc-brain.sh')],
+          argv: ['-c', 'umask 077 && exec sh "$0" "$@"', join(alone, 'obsybrain.sh')],
           env: { OBSY_BRAIN_REPO: `file://${repo}` },
         },
       )
@@ -525,7 +525,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       }
       assert.equal(branding.setupRequired, true)
       const u = await launch(['uninstall', '--delete-data', '--confirm', name, '--dir', dir], {
-        argv: [join(alone, 'rsc-brain.sh')],
+        argv: [join(alone, 'obsybrain.sh')],
       })
       assert.equal(u.code, 0, u.stderr)
     })
@@ -644,7 +644,7 @@ describe('the launcher with real containers', { skip: why ?? false }, () => {
       assert.equal(b.code, 3, b.stderr)
       assert.match(
         b.stderr,
-        /Another rsc-brain launcher is working on .* \(process \d+\)\. Wait for it to finish\./,
+        /Another obsybrain launcher is working on .* \(process \d+\)\. Wait for it to finish\./,
       )
       assert.equal(first.code, 0, first.stderr)
       const key = JSON.parse(first.stdout).installationKey

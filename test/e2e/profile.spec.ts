@@ -18,7 +18,7 @@ import { type APIRequestContext, type Browser, expect, type Page, test } from '@
 import { keepTheKey } from './key.ts'
 
 const ADMIN = { name: 'Eric', email: 'eric@example.test', password: 'correct horse battery staple' }
-const WEB = { 'x-requested-with': 'rsc-brain-web' }
+const WEB = { 'x-requested-with': 'obsybrain-web' }
 const MEASURES = new URL('../../test-results/ca1.txt', import.meta.url).pathname
 
 test.describe.configure({ mode: 'serial' })
@@ -39,10 +39,10 @@ async function mailLink(request: APIRequestContext, to: string): Promise<string>
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up rsc-brain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up rsc-brain') {
-    await page.getByLabel('Name of this installation').fill('rsc-brain')
+  if (where === 'Set up obsybrain') {
+    await page.getByLabel('Name of this installation').fill('obsybrain')
     await page.getByLabel('Address people open').fill(baseURL)
     await page.getByLabel('Your name').fill(ADMIN.name)
     await page.getByLabel('Your email').fill(ADMIN.email)
@@ -190,11 +190,11 @@ test('CA1, standard route: from the invitation email to a connected Claude Code,
   const standard = panel.getByRole('region', { name: 'Standard connection' })
   await expect(standard).toContainText('Recommended')
   await act('click «Copy» on the command', () =>
-    standard.getByRole('button', { name: 'Copy: Add rsc-brain for all your projects and sign in' }).click(),
+    standard.getByRole('button', { name: 'Copy: Add obsybrain for all your projects and sign in' }).click(),
   )
   const command = await clipboard(p)
   expect(command).toBe(
-    `claude mcp add --transport http rsc-brain ${base}/mcp --scope user\nclaude mcp login rsc-brain`,
+    `claude mcp add --transport http obsybrain ${base}/mcp --scope user\nclaude mcp login obsybrain`,
   )
   await act('paste it in a terminal', async () => {})
   // Enter runs both lines: the server is added, and the sign-in opens the browser at the consent page.
@@ -204,7 +204,7 @@ test('CA1, standard route: from the invitation email to a connected Claude Code,
   await expect(agent.consent.getByRole('radio', { name: /Read and write/ })).toBeChecked()
   await act('click «Approve»', () => agent.consent.getByRole('button', { name: 'Approve' }).click())
   const key = await agent.exchange()
-  // The exchange alone is not the agent reaching rsc-brain.
+  // The exchange alone is not the agent reaching obsybrain.
   await p.waitForTimeout(2_500)
   await expect(p.getByRole('region', { name: 'Live check' })).toContainText('Waiting for your agent…')
   await act('type «claude» in the terminal', async () => {})
@@ -212,7 +212,7 @@ test('CA1, standard route: from the invitation email to a connected Claude Code,
   expect(first.status).toBe(200)
   const check = p.getByRole('region', { name: 'Live check' })
   await expect(check).toContainText('Connected', { timeout: 15_000 })
-  await expect(check).toContainText('Claude Code reached rsc-brain')
+  await expect(check).toContainText('Claude Code reached obsybrain')
   const seconds = (Date.now() - t0) / 1000
   mkdirSync(dirname(MEASURES), { recursive: true })
   writeFileSync(
@@ -270,8 +270,8 @@ test('CA1, token route (the alternative): the same person path, counted honestly
     await act('save the file', async () => writeFileSync(join(home, '.bashrc'), `${load}\n`))
     await act('open a new terminal', async () => {})
     await act('click «Copy» on the .mcp.json', () =>
-      block(/^Add rsc-brain to a project/)
-        .getByRole('button', { name: /^Copy: Add rsc-brain to a project/ })
+      block(/^Add obsybrain to a project/)
+        .getByRole('button', { name: /^Copy: Add obsybrain to a project/ })
         .click(),
     )
     const mcpJson = await clipboard(p)
@@ -284,7 +284,7 @@ test('CA1, token route (the alternative): the same person path, counted honestly
       JSON.parse(readFileSync(join(home, '.mcp.json'), 'utf8')) as {
         mcpServers: Record<string, { headers: { Authorization: string } }>
       }
-    ).mcpServers['rsc-brain']?.headers.Authorization
+    ).mcpServers['obsybrain']?.headers.Authorization
     const expanded = shell(`source ~/.bashrc && printf '%s' "${header}"`)
     expect(expanded).toBe(`Bearer ${token}`)
     const first = await act('press Enter (Claude Code starts and connects)', () =>

@@ -134,8 +134,8 @@ export async function createBrain(
       if (open && open.invited_by !== ctx.who.accountId) {
         throw conflict(
           'invitation_pending_elsewhere',
-          `${pendingEmail} has an open rsc-brain invitation from someone else.`,
-          'Ask an administrator of rsc-brain to resend or withdraw that invitation, then create the brain again, or name another first curator.',
+          `${pendingEmail} has an open obsybrain invitation from someone else.`,
+          'Ask an administrator of obsybrain to resend or withdraw that invitation, then create the brain again, or name another first curator.',
         )
       }
     }

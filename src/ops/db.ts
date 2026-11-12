@@ -1,7 +1,7 @@
 // The PostgreSQL of an installation (spec B7 «Modos de instalación», C13, C14; plan §3.7).
-//   check      whether a server can hold rsc-brain (version, unaccent) and what the given login may do there
-//   provision  with an administration login: rsc-brain's own role and database, closed to everyone else and, on a
-//              server shared with another program, that program's database closed to rsc-brain and back
+//   check      whether a server can hold obsybrain (version, unaccent) and what the given login may do there
+//   provision  with an administration login: obsybrain's own role and database, closed to everyone else and, on a
+//              server shared with another program, that program's database closed to obsybrain and back
 //   drop       removes that database and that role, and nothing else (uninstall with --delete-data)
 // The administration login is used for these alone and never kept (C13): the migrations need only the owner of the
 // database (unaccent is a trusted extension since PostgreSQL 13).
@@ -35,7 +35,7 @@ export type Simulate = {
 }
 
 // What provision writes on the database and the role it makes, and what drop requires before removing anything.
-export const MARK = 'rsc-brain'
+export const MARK = 'obsybrain'
 
 export type ProvisionInput = {
   database: string
@@ -56,7 +56,7 @@ function plainName(what: 'database' | 'role', v: string): void {
       400,
       'invalid_name',
       `The ${what} name is not a plain lowercase name.`,
-      'Use 1 to 63 lowercase letters, digits and underscores, starting with a letter (rsc_brain).',
+      'Use 1 to 63 lowercase letters, digits and underscores, starting with a letter (obsybrain).',
     )
   }
 }
@@ -119,7 +119,7 @@ export function tooOldError(r: TooOld): AppError {
   const e = fail(
     422,
     'too_old',
-    `This PostgreSQL is version ${r.version}; rsc-brain needs ${r.min} or newer.`,
+    `This PostgreSQL is version ${r.version}; obsybrain needs ${r.min} or newer.`,
     `Upgrade the server to PostgreSQL ${r.min} or newer, or install with the bundled PostgreSQL (--db bundled).`,
   )
   e.extra = { min: r.min, version: r.version }
@@ -137,13 +137,13 @@ export function scramVerifier(password: string, salt = randomBytes(16), iteratio
 }
 
 // What the driver (pg-connection-string) reads about TLS: with any of them, the administration URL used it, and the new
-// one must the same way, or rsc-brain would talk to its database in clear.
+// one must the same way, or obsybrain would talk to its database in clear.
 const TLS_PARAMS = ['ssl', 'sslmode', 'sslrootcert', 'sslcert', 'sslkey', 'sslnegotiation', 'uselibpqcompat']
 
 // The URL of the new role, made from scratch: the scheme, host and port of the administration URL, the new role, its
 // password and its database, and of the query only how to reach the server safely (TLS_PARAMS) and, for a socket,
 // its folder and port. Anything else in the query (user, password, dbname, options, passfile) would override the rest
-// for the driver: an administration login kept in the URL rsc-brain runs with.
+// for the driver: an administration login kept in the URL obsybrain runs with.
 export function connectionUrl(adminUrl: string, role: string, password: string, database: string): string {
   const { url: a, host } = parseUrl(adminUrl)
   const q = new URLSearchParams()
@@ -336,8 +336,8 @@ async function provision(
       other = { owner: o.owner, ownerSuper: o.owner_super }
       if (o.owner_super) {
         warnings.push(
-          `${isolateFrom} belongs to ${o.owner}, a superuser: a superuser can connect to any database, rsc-brain's ` +
-            `too. rsc-brain cannot reach ${isolateFrom}, but the separation holds one way only until that program uses ` +
+          `${isolateFrom} belongs to ${o.owner}, a superuser: a superuser can connect to any database, obsybrain's ` +
+            `too. obsybrain cannot reach ${isolateFrom}, but the separation holds one way only until that program uses ` +
             'a login that is no superuser.',
         )
       }
@@ -359,13 +359,13 @@ async function provision(
         createdDb = true
         await actAs(c, role, found.isSuper, async () => {
           await c.query(`COMMENT ON DATABASE ${ident(c, database)} IS ${c.escapeLiteral(MARK)}`)
-          // Only its role (and superusers) may connect to rsc-brain's database.
+          // Only its role (and superusers) may connect to obsybrain's database.
           await c.query(`REVOKE ALL ON DATABASE ${ident(c, database)} FROM PUBLIC`)
         })
       })
       await sim?.afterDatabase?.()
       // The other program's database: every login keeps exactly what it may do there now (CONNECT, TEMPORARY, each
-      // on its own), given by name where it has it only through PUBLIC; except rsc-brain's (this one and any other
+      // on its own), given by name where it has it only through PUBLIC; except obsybrain's (this one and any other
       // installation's). Then it is closed to PUBLIC. What was changed is kept, to put it back if a later step fails.
       if (isolateFrom !== undefined) {
         const plan = (
@@ -480,16 +480,16 @@ async function drop(
         409,
         'not_ours',
         `${what}. Nothing was removed.`,
-        'Check the database and role names of this installation: drop removes only what rsc-brain db provision made.',
+        'Check the database and role names of this installation: drop removes only what obsybrain db provision made.',
       )
     if (dbFound && s.owner !== input.role)
       throw notOurs(`The database ${input.database} belongs to ${s.owner}, not to ${input.role}`)
     if (dbFound && s.db_mark !== MARK)
-      throw notOurs(`The database ${input.database} was not made by rsc-brain`)
+      throw notOurs(`The database ${input.database} was not made by obsybrain`)
     if (s.role_found && (s.role_super || input.role === s.me))
       throw notOurs(`The role ${input.role} is a superuser or the login in use`)
     if (s.role_found && s.role_mark !== MARK)
-      throw notOurs(`The role ${input.role} was not made by rsc-brain`)
+      throw notOurs(`The role ${input.role} was not made by obsybrain`)
     if (input.database === s.here)
       throw notOurs(`The database ${input.database} is the one this login is connected to`)
     if (!dbFound && !s.role_found) return { database: false, role: false }

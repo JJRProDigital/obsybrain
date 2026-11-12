@@ -1,7 +1,7 @@
 # Changelog
 
-What each published version of rsc-brain changes. Every release carries the same notes, the launcher
-`rsc-brain.sh` as a file of the release and its SHA-256. Versions follow `vX.Y.Z`; updates only move
+What each published version of obsybrain changes. Every release carries the same notes, the launcher
+`obsybrain.sh` as a file of the release and its SHA-256. Versions follow `vX.Y.Z`; updates only move
 forward.
 
 ## v0.7.0
@@ -93,9 +93,9 @@ A new face for the web: a canvas you can turn, in a dark style.
 
 ## v0.3.0
 
-Update rsc-brain from its own web, and know what version is out.
+Update obsybrain from its own web, and know what version is out.
 
-- **Updating from the web, off by default.** `rsc-brain.sh web-updates enable` starts a small updater in a
+- **Updating from the web, off by default.** `obsybrain.sh web-updates enable` starts a small updater in a
   container of its own. Whoever controls it controls the server, and `enable` says so. A private repository
   needs a read-only token or SSH key given as a file.
 - **The button.** Administration › Backups & system offers «Update to vX.Y.Z» to an administrator, who confirms
@@ -103,7 +103,7 @@ Update rsc-brain from its own web, and know what version is out.
   and the page follows the update to its result. If the update cannot start, the page says what is missing and
   how to fix it. If a way back could not restore your data, the page says so and gives the steps for the
   server instead of offering to try again. An installation made by rsc-factory has no button: update it there.
-- **See what is new.** `rsc-brain.sh update --check` shows the version running, the newest published and what
+- **See what is new.** `obsybrain.sh update --check` shows the version running, the newest published and what
   it changes, without stopping anything. A private repository says so instead of claiming it is up to date.
 - **Something answers during an update.** While the service restarts, a page says so (503 with `Retry-After`
   for programs) instead of a dead port.
@@ -113,13 +113,13 @@ Update rsc-brain from its own web, and know what version is out.
 
 ## v0.2.0
 
-rsc-brain as rsc-factory's memory: rsc-factory can install it, set it up and work with it.
+obsybrain as rsc-factory's memory: rsc-factory can install it, set it up and work with it.
 
-- **Installed by rsc-factory (companion mode).** `rsc-brain.sh install --companion --attach-network
-  NAME --factory-url URL` joins the network rsc-factory shares as `rsc-brain`, with no Caddy of its own,
+- **Installed by rsc-factory (companion mode).** `obsybrain.sh install --companion --attach-network
+  NAME --factory-url URL` joins the network rsc-factory shares as `obsybrain`, with no Caddy of its own,
   and waits: its setup page says to finish in rsc-factory. rsc-factory's setup then calls
   `POST /v1/setup/companion` with the one-time key from the `--json` summary (`companionToken`) and
-  gets the administration and its service account in one go. The call answers only while rsc-brain is
+  gets the administration and its service account in one go. The call answers only while obsybrain is
   not set up, only from the shared network, and only once. A main key lost afterwards is replaced with
   `POST /v1/setup/companion/reconnect` (the one-time key and an administrator's password).
 - **What a service asks for the people it serves.** `POST /v1/access` tells a service which role a
@@ -146,13 +146,13 @@ The first release: a knowledge server for AI agents that anyone can install.
 - **For people.** A web to read and curate each brain: overview, journal, wiki with its graph,
   proposals, activity live, health, settings, people and tokens; an administration with accounts,
   email, meaning search, the audit, and backups & system.
-- **Install in one command.** `rsc-brain.sh install` on this machine or on a server with a domain
+- **Install in one command.** `obsybrain.sh install` on this machine or on a server with a domain
   (HTTPS by itself), with its own PostgreSQL, an existing one, or one shared with another program.
 - **Copies and restore.** Encrypted copies every day (and by hand), restored here or on another
-  installation with the installation key; the key can be rotated (`rsc-brain.sh key rotate`).
+  installation with the installation key; the key can be rotated (`obsybrain.sh key rotate`).
 - **Export and import.** A brain exported as a folder that opens as an Obsidian vault, or as a
   faithful copy; a documentation folder (or a faithful export) imported into an empty brain.
-- **Update with rollback.** `rsc-brain.sh update` makes a copy first, refuses writes while it
+- **Update with rollback.** `obsybrain.sh update` makes a copy first, refuses writes while it
   migrates, and goes back to the version before by itself if anything fails, Ctrl-C included. An
   update killed halfway is taken back by the next command; a key rotation
   killed halfway is finished by the next `key rotate`. Release candidates are ordered as semver
