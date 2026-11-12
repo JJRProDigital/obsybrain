@@ -1,0 +1,71 @@
+// The token of an invitation or reset link, read from "#token=" and taken out of the address at once
+// (never in the server's logs, never in a URL of the history). Kept in memory for the visit, so a screen
+// that mounts again still has it, and in this tab's own history entry (history.state), so a reload does
+// not lose the invitation; never in localStorage or sessionStorage, and never sent anywhere. Note:
+// history.state belongs to the entry, so the browser may keep it on disk with the session and bring it
+// back with that entry (restoring the session after a restart, or going Back to the page). Using the link
+// clears it, and so does abandoning it here. It is not cleared on pagehide: a reload fires pagehide too
+// and cannot be told apart, so clearing there would lose the invitation on every reload. The link is
+// single-use and expires on the server, which bounds what a restored entry can do. A link pasted
+// again in the same tab (hashchange) is read anew.
+import { useEffect, useState } from 'preact/hooks'
+import { tokenFromHash } from './nav.ts'
+
+const memory = new Map<string, string>()
+const slot = (kind: string) => `rscb.link.${kind}`
+
+function stateWith(kind: string, token: string | null): Record<string, unknown> {
+  const now = history.state && typeof history.state === 'object' ? { ...history.state } : {}
+  if (token) now[slot(kind)] = token
+  else delete now[slot(kind)]
+  return now
+}
+
+function held(kind: string): string | null {
+  const v = history.state && typeof history.state === 'object' ? history.state[slot(kind)] : null
+  return typeof v === 'string' && v ? v : null
+}
+
+function take(kind: string): string | null {
+  const t = tokenFromHash(location.hash)
+  if (t) {
+    memory.set(kind, t)
+    history.replaceState(stateWith(kind, t), '', location.pathname)
+  }
+  return memory.get(kind) ?? held(kind)
+}
+
+function drop(kind: string): void {
+  memory.delete(kind)
+  if (held(kind)) history.replaceState(stateWith(kind, null), '', location.pathname)
+}
+
+export function useLinkToken(kind: 'invite' | 'reset'): {
+  token: string | null
+  // Changes each time a link arrives, so a screen can start over with it.
+  visit: number
+  // The link was used: a screen that mounts again no longer finds it (this one keeps its last step).
+  spend(): void
+  // The link is abandoned: it is no longer held, and the screen starts without one.
+  forget(): void
+} {
+  const [held, setHeld] = useState(() => ({ token: take(kind), visit: 0 }))
+  useEffect(() => {
+    const onHash = () => {
+      if (!tokenFromHash(location.hash)) return
+      const t = take(kind)
+      setHeld((h) => ({ token: t, visit: h.visit + 1 }))
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+  return {
+    token: held.token,
+    visit: held.visit,
+    spend: () => drop(kind),
+    forget: () => {
+      drop(kind)
+      setHeld((h) => ({ token: null, visit: h.visit + 1 }))
+    },
+  }
+}
