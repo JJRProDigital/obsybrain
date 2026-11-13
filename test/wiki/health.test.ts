@@ -69,7 +69,7 @@ describe('wiki by hand, health and purge', { skip: skipPg }, () => {
       kind: string
       summary: string
     }[]
-    assert.deepEqual([log[0]?.kind, log[0]?.summary], ['direct', 'Direct edit: ca10/page'])
+    assert.deepEqual([log[0]?.kind, log[0]?.summary], ['direct', 'Directo: edit: ca10/page'])
   })
 
   it('an edit by hand against an old revision saves nothing and shows the current version', async () => {

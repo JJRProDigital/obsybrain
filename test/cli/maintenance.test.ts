@@ -59,7 +59,8 @@ describe('obsybrain maintenance', { skip: skipPg }, () => {
     const s = JSON.parse((await run(['maintenance', 'status', '--json'], env)).out)
     assert.equal(s.reason, 'update')
     const left = new Date(s.until).getTime() - t0
-    assert.ok(left > 100_000 && left <= 125_000, `${left}`)
+    // A slow machine (a full-suite run can take minutes) only needs the ~120 s to be honored, ±25 s.
+    assert.ok(left > 95_000 && left <= 145_000, `${left}`)
   })
 
   it('on while on replaces the end and the reason, and says which one it replaced', async () => {

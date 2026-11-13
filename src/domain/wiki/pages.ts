@@ -269,7 +269,9 @@ const revisionSummary = (r: Row): RevisionSummary => ({
   kind: r.kind as RevisionSummary['kind'],
   change: changeOf(r),
   restoredFrom:
-    r.kind === 'revert' ? Number(/back to revision (\d+)/.exec(String(r.note ?? ''))?.[1]) || null : null,
+    r.kind === 'revert'
+      ? Number(/de vuelta a la revisión (\d+)/.exec(String(r.note ?? ''))?.[1]) || null
+      : null,
   // The curator's reason for a change by hand or a restore; the operation's for a proposal.
   reason: r.purged_at || r.why == null ? null : String(r.why),
   authorId: String(r.author_id),

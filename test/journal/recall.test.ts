@@ -435,7 +435,7 @@ describe('recall: curate, search, context', { skip: skipPg }, () => {
     const both = (await find(eric.key, 'q=voces')).items.map((h) => h.brain)
     assert.deepEqual([...new Set(both)].sort(), ['other', 'yt'])
     const empty = await find(ana.key, 'q=nothingmatchesthisword&brains=yt')
-    assert.match(empty.note ?? '', /without filters/)
+    assert.match(empty.note ?? '', /sin filtros/)
     assert.equal((await w.call(ana.key, 'GET', '/v1/search?q=x&brains=other')).status, 404)
     assert.equal((await w.call(ana.key, 'GET', `/v1/search?q=${'a'.repeat(1001)}`)).status, 400)
   })

@@ -127,7 +127,7 @@ describe('writing to the wiki directly (v0.6)', { skip: skipPg }, () => {
     assert.equal(log[0]?.kind, 'write')
     assert.equal(log[0]?.keyName, 'Ana agent')
     assert.equal(log[0]?.actorName, 'Ana')
-    assert.match(String(log[0]?.summary), /^Written directly by Ana agent: Hooks and retention/)
+    assert.match(String(log[0]?.summary), /^Escrito directamente por Ana agent: Hooks and retention/)
     assert.equal(log[0]?.id, r.body.logId)
     // The cited entry is compiled, as with an approved proposal.
     const e = await w.db.one('SELECT compiled FROM entries WHERE id = $1', [source])

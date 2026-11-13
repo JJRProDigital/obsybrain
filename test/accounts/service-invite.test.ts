@@ -88,7 +88,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     assert.deepEqual(await openGrants('new.person@example.com'), [
       { brainId: await brainId('made'), role: 'reader' },
     ])
-    const mail = await w.mailTo('new.person@example.com', /invited you/)
+    const mail = await w.mailTo('new.person@example.com', /te invitó/)
     assert.match(mail.subject, /^rsc-factory te invitó/)
   })
 
@@ -134,7 +134,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
   it('accepting the invitation gives the role in the brain', async () => {
     const email = 'joins@example.com'
     await invite('other-made', [{ email, role: 'curator' }])
-    const link = (await w.mailTo(email, /invited you/)).text
+    const link = (await w.mailTo(email, /te invitó/)).text
     const token = /#token=([A-Za-z0-9_-]+)/.exec(link)?.[1] ?? ''
     const ok = await w.raw('POST', '/v1/invitations/accept', {
       headers: { 'x-requested-with': 'obsybrain-web' },
@@ -283,7 +283,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     const resent = await w.callWeb(web, 'POST', `/v1/invitations/${String(mine.id)}/resend`)
     assert.equal(resent.status, 404, resent.text)
     // Alice gets one fresh link, from rsc-factory, that covers every grant.
-    const mail = await w.mailTo(email, /^rsc-factory invited you/)
+    const mail = await w.mailTo(email, /^rsc-factory te invitó/)
     const fresh = tokenOf(mail.text)
     assert.notEqual(fresh, held)
     const joined = await accept(fresh, 'Alice')
@@ -381,7 +381,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     const r = await invite('made', [{ email, role: 'curator' }])
     assert.deepEqual(r.body.invited, [{ email, status: 'invited' }])
     assert.equal((await look(held)).status, 400, 'the link Mallory holds is dead')
-    const fresh = tokenOf((await w.mailTo(email, /^rsc-factory invited you/)).text)
+    const fresh = tokenOf((await w.mailTo(email, /^rsc-factory te invitó/)).text)
     assert.equal((await look(fresh)).status, 200)
   })
 
@@ -404,7 +404,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     const r = await w.call(factory.key, 'POST', '/v1/brains', { slug: 'upfront', firstCurator: email })
     assert.equal(r.status, 409, r.text)
     assert.equal(r.body.error?.code, 'invitation_pending_elsewhere')
-    assert.match(String(r.body.error?.howToProceed), /reenvíe o la retire/)
+    assert.match(String(r.body.error?.howToProceed), /reenvíe o retire/)
     assert.equal(await w.db.one("SELECT 1 FROM brains WHERE slug = 'upfront'"), undefined, 'no brain')
     assert.equal(w.mails.length, mails, 'no mail')
     assert.equal(await spent(), before, 'no quota spent')

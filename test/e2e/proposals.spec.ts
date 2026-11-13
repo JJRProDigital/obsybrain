@@ -25,7 +25,7 @@ test.describe.configure({ mode: 'serial' })
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Configurar obsybrain|Iniciar sesión|Tus brains/)
   const where = await h1.textContent()
   if (where === 'Configurar obsybrain') {
     await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
@@ -184,7 +184,7 @@ test('CA2: at 375 px a curator approves two of three changes and returns the thi
       headers: { authorization: `Bearer ${agent}` },
     })
   ).json()) as { items: Array<{ title: string; content: string; appliesTo: string | null }> }
-  const c = corrections.items.find((x) => x.title === 'Returned: Three pages about intros')
+  const c = corrections.items.find((x) => x.title === 'Devuelta: Three pages about intros')
   expect(c?.content).toContain('No page about greetings: we cut them.')
   expect(c?.appliesTo).toBe('Claude Code')
 })
@@ -204,7 +204,7 @@ test('CA2b: at 375 px a curator returns a proposal with a comment; nothing appli
   const p = (await (
     await request.get(`/v1/proposals/${ids.back}`, { headers: { authorization: `Bearer ${agent}` } })
   ).json()) as { proposal: { status: string } }
-  expect(p.proposal.status).toBe('devuelto')
+  expect(p.proposal.status).toBe('returned')
 })
 
 test('another curator approves it while I look: «approved by … just now», read-only', async ({
@@ -213,7 +213,7 @@ test('another curator approves it while I look: «approved by … just now», re
   baseURL,
 }) => {
   await signedInAdmin(page, baseURL as string)
-  const eva = await person(browser, page, 'Eva', 'curador')
+  const eva = await person(browser, page, 'Eva', 'curator')
   const e = await eva.newPage()
   await e.goto(`${INBOX}/${ids.live}`)
   await expect(e.getByRole('button', { name: 'Aprobar todo' })).toBeVisible()

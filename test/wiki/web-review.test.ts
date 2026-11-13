@@ -126,8 +126,8 @@ describe('the wiki as the web shows it (PR19 review)', { skip: skipPg }, () => {
   it('the log gives the reason, and a direct status change its new status', async () => {
     const r = await w.call(eric.key, 'GET', '/v1/brains/rv/wiki/log?kind=direct&page=a/two')
     const items = r.body.items as { summary: string; reason: string | null }[]
-    const status = items.find((l) => l.summary.includes('status'))
-    assert.equal(status?.summary, 'Direct status → stale: a/two')
+    const status = items.find((l) => l.summary.includes('Estado directo'))
+    assert.equal(status?.summary, 'Estado directo → stale: a/two')
     assert.equal(status?.reason, 'Numbers are old.')
   })
 

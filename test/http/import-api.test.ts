@@ -463,7 +463,7 @@ describe('the import route and the command (CA19)', { skip: skipPg }, () => {
     // Not joined yet: the brain is not found, and nothing changes.
     const out = await run(['import', '--brain', 'cli', '--from', SAMPLE, '--as', email], env)
     assert.equal(out.code, 1, out.err)
-    assert.match(out.err, /not found|no brain/i)
+    assert.match(out.err, /no existe|no brain|ningún brain/i)
     await w.callWeb(S('boss'), 'POST', '/v1/admin/brains/cli/join')
     const reader = await run(['import', '--brain', 'cli', '--from', SAMPLE, '--as', email], env)
     assert.equal(reader.code, 1)

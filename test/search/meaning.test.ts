@@ -76,10 +76,10 @@ describe('search by meaning', { skip: skipPg }, () => {
     const get = await w.callWeb(adminWeb, 'GET', '/v1/admin/meaning')
     assert.equal(get.status, 200, get.text)
     assert.deepEqual([get.body.enabled, get.body.available], [false, ['test', 'other']])
-    assert.match(String(get.body.warning), /will be sent to this provider.*cannot be taken back/)
+    assert.match(String(get.body.warning), /se enviará a este proveedor.*no se puede recuperar/)
     const noAccept = await w.callWeb(adminWeb, 'PUT', '/v1/admin/meaning', { provider: 'test' })
     assert.equal(noAccept.status, 400)
-    assert.match(JSON.stringify(noAccept.body), /cannot be taken back/)
+    assert.match(JSON.stringify(noAccept.body), /no se puede recuperar/)
     assert.equal((await w.callWeb(adminWeb, 'GET', '/v1/admin/meaning')).body.enabled, false)
     assert.equal(
       (await w.callWeb(ericWeb, 'PUT', '/v1/admin/meaning', { provider: 'test', accept: true })).status,

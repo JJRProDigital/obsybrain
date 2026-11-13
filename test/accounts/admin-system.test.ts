@@ -227,7 +227,7 @@ describe('the administration of the installation (PR25b)', { skip: skipPg }, () 
       const failures = (await mail()).body.failures as Json[]
       assert.equal(failures[0]?.status, 'failed')
       assert.equal(failures[0]?.kind, 'test')
-      assert.equal(failures[0]?.error, 'connection refused')
+      assert.equal(failures[0]?.error, 'conexión rechazada')
       assert.ok(failures.every((f) => f.status !== 'sent'))
     })
 

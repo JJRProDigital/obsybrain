@@ -26,7 +26,7 @@ test.describe.configure({ mode: 'serial' })
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Configurar obsybrain|Iniciar sesión|Tus brains/)
   const where = await h1.textContent()
   if (where === 'Configurar obsybrain') {
     await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
@@ -133,7 +133,7 @@ test('CA18: a new logo and name show in the header for anyone, and in the invita
   const email = `ca18-${Date.now()}@example.test`
   const made = await admin.request.post('/v1/invitations', { headers: WEB, data: { emails: [email] } })
   expect(made.status()).toBe(201)
-  const m = await mailTo(admin, email, /invited you to Acme Brain/)
+  const m = await mailTo(admin, email, /te invitó a Acme Brain/)
   expect(m.html).toContain('Acme Brain')
   expect(m.html).toMatch(/<img [^>]*src="cid:logo@obsybrain"/)
   expect(m.html).not.toMatch(/src="https?:/)
@@ -276,9 +276,9 @@ test('email: settings saved in the web, the password never shown; a test mail ca
   await expect(admin.locator('body')).not.toContainText('e2e-mail-secret')
   // The test mail, captured.
   await admin.getByRole('button', { name: 'Enviar email de prueba' }).click()
-  await expect(admin.getByRole('status').filter({ hasText: `Sent to ${ADMIN.email}` })).toBeFocused()
-  const m = await mailTo(admin, ADMIN.email, /^Test mail from /)
-  expect(m.text).toContain('Mail works.')
+  await expect(admin.getByRole('status').filter({ hasText: `Enviado a ${ADMIN.email}` })).toBeFocused()
+  const m = await mailTo(admin, ADMIN.email, /Correo de prueba de /)
+  expect(m.text).toContain('El correo funciona.')
   // A server that cannot be reached: the test says why, and the failure is listed.
   await admin.getByLabel('Servidor de correo').fill('down.e2e.test')
   // Another server: its password is typed again.
@@ -290,8 +290,10 @@ test('email: settings saved in the web, the password never shown; a test mail ca
   await admin.getByRole('button', { name: 'Guardar los ajustes de correo' }).click()
   await expect(admin.getByRole('status').filter({ hasText: 'Ajustes de correo guardados.' })).toBeVisible()
   await admin.getByRole('button', { name: 'Enviar email de prueba' }).click()
-  await expect(admin.getByRole('alert').filter({ hasText: 'No salió' })).toContainText('server not found')
+  await expect(admin.getByRole('alert').filter({ hasText: 'No salió' })).toContainText(
+    'servidor no encontrado',
+  )
   await expect(
     admin.getByRole('region', { name: 'Fallos de envío recientes' }).getByRole('listitem').first(),
-  ).toContainText('server not found')
+  ).toContainText('servidor no encontrado')
 })

@@ -28,7 +28,7 @@ async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   // Where the web leads a fresh browser: the setup, the sign-in, or home.
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Configurar obsybrain|Iniciar sesión|Tus brains/)
   const where = await h1.textContent()
   if (where === 'Configurar obsybrain') {
     await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
@@ -63,7 +63,7 @@ test('CA19: a new brain shows three first steps; an agent writing marks steps 1 
   await expect(steps.nth(0)).toContainText('Por hacer')
   await expect(steps.nth(1)).toContainText('Por hacer')
   // The third, importing a folder (B7 PR32): its own walk is test/e2e/import.spec.ts.
-  await expect(steps.nth(2)).toContainText('Importar una carpeta de documentación')
+  await expect(steps.nth(2)).toContainText('Importa una carpeta de documentación')
   await expect(steps.nth(2)).toContainText('Por hacer')
   // The agent: a token of the administrator, used by a program that is not the web.
   const made = await page.request.post('/v1/me/tokens', {
@@ -82,7 +82,7 @@ test('CA19: a new brain shows three first steps; an agent writing marks steps 1 
   await expect(steps.nth(0)).toContainText('Hecho', { timeout: 5_000 })
   await expect(steps.nth(1)).toContainText('Hecho')
   // With an entry, the brain is no longer empty: the third step says an import can no longer be taken.
-  await expect(steps.nth(2)).toContainText('Solo en un brain vacío')
+  await expect(steps.nth(2)).toContainText('solo entra en un brain vacío')
   expect(page.url()).toBe(url)
   await expect(page.getByRole('region', { name: 'En números' })).toContainText('1 entrada')
   await expect(page.getByRole('region', { name: 'Sesiones de hoy' }).getByRole('listitem')).toHaveCount(1)
@@ -187,7 +187,7 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
     hasText: 'lena@example.test',
   })
   await expect(lena).toContainText('pendiente')
-  await expect(lena).toContainText('Lifecycle as contributor')
+  await expect(lena).toContainText('Lifecycle como colaborador')
 
   const link = await mailLink(page.request, 'lena@example.test')
   const ctx = await browser.newContext()
@@ -210,7 +210,7 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
   await expect(page.getByRole('link', { name: 'Lifecycle' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Invitar personas' })).toHaveCount(0)
   await page.getByRole('banner').getByRole('link', { name: 'Personas' }).click()
-  await expect(lena).toContainText('accepted')
+  await expect(lena).toContainText('aceptada')
 })
 
 test('the administration makes a reset link for a person, shown once', async ({ page, baseURL }) => {
@@ -223,7 +223,7 @@ test('the administration makes a reset link for a person, shown once', async ({ 
       hasText: 'lena@example.test',
     })
   await lena.getByRole('button', { name: 'Crear un enlace de restablecimiento' }).click()
-  const shown = lena.getByRole('region', { name: /Reset link for Lena/ })
+  const shown = lena.getByRole('region', { name: /Enlace de restablecimiento para Lena/ })
   await expect(shown).toContainText('/reset#token=')
   await shown.getByRole('button', { name: 'Listo, lo copié' }).click()
   await expect(page.getByText('/reset#token=')).toHaveCount(0)

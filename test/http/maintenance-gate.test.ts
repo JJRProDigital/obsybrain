@@ -463,7 +463,7 @@ describe('the maintenance gate', { skip: skipPg }, () => {
       assert.equal(res.status, 503, `${path}: ${html}`)
       assert.equal(res.headers.get('retry-after'), '120', path)
       assert.match(res.headers.get('content-type') ?? '', /text\/html/, path)
-      assert.match(html, /obsybrain is updating\. Try again in 120 seconds\./, path)
+      assert.match(html, /obsybrain se está actualizando\. Vuelve a intentarlo en 120 segundos\./, path)
       const back = /<a href="([^"]+)"/.exec(html)?.[1]?.replace(/&amp;/g, '&') ?? ''
       assert.ok(back.startsWith('/oauth/authorize?'), `${path}: ${back}`)
       assert.equal(new URLSearchParams(back.split('?')[1]).get('client_id'), clientId, path)

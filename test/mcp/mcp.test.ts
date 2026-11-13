@@ -332,7 +332,7 @@ describe('the MCP endpoint', { skip: skipPg }, () => {
       m.candidates.map((c) => c.slug),
       ['alpha', 'beta'],
     )
-    assert.match(m.howToProceed, /curator can link/)
+    assert.match(m.howToProceed, /puede vincular este repositorio/)
     // Someone who cannot see alpha gets no answer about it.
     const other = await w.person('Other')
     const theirs = await call(other.key, 'brain_resolve', { repos: ['github.com/risco/rsc-factory'] })

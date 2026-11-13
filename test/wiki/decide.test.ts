@@ -234,7 +234,7 @@ describe('wiki decisions in the web', { skip: skipPg }, () => {
       lastError: string
     }
     assert.equal(p.status, 'pending')
-    assert.match(p.lastError, /could not be applied|injected/)
+    assert.match(p.lastError, /no se pudo aplicar|injected/)
     await w.db.query('DROP TRIGGER fail_page ON pages')
   })
 
@@ -345,7 +345,7 @@ describe('wiki decisions in the web', { skip: skipPg }, () => {
       ops: [create('ca12/a')],
     })
     assert.equal(taken.status, 400)
-    assert.match(taken.text, /reserved/)
+    assert.match(taken.text, /está reservada/)
   })
 
   it('CA13: merging y into x: x has the body, the sources and the links of y; y is superseded; links to y lead to x', async () => {

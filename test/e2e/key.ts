@@ -2,7 +2,7 @@
 import type { Page } from '@playwright/test'
 
 export async function keepTheKey(page: Page): Promise<void> {
-  await page.getByRole('heading', { level: 1, name: 'Keep the installation key' }).waitFor()
-  await page.getByLabel('I saved the installation key somewhere safe, outside this machine').check()
-  await page.getByRole('button', { name: 'Continue to obsybrain' }).click()
+  await page.getByRole('heading', { level: 1, name: 'Guarda la clave de instalación' }).waitFor()
+  await page.getByLabel('Guardé la clave de instalación en un lugar seguro, fuera de esta máquina').check()
+  await page.getByRole('button', { name: 'Continuar a obsybrain' }).click()
 }

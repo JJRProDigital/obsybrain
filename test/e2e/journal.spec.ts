@@ -24,7 +24,7 @@ test.describe.configure({ mode: 'serial' })
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Configurar obsybrain|Iniciar sesión|Tus brains/)
   const where = await h1.textContent()
   if (where === 'Configurar obsybrain') {
     await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
@@ -159,7 +159,7 @@ test('an agent writes; a contributor corrects their own entry; a reader sees no 
     .click()
   await expect(a.getByRole('heading', { level: 1, name: 'Sesiones' })).toBeVisible()
   await a.getByRole('link', { name: 'Review the October intros' }).click()
-  await expect(a.locator('.facts')).toContainText('of Eric')
+  await expect(a.locator('.facts')).toContainText('de Eric')
   await a.goto(`${J}/entries/${ids.short}`)
   await expect(a.getByRole('button', { name: 'Editar esta entrada' })).toHaveCount(0)
   await a.goto(`${J}/entries/${own}`)
@@ -199,7 +199,7 @@ test('CA12: a person adds a correction to the page «Intros»; an agent on a tas
   await page.getByLabel('Solo para un agente (opcional)').fill('narrator')
   await page.getByRole('button', { name: 'Añadir corrección' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Corrección añadida.' })).toBeVisible()
-  await expect(page.locator('.page-main')).toContainText('the page style/intros')
+  await expect(page.locator('.page-main')).toContainText('Sobre la página style/intros')
   // Another agent, on a task about intros: it is about a page of its task.
   expect(await context(page.request, 'task=rewrite+the+intros&agent=writer')).toContain('Cut the greeting')
   // On a task about something else, it is not.
@@ -261,7 +261,7 @@ test('a wrong entry is forgotten with a reason, leaves the context, and a curato
   const item = page.locator('main ul.list > li').filter({ hasText: 'The channel has 9 million subscribers' })
   await expect(item).toContainText('Olvidada por Eric el')
   await expect(item).toContainText('Wrong number: it is 900 thousand.')
-  await item.getByRole('button', { name: /Recover/ }).click()
+  await item.getByRole('button', { name: /Recuperar/ }).click()
   await expect(page.getByRole('status').filter({ hasText: 'Recuperada' })).toBeVisible()
   expect(await context(request, 'agent=x')).toContain('9 million subscribers')
 })

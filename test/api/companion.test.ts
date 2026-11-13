@@ -63,7 +63,7 @@ describe('companion mode: waiting for rsc-factory', { skip: skipPg }, () => {
   it('the setup of obsybrain says to finish in rsc-factory, with its address, and takes no password', async () => {
     const state = await w.raw('GET', '/v1/setup')
     assert.deepEqual([state.status, state.body.error?.code], [409, 'companion_pending'], state.text)
-    assert.equal(errorOf(state).message, 'Finish the setup in rsc-factory.')
+    assert.equal(errorOf(state).message, 'Termina la configuración en rsc-factory.')
     assert.equal(errorOf(state).factoryUrl, FACTORY)
     assert.match(errorOf(state).howToProceed ?? '', /factory\.example\.com/)
     const post = await w.raw('POST', '/v1/setup', {
@@ -393,7 +393,7 @@ describe('companion mode: reconnecting rsc-factory', { skip: skipPg }, () => {
     const r = await reconnect()
     assert.deepEqual([r.status, r.body.error?.code], [409, 'service_removed'], r.text)
     assert.match(errorOf(r).message ?? '', /dio de baja la cuenta de rsc-factory/)
-    assert.match(errorOf(r).howToProceed ?? '', /[Rr]eactivate it/)
+    assert.match(errorOf(r).howToProceed ?? '', /[Rr]eactívala/)
     assert.deepEqual(await counts(w), before)
     const live = await w.db.one<{ n: number }>(
       'SELECT count(*)::int AS n FROM credentials WHERE account_id = $1 AND revoked_at IS NULL',

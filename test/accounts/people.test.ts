@@ -44,7 +44,7 @@ describe('people and keys', { skip: skipPg }, () => {
     assert.equal(r.status, 201, r.text)
     const inv = (r.body.invitations as Array<{ link: string; mailed: boolean; mailError: string }>)[0]
     assert.equal(inv?.mailed, false)
-    assert.match(String(inv?.mailError), /not set up/)
+    assert.match(String(inv?.mailError), /no está configurado/)
     assert.equal(w.mails.length, 0)
     const shown = await look(tokenOf(String(inv?.link)))
     assert.deepEqual(
@@ -101,7 +101,7 @@ describe('people and keys', { skip: skipPg }, () => {
     assert.equal(login.status, 200)
     const again = await accept(tokenOf(mail.text), 'Dani again')
     assert.deepEqual([again.status, again.body.error?.code], [400, 'invitation_invalid'])
-    assert.match(String(again.body.error?.howToProceed), /administración/)
+    assert.match(String(again.body.error?.howToProceed), /administrador/)
     // 72 hours later the other link no longer works.
     const late = await w.mailTo('late@example.com')
     w.advance(72 * 3_600_000 + 1000)
@@ -186,7 +186,10 @@ describe('people and keys', { skip: skipPg }, () => {
     ]) {
       assert.equal(r.status, 403, r.text)
       assert.match(String(r.body.error?.message), /tú eres reader/)
-      assert.match(String(r.body.error?.howToProceed), /Pídeselo a quien cure el brain \(Ana\)/)
+      assert.match(
+        String(r.body.error?.howToProceed),
+        /Pide el rol contributor a quien cure el brain \(Ana\)/,
+      )
     }
     const denied = await w.db.query("SELECT * FROM audit WHERE actor_id = $1 AND outcome = 'denied'", [
       rita.id,
@@ -548,7 +551,7 @@ describe('people and keys', { skip: skipPg }, () => {
     const r = await w.callWeb(adminWeb, 'POST', '/v1/invitations', { emails: ['nora@example.com'] })
     assert.equal(r.status, 201)
     const inv = (r.body.invitations as Array<{ mailed: boolean; mailError: string; link: string }>)[0]
-    assert.deepEqual([inv?.mailed, /refused/.test(String(inv?.mailError))], [false, true])
+    assert.deepEqual([inv?.mailed, /rechazada/.test(String(inv?.mailError))], [false, true])
     assert.ok(tokenOf(String(inv?.link)))
     const panel = await w.callWeb(adminWeb, 'GET', '/v1/admin/mail')
     assert.ok(
@@ -573,7 +576,7 @@ describe('people and keys', { skip: skipPg }, () => {
     const email = String((await w.db.one('SELECT email FROM accounts WHERE id = $1', [ana.id]))?.email)
     const r = await w.raw('POST', '/v1/auth/reset', { body: { email } })
     assert.equal(r.status, 202)
-    const m = await w.mailTo(email, /Reset your obsybrain password/)
+    const m = await w.mailTo(email, /Restablece tu contraseña de obsybrain/)
     assert.match(m.text, /una sola vez y durante 1 hora/)
     const token = tokenOf(m.text)
     const ok = await w.raw('POST', '/v1/auth/reset/confirm', {

@@ -263,8 +263,8 @@ describe('search: entries and pages', { skip: skipPg }, () => {
     const last = await save(eric.key, 'yt', { type: 'note', title: 'Latest', content: 'the very last one' })
     const recent = await find(eric.key, 'q=&brains=yt')
     assert.deepEqual([recent.items[0]?.id, recent.items[0]?.why], [last, 'recent'])
-    assert.match((await find(eric.key, `${q('zzyzxnothing')}&types=fact`)).note ?? '', /without filters/)
-    assert.match((await find(eric.key, q('zzyzxnothing'))).note ?? '', /other words/)
+    assert.match((await find(eric.key, `${q('zzyzxnothing')}&types=fact`)).note ?? '', /sin filtros/)
+    assert.match((await find(eric.key, q('zzyzxnothing'))).note ?? '', /otras palabras/)
   })
 
   it('pages: 10 by default, up to 50, and it says when there are more', async () => {

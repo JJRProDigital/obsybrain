@@ -77,7 +77,7 @@ describe('service invitations under concurrency', { skip: skipPg }, () => {
   it('F3: accepting an invitation waits for an invitation of the same email being made', async () => {
     const email = 'accepts@example.com'
     assert.equal((await invite('made', [{ email, role: 'reader' }])).status, 201)
-    const token = /#token=([A-Za-z0-9_-]+)/.exec((await w.mailTo(email, /invited you/)).text)?.[1] ?? ''
+    const token = /#token=([A-Za-z0-9_-]+)/.exec((await w.mailTo(email, /te invitó/)).text)?.[1] ?? ''
     await other.query('BEGIN')
     await other.query(LOCK, [email])
     const pending = w.raw('POST', '/v1/invitations/accept', {
@@ -123,7 +123,7 @@ describe('service invitations under concurrency', { skip: skipPg }, () => {
     const email = 'first-curator@example.com'
     const made = await w.call(factory.key, 'POST', '/v1/brains', { slug: 'waits', firstCurator: email })
     assert.equal(made.status, 201, made.text)
-    const token = /#token=([A-Za-z0-9_-]+)/.exec((await w.mailTo(email, /invited you/)).text)?.[1] ?? ''
+    const token = /#token=([A-Za-z0-9_-]+)/.exec((await w.mailTo(email, /te invitó/)).text)?.[1] ?? ''
     const waits = String((await w.db.one("SELECT id FROM brains WHERE slug = 'waits'"))?.id)
     // The brain row is held, so whoever wants it waits there, in the order they came.
     await other.query('BEGIN')

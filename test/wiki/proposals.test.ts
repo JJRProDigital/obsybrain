@@ -129,10 +129,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
       ops: [create('voices/style', { links: [{ kind: 'depends-on', to: 'voices/narrator' }] })],
     })
     assert.equal(bad.status, 400)
-    assert.match(
-      JSON.stringify(bad.body),
-      /depends-on link points at \\"voices\/narrator\\", which does not exist/,
-    )
+    assert.match(JSON.stringify(bad.body), /apunta a \\"voices\/narrator\\", que no existe/)
     const both = await propose(factory.key, {
       title: 'Dep with the page',
       ops: [
@@ -228,7 +225,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
     await w.call(eric.key, 'POST', '/v1/brains/other/archive')
     const archived = await propose(eric.key, { title: 'x', ops: [create('a/b')] }, 'other')
     assert.equal(archived.status, 403)
-    assert.match(archived.body.error?.message ?? '', /archived/)
+    assert.match(archived.body.error?.message ?? '', /archivado/)
   })
 
   it('CA22: the author replaces a pending proposal; the old one is superseded and no longer pending', async () => {
@@ -326,7 +323,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
     assert.equal(pk.corrections.length, 2)
     assert.ok(pk.corrections.every((c) => c.type === 'correction'))
     assert.ok(Array.isArray(pk.map.groups))
-    assert.match(pk.guide, /cites the journal entries/)
+    assert.match(pk.guide, /cita las entradas del diario/)
     assert.equal(pk.remaining, 0)
     const small = (await w.call(factory.key, 'GET', '/v1/brains/pack/wiki/compile?maxChars=4000')).body as {
       entries: unknown[]
@@ -359,7 +356,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
       custom: boolean
     }
     assert.equal(g.custom, false)
-    assert.match(g.guide, /One page per topic/)
+    assert.match(g.guide, /Una página por tema/)
   })
 
   it('reading a page: old addresses redirect, links both ways, broken and retired mentions, sources', async () => {
@@ -501,7 +498,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
     for (const ops of cases) {
       const r = await propose(factory.key, { title: 'Self', ops })
       assert.equal(r.status, 400, JSON.stringify(ops))
-      assert.match(JSON.stringify(r.body), /sí misma/)
+      assert.match(JSON.stringify(r.body), /misma/)
     }
   })
 

@@ -384,7 +384,7 @@ describe('the journal', { skip: skipPg }, () => {
     await w.db.query("UPDATE entries SET state = 'forgotten' WHERE id = $1", [a.receipt.entryId])
     const b = await save(ana.key, { type: 'fact', title: 'New', content: 'new voice', topic: 'voices/old' })
     assert.notEqual(b.receipt.entryId, a.receipt.entryId)
-    assert.match(b.receipt.topicNote ?? '', /forgotten/)
+    assert.match(b.receipt.topicNote ?? '', /olvidada/)
   })
 
   it('CA22 and errors: limits, types and permissions say what to do', async () => {

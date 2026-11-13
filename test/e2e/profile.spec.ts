@@ -39,7 +39,7 @@ async function mailLink(request: APIRequestContext, to: string): Promise<string>
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Configurar obsybrain|Iniciar sesión|Tus brains/)
   const where = await h1.textContent()
   if (where === 'Configurar obsybrain') {
     await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
@@ -192,7 +192,7 @@ test('CA1, standard route: from the invitation email to a connected Claude Code,
   const { ctx, p, steps, act, t0 } = await invitedToConnect(browser, page, 'Nora')
   const panel = p.getByRole('tabpanel', { name: 'Claude Code' })
   const standard = panel.getByRole('region', { name: 'Conexión estándar' })
-  await expect(standard).toContainText('Recommended')
+  await expect(standard).toContainText('Recomendada')
   await act('click «Copy» on the command', () =>
     standard.getByRole('button', { name: 'Copiar: Add obsybrain for all your projects and sign in' }).click(),
   )
@@ -254,7 +254,7 @@ test('CA1, token route (the alternative): the same person path, counted honestly
     const block = (title: RegExp) => once.locator('.cmd-block').filter({ has: p.getByText(title) })
     await act('click «Copy» on the command that saves the token', () =>
       block(/^Save the token/)
-        .getByRole('button', { name: /^Copy: Save the token/ })
+        .getByRole('button', { name: /^Copiar: Save the token/ })
         .click(),
     )
     const save = await clipboard(p)
@@ -267,7 +267,7 @@ test('CA1, token route (the alternative): the same person path, counted honestly
     await act('press Enter', async () => shell(save, `${token}\n`))
     await act('click «Copy» on the line that loads it', () =>
       block(/^Load it in your shell/)
-        .getByRole('button', { name: /^Copy: Load it/ })
+        .getByRole('button', { name: /^Copiar: Load it/ })
         .click(),
     )
     const load = await clipboard(p)
@@ -277,7 +277,7 @@ test('CA1, token route (the alternative): the same person path, counted honestly
     await act('open a new terminal', async () => {})
     await act('click «Copy» on the .mcp.json', () =>
       block(/^Add obsybrain to a project/)
-        .getByRole('button', { name: /^Copy: Add obsybrain to a project/ })
+        .getByRole('button', { name: /^Copiar: Add obsybrain to a project/ })
         .click(),
     )
     const mcpJson = await clipboard(p)
@@ -355,7 +355,7 @@ test('CA13: a token made in the profile is shown once, then never again, on the 
   const row = tokens.getByRole('listitem').filter({ hasText: 'CA13 e2e' })
   await row.getByRole('button', { name: 'Revocar' }).click()
   await row.getByRole('button', { name: 'Revocar CA13 e2e' }).click()
-  await expect(tokens.getByRole('status')).toContainText('CA13 e2e is revoked.')
+  await expect(tokens.getByRole('status')).toContainText('CA13 e2e quedó revocado.')
   const after = await page.request.get('/v1/me', { headers: { authorization: `Bearer ${secret}` } })
   expect(after.status()).toBe(401)
 })
@@ -389,7 +389,9 @@ test('G6: a new password from the profile signs the person out of their other se
   await form.getByLabel('Contraseña actual').fill(ADMIN.password)
   await form.getByLabel('Contraseña nueva').fill('a brand new passphrase for pia')
   await form.getByRole('button', { name: 'Cambiar contraseña' }).click()
-  await expect(form.getByRole('status')).toContainText('Password changed.')
+  await expect(form.getByRole('status')).toContainText(
+    'Contraseña cambiada. Tus otras sesiones cerraron sesión.',
+  )
   expect((await p.request.get('/v1/me')).status()).toBe(200)
   expect((await elsewhere.request.get('/v1/me')).status()).toBe(401)
   await here.close()

@@ -77,7 +77,7 @@ describe('brain settings and the administration (PR25a)', { skip: skipPg }, () =
       assert.deepEqual([late.status, late.body.error?.code], [409, 'settings_changed'])
       const current = (late.body.error as Json).current as Json
       assert.equal(current.usageNote, 'Name the ticket.')
-      assert.match(String(late.body.error?.howToProceed), /guarda tu cambio/i)
+      assert.match(String(late.body.error?.howToProceed), /guardar tu cambio/i)
       const now = await read()
       assert.deepEqual([now.usageNote, now.staleDays], ['Name the ticket.', 45])
     })

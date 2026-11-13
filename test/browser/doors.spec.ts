@@ -88,12 +88,18 @@ test.describe('sign in', () => {
     await page.goto('/sign-in')
     await context.setOffline(true)
     await expect(page.getByRole('status').filter({ hasText: 'Estás sin conexión' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toHaveAttribute('aria-disabled', 'true')
+    await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
     await expect(
       page.getByText('Estás sin conexión: esto no se puede enviar hasta que vuelva la conexión.'),
     ).toBeVisible()
     await context.setOffline(false)
-    await expect(page.getByRole('button', { name: 'Iniciar sesión' })).not.toHaveAttribute('aria-disabled', 'true')
+    await expect(page.getByRole('button', { name: 'Iniciar sesión' })).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
   })
 })
 

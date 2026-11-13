@@ -526,7 +526,7 @@ describe('importing a documentation folder (CA14, PostgreSQL)', { skip: skipPg }
         },
       })),
     })
-    const stopped = (e: { message?: string }) => /stopped/.test(String(e.message))
+    const stopped = (e: { message?: string }) => /se detuvo/.test(String(e.message))
     // Ends while the first file is read: no other file is read.
     assert.equal((await w.call(bo.key, 'POST', '/v1/brains', { slug: 'ends-1', name: 'Ends 1' })).status, 201)
     const one = new AbortController()

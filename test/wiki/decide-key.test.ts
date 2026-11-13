@@ -157,7 +157,7 @@ describe('deciding proposals with a key (v0.7)', { skip: skipPg }, () => {
     assert.equal(log[0]?.proposalId, id)
     assert.equal(log[0]?.actorName, 'Ana')
     assert.equal(log[0]?.keyName, 'Ana agent')
-    assert.match(String(log[0]?.summary), /^Approved by Ana with the key Ana agent: Hooks/)
+    assert.match(String(log[0]?.summary), /^Aprobada por Ana con la clave Ana agent: Hooks/)
     const row = await w.db.one('SELECT decided_by FROM proposals WHERE id = $1', [id])
     assert.equal(row?.decided_by, ana.id)
     // The activity says it too: the decision, with the key; the change, with the log's words.
@@ -168,8 +168,8 @@ describe('deciding proposals with a key (v0.7)', { skip: skipPg }, () => {
     assert.deepEqual(
       events.map((e) => [e.kind, e.label, e.account_id, e.credential_id]),
       [
-        ['wiki.changed', 'Approved by Ana with the key Ana agent: Hooks', ana.id, writer.id],
-        ['proposal.decided', 'approved with the key Ana agent', ana.id, writer.id],
+        ['wiki.changed', 'Aprobada por Ana con la clave Ana agent: Hooks', ana.id, writer.id],
+        ['proposal.decided', 'approved con la clave Ana agent', ana.id, writer.id],
       ],
     )
   })
@@ -253,7 +253,7 @@ describe('deciding proposals with a key (v0.7)', { skip: skipPg }, () => {
     const ev = await w.db.one("SELECT label FROM events WHERE kind = 'proposal.decided' AND target_id = $1", [
       id,
     ])
-    assert.equal(ev?.label, 'returned with the key Ana agent')
+    assert.equal(ev?.label, 'returned con la clave Ana agent')
     // By the API as well.
     const id2 = await propose([create('ca4/api')])
     const a = await w.call(writer.secret, 'POST', `/v1/proposals/${id2}/return`, {

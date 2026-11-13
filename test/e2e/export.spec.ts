@@ -13,7 +13,7 @@ test.describe.configure({ mode: 'serial' })
 async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   await page.goto('/')
   const h1 = page.getByRole('heading', { level: 1 })
-  await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
+  await expect(h1).toHaveText(/Configurar obsybrain|Iniciar sesión|Tus brains/)
   const where = await h1.textContent()
   if (where === 'Configurar obsybrain') {
     await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
@@ -74,7 +74,7 @@ test('a curator saves both exports from Settings, and they hold the brain', asyn
   expect(files.has('index.md')).toBe(true)
   await expect(part.getByRole('status')).toContainText('Guardado obsybrain-')
 
-  await part.getByLabel('Faithful').check()
+  await part.getByLabel('Fiel').check()
   const [faithful] = await Promise.all([
     page.waitForEvent('download'),
     part.getByRole('button', { name: 'Descargar la exportación' }).click(),

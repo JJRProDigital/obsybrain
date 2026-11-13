@@ -218,7 +218,7 @@ describe('preparing and sending an export', { skip: skipPg }, () => {
       assert.equal(((d.json?.error ?? {}) as Record<string, unknown>).code, 'export_busy')
       assert.match(
         String(((d.json?.error ?? {}) as Record<string, unknown>).message),
-        /Another export is being prepared/,
+        /Otra exportación se está preparando/,
       )
     } finally {
       EXPORT_STATE.building = 0

@@ -264,7 +264,7 @@ describe('the MCP endpoint: review', { skip: skipPg }, () => {
       d.brains.map((b) => b.slug),
       ['mal-trap'],
     )
-    assert.match(d.howToProceed, /Ask the person/)
+    assert.match(d.howToProceed, /Pregúntale a la persona/)
     // Once the person chose it and worked in it, it is chosen alone.
     await call(victim.key, 'mem_save', { brain: 'mal-trap', type: 'note', title: 'Chosen', content: 'x' })
     const again = await call(victim.key, 'brain_resolve', { repos: ['github.com/victimco/secret-app'] })

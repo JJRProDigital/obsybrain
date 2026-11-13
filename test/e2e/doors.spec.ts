@@ -41,7 +41,7 @@ test('first run from the web makes the administrator and signs them in', async (
   expect((await page.request.post('/v1/setup/key', { headers: WEB, data: {} })).status()).toBe(404)
   await expect(page.locator('body')).not.toContainText(E2E_SECRET)
   // U1: the administrator sees it worked and the next step, with the agent command for this address.
-  await expect(page.getByRole('status').filter({ hasText: 'Brain is set up.' })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: 'obsybrain está configurado.' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Para empezar' })).toBeVisible()
   await expect(page.getByText(`${baseURL}/mcp`)).toBeVisible()
   await expect(page.locator('header')).toContainText('obsybrain')
@@ -78,14 +78,16 @@ test('an invitation by email is accepted and opens a session', async ({ page, br
   await p.getByRole('button', { name: 'Crear mi cuenta' }).click()
   await expect(p.getByRole('link', { name: 'Growth' })).toBeVisible()
   // The welcome comes from the real accept answer: what she joined, with her role.
-  await expect(p.getByRole('status').filter({ hasText: /Welcome — you joined Growth as/ })).toBeVisible()
+  await expect(
+    p.getByRole('status').filter({ hasText: /Bienvenido — te uniste a Growth como/ }),
+  ).toBeVisible()
   const me = await p.request.get('/v1/me')
   expect(((await me.json()) as { account: { name: string } }).account.name).toBe('Marta')
   // The link works once; opened again while signed in, it says so and leads to her brains.
   await p.goto(link)
-  await expect(p.getByRole('heading', { level: 1, name: 'This invitation is already used' })).toBeVisible()
+  await expect(p.getByRole('heading', { level: 1, name: 'Esta invitación ya se usó' })).toBeVisible()
   await expect(p.getByRole('alert')).toContainText('Este enlace de invitación no es válido')
-  await expect(p.getByRole('main').getByRole('link', { name: 'Go to your brains' })).toBeVisible()
+  await expect(p.getByRole('main').getByRole('link', { name: 'Ir a tus brains' })).toBeVisible()
   await marta.close()
 })
 
@@ -99,7 +101,7 @@ test('signing out ends the session; signing in again works', async ({ page }) =>
   await page.getByRole('button', { name: /Cuenta/ }).click()
   await page.getByRole('button', { name: 'Cerrar sesión' }).click()
   await expect(page).toHaveURL(/\/sign-in$/)
-  await expect(page.getByRole('status').filter({ hasText: 'Signed out.' })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: 'Sesión cerrada.' })).toBeVisible()
   expect((await page.request.get('/v1/me')).status()).toBe(401)
 })
 

@@ -155,7 +155,7 @@ describe('companion mode and the key epoch', { skip: skipPg }, () => {
         publicUrl: 'http://localhost',
         admin: { name: 'X', email: 'x@example.com', password: 'a long enough password' },
       }),
-      /already set up/,
+      /ya está configurada/,
     )
   })
 

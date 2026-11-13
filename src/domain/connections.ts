@@ -138,7 +138,7 @@ async function fetchClient(db: Db, now: Date, clientId: string, policy: FetchPol
   } catch (err) {
     // Brain's own reasons only: a network error says nothing about what is out there.
     const why =
-      err instanceof FetchRefused && !/no se pudo obtener\.?$/.test(err.message) ? ` ${err.message}` : ''
+      err instanceof FetchRefused && !/no se pudo obtener/.test(err.message) ? ` ${err.message}` : ''
     throw bad('invalid_client', `El documento del cliente no se pudo obtener ni usar.${why}`)
   }
   if (doc.client_id !== clientId) {

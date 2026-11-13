@@ -452,7 +452,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
     assert.equal(r.warnings.length, 1)
     assert.match(
       String(r.warnings[0]),
-      new RegExp(`${superOwnedDb}.*superuser.*connect to any database`, 's'),
+      new RegExp(`${superOwnedDb}.*superusuario.*cualquier base de datos`, 's'),
     )
     assert.match(String(await connectError(as(role, superOwnedDb))), /permission denied for database/)
   })
@@ -638,7 +638,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
     await assert.rejects(
       dbOps.drop(PG_URL as string, { database: foreignDb, role: foreignRole }),
       (err: Error & { code?: string }) =>
-        err.code === 'not_ours' && /not made by obsybrain/.test(err.message),
+        err.code === 'not_ours' && /no l[oa] hizo obsybrain/.test(err.message),
     )
     assert.deepEqual([await exists('database', foreignDb), await exists('role', foreignRole)], [true, true])
     // Either mark missing is enough to refuse: the role's, or the database's.
@@ -649,7 +649,7 @@ describe('db.provision and db.drop', { skip: skipPg }, () => {
       await assert.rejects(
         dbOps.drop(PG_URL as string, { database, role }),
         (err: Error & { code?: string }) =>
-          err.code === 'not_ours' && /not made by obsybrain/.test(err.message),
+          err.code === 'not_ours' && /no l[oa] hizo obsybrain/.test(err.message),
       )
       assert.deepEqual([await exists('database', database), await exists('role', role)], [true, true])
     }

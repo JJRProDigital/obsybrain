@@ -164,7 +164,7 @@ describe('connections with the standard sign-in', { skip: skipPg }, () => {
       brains: ['alpha'],
       perm: 'write',
     })
-    assert.match(page, /declared by the app, not verified/)
+    assert.match(page, /lo declara la app, sin verificar/)
     assert.deepEqual(
       [back.searchParams.get('state'), back.searchParams.get('iss')],
       ['st-123', 'http://localhost'],
@@ -194,7 +194,7 @@ describe('connections with the standard sign-in', { skip: skipPg }, () => {
     }>
     assert.deepEqual(
       apps.map((a) => [a.name, a.brains, a.perm, a.returnsTo]),
-      [['Claude Code', ['alpha'], 'write', '127.0.0.1:43123 (this computer)']],
+      [['Claude Code', ['alpha'], 'write', '127.0.0.1:43123 (esta computadora)']],
     )
     // A role lower than consented wins: as a reader of alpha, the connection cannot write.
     const ana = await w.person('Ana')
@@ -267,7 +267,7 @@ describe('connections with the standard sign-in', { skip: skipPg }, () => {
       brains: ['alpha'],
       perm: 'read',
     })
-    assert.match(page, /Connect “Claude”/)
+    assert.match(page, /¿Conectar “Claude”/)
     assert.match(page, /<span class="domain">evil\.example<\/span>/)
   })
 
@@ -518,7 +518,7 @@ describe('connections with the standard sign-in', { skip: skipPg }, () => {
       client_id: client,
     })
     assert.equal(old.json().error, 'invalid_grant')
-    assert.match(old.json().error_description, /Sign in again/)
+    assert.match(old.json().error_description, /Inicia sesión de nuevo/)
   })
 
   it('revoking in the profile, removing the person, or restoring a copy ends a connection at once', async () => {
