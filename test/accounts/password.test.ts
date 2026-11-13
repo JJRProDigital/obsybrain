@@ -74,7 +74,7 @@ describe('changing a password from the profile (G6)', { skip: skipPg }, () => {
     const here = await w.web(p.id)
     const wrong = await change(here, { current: 'not the current one', next: NEXT })
     assert.deepEqual([wrong.status, wrong.body.error?.code], [400, 'wrong_password'], wrong.text)
-    assert.match(String(wrong.body.error?.howToProceed), /reset/i)
+    assert.match(String(wrong.body.error?.howToProceed), /restablécela/i)
     const short = await change(here, { current: PW, next: 'short' })
     assert.deepEqual([short.status, short.body.error?.code], [400, 'invalid_request'], short.text)
     assert.match(String(short.body.error?.message), /12 to 200/)
@@ -121,7 +121,7 @@ describe('changing a password from the profile (G6)', { skip: skipPg }, () => {
     w.advance(30_000)
     const none = await change(here, { current: PW, next: NEXT })
     assert.deepEqual([none.status, none.body.error?.code], [400, 'invalid_request'], none.text)
-    assert.match(String(none.body.error?.message), /code/i)
+    assert.match(String(none.body.error?.message), /código/i)
     const wrong = await change(here, { current: PW, next: NEXT, code: '000000' })
     assert.deepEqual([wrong.status, wrong.body.error?.code], [400, 'invalid_request'], wrong.text)
     const brake = await w.db.one<{ failures: number }>('SELECT failures FROM login_brakes WHERE email = $1', [

@@ -5,22 +5,22 @@ import { T } from '../text.ts'
 import { ago, clientLabel } from './brains.ts'
 
 export function brainsLabel(t: { allBrains: boolean; brains: string[] | null }): string {
-  if (t.allBrains) return 'All your brains, and the ones you join later'
+  if (t.allBrains) return 'Todos tus brains, y los que te unas más adelante'
   return (t.brains ?? []).join(', ')
 }
 
 export function permLabel(perm: string): string {
-  return perm === 'read' ? 'Read' : 'Read and write'
+  return perm === 'read' ? 'Solo lectura' : 'Lectura y escritura'
 }
 
 export function lastUseLabel(
   t: { lastUsedAt: string | null; lastClient: string | null },
   now: Date = new Date(),
 ): string {
-  if (!t.lastUsedAt) return 'Never used'
+  if (!t.lastUsedAt) return 'Nunca usado'
   const when = ago(t.lastUsedAt, now) ?? ''
   const by = clientLabel(t.lastClient)
-  return by ? `Used ${when} by ${by}` : `Used ${when}`
+  return by ? `Usado ${when} por ${by}` : `Usado ${when}`
 }
 
 // A token works with the person's role in each brain (B4): «write» means something only where the person
@@ -84,10 +84,9 @@ export function tokenRequest(f: TokenForm): {
 } {
   const name = f.name.trim()
   const problems: { name?: string; brains?: string } = {}
-  if (!name) problems.name = 'Enter a name.'
-  else if (name.length > 80) problems.name = 'Shorten the name to 80 characters or fewer.'
-  if (f.scope === 'some' && f.brains.length === 0)
-    problems.brains = 'Choose at least one brain, or all of them.'
+  if (!name) problems.name = 'Introduce un nombre.'
+  else if (name.length > 80) problems.name = 'Acorta el nombre a 80 caracteres o menos.'
+  if (f.scope === 'some' && f.brains.length === 0) problems.brains = 'Elige al menos un brain, o todos.'
   if (problems.name || problems.brains) return { body: null, problems }
   // Only what the token reaches with read + write, and only where the person is a curator (wikiWriteChoices).
   const wikiWrite = f.perm === 'write' ? (f.wikiWrite ?? []) : []

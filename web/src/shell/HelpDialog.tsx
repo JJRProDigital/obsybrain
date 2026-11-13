@@ -33,12 +33,12 @@ export function HelpDialog({
               <td>
                 {s.id.startsWith('go-') ? (
                   <>
-                    <kbd>{s.keys[0]}</kbd> then <kbd>{s.keys[1]}</kbd>
+                    <kbd>{s.keys[0]}</kbd> luego <kbd>{s.keys[1]}</kbd>
                   </>
                 ) : (
                   s.keys.map((k, i) => (
                     <span key={k}>
-                      {i > 0 ? ' or ' : ''}
+                      {i > 0 ? ' o ' : ''}
                       <kbd>{k}</kbd>
                     </span>
                   ))

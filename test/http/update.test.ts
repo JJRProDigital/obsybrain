@@ -269,7 +269,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
       const web = await v.web(a.id)
       const r = await v.callWeb(web, 'POST', '/v1/admin/update', { password: PW })
       assert.deepEqual([r.status, r.body.error?.code], [409, 'companion'], r.text)
-      assert.match(r.body.error?.message ?? '', /installed by rsc-factory: update it from there/)
+      assert.match(r.body.error?.message ?? '', /instalado por rsc-factory: actualízalo desde allí/)
       assert.match(r.body.error?.howToProceed ?? '', /factory\.example\.test/)
       assert.deepEqual(await marks(), [])
       const sys = await v.callWeb(web, 'GET', '/v1/admin/system')
@@ -534,7 +534,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
     assert.deepEqual([retry.status, retry.body.error?.code], [409, 'retry_limit'], retry.text)
     const plain = await asked(adaWeb)
     assert.deepEqual([plain.status, plain.body.error?.code], [409, 'update_failed'], plain.text)
-    assert.doesNotMatch(plain.body.error?.howToProceed ?? '', /Try again/)
+    assert.doesNotMatch(plain.body.error?.howToProceed ?? '', /Reintentar|Vuelve a intentarlo/)
     assert.deepEqual(await marks(), [])
   })
 
@@ -553,15 +553,15 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
     await updaterSays(failure(NEWER, 3, null))
     const r = await asked(adaWeb)
     assert.deepEqual([r.status, r.body.error?.code], [409, 'update_failed'], r.text)
-    assert.doesNotMatch(r.body.error?.howToProceed ?? '', /Try again/)
+    assert.doesNotMatch(r.body.error?.howToProceed ?? '', /Reintentar|Vuelve a intentarlo/)
     assert.match(r.body.error?.howToProceed ?? '', /obsybrain\.sh update/)
     await updaterSays(failure(NEWER, 3, new Date(w.now.getTime() - 60_000).toISOString()))
     const past = await asked(adaWeb)
-    assert.doesNotMatch(past.body.error?.howToProceed ?? '', /Try again/)
+    assert.doesNotMatch(past.body.error?.howToProceed ?? '', /Reintentar|Vuelve a intentarlo/)
     // While it can still be tried again, the page says so.
     await updaterSays(failure(NEWER, 1, new Date(w.now.getTime() - 60_000).toISOString()))
     const can = await asked(adaWeb)
-    assert.match(can.body.error?.howToProceed ?? '', /Try again/)
+    assert.match(can.body.error?.howToProceed ?? '', /Reintentar/)
   })
 
   it('an update that has been running far longer than the beat limit, with the updater still beating, reads running and a second request is update_running', async () => {

@@ -54,16 +54,16 @@ describe('the folder exports are prepared in (B7 PR31 second pass)', () => {
   it('refuses a folder others can read, and a link in place of a folder', async () => {
     const open = join(root, 'open-folder')
     mkdirSync(open, { mode: 0o755 })
-    await assert.rejects(exportFolder(open), /export_folder_unsafe|not a private folder/)
+    await assert.rejects(exportFolder(open), /export_folder_unsafe|carpeta privada/)
     const real = join(root, 'real-folder')
     mkdirSync(real, { mode: 0o700 })
     const link = join(root, 'linked-folder')
     symlinkSync(real, link)
-    await assert.rejects(exportFolder(link), /not a private folder/)
+    await assert.rejects(exportFolder(link), /carpeta privada/)
     // A file in place of the folder.
     const file = join(root, 'file-folder')
     writeFileSync(file, 'x', { mode: 0o700 })
-    await assert.rejects(exportFolder(file), /not a private folder/)
+    await assert.rejects(exportFolder(file), /carpeta privada/)
     // Nothing was changed to make it pass.
     assert.equal(statSync(open).mode & 0o777, 0o755)
   })

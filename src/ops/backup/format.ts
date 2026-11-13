@@ -66,8 +66,8 @@ export const weakKey = () =>
   new AppError(
     409,
     'weak_installation_key',
-    'The installation key is too short to protect a copy (OBSY_BRAIN_SECRET needs at least 32 characters).',
-    'Rotate to a long random key (the installer generates one: openssl rand -base64 48), then make a copy again.',
+    'La clave de instalación es demasiado corta para proteger una copia (OBSY_BRAIN_SECRET necesita al menos 32 caracteres).',
+    'Rota a una clave larga aleatoria (el instalador genera una: openssl rand -base64 48) y vuelve a hacer una copia.',
   )
 
 // Writes every byte of `b`, however few each call takes (a nearly full disk may take part of a buffer without an
@@ -90,16 +90,16 @@ export const corruptCopy = () =>
   new AppError(
     422,
     'corrupt_copy',
-    'This file is not a complete obsybrain copy: it was cut, changed or not written to the end.',
-    'Use another copy from the list (obsybrain backups list); this one cannot be restored.',
+    'Este archivo no es una copia completa de obsybrain: se cortó, se cambió o no se llegó a escribir del todo.',
+    'Usa otra copia de la lista (obsybrain backups list); esta no se puede restaurar.',
   )
 
 export const wrongKey = (needs: string) => {
   const e = new AppError(
     409,
     'wrong_key',
-    `This copy was made with another installation key (key id ${needs}).`,
-    `Pass the installation key whose id is ${needs}; obsybrain key id prints the id of a key.`,
+    `Esta copia se hizo con otra clave de instalación (id de clave ${needs}).`,
+    `Pasa la clave de instalación cuyo id es ${needs}; obsybrain key id imprime el id de una clave.`,
   )
   e.extra = { needs }
   return e

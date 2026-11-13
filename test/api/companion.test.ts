@@ -392,7 +392,7 @@ describe('companion mode: reconnecting rsc-factory', { skip: skipPg }, () => {
     const before = await counts(w)
     const r = await reconnect()
     assert.deepEqual([r.status, r.body.error?.code], [409, 'service_removed'], r.text)
-    assert.match(errorOf(r).message ?? '', /removed the rsc-factory account/)
+    assert.match(errorOf(r).message ?? '', /dio de baja la cuenta de rsc-factory/)
     assert.match(errorOf(r).howToProceed ?? '', /[Rr]eactivate it/)
     assert.deepEqual(await counts(w), before)
     const live = await w.db.one<{ n: number }>(

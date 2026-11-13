@@ -13,7 +13,7 @@ import { grantOnCreate, wikiWriteOf } from './wiki/writers.ts'
 
 export const TOKEN_DAYS = [30, 90, 365] as const
 export const ALL_BRAINS_NOTE =
-  'This token reaches every brain you are a member of, including brains you join later.'
+  'Este token alcanza todos los brains de los que eres miembro, incluidos los que te sumes después.'
 
 export async function createToken(
   ctx: Ctx,
@@ -27,25 +27,26 @@ export async function createToken(
     wikiWrite?: unknown
   },
 ) {
-  inWeb(ctx, 'Creating a token')
-  if (ctx.who.kind !== 'person') throw invalid('Tokens belong to people.', 'Use a main key for a service.')
+  inWeb(ctx, 'Crear un token')
+  if (ctx.who.kind !== 'person')
+    throw invalid('Los tokens son de personas.', 'Usa una clave principal para un servicio.')
   const name = typeof input.name === 'string' ? input.name.trim() : ''
   if (!name || name.length > 80) {
-    throw invalid('A token needs a name of 1 to 80 characters.', 'Such as "Claude Code laptop".')
+    throw invalid('Un token necesita un nombre de 1 a 80 caracteres.', 'Por ejemplo "Claude Code laptop".')
   }
   if (input.perm !== 'read' && input.perm !== 'write') {
-    throw invalid('"perm" is "read", or "write" (read + write).', 'Choose one.')
+    throw invalid('"perm" es "read" o "write" (lectura y escritura).', 'Elige uno.')
   }
   const days = input.days ?? 90
   if (!TOKEN_DAYS.includes(days as (typeof TOKEN_DAYS)[number])) {
-    throw invalid('A token lasts 30, 90 or 365 days.', 'Choose one of the three (90 by default).')
+    throw invalid('Un token dura 30, 90 o 365 días.', 'Elige uno de los tres (90 por defecto).')
   }
   const all = input.allBrains === true
   const slugs = input.brains
   if (all === (slugs !== undefined && slugs !== null)) {
     throw invalid(
-      'Choose the brains of the token: "brains" (a list) or "allBrains": true.',
-      'Send one of the two.',
+      'Elige los brains del token: "brains" (una lista) o "allBrains": true.',
+      'Envía uno de los dos.',
     )
   }
   const brainIds: string[] = []
@@ -56,7 +57,7 @@ export async function createToken(
       slugs.length > 100 ||
       slugs.some((s) => typeof s !== 'string')
     ) {
-      throw invalid('"brains" is a list of 1 to 100 brain names.', 'Send ["slug", …].')
+      throw invalid('"brains" es una lista de 1 a 100 nombres de brain.', 'Envía ["slug", …].')
     }
     for (const slug of slugs as string[]) {
       const b = await ctx.db.one<{ id: string }>('SELECT id FROM brains WHERE slug = $1', [slug])
@@ -66,7 +67,7 @@ export async function createToken(
   }
   const wikiWrite = input.wikiWrite ?? []
   if (!Array.isArray(wikiWrite) || wikiWrite.length > 100 || wikiWrite.some((s) => typeof s !== 'string')) {
-    throw invalid('"wikiWrite" is a list of brain names.', 'Send ["slug", …], or leave it out.')
+    throw invalid('"wikiWrite" es una lista de nombres de brain.', 'Envía ["slug", …] u omítelo.')
   }
   const perm = input.perm
   const k = await ctx.db.tx(async (db) => {
@@ -90,13 +91,13 @@ export async function createToken(
   })
   return {
     token: { id: k.id, secret: k.secret, last4: k.secret.slice(-4), expiresAt: k.expiresAt },
-    message: 'Copy it now: obsybrain shows it only this once.',
+    message: 'Cópialo ahora: obsybrain lo muestra solo esta vez.',
     ...(all ? { note: ALL_BRAINS_NOTE } : {}),
   }
 }
 
 export async function listTokens(ctx: Ctx) {
-  inWeb(ctx, 'Seeing your tokens')
+  inWeb(ctx, 'Ver tus tokens')
   const now = ctx.clock()
   const rows = await ctx.db.query(
     `SELECT c.*, (SELECT coalesce(array_agg(b.slug ORDER BY b.slug), '{}') FROM brains b WHERE b.id = ANY(c.brain_ids)) AS slugs
@@ -129,7 +130,7 @@ export async function listTokens(ctx: Ctx) {
 }
 
 export async function revokeToken(ctx: Ctx, id: string) {
-  inWeb(ctx, 'Revoking a token')
+  inWeb(ctx, 'Revocar un token')
   const r = await ctx.db.one(
     `UPDATE credentials SET revoked_at = $3 WHERE id = $1 AND account_id = $2 AND kind = 'token'
       AND revoked_at IS NULL RETURNING id`,
@@ -142,7 +143,7 @@ export async function revokeToken(ctx: Ctx, id: string) {
 // «Revoke all tokens and apps» (profile): every personal token and every connected app of the person, in
 // one transaction and one line of the audit. Web sessions stay (that is «sign out everywhere»).
 export async function revokeAll(ctx: Ctx): Promise<{ tokens: number; apps: number }> {
-  inWeb(ctx, 'Revoking your tokens and apps')
+  inWeb(ctx, 'Revocar tus tokens y apps')
   const now = ctx.clock()
   return ctx.db.tx(async (tx) => {
     const tokens = await tx.query(

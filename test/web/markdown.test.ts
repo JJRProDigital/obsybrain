@@ -87,13 +87,13 @@ describe('a page body', () => {
   it('a mention of a page that does not exist looks different and says so in words', () => {
     const html = md('Soon: [[drafts/not-yet]].')
     assert.match(html, /class="wikilink broken"/)
-    assert.match(html, /no page yet/)
+    assert.match(html, /todavía sin página/)
   })
 
   it('a mention of a retired or superseded page says that too', () => {
     assert.match(
       md('[[legal/retired-one]]'),
-      /class="wikilink retired"[^>]*>legal\/retired-one<span class="link-note"> \(retired\)/,
+      /class="wikilink retired"[^>]*>legal\/retired-one<span class="link-note"> \(retirada\)/,
     )
     assert.match(md('[[audience/old-intros]]'), /class="wikilink superseded"/)
   })

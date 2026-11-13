@@ -53,7 +53,7 @@ describe('first-time setup', { skip: skipPg }, () => {
 
   it('CA2: a public address without encryption is warned about; a password over it is refused', async () => {
     const warn = await w.raw('GET', '/v1/setup?publicUrl=http%3A%2F%2Fbrain.example.com')
-    assert.match(String(warn.body.warning), /not encrypted.*HTTPS.*local address.*tunnel/s)
+    assert.match(String(warn.body.warning), /cifrada.*HTTPS.*dirección local.*túnel/s)
     assert.equal(
       (await w.raw('GET', '/v1/setup?publicUrl=https%3A%2F%2Fbrain.example.com')).body.warning,
       null,

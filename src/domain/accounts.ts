@@ -18,16 +18,17 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function createAccount(db: Db, clock: Clock, a: NewAccount): Promise<string> {
   const name = a.name.trim()
-  if (!name || name.length > 80) throw invalid('An account name has 1 to 80 characters.', 'Shorten the name.')
+  if (!name || name.length > 80)
+    throw invalid('El nombre de una cuenta tiene de 1 a 80 caracteres.', 'Acorta el nombre.')
   const email = a.email?.trim().toLowerCase()
   if (a.kind === 'person' && (!email || !EMAIL.test(email))) {
-    throw invalid('A person needs a valid email.', 'Give an email such as ana@example.com.')
+    throw invalid('Una persona necesita un correo válido.', 'Indica un correo como ana@example.com.')
   }
   if (a.kind === 'service' && email) {
-    throw invalid('A service account has no email.', 'Leave the email out.')
+    throw invalid('Una cuenta de servicio no tiene correo.', 'Omite el correo.')
   }
   if (a.kind === 'service' && a.isAdmin) {
-    throw invalid('A service account cannot be an administrator.', 'Create a person account instead.')
+    throw invalid('Una cuenta de servicio no puede ser administradora.', 'Crea una cuenta de persona.')
   }
   const id = newId('acc')
   try {
@@ -47,7 +48,7 @@ export async function createAccount(db: Db, clock: Clock, a: NewAccount): Promis
     )
   } catch (err) {
     if ((err as { code?: string }).code === '23505') {
-      throw conflict('email_taken', 'An account with that email already exists.', 'Use another email.')
+      throw conflict('email_taken', 'Ya existe una cuenta con ese correo.', 'Usa otro correo.')
     }
     throw err
   }

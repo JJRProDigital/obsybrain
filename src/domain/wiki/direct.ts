@@ -26,7 +26,10 @@ export async function directChange(
     await allow(c, 'wiki.decide', { role, brainStatus: brain.status }, brain.id)
     if (op) problems.push(...(await problemsOf(db, brain.id, [op], [], false)))
     if (!op || problems.length > 0) {
-      const err = invalid('The change has problems; nothing was saved.', 'Fix each one listed in "problems".')
+      const err = invalid(
+        'El cambio tiene problemas; no se guardó nada.',
+        'Corrige cada uno de los listados en "problems".',
+      )
       err.problems = problems
       throw err
     }
@@ -38,8 +41,8 @@ export async function directChange(
       if (now && Number(now.revision) !== op.baseRevision) {
         const err = conflict(
           'page_changed',
-          `"${op.address}" changed since revision ${op.baseRevision}; it is at ${now.revision}. Nothing was saved.`,
-          'Apply your change to the current version (in "current") and save it with its revision.',
+          `"${op.address}" cambió desde la revisión ${op.baseRevision}; está en la ${now.revision}. No se guardó nada.`,
+          'Aplica tu cambio sobre la versión actual (en "current") y guárdalo con su revisión.',
         )
         err.current = await getPage(c, slug, op.address)
         throw err
@@ -47,10 +50,10 @@ export async function directChange(
     }
     const verb =
       op.op === 'revert'
-        ? `Back to revision ${op.toRevision}`
+        ? `De vuelta a la revisión ${op.toRevision}`
         : op.op === 'status'
-          ? `Direct status → ${op.status}`
-          : `Direct ${op.op}`
+          ? `Estado directo → ${op.status}`
+          : `Directo: ${op.op}`
     const { revised } = await applyOps(c, db, brain.id, [{ op }], {
       kind: op.op === 'revert' ? 'revert' : 'direct',
       summary: `${verb}: ${op.address}`,
@@ -118,18 +121,18 @@ export async function setWikiSettings(
   const usageNote = s.usageNote === undefined ? undefined : redact(s.usageNote.trim()).text
   if (guide !== undefined && guide !== null && (!guide || guide.length > 20_000)) {
     throw invalid(
-      'The guide has 1 to 20 000 characters.',
-      'Shorten it, or send null to go back to the default.',
+      'La guía tiene de 1 a 20 000 caracteres.',
+      'Acórtala, o envía null para volver a la guía por defecto.',
     )
   }
   if (mapIntro !== undefined && mapIntro.length > 4000)
-    throw invalid('The map intro has at most 4 000 characters.', 'Shorten it.')
+    throw invalid('La introducción del mapa tiene como máximo 4 000 caracteres.', 'Acórtala.')
   // The note that opens every start-up context of the brain (spec B3).
   if (usageNote !== undefined && usageNote.length > 2000)
-    throw invalid('The usage note has at most 2 000 characters.', 'Shorten it.')
+    throw invalid('La nota de uso tiene como máximo 2 000 caracteres.', 'Acórtala.')
   const range = (v: number | undefined, name: string, min: number, max: number) => {
     if (v !== undefined && (!Number.isSafeInteger(v) || v < min || v > max)) {
-      throw invalid(`"${name}" goes from ${min} to ${max}.`, `Fix "${name}".`)
+      throw invalid(`"${name}" va de ${min} a ${max}.`, `Corrige "${name}".`)
     }
   }
   range(s.staleDays, 'staleDays', 1, 3650)
@@ -151,8 +154,8 @@ export async function setWikiSettings(
       if (moved.length) {
         const e = conflict(
           'settings_changed',
-          `Someone changed ${moved.join(', ')} of "${slug}" since you read ${moved.length === 1 ? 'it' : 'them'}.`,
-          'Read the current values in "current", then save your change again on top of them.',
+          `Alguien cambió ${moved.join(', ')} de "${slug}" desde que ${moved.length === 1 ? 'lo' : 'los'} leíste.`,
+          'Lee los valores actuales en "current" y vuelve a guardar tu cambio sobre ellos.',
         )
         e.current = settingsView(now)
         throw e
@@ -177,8 +180,8 @@ export async function setWikiSettings(
       return { ...settingsView(await settingsOf(db, brain.id)), unchanged: true }
     if (sets.length === 0)
       throw invalid(
-        'Nothing to change.',
-        'Send guide, mapIntro, usageNote, meaningExcluded, staleDays, longChars or maintenanceEvery.',
+        'Nada que cambiar.',
+        'Envía guide, mapIntro, usageNote, meaningExcluded, staleDays, longChars o maintenanceEvery.',
       )
     // Waits for any vector being stored for this brain, so none lands after the exclusion.
     if (s.meaningExcluded !== undefined) await lockMeaning(db, brain.id)

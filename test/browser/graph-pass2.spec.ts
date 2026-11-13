@@ -23,23 +23,23 @@ test('Leave focus never leaves the keyboard waiting for a row that is gone, nor 
 }) => {
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
   await page.goto(`${GRAPH}?view=list`)
-  const table = page.getByRole('table', { name: /Pages of the wiki/ })
+  const table = page.getByRole('table', { name: /Páginas del wiki/ })
   await expect(table.locator('tbody tr').first()).toBeVisible()
   // A topic page: a Type filter set during focus leaves its row out of the list.
-  const row = table.locator('tbody tr', { hasText: 'Topic' }).first()
+  const row = table.locator('tbody tr', { hasText: 'Tema' }).first()
   const focusButton = row.locator('[data-focus-for]')
   const address = (await focusButton.getAttribute('data-focus-for')) as string
   await focusButton.focus()
   await page.keyboard.press('Enter')
   await expect(page.locator('#graph-focus')).toBeFocused()
   await openFilters(page)
-  await page.getByLabel('Type', { exact: true }).selectOption('decision')
-  await page.getByRole('button', { name: 'Leave focus' }).focus()
+  await page.getByLabel('Tipo', { exact: true }).selectOption('decision')
+  await page.getByRole('button', { name: 'Salir del foco' }).focus()
   await page.keyboard.press('Enter')
   // The row is not there: the keyboard lands on the heading of the list instead of nowhere.
   await expect(page.locator('#graph-place')).toBeFocused()
   // Later, the row comes back: the keyboard stays where the person put it.
-  const type = page.getByLabel('Type', { exact: true })
+  const type = page.getByLabel('Tipo', { exact: true })
   await type.focus()
   await type.selectOption('')
   await expect(page.locator(`[data-focus-for="${address}"]`)).toBeVisible()
@@ -53,20 +53,20 @@ test('a lumpy wiki: loose pages beside the groups, many gathered as "Other pages
 }) => {
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 'lumpy' })
   await page.goto(`${GRAPH}?view=list`)
-  const groups = page.getByRole('table', { name: 'Groups of the wiki' })
+  const groups = page.getByRole('table', { name: 'Grupos del wiki' })
   await expect(groups.locator('tbody tr')).toHaveCount(3)
-  await expect(groups).toContainText('Other pages (100)')
-  await page.getByRole('button', { name: 'Open group eng' }).click()
-  await expect(page.locator('#graph-place')).toHaveText('Group eng')
-  await expect(groups).toContainText('Other pages in eng (60)')
-  await page.getByRole('button', { name: 'Open group Other pages in eng (60)' }).click()
+  await expect(groups).toContainText('Otras páginas (100)')
+  await page.getByRole('button', { name: 'Abrir el grupo eng' }).click()
+  await expect(page.locator('#graph-place')).toHaveText('Grupo eng')
+  await expect(groups).toContainText('Otras páginas en eng (60)')
+  await page.getByRole('button', { name: 'Abrir el grupo Otras páginas en eng (60)' }).click()
   await expect(page).toHaveURL(/loose=1/)
-  await expect(page.locator('#graph-place')).toHaveText('Other pages in eng')
-  await expect(page.getByRole('table', { name: /Pages of the wiki/ }).getByRole('caption')).toContainText(
+  await expect(page.locator('#graph-place')).toHaveText('Otras páginas en eng')
+  await expect(page.getByRole('table', { name: /Páginas del wiki/ }).getByRole('caption')).toContainText(
     'of 60 pages',
   )
   // In the graph, the same group draws its 60 pages.
-  await page.getByRole('button', { name: 'Graph', exact: true }).click()
+  await page.getByRole('button', { name: 'Grafo', exact: true }).click()
   await settled(page)
   await expect(page.locator('canvas.graph-canvas')).toHaveAttribute('data-items', /^6\d$/)
 })
@@ -89,7 +89,7 @@ test('1440 × 900: the graph starts above the fold, the filters fold into a summ
   expect(box?.height ?? 0).toBeGreaterThan(400)
   await canvas.focus()
   await page.keyboard.press('Enter')
-  await inspectorOf(page).getByRole('button', { name: 'Focus: 2 hops' }).click()
+  await inspectorOf(page).getByRole('button', { name: 'Foco: 2 saltos' }).click()
   await expect(page.locator('#graph-place')).toHaveText(/^Focus: .+ · 2 hops · \d+ pages?$/)
   await expect(canvas).toBeInViewport({ ratio: 0.9 })
   expect(await page.evaluate(() => window.scrollY)).toBeLessThan(200)
@@ -119,7 +119,7 @@ test('375 px: the inspector opens as a peek that expands, and the selected page 
       return (cbox?.y ?? 0) + (y ?? 9999)
     })
     .toBeLessThan(top)
-  await sheet.getByRole('button', { name: 'More' }).click()
+  await sheet.getByRole('button', { name: 'Más' }).click()
   await expect(sheet).toHaveAttribute('data-sheet', 'full')
 })
 
@@ -130,7 +130,7 @@ test('focus in the list: two-hop rows say which neighbour they come through; one
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto(`${GRAPH}?view=list&focus=audience%2Fretention&hops=2`)
-  await expect(page.getByRole('heading', { level: 1, name: 'Graph' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Grafo' })).toBeVisible()
   await expect(page.locator('#graph-place')).toHaveText(/^Focus: Retention · 2 hops · \d+ pages$/)
   const table = page.getByRole('table', { name: 'Retention and its neighbours' })
   const two = table.locator('tbody tr', { hasText: '2 hops' }).first()
@@ -147,7 +147,7 @@ test('focus in the list: two-hop rows say which neighbour they come through; one
 test('the list has a way past the table to its pages', async ({ page, context, baseURL }) => {
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
   await page.goto(`${GRAPH}?view=list`)
-  const skip = page.getByRole('button', { name: 'Skip to the page buttons' })
+  const skip = page.getByRole('button', { name: 'Saltar a los botones de página' })
   await expect(skip).toHaveCount(1)
   await skip.focus()
   await page.keyboard.press('Enter')
@@ -160,7 +160,7 @@ test('tags filter as they are typed', async ({ page, context, baseURL }) => {
   await settled(page)
   await page.locator('.graph-filters summary').click()
   await openFilters(page)
-  await page.getByLabel('Tag', { exact: true }).pressSequentially('q4')
+  await page.getByLabel('Etiqueta', { exact: true }).pressSequentially('q4')
   await expect(page).toHaveURL(/tag=q4/)
 })
 
@@ -172,11 +172,11 @@ test('an empty wiki points to Proposals, and with words says no pages match', as
   await scenario(context, baseURL as string, 'signed-in', { graph: 'empty', pages: 'empty' })
   await page.goto(`${GRAPH}?view=list`)
   const main = page.getByRole('main')
-  await expect(main).toContainText('Pages arrive when agents propose them and a curator approves')
-  await expect(main.getByRole('link', { name: 'Proposals' })).toBeVisible()
+  await expect(main).toContainText('Las páginas llegan cuando los agentes las proponen y un curador aprueba')
+  await expect(main.getByRole('link', { name: 'Propuestas' })).toBeVisible()
   await expect(main.locator('[data-state="empty"]')).not.toContainText(/graph/i)
   await page.goto(`${GRAPH}?view=list&q=zebra`)
-  await expect(page.getByText('No results for these filters.')).toBeVisible()
+  await expect(page.getByText('No hay resultados para estos filtros.')).toBeVisible()
 })
 
 test('without OffscreenCanvas the page paints the graph itself', async ({ page, context, baseURL }) => {

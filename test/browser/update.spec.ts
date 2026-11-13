@@ -36,14 +36,14 @@ async function audit(page: Page, where: string) {
   expect(bad).toEqual([])
 }
 
-const service = (page: Page) => page.getByRole('region', { name: 'Service' })
+const service = (page: Page) => page.getByRole('region', { name: 'Servicio' })
 
 test.describe('Admin › Backups & system: updating from the web', () => {
   test('off: the command, and no button, even with a newer version', async ({ page, context, baseURL }) => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await behind(baseURL as string, s.id, { release: NEWER })
     await page.goto('/admin/system')
-    await expect(service(page)).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
+    await expect(service(page)).toContainText('Corre la versión v0.1.0. La versión v0.2.0 está disponible.')
     await expect(service(page)).toContainText('obsybrain.sh update')
     await expect(page.getByRole('button', { name: /^Update to/ })).toHaveCount(0)
   })
@@ -56,34 +56,34 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await behind(baseURL as string, s.id, { release: NEWER, update: { mode: 'on' } })
     await page.goto('/admin/system')
-    await expect(service(page)).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
+    await expect(service(page)).toContainText('Corre la versión v0.1.0. La versión v0.2.0 está disponible.')
     await audit(page, 'update available')
     // By keyboard: the button is reached and opens the dialog; the password has the focus.
-    const button = service(page).getByRole('button', { name: 'Update to v0.2.0' })
+    const button = service(page).getByRole('button', { name: 'Actualizar a v0.2.0' })
     await button.focus()
     await page.keyboard.press('Enter')
     const dialog = page.getByRole('dialog')
-    await expect(dialog).toContainText('Update to v0.2.0')
+    await expect(dialog).toContainText('Actualizar a v0.2.0')
     await expect(dialog).toContainText('goes back to the version you have now')
-    await expect(dialog.getByLabel('Your password')).toBeFocused()
+    await expect(dialog.getByLabel('Tu contraseña')).toBeFocused()
     await audit(page, 'update dialog')
     // Nothing typed.
-    await dialog.getByRole('button', { name: 'Update to v0.2.0' }).click()
-    await expect(dialog).toContainText('Type your password.')
-    await expect(dialog.getByLabel('Your password')).toBeFocused()
+    await dialog.getByRole('button', { name: 'Actualizar a v0.2.0' }).click()
+    await expect(dialog).toContainText('Escribe tu contraseña.')
+    await expect(dialog.getByLabel('Tu contraseña')).toBeFocused()
     // A wrong one.
-    await dialog.getByLabel('Your password').fill('not the password')
+    await dialog.getByLabel('Tu contraseña').fill('not the password')
     await page.keyboard.press('Enter')
     await expect(dialog).toContainText('The password is not right.')
-    await expect(dialog.getByLabel('Your password')).toBeFocused()
-    await expect(dialog.getByLabel('Your password')).toHaveValue('')
+    await expect(dialog.getByLabel('Tu contraseña')).toBeFocused()
+    await expect(dialog.getByLabel('Tu contraseña')).toHaveValue('')
     // The right one: the request carries the password and nothing else.
-    await dialog.getByLabel('Your password').fill(PASSWORD)
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
     const sent = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/v1/admin/update'))
     await page.keyboard.press('Enter')
     expect(Object.keys((await sent).postDataJSON())).toEqual(['password'])
     await expect(page.getByRole('dialog')).toHaveCount(0)
-    const said = page.getByRole('status').filter({ hasText: 'Update requested.' })
+    const said = page.getByRole('status').filter({ hasText: 'Actualización pedida.' })
     await expect(said).toBeFocused()
     // The page follows: the request waits for the updater, then it runs, then the result.
     await expect(service(page)).toContainText('waits for the updater')
@@ -91,15 +91,15 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     await behind(baseURL as string, s.id, {
       update: { requested: false, running: { to: 'v0.2.0', startedAt: '2026-10-29T10:00:00.000Z' } },
     })
-    await expect(service(page)).toContainText('Updating to v0.2.0.', { timeout: 10_000 })
+    await expect(service(page)).toContainText('Actualizando a v0.2.0.', { timeout: 10_000 })
     await audit(page, 'update running')
     await behind(baseURL as string, s.id, {
       release: { latest: 'v0.1.0', notes: '', checkedAt: '2026-10-29T10:05:00.000Z' },
       update: { running: null },
       lastUpdate: { ok: true, from: 'v0.0.9', to: 'v0.1.0', at: '2026-10-29T10:04:00.000Z' },
     })
-    await expect(service(page)).toContainText('Updated from v0.0.9 to v0.1.0.', { timeout: 10_000 })
-    await expect(service(page)).toContainText('This is the newest')
+    await expect(service(page)).toContainText('Actualizado de v0.0.9 a v0.1.0.', { timeout: 10_000 })
+    await expect(service(page)).toContainText('Esta es la más nueva')
   })
 
   test('with a second factor the code is asked, and sent', async ({ page, context, baseURL }) => {
@@ -112,15 +112,15 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       await route.fulfill({ response: res, json: body })
     })
     await page.goto('/admin/system')
-    await service(page).getByRole('button', { name: 'Update to v0.2.0' }).click()
+    await service(page).getByRole('button', { name: 'Actualizar a v0.2.0' }).click()
     const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Your password').fill(PASSWORD)
-    await dialog.getByRole('button', { name: 'Update to v0.2.0' }).click()
-    await expect(dialog.getByLabel('Code from your authenticator app')).toBeFocused()
-    await expect(dialog).toContainText('Type the 6 digits')
-    await dialog.getByLabel('Code from your authenticator app').fill('424242')
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
+    await dialog.getByRole('button', { name: 'Actualizar a v0.2.0' }).click()
+    await expect(dialog.getByLabel('Código de tu app de autenticación')).toBeFocused()
+    await expect(dialog).toContainText('Escribe los 6 dígitos')
+    await dialog.getByLabel('Código de tu app de autenticación').fill('424242')
     const sent = page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/v1/admin/update'))
-    await dialog.getByRole('button', { name: 'Update to v0.2.0' }).click()
+    await dialog.getByRole('button', { name: 'Actualizar a v0.2.0' }).click()
     expect((await sent).postDataJSON()).toEqual({ password: PASSWORD, code: '424242' })
   })
 
@@ -132,13 +132,13 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await behind(baseURL as string, s.id, { release: NEWER, update: { mode: 'on' } })
     await page.goto('/admin/system')
-    await service(page).getByRole('button', { name: 'Update to v0.2.0' }).click()
+    await service(page).getByRole('button', { name: 'Actualizar a v0.2.0' }).click()
     // Meanwhile another administrator asks.
     await behind(baseURL as string, s.id, { update: { requested: true } })
     const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Your password').fill(PASSWORD)
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
     await page.keyboard.press('Enter')
-    await expect(dialog.getByRole('alert')).toContainText('An update is already running.')
+    await expect(dialog.getByRole('alert')).toContainText('Ya corre una actualización.')
   })
 
   test('a failure: when, why, and Try again; it asks the password again too', async ({
@@ -152,20 +152,20 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       update: { mode: 'on', attempts: [failure(0, PAST)] },
     })
     await page.goto('/admin/system')
-    await expect(service(page)).toContainText('The update to v0.2.0 failed at')
-    await service(page).getByText('What the updater said').click()
+    await expect(service(page)).toContainText('La actualización a v0.2.0 falló')
+    await service(page).getByText('Lo que dijo el updater').click()
     await expect(service(page)).toContainText('the image did not build')
     await expect(service(page).getByRole('button', { name: /^Update to/ })).toHaveCount(0)
     await audit(page, 'update failed')
-    await service(page).getByRole('button', { name: 'Try again' }).click()
+    await service(page).getByRole('button', { name: 'Probar otra vez' }).click()
     const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Your password').fill(PASSWORD)
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
     const sent = page.waitForRequest(
       (r) => r.method() === 'POST' && r.url().endsWith('/v1/admin/update/retry'),
     )
-    await dialog.getByRole('button', { name: 'Try again' }).click()
+    await dialog.getByRole('button', { name: 'Probar otra vez' }).click()
     expect(Object.keys((await sent).postDataJSON())).toEqual(['password'])
-    await expect(page.getByRole('status').filter({ hasText: 'Update requested.' })).toBeFocused()
+    await expect(page.getByRole('status').filter({ hasText: 'Actualización pedida.' })).toBeFocused()
   })
 
   test('too soon to try again: said with when, no button; past the limit: only the server, with the command', async ({
@@ -179,13 +179,13 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       update: { mode: 'on', attempts: [failure(1, FUTURE)] },
     })
     await page.goto('/admin/system')
-    await expect(service(page)).toContainText('You can try again')
-    await expect(service(page).getByRole('button', { name: 'Try again' })).toHaveCount(0)
+    await expect(service(page)).toContainText('Puedes probar otra vez')
+    await expect(service(page).getByRole('button', { name: 'Probar otra vez' })).toHaveCount(0)
     await behind(baseURL as string, s.id, { update: { attempts: [failure(3, null)] } })
     await page.reload()
     await expect(service(page)).toContainText('only the server can try again')
     await expect(service(page)).toContainText('obsybrain.sh update')
-    await expect(service(page).getByRole('button', { name: 'Try again' })).toHaveCount(0)
+    await expect(service(page).getByRole('button', { name: 'Probar otra vez' })).toHaveCount(0)
   })
 
   test('a refused request says «Cannot update: …» with the reason, and the button stays (closing review)', async ({
@@ -210,7 +210,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       'Cannot update: there is not enough free disk (needs 2 GB, 1 GB free).',
     )
     await expect(service(page)).toContainText('obsybrain.sh update')
-    await expect(service(page).getByRole('button', { name: 'Update to v0.2.0' })).toBeVisible()
+    await expect(service(page).getByRole('button', { name: 'Actualizar a v0.2.0' })).toBeVisible()
     await audit(page, 'update refused')
   })
 
@@ -255,9 +255,9 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       },
     })
     await page.goto('/admin/system')
-    await expect(service(page)).toContainText('The update to v0.2.0 failed at')
-    await expect(service(page)).toContainText('Cannot update: another run holds the lock.')
-    await expect(service(page).getByRole('button', { name: 'Try again' })).toBeVisible()
+    await expect(service(page)).toContainText('La actualización a v0.2.0 falló')
+    await expect(service(page)).toContainText('No se puede actualizar: another run holds the lock.')
+    await expect(service(page).getByRole('button', { name: 'Probar otra vez' })).toBeVisible()
     await audit(page, 'failure and refusal')
     await behind(baseURL as string, s.id, {
       update: {
@@ -283,14 +283,14 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       update: { mode: 'companion', factoryUrl: 'https://factory.example.test' },
     })
     await page.goto('/admin/system')
-    await expect(service(page)).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
+    await expect(service(page)).toContainText('Corre la versión v0.1.0. La versión v0.2.0 está disponible.')
     await expect(service(page)).toContainText('obsybrain was installed by rsc-factory: update it from there.')
-    await expect(service(page).getByRole('link', { name: 'Open rsc-factory' })).toHaveAttribute(
+    await expect(service(page).getByRole('link', { name: 'Abrir rsc-factory' })).toHaveAttribute(
       'href',
       'https://factory.example.test',
     )
     await expect(page.getByRole('button', { name: /^Update to|Try again/ })).toHaveCount(0)
-    await expect(service(page)).not.toContainText('Update on the machine')
+    await expect(service(page)).not.toContainText('Actualiza en la máquina')
     await audit(page, 'companion')
   })
 
@@ -333,15 +333,15 @@ test.describe('Admin › Backups & system: updating from the web', () => {
         },
       })
       await page.goto('/admin/system')
-      await expect(service(page)).toContainText('Version v0.1.0 is running.')
+      await expect(service(page)).toContainText('Corre la versión v0.1.0.')
       await noSideScroll(page)
     }
     await behind(baseURL as string, s.id, {
       update: { mode: 'on', requested: false, running: null, attempts: [] },
     })
     await page.goto('/admin/system')
-    await service(page).getByRole('button', { name: 'Update to v0.2.0' }).click()
-    await expect(page.getByRole('dialog').getByLabel('Your password')).toBeVisible()
+    await service(page).getByRole('button', { name: 'Actualizar a v0.2.0' }).click()
+    await expect(page.getByRole('dialog').getByLabel('Tu contraseña')).toBeVisible()
     await noSideScroll(page)
   })
 })

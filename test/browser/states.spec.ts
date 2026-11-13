@@ -15,9 +15,9 @@ test.describe('home', () => {
   test('empty says who can give access', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'member', { home: 'empty' })
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'You are not in any brain yet' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Todavía no estás en ningún brain' })).toBeVisible()
     await expect(
-      page.getByText('A curator of a brain, or an administrator, can add you to one.'),
+      page.getByText('Un curador de un brain, o un administrador, puede añadirte a uno.'),
     ).toBeVisible()
   })
 
@@ -28,7 +28,7 @@ test.describe('home', () => {
     await expect(alert).toContainText('Something went wrong on the server (reference fx000001).')
     await expect(alert).toContainText('give the reference to an administrator')
     await s.state('home', 'normal')
-    await alert.getByRole('button', { name: 'Try again' }).click()
+    await alert.getByRole('button', { name: 'Probar otra vez' }).click()
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
   })
 
@@ -45,7 +45,7 @@ test.describe('home', () => {
     await page.goto('/')
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
     await context.setOffline(true)
-    await expect(page.getByText('You are offline. What you see may be out of date')).toBeVisible()
+    await expect(page.getByText('Estás sin conexión. Lo que ves puede estar desactualizado')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
     await context.setOffline(false)
   })
@@ -60,16 +60,16 @@ test.describe('a brain', () => {
     await scenario(context, baseURL as string, 'signed-in', { brain: 'forbidden' })
     await page.goto('/b/growth')
     const alert = page.getByRole('alert')
-    await expect(alert).toContainText('You cannot open this')
-    await expect(alert).toContainText('Ask a curator of that brain to add you')
-    await expect(alert.getByRole('button', { name: 'Try again' })).toHaveCount(0)
+    await expect(alert).toContainText('No puedes abrir esto')
+    await expect(alert).toContainText('Pide a un curador de ese brain que te añada')
+    await expect(alert.getByRole('button', { name: 'Probar otra vez' })).toHaveCount(0)
   })
 
   test('one that does not exist reads the same', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/nowhere')
     await expect(page.getByRole('alert')).toContainText(
-      'This brain does not exist, or you are not one of its members.',
+      'Este brain no existe, o no eres uno de sus miembros.',
     )
   })
 })
@@ -99,8 +99,8 @@ test.describe('the session', () => {
     await page.waitForTimeout(500)
     await expect(page).toHaveURL(/\/sign-in\?next=%2Fb%2Fgrowth$/)
     await page.getByLabel('Email').fill('eric@example.test')
-    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click()
     await expect(page).toHaveURL(/\/b\/growth$/)
     await expect(page.getByRole('heading', { level: 1, name: 'Growth' })).toBeVisible()
   })
@@ -113,8 +113,8 @@ test.describe('the session', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/%E0%A4%A')
-    await expect(page.getByRole('heading', { name: 'Nothing here' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Go home' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Nada aquí' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Ir al inicio' })).toBeVisible()
   })
 
   test('an address that is not a page of the web says so and leads home', async ({
@@ -124,9 +124,9 @@ test.describe('the session', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/nothing/here')
-    await expect(page.getByRole('heading', { name: 'Nothing here' })).toBeVisible()
-    await page.getByRole('link', { name: 'Go home' }).click()
-    await expect(page.getByRole('heading', { name: 'Your brains' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Nada aquí' })).toBeVisible()
+    await page.getByRole('link', { name: 'Ir al inicio' }).click()
+    await expect(page.getByRole('heading', { name: 'Tus brains' })).toBeVisible()
   })
 })
 

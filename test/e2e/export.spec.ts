@@ -15,29 +15,29 @@ async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   const h1 = page.getByRole('heading', { level: 1 })
   await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up obsybrain') {
-    await page.getByLabel('Name of this installation').fill('obsybrain')
-    await page.getByLabel('Address people open').fill(baseURL)
-    await page.getByLabel('Your name').fill(ADMIN.name)
-    await page.getByLabel('Your email').fill(ADMIN.email)
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
-  } else if (where === 'Sign in') {
+  if (where === 'Configurar obsybrain') {
+    await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await page.getByLabel('Dirección que abre la gente').fill(baseURL)
+    await page.getByLabel('Tu nombre').fill(ADMIN.name)
+    await page.getByLabel('Tu email').fill(ADMIN.email)
+    await page.getByLabel('Contraseña', { exact: true }).fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
+  } else if (where === 'Iniciar sesión') {
     await page.getByLabel('Email').fill(ADMIN.email)
-    await page.getByLabel('Password').fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Contraseña').fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
   }
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
 }
 
 test('a curator saves both exports from Settings, and they hold the brain', async ({ page, baseURL }) => {
   await signedInAdmin(page, baseURL as string)
   await page.goto('/')
-  await page.getByRole('button', { name: 'Create brain' }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Create a brain' })
-  await dialog.getByLabel('Name').fill('Export walk')
-  await dialog.getByLabel('What it is for').fill('What the export e2e walks.')
-  await dialog.getByRole('button', { name: 'Create brain' }).click()
+  await page.getByRole('button', { name: 'Crear brain' }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'Crear un brain' })
+  await dialog.getByLabel('Nombre').fill('Export walk')
+  await dialog.getByLabel('Para qué sirve').fill('What the export e2e walks.')
+  await dialog.getByRole('button', { name: 'Crear brain' }).click()
   await expect(page).toHaveURL(/\/b\/[^/]+$/)
   const slug = decodeURIComponent(new URL(page.url()).pathname.split('/')[2] as string)
   for (const [address, body] of [
@@ -61,10 +61,10 @@ test('a curator saves both exports from Settings, and they hold the brain', asyn
     expect(r.status(), await r.text()).toBe(201)
   }
   await page.goto(`/b/${slug}/settings/archive`)
-  const part = page.getByRole('region', { name: 'Export', exact: true })
+  const part = page.getByRole('region', { name: 'Exportar', exact: true })
   const [readable] = await Promise.all([
     page.waitForEvent('download'),
-    part.getByRole('button', { name: 'Download the export' }).click(),
+    part.getByRole('button', { name: 'Descargar la exportación' }).click(),
   ])
   expect(readable.suggestedFilename()).toMatch(
     new RegExp(`^obsybrain-${slug}-readable-\\d{8}T\\d{6}Z\\.zip$`),
@@ -77,7 +77,7 @@ test('a curator saves both exports from Settings, and they hold the brain', asyn
   await part.getByLabel('Faithful').check()
   const [faithful] = await Promise.all([
     page.waitForEvent('download'),
-    part.getByRole('button', { name: 'Download the export' }).click(),
+    part.getByRole('button', { name: 'Descargar la exportación' }).click(),
   ])
   const all = filesOf(readFileSync(await faithful.path()))
   const manifest = JSON.parse(all.get('manifest.json') as string) as {

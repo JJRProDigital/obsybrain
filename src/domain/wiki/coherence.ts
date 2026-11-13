@@ -116,7 +116,7 @@ async function after(db: Db, brainId: string, b: Before, touched: string[]): Pro
       pairs.add(key)
       out.push({
         code: 'duplicate_title',
-        message: `The title "${p.title}" of "${p.address}" is almost the same as that of "${t.address}" ("${t.title}"): the same subject twice?`,
+        message: `El título "${p.title}" de "${p.address}" es casi igual al de "${t.address}" ("${t.title}"): ¿el mismo tema dos veces?`,
         addresses: [String(p.address), String(t.address)],
       })
     }
@@ -132,7 +132,7 @@ async function after(db: Db, brainId: string, b: Before, touched: string[]): Pro
   for (const r of broken)
     out.push({
       code: 'broken_link',
-      message: `"${r.from}" links to [[${r.to}]], which is no page.`,
+      message: `"${r.from}" enlaza a [[${r.to}]], que no es ninguna página.`,
       addresses: [String(r.from), String(r.to)],
     })
   // A page left with no link either way that was not so before (or did not exist).
@@ -143,14 +143,14 @@ async function after(db: Db, brainId: string, b: Before, touched: string[]): Pro
     for (const r of await db.query('SELECT address FROM pages WHERE id = ANY($1) ORDER BY address', [lonely]))
       out.push({
         code: 'orphan_created',
-        message: `"${r.address}" is left with no link to or from any other page: link it where it belongs.`,
+        message: `"${r.address}" queda sin enlaces hacia ni desde ninguna otra página: enlázala donde corresponda.`,
         addresses: [String(r.address)],
       })
   }
   for (const r of b.stale)
     out.push({
       code: 'stale_page',
-      message: `"${r.address}" is stale: the journal says newer things about it, or a curator marked it. Check them before relying on it.`,
+      message: `"${r.address}" está desactualizada: el diario dice cosas más nuevas sobre ella, o una persona curadora la marcó. Revísalas antes de fiarte de ella.`,
       addresses: [String(r.address)],
     })
   // A touched page in an open contradiction with another live page.
@@ -165,7 +165,7 @@ async function after(db: Db, brainId: string, b: Before, touched: string[]): Pro
   for (const r of conflicts)
     out.push({
       code: 'open_conflict',
-      message: `"${r.a}" and "${r.b}" contradict each other and nobody has settled it: settle it, or say which holds.`,
+      message: `"${r.a}" y "${r.b}" se contradicen y nadie lo ha resuelto: resuélvelo, o di cuál vale.`,
       addresses: [String(r.a), String(r.b)],
     })
   // The pages linked to what was touched: what to read for contradictions in meaning.

@@ -204,7 +204,7 @@ describe('fixes of PR25b (reviews)', { skip: skipPg }, () => {
       for (const change of [{ host: 'smtp.elsewhere.example' }, { port: 465 }, { user: 'someone' }]) {
         const r = await w.callWeb(adminWeb, 'PUT', '/v1/admin/mail', { ...SMTP, ...change })
         assert.equal(r.status, 400, `${JSON.stringify(change)}: ${r.text}`)
-        assert.match(r.body.error?.message ?? '', /password/i)
+        assert.match(r.body.error?.message ?? '', /contraseña/i)
       }
       assert.equal(
         (
@@ -272,28 +272,28 @@ describe('fixes of PR25b (reviews)', { skip: skipPg }, () => {
   describe('8: a send that fails is a short category, never the server’s words', () => {
     it('maps errors to categories', () => {
       const e = (message: string, code?: string) => Object.assign(new Error(message), code ? { code } : {})
-      assert.equal(mailError(e('connect ECONNREFUSED 10.0.0.1:587', 'ECONNREFUSED')), 'connection refused')
-      assert.equal(mailError(e('Connection timeout', 'ETIMEDOUT')), 'timeout')
-      assert.equal(mailError(e('Greeting never received', 'ETIMEDOUT')), 'timeout')
-      assert.equal(mailError(e('getaddrinfo ENOTFOUND smtp.x', 'EDNS')), 'server not found')
+      assert.equal(mailError(e('connect ECONNREFUSED 10.0.0.1:587', 'ECONNREFUSED')), 'conexión rechazada')
+      assert.equal(mailError(e('Connection timeout', 'ETIMEDOUT')), 'tiempo de espera agotado')
+      assert.equal(mailError(e('Greeting never received', 'ETIMEDOUT')), 'tiempo de espera agotado')
+      assert.equal(mailError(e('getaddrinfo ENOTFOUND smtp.x', 'EDNS')), 'servidor no encontrado')
       assert.equal(mailError(e('self-signed certificate in chain', 'ESOCKET')), 'TLS')
-      assert.equal(mailError(e('535 5.7.8 Authentication failed', 'EAUTH')), 'auth failed')
-      assert.equal(mailError(e('550 relay not permitted: <evil banner>', 'EENVELOPE')), 'rejected')
-      assert.equal(mailError(e('something odd <script>')), 'failed')
+      assert.equal(mailError(e('535 5.7.8 Authentication failed', 'EAUTH')), 'fallo de autenticación')
+      assert.equal(mailError(e('550 relay not permitted: <evil banner>', 'EENVELOPE')), 'rechazado')
+      assert.equal(mailError(e('something odd <script>')), 'fallo')
     })
 
     it('the log and the answer hold only the category', async () => {
       w.mailFails = true
       try {
         const r = await w.callWeb(adminWeb, 'POST', '/v1/admin/mail/test', {})
-        assert.equal(r.body.error, 'connection refused')
+        assert.equal(r.body.error, 'conexión rechazada')
       } finally {
         w.mailFails = false
       }
       const row = await w.db.one<{ error: string }>(
         "SELECT error FROM mail_log WHERE status = 'failed' ORDER BY id DESC LIMIT 1",
       )
-      assert.equal(row?.error, 'connection refused')
+      assert.equal(row?.error, 'conexión rechazada')
     })
   })
 

@@ -83,7 +83,7 @@ const guardedLookup =
       )
       if (ok.length === 0 || ok.length !== list.length) {
         // Said like any other failure, so the answer does not map names only reachable inside.
-        return callback(new FetchRefused('The document could not be fetched.'), '', 4)
+        return callback(new FetchRefused('El documento no se pudo obtener.'), '', 4)
       }
       if ((options as { all?: boolean }).all)
         return (callback as unknown as (e: null, a: unknown) => void)(null, ok)
@@ -97,15 +97,15 @@ export async function fetchJson(address: string, policy: FetchPolicy = {}): Prom
   try {
     url = new URL(address)
   } catch {
-    throw new FetchRefused('Not an address.')
+    throw new FetchRefused('No es una dirección.')
   }
   const host = url.hostname.replace(/^\[|\]$/g, '')
   const loopback = LOOPBACK.has(host) || host === 'localhost'
   const plainOk = policy.allowLoopbackHttp && loopback && url.protocol === 'http:'
-  if (url.protocol !== 'https:' && !plainOk) throw new FetchRefused('Only https addresses are fetched.')
-  if (url.username || url.password) throw new FetchRefused('Addresses with credentials are not fetched.')
+  if (url.protocol !== 'https:' && !plainOk) throw new FetchRefused('Solo se obtienen direcciones https.')
+  if (url.username || url.password) throw new FetchRefused('No se obtienen direcciones con credenciales.')
   if (isIP(host) && forbiddenAddress(host) && !(policy.allowLoopbackHttp && LOOPBACK.has(host))) {
-    throw new FetchRefused(`${host} is an address obsybrain does not reach.`)
+    throw new FetchRefused(`${host} es una dirección que obsybrain no alcanza.`)
   }
   const request = url.protocol === 'https:' ? httpsRequest : httpRequest
   return new Promise((resolve, reject) => {
@@ -121,7 +121,7 @@ export async function fetchJson(address: string, policy: FetchPolicy = {}): Prom
         if (res.statusCode !== 200) {
           res.resume()
           return reject(
-            new FetchRefused(`The document answered ${res.statusCode} (redirects are not followed).`),
+            new FetchRefused(`El documento respondió ${res.statusCode} (no se siguen redirecciones).`),
           )
         }
         const chunks: Buffer[] = []
@@ -129,7 +129,7 @@ export async function fetchJson(address: string, policy: FetchPolicy = {}): Prom
         res.on('data', (c: Buffer) => {
           size += c.length
           if (size > FETCH_MAX_BYTES) {
-            req.destroy(new FetchRefused('The document is larger than 64 KB.'))
+            req.destroy(new FetchRefused('El documento pesa más de 64 KB.'))
             return
           }
           chunks.push(c)
@@ -138,21 +138,21 @@ export async function fetchJson(address: string, policy: FetchPolicy = {}): Prom
           try {
             resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')))
           } catch {
-            reject(new FetchRefused('The document is not JSON.'))
+            reject(new FetchRefused('El documento no es JSON.'))
           }
         })
         res.on('error', reject)
       },
     )
     const timer = setTimeout(
-      () => req.destroy(new FetchRefused('The document took longer than 5 seconds.')),
+      () => req.destroy(new FetchRefused('El documento tardó más de 5 segundos.')),
       FETCH_TIMEOUT_MS,
     )
     req.on('close', () => clearTimeout(timer))
-    req.on('timeout', () => req.destroy(new FetchRefused('The document took longer than 5 seconds.')))
+    req.on('timeout', () => req.destroy(new FetchRefused('El documento tardó más de 5 segundos.')))
     req.on('error', (e) =>
       reject(
-        e instanceof FetchRefused ? e : new FetchRefused(`The document could not be fetched: ${e.message}`),
+        e instanceof FetchRefused ? e : new FetchRefused(`El documento no se pudo obtener: ${e.message}`),
       ),
     )
     req.end()

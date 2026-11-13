@@ -462,8 +462,8 @@ function sourceEntriesOf(p: FxProposal, curator: boolean) {
 const FORBIDDEN = err(
   403,
   'forbidden',
-  'This needs the curator role in the brain; you are a contributor.',
-  'Ask a curator of the brain (Eric) for the curator role.',
+  'Esto necesita el rol curator en el brain; tú eres a contributor.',
+  'Pide el rol curator a quien cure el brain (Eric).',
 )
 
 function stillAsSeen(p: FxProposal, fingerprint: unknown, review: () => Answer): Answer | null {

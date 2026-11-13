@@ -72,8 +72,8 @@ export const companionPending = (factoryUrl: string) => {
   const e = new AppError(
     409,
     'companion_pending',
-    'Finish the setup in rsc-factory.',
-    `obsybrain was installed with rsc-factory: open rsc-factory at ${factoryUrl} and finish its first-time setup. obsybrain is set up with the same administration.`,
+    'Termina la configuración en rsc-factory.',
+    `obsybrain se instaló con rsc-factory: abre rsc-factory en ${factoryUrl} y termina su configuración inicial. obsybrain queda configurado con la misma administración.`,
   )
   e.extra = { factoryUrl }
   return e
@@ -107,8 +107,8 @@ export async function companionReconnect(
       detail: `not an administrator, from ${conn.ip}`,
     })
     throw denied(
-      'Only an administrator of obsybrain can reconnect rsc-factory.',
-      'Use the email and password of an administrator of obsybrain.',
+      'Solo un administrador de obsybrain puede reconectar rsc-factory.',
+      'Usa el correo y la contraseña de un administrador de obsybrain.',
     )
   }
   const out = await db.tx(
@@ -168,8 +168,8 @@ export async function companionReconnect(
     throw new AppError(
       409,
       'service_removed',
-      'An administrator removed the rsc-factory account in obsybrain.',
-      'Reactivate it there first (Admin › People), then finish connecting again.',
+      'Un administrador dio de baja la cuenta de rsc-factory en obsybrain.',
+      'Reactívala allí primero (Admin › Personas) y termina de conectar de nuevo.',
     )
   }
   return out

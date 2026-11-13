@@ -76,8 +76,8 @@ export const newerCopy = (release: string) => {
   const e = new AppError(
     409,
     'newer_copy',
-    `This copy was made by obsybrain ${release}, which is newer than this one (${VERSION}).`,
-    `Restore it with obsybrain ${release} or newer.`,
+    `Esta copia la hizo obsybrain ${release}, que es más nuevo que este (${VERSION}).`,
+    `Restáurala con obsybrain ${release} o más nuevo.`,
   )
   e.extra = { needs: release }
   return e
@@ -87,32 +87,32 @@ const confirmMismatch = (expected: string) =>
   new AppError(
     400,
     'confirm_mismatch',
-    'The name given to confirm does not match this installation. Nothing was changed.',
-    `Confirm with the name of this installation, exactly: "${expected}".`,
+    'El nombre dado para confirmar no coincide con esta instalación. No cambió nada.',
+    `Confirma con el nombre de esta instalación, exacto: "${expected}".`,
   )
 
 const keepKeysRefused = () =>
   new AppError(
     400,
     'keep_keys_refused',
-    'Keys are kept only when rolling back an update: with the copy this installation made before it, with its own key.',
-    'Restore without --keep-keys (every key and session then ends), or pick the pre-update copy of this installation.',
+    'Las claves se conservan solo al volver atrás una actualización: con la copia que esta instalación hizo antes, con su propia clave.',
+    'Restaura sin --keep-keys (entonces terminan todas las claves y sesiones), o elige la copia pre-update de esta instalación.',
   )
 
 const notRscBrain = () =>
   new AppError(
     409,
     'not_obsybrain_database',
-    'This database holds tables that are not obsybrain’s, so a restore will not replace them.',
-    'Point OBSY_BRAIN_DATABASE_URL at the database of obsybrain (one it owns alone), then restore again.',
+    'Esta base de datos tiene tablas que no son de obsybrain, así que una restauración no las reemplaza.',
+    'Apunta OBSY_BRAIN_DATABASE_URL a la base de datos de obsybrain (una que sea solo suya) y restaura de nuevo.',
   )
 
 const restoreFailed = (code: unknown) =>
   new AppError(
     500,
     'restore_failed',
-    `The restore failed${typeof code === 'string' && /^[0-9A-Z]{5}$/.test(code) ? ` (database error ${code})` : ''}. Nothing was changed.`,
-    'Restore again; if it fails again, keep the copy and look at the log of the service.',
+    `La restauración falló${typeof code === 'string' && /^[0-9A-Z]{5}$/.test(code) ? ` (error de base de datos ${code})` : ''}. No cambió nada.`,
+    'Restaura de nuevo; si vuelve a fallar, conserva la copia y mira el registro del servicio.',
   )
 
 // Reads the events of a copy one by one, with one put back (a table's rows end where the next table begins).
@@ -252,8 +252,8 @@ const dangling = () =>
   new AppError(
     422,
     'corrupt_copy',
-    'This copy holds rows that point to rows it does not hold, so it cannot be restored. Nothing was changed.',
-    'Use another copy from the list (obsybrain backups list).',
+    'Esta copia tiene filas que apuntan a filas que no contiene, así que no se puede restaurar. No cambió nada.',
+    'Usa otra copia de la lista (obsybrain backups list).',
   )
 
 async function checkLinks(tx: Db, fixed: Link[]): Promise<void> {

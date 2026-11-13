@@ -48,7 +48,7 @@ describe('branding of the installation', { skip: skipPg }, () => {
       const r = await w.raw('GET', '/v1/branding/logo')
       assert.equal(r.status, 404, r.text)
       assert.equal(r.body.error?.code, 'no_logo')
-      assert.match(r.body.error?.howToProceed ?? '', /administration/i)
+      assert.match(r.body.error?.howToProceed ?? '', /administración/i)
       assert.equal(r.headers.get('x-content-type-options'), 'nosniff')
     }
   })

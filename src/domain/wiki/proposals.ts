@@ -187,30 +187,29 @@ export async function problemsOf(
       if (k && k.pageId !== ownPage) {
         p(
           k.address === a
-            ? `The address "${a}" is already taken by the page "${k.title}".`
-            : `The address "${a}" is reserved: it was an address of the page now at "${k.address}".`,
+            ? `La dirección "${a}" ya la toma la página "${k.title}".`
+            : `La dirección "${a}" está reservada: era una dirección de la página que ahora está en "${k.address}".`,
         )
       }
       const prev = claimed.get(a)
-      if (prev !== undefined) p(`Operation ${prev} already gives the address "${a}" to a page.`)
+      if (prev !== undefined) p(`La operación ${prev} ya le da la dirección "${a}" a una página.`)
       claimed.set(a, i)
     }
     if (o.op === 'create') {
       claim(o.address, null)
       if (byAgent && o.sources.length === 0) {
         p(
-          `The new page "${o.address}" cites no sources. Cite the journal entries (or addresses) it comes from.`,
+          `La página nueva "${o.address}" no cita ninguna fuente. Cita las entradas del diario (o direcciones) de las que viene.`,
         )
       }
       for (const l of o.links) {
-        if (!exists(l.to))
-          p(`The ${l.kind} link points at "${l.to}", which does not exist and is not created here.`)
-        else if (same(l.to, o.address)) p(`The ${l.kind} link points at the page itself.`)
+        if (!exists(l.to)) p(`El enlace ${l.kind} apunta a "${l.to}", que no existe y no se crea aquí.`)
+        else if (same(l.to, o.address)) p(`El enlace ${l.kind} apunta a la página misma.`)
       }
       return
     }
     if (!exists(o.address)) {
-      p(`There is no page at "${o.address}", and this proposal does not create it.`)
+      p(`No hay ninguna página en "${o.address}", y esta propuesta no la crea.`)
       return
     }
     const id = ident.get(o.address) as string
@@ -218,10 +217,10 @@ export async function problemsOf(
     switch (o.op) {
       case 'edit':
         if (k && o.baseRevision === undefined) {
-          p(`Say which revision of "${o.address}" you edited, in "baseRevision" (it is at ${k.revision}).`)
+          p(`Di qué revisión de "${o.address}" editaste, en "baseRevision" (está en la ${k.revision}).`)
         }
         if (k && o.baseRevision !== undefined && o.baseRevision > k.revision) {
-          p(`"${o.address}" has no revision ${o.baseRevision}; it is at ${k.revision}.`)
+          p(`"${o.address}" no tiene revisión ${o.baseRevision}; está en la ${k.revision}.`)
         }
         break
       case 'move':
@@ -229,27 +228,27 @@ export async function problemsOf(
         break
       case 'link':
       case 'unlink':
-        if (!exists(o.to))
-          p(`The ${o.kind} link points at "${o.to}", which does not exist and is not created here.`)
-        else if (same(o.to, o.address)) p(`"${o.to}" is the page itself; a page cannot link to itself.`)
+        if (!exists(o.to)) p(`El enlace ${o.kind} apunta a "${o.to}", que no existe y no se crea aquí.`)
+        else if (same(o.to, o.address))
+          p(`"${o.to}" es la página misma; una página no puede enlazarse a sí misma.`)
         break
       case 'status':
         if (o.supersededBy !== undefined && !exists(o.supersededBy)) {
-          p(`"supersededBy" points at "${o.supersededBy}", which does not exist and is not created here.`)
+          p(`"supersededBy" apunta a "${o.supersededBy}", que no existe y no se crea aquí.`)
         } else if (o.supersededBy !== undefined && same(o.supersededBy, o.address)) {
-          p('A page cannot supersede itself.')
+          p('Una página no se reemplaza a sí misma.')
         }
         break
       case 'merge':
         if (!exists(o.from))
-          p(`There is no page at "${o.from}" to merge, and this proposal does not create it.`)
+          p(`No hay ninguna página en "${o.from}" que fusionar, y esta propuesta no la crea.`)
         else if (same(o.from, o.address))
-          p(`"${o.from}" is the page itself; a page cannot be merged into itself.`)
+          p(`"${o.from}" es la página misma; una página no se fusiona consigo misma.`)
         break
       case 'revert':
-        if (!k) p(`"${o.address}" is created in this proposal; there is nothing to go back to.`)
+        if (!k) p(`"${o.address}" se crea en esta propuesta; no hay nada a lo que volver.`)
         else if (o.toRevision >= k.revision) {
-          p(`"${o.address}" is at revision ${k.revision}; go back to an earlier one.`)
+          p(`"${o.address}" está en la revisión ${k.revision}; vuelve a una anterior.`)
         }
         break
     }
@@ -267,7 +266,7 @@ export async function problemsOf(
     )
     const found = new Set(rows.map((r) => String(r.id)))
     for (const id of cited) {
-      if (!found.has(id)) problems.push({ op: null, message: `There is no entry "${id}" in this brain.` })
+      if (!found.has(id)) problems.push({ op: null, message: `No existe la entrada "${id}" en este brain.` })
     }
   }
   return problems
@@ -293,10 +292,10 @@ export async function warningsOf(
     const w = (code: string, message: string) => out.push({ op: i, code, message })
     if (o.op === 'create') {
       if (o.links.length === 0 && mentionsOf(o.body).length === 0) {
-        w('no_links', `The new page "${o.address}" links to no other page.`)
+        w('no_links', `La página nueva "${o.address}" no enlaza a ninguna otra página.`)
       }
       if (!o.summary.trim())
-        w('empty_summary', `The new page "${o.address}" has no summary; the map shows it.`)
+        w('empty_summary', `La página nueva "${o.address}" no tiene resumen; el mapa lo muestra.`)
     }
     if (o.op === 'create' || (o.op === 'edit' && o.title !== undefined)) {
       const title = o.title as string
@@ -306,12 +305,12 @@ export async function warningsOf(
           known.get(o.address)?.address !== t.address &&
           nearlySame(title, String(t.title)),
       )
-      if (twin) w('similar_title', `The title "${title}" is almost the same as the page "${twin.address}".`)
+      if (twin) w('similar_title', `El título "${title}" es casi igual al de la página "${twin.address}".`)
     }
     if ('body' in o && typeof o.body === 'string') {
       for (const m of mentionsOf(o.body)) {
         if (!known.has(m) && !born.has(m)) {
-          w('broken_mention', `[[${m}]] points at no page yet; it will show as a broken link.`)
+          w('broken_mention', `[[${m}]] no apunta todavía a ninguna página; se mostrará como enlace roto.`)
         }
       }
     }
@@ -331,7 +330,7 @@ export async function warningsOf(
           out.push({
             op: i,
             code: state.get(s.entryId) === 'purged' ? 'source_purged' : 'source_forgotten',
-            message: `The source ${s.entryId} was ${state.get(s.entryId)} after this proposal was written.`,
+            message: `La fuente ${s.entryId} pasó a estado "${state.get(s.entryId)}" después de que se escribiera esta propuesta.`,
           })
         }
       }
@@ -365,20 +364,20 @@ export type Package = {
   problems: Problem[]
 }
 
-export function readPackage(ctx: Ctx, input: ProposalInput, what = 'A proposal'): Package {
+export function readPackage(ctx: Ctx, input: ProposalInput, what = 'Una propuesta'): Package {
   const title = redact(input.title.trim()).text
   const reason = redact((input.reason ?? '').trim()).text
   if (!title || title.length > WIKI_LIMITS.title) {
     throw invalid(
-      `${what} needs a title of 1 to ${WIKI_LIMITS.title} characters.`,
-      'Say in one line what it changes.',
+      `${what} necesita un título de 1 a ${WIKI_LIMITS.title} caracteres.`,
+      'Di en una línea qué cambia.',
     )
   }
   if (reason.length > WIKI_LIMITS.reason) {
-    throw invalid(`The reason is longer than ${WIKI_LIMITS.reason} characters.`, 'Shorten it.')
+    throw invalid(`La razón tiene más de ${WIKI_LIMITS.reason} caracteres.`, 'Acórtala.')
   }
   if (!Array.isArray(input.ops) || input.ops.length === 0) {
-    throw invalid(`${what} carries a list "ops" with at least one operation.`, 'Add the operations.')
+    throw invalid(`${what} lleva una lista "ops" con al menos una operación.`, 'Añade las operaciones.')
   }
   const collectedRaw = input.collected ?? []
   if (
@@ -387,19 +386,19 @@ export function readPackage(ctx: Ctx, input: ProposalInput, what = 'A proposal')
     collectedRaw.length > WIKI_LIMITS.collected
   ) {
     throw invalid(
-      `"collected" is a list of at most ${WIKI_LIMITS.collected} entry ids ("ent_…").`,
-      'List the entries read that add nothing new.',
+      `"collected" es una lista de como máximo ${WIKI_LIMITS.collected} ids de entrada ("ent_…").`,
+      'Lista las entradas leídas que no aportan nada nuevo.',
     )
   }
   const collected = [...new Set(collectedRaw as string[])]
   const agent = redact((ctx.who.credential.agent ?? input.agent ?? '').trim()).text || null
   if (agent && agent.length > WIKI_LIMITS.agent)
-    throw invalid('"agent" is too long.', 'Name the agent briefly.')
+    throw invalid('"agent" es demasiado largo.', 'Nombra al agente brevemente.')
   const problems: Problem[] = []
   if (input.ops.length > WIKI_LIMITS.ops) {
     problems.push({
       op: null,
-      message: `${what} has at most ${WIKI_LIMITS.ops} operations; this one has ${input.ops.length}.`,
+      message: `${what} lleva como máximo ${WIKI_LIMITS.ops} operaciones; esta lleva ${input.ops.length}.`,
     })
   }
   const ops = input.ops.slice(0, WIKI_LIMITS.ops).map((raw, i) => readOp(raw, i, problems))
@@ -425,13 +424,13 @@ export async function submitProposal(
         brain.id,
       ])
       if (!replaced)
-        problems.push({ op: null, message: `There is no proposal "${input.supersedes}" in this brain.` })
+        problems.push({ op: null, message: `No existe la propuesta "${input.supersedes}" en este brain.` })
       else if (replaced.author_id !== ctx.who.accountId) {
-        problems.push({ op: null, message: 'Only the author of a proposal can replace it.' })
+        problems.push({ op: null, message: 'Solo quien propuso puede reemplazarla.' })
       } else if (replaced.status !== 'pending') {
         problems.push({
           op: null,
-          message: `Proposal ${replaced.id} is ${replaced.status}; only a pending one can be replaced.`,
+          message: `La propuesta ${replaced.id} está "${replaced.status}"; solo se puede reemplazar una pendiente.`,
         })
       }
     }
@@ -439,8 +438,8 @@ export async function submitProposal(
       const err = new AppError(
         400,
         'proposal_invalid',
-        `The proposal has ${problems.length} problem${problems.length === 1 ? '' : 's'}; nothing was saved.`,
-        'Fix each problem listed in "problems" and send it again.',
+        `La propuesta tiene ${problems.length} problema${problems.length === 1 ? '' : 's'}; no se guardó nada.`,
+        'Corrige cada problema listado en "problems" y envíala de nuevo.',
       )
       err.problems = problems
       throw err
@@ -512,11 +511,11 @@ async function proposalNotice(
   for (const r of to) {
     await send(ctx.db, ctx.clock, ctx.mail, 'proposal', {
       to: String(r.email),
-      subject: `New proposal in "${brain.name}"`,
+      subject: `Propuesta nueva en "${brain.name}"`,
       text: [
-        `${by} proposed ${n} change${n === 1 ? '' : 's'} to the wiki of "${brain.name}".`,
+        `${by} propuso ${n} ${n === 1 ? 'cambio' : 'cambios'} a la wiki de "${brain.name}".`,
         '',
-        `Review it (you will be asked to sign in): ${base}/b/${brain.slug}/proposals/${id}`,
+        `Revísala (se te pedirá iniciar sesión): ${base}/b/${brain.slug}/proposals/${id}`,
       ].join('\n'),
     })
   }
@@ -524,9 +523,9 @@ async function proposalNotice(
 
 async function loadProposal(ctx: Ctx, id: string, lock = false): Promise<{ row: Row; slug: string }> {
   const row = await ctx.db.one(`SELECT * FROM proposals WHERE id = $1${lock ? ' FOR UPDATE' : ''}`, [id])
-  if (!row) throw notFound('proposal')
+  if (!row) throw notFound('propuesta')
   const { brain } = await inBrain(ctx, { id: String(row.brain_id) }).catch(() => {
-    throw notFound('proposal')
+    throw notFound('propuesta')
   })
   return { row, slug: brain.slug }
 }
@@ -649,18 +648,13 @@ export async function withdrawProposal(ctx: Ctx, id: string): Promise<Proposal> 
     const { brain, role } = await inBrain(c, { id: String(row.brain_id) }, 'share')
     await allow(c, 'wiki.propose', { role, brainStatus: brain.status }, brain.id)
     if (row.author_id !== ctx.who.accountId) {
-      throw new AppError(
-        403,
-        'forbidden',
-        'Only the author of a proposal can withdraw it.',
-        'Ask its author.',
-      )
+      throw new AppError(403, 'forbidden', 'Solo quien propuso puede retirarla.', 'Pídeselo a su autor.')
     }
     if (row.status !== 'pending') {
       throw conflict(
         'proposal_decided',
-        `This proposal is ${row.status}; only a pending one can be withdrawn.`,
-        'Nothing to do.',
+        `Esta propuesta está "${row.status}"; solo se puede retirar una pendiente.`,
+        'Nada que hacer.',
       )
     }
     const out = await db.one("UPDATE proposals SET status = 'withdrawn' WHERE id = $1 RETURNING *", [id])

@@ -17,20 +17,20 @@ async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   const h1 = page.getByRole('heading', { level: 1 })
   await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up obsybrain') {
-    await page.getByLabel('Name of this installation').fill('obsybrain')
-    await page.getByLabel('Address people open').fill(baseURL)
-    await page.getByLabel('Your name').fill(ADMIN.name)
-    await page.getByLabel('Your email').fill(ADMIN.email)
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
+  if (where === 'Configurar obsybrain') {
+    await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await page.getByLabel('Dirección que abre la gente').fill(baseURL)
+    await page.getByLabel('Tu nombre').fill(ADMIN.name)
+    await page.getByLabel('Tu email').fill(ADMIN.email)
+    await page.getByLabel('Contraseña', { exact: true }).fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await keepTheKey(page)
-  } else if (where === 'Sign in') {
+  } else if (where === 'Iniciar sesión') {
     await page.getByLabel('Email').fill(ADMIN.email)
-    await page.getByLabel('Password').fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Contraseña').fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
   }
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
 }
 
 async function person(
@@ -66,7 +66,7 @@ let bob: { ctx: BrowserContext; token: string }
 test.beforeAll(async ({ browser, baseURL }) => {
   admin = await (await browser.newContext()).newPage()
   await signedInAdmin(admin, baseURL as string)
-  const r = await admin.request.post('/v1/brains', { headers: WEB, data: { slug: SLUG, name: 'Activity' } })
+  const r = await admin.request.post('/v1/brains', { headers: WEB, data: { slug: SLUG, name: 'Actividad' } })
   expect([201, 409]).toContain(r.status())
   ana = await person(browser, admin, 'Ana', 'contributor')
   bob = await person(browser, admin, 'Bob', 'contributor')
@@ -78,7 +78,7 @@ test.afterAll(async () => {
   await admin.context().close()
 })
 
-const feed = (page: Page) => page.getByRole('list', { name: 'Live feed' }).getByRole('listitem')
+const feed = (page: Page) => page.getByRole('list', { name: 'Feed en vivo' }).getByRole('listitem')
 
 test("CA6b: a contributor who is not Ana never sees her agent's searches; a curator does", async () => {
   const agent = { authorization: `Bearer ${ana.token}` }
@@ -111,7 +111,7 @@ test("CA6b: a contributor who is not Ana never sees her agent's searches; a cura
 
 test('CA8: an agent’s write shows in under 2 seconds; pause holds the list until resume', async () => {
   await admin.goto(A)
-  await expect(admin.locator('.live-state')).toHaveText('Live')
+  await expect(admin.locator('.live-state')).toHaveText('En vivo')
   const agent = { authorization: `Bearer ${bob.token}` }
   const title = `Live write ${Date.now()}`
   // The clock starts before the write is sent: the 2 s cover the write itself, the feed and the screen.
@@ -125,16 +125,16 @@ test('CA8: an agent’s write shows in under 2 seconds; pause holds the list unt
   const shown = Date.now() - t0
   expect(shown, `shown ${shown} ms after the write was sent`).toBeLessThan(2_000)
 
-  await admin.getByRole('button', { name: 'Pause' }).click()
+  await admin.getByRole('button', { name: 'Pausar' }).click()
   const before = await feed(admin).count()
   await admin.request.post(`/v1/brains/${SLUG}/entries`, {
     headers: agent,
     data: { type: 'note', title: 'Written while paused', content: 'x' },
   })
-  await expect(admin.getByRole('button', { name: 'Resume (1 new)' })).toBeVisible({ timeout: 3_000 })
+  await expect(admin.getByRole('button', { name: 'Reanudar (1 nuevo)' })).toBeVisible({ timeout: 3_000 })
   await expect(feed(admin)).toHaveCount(before)
   await expect(feed(admin).first()).toContainText(title)
-  await admin.getByRole('button', { name: 'Resume (1 new)' }).click()
+  await admin.getByRole('button', { name: 'Reanudar (1 nuevo)' }).click()
   await expect(feed(admin).first()).toContainText('Written while paused')
 })
 
@@ -145,12 +145,12 @@ test('Health of the new brain says «Nothing to fix»; the open session of an ag
   })
   expect(s.status(), await s.text()).toBe(201)
   await admin.goto(A)
-  const open = admin.getByRole('region', { name: 'Active sessions now' }).getByRole('listitem')
+  const open = admin.getByRole('region', { name: 'Sesiones activas ahora' }).getByRole('listitem')
   await expect(open.filter({ hasText: 'Check the intros' })).toContainText('ticket 42')
   // No Factory address is set: the reference is text (CA9 closes in PR25).
   await expect(open.getByRole('link', { name: /ticket 42/ })).toHaveCount(0)
   await admin.goto(`/b/${SLUG}/health`)
-  await expect(admin.getByRole('heading', { name: 'Nothing to fix' })).toBeVisible()
+  await expect(admin.getByRole('heading', { name: 'Nada que corregir' })).toBeVisible()
 })
 
 // Review of PR23: an agent working with a person's token stamps no key reference; its session's reference is
@@ -170,7 +170,7 @@ test('the reference filter finds the writes of a session by its reference', asyn
   expect(saved.status()).toBe(201)
   await admin.goto(A)
   await expect(feed(admin).filter({ hasText: 'Done in ticket 77' })).toHaveCount(1)
-  await admin.locator('summary').filter({ hasText: 'Filter the activity' }).click()
+  await admin.locator('summary').filter({ hasText: 'Filtrar la actividad' }).click()
   await admin.getByLabel('Reference').fill('ticket-77')
   await expect(feed(admin).filter({ hasText: 'Done in ticket 77' })).toHaveCount(1)
   await expect(feed(admin).filter({ hasText: 'Live write' })).toHaveCount(0)

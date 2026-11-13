@@ -15,12 +15,13 @@ import { mentionsOf, type Source } from './model.ts'
 import { pageNotFound } from './pages.ts'
 import { webOnly } from './review.ts'
 
-const BACKUPS = 'Backups taken before this purge still hold the text until they rotate out.'
+const BACKUPS =
+  'Las copias de seguridad tomadas antes de esta purga siguen conteniendo el texto hasta que roten.'
 
 function reasonOf(raw: string): string {
   const why = redact(raw.trim()).text
   if (!why || why.length > 500)
-    throw invalid('Write why it is purged, in 1 to 500 characters.', 'Add the reason.')
+    throw invalid('Escribe por qué se purga, en 1 a 500 caracteres.', 'Añade la razón.')
   return why
 }
 
@@ -249,7 +250,7 @@ export async function purgePageRevisions(
   await allow(ctx, 'entry.purge', {})
   const wanted = [...new Set(purge)].sort((a, b) => a - b)
   if (wanted.length === 0 || wanted.length > 1000)
-    throw invalid('Name 1 to 1 000 revisions to purge.', 'Send "revisions".')
+    throw invalid('Nombra de 1 a 1 000 revisiones para purgar.', 'Envía "revisions".')
   const needles = [...new Set(texts.map((t) => t.trim()))]
   if (
     needles.length === 0 ||
@@ -260,8 +261,8 @@ export async function purgePageRevisions(
     )
   ) {
     throw invalid(
-      'Name the text that must go, in "text": 1 to 20 pieces of 3 to 500 characters.',
-      'Copy the exact words that cannot stay (a name, an id number), as they appear.',
+      'Nombra el texto que debe irse, en "text": de 1 a 20 trozos de 3 a 500 caracteres.',
+      'Copia las palabras exactas que no pueden quedar (un nombre, un número de id), tal como aparecen.',
     )
   }
   const re = pattern(needles)
@@ -281,8 +282,8 @@ export async function purgePageRevisions(
     if (pages.length === 0) throw pageNotFound(target.address)
     if (pages.length > 1) {
       const err = invalid(
-        `Several pages have had the address "${target.address}".`,
-        'Send "pageId" too: one of those listed in "problems".',
+        `Varias páginas han tenido la dirección "${target.address}".`,
+        'Envía también "pageId": una de las que se listan en "problems".',
       )
       err.problems = pages.map((p) => ({ pageId: p.id, status: p.status }))
       throw err
@@ -298,8 +299,8 @@ export async function purgePageRevisions(
       throw new AppError(
         404,
         'revision_not_found',
-        `Page "${page.address}" has no revision ${missing.join(', ')}.`,
-        'See its history.',
+        `La página "${page.address}" no tiene ${missing.length === 1 ? 'la revisión' : 'las revisiones'} ${missing.join(', ')}.`,
+        'Mira su historial.',
       )
     }
     // Addresses are identifiers that links rely on; text inside one is moved away first, by hand.
@@ -311,8 +312,8 @@ export async function purgePageRevisions(
     if (hit) {
       throw conflict(
         'text_in_address',
-        `The text is part of the address "${hit.address}". Nothing was purged.`,
-        'Move that page to another address first, then purge.',
+        `El texto es parte de la dirección "${hit.address}". No se purgó nada.`,
+        'Mueve primero esa página a otra dirección y purga después.',
       )
     }
     // Nor in the addresses and link targets proposals and revisions name (a pending "create" at it).
@@ -325,8 +326,8 @@ export async function purgePageRevisions(
       if (where) {
         throw conflict(
           'text_in_address',
-          `The text is part of the address "${where}" in ${String(r.id).startsWith('prp_') ? `proposal ${r.id}` : 'a page history'}. Nothing was purged.`,
-          'Purge or withdraw that proposal, or move the page, first.',
+          `El texto es parte de la dirección "${where}" en ${String(r.id).startsWith('prp_') ? `la propuesta ${r.id}` : 'el historial de una página'}. No se purgó nada.`,
+          'Purga o retira primero esa propuesta, o mueve la página.',
         )
       }
     }
@@ -341,8 +342,8 @@ export async function purgePageRevisions(
     if (absent.length > 0) {
       const err = conflict(
         'text_not_found',
-        `The text ${absent.map((a) => `"${a}"`).join(', ')} is not in this brain's wiki. Nothing was purged.`,
-        'Copy it exactly as it appears in the page (letters, accents, spaces).',
+        `El texto ${absent.map((a) => `"${a}"`).join(', ')} no está en la wiki de este brain. No se purgó nada.`,
+        'Cópialo exactamente como aparece en la página (letras, tildes, espacios).',
       )
       throw err
     }
@@ -417,8 +418,8 @@ export async function purgePageRevisions(
     if (left.size > 0) {
       throw conflict(
         'purge_incomplete',
-        'Some copy of the text could not be removed; nothing was purged.',
-        'Tell the administration of this installation; this should not happen.',
+        'No se pudo quitar alguna copia del texto; no se purgó nada.',
+        'Avisa a la administración de esta instalación; esto no debería pasar.',
       )
     }
     // Every correction written before this purge is now refused, and open reviews hear it (B5 events).
@@ -440,7 +441,7 @@ export async function purgePageRevisions(
         brainId,
         now,
         ctx.who.accountId,
-        `Purged revision ${wanted.join(', ')} of ${page.address}`,
+        `Purgadas las revisiones ${wanted.join(', ')} de ${page.address}`,
         [String(page.address)],
         newId('wlg'),
       ],
@@ -474,7 +475,7 @@ export async function purgeProposal(
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const row = (await db.one('SELECT * FROM proposals WHERE id = $1 FOR UPDATE', [id])) as Row | undefined
-    if (!row) throw notFound('proposal')
+    if (!row) throw notFound('propuesta')
     const brainId = String(row.brain_id)
     const joined = await joinAsAdmin(c, brainId, 'joined to purge a wiki proposal')
     if (!row.purged_at) {

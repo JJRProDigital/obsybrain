@@ -68,16 +68,16 @@ async function mailInvitation(
     .filter(Boolean)
   return send(db, clock, outbox, 'invitation', {
     to: o.email,
-    subject: `${o.by} invited you to ${inst}`,
+    subject: `${o.by} te invitó a ${inst}`,
     text: [
-      `${o.by} invited you to ${inst}, a shared memory for people and their AI agents.`,
+      `${o.by} te invitó a ${inst}, una memoria compartida para personas y sus agentes de IA.`,
       '',
-      ...(lines.length ? ['You will join:', ...lines, ''] : []),
-      ...(o.isAdmin ? ['You will also administer the installation.', ''] : []),
-      'Open this link to choose your name and password. It works once, for 72 hours:',
+      ...(lines.length ? ['Entrarás en:', ...lines, ''] : []),
+      ...(o.isAdmin ? ['Además administrarás la instalación.', ''] : []),
+      'Abre este enlace para elegir tu nombre y contraseña. Funciona una sola vez y durante 72 horas:',
       o.link,
       '',
-      'If you did not expect this, ignore this mail.',
+      'Si no esperabas este correo, ignóralo.',
     ].join('\n'),
   })
 }
@@ -142,8 +142,8 @@ export async function storeInvitation(
   if (unused && o.as === 'curator') {
     throw conflict(
       'invitation_open',
-      `${o.email} already has an invitation that was not used yet.`,
-      'Once the person is in, add them to your brain; or ask the administration.',
+      `${o.email} ya tiene una invitación que todavía no se usó.`,
+      'Cuando la persona entre, añádela a tu brain; o pídeselo a la administración.',
     )
   }
   const merge = (base: Grant[]) => {
@@ -306,12 +306,12 @@ export async function takeOver(
     const lines = await brainLines(ctx.db, t.add)
     await send(ctx.db, ctx.clock, ctx.mail, 'invitation', {
       to: t.email,
-      subject: 'The obsybrain invitation you just received is no longer valid',
+      subject: 'La invitación de obsybrain que acabas de recibir ya no es válida',
       text: [
-        'The obsybrain invitation you just received is no longer valid.',
-        ...(lines.length ? ['', 'It was for:', ...lines] : []),
+        'La invitación de obsybrain que acabas de recibir ya no es válida.',
+        ...(lines.length ? ['', 'Era para:', ...lines] : []),
         '',
-        'You will get a new one if needed; nothing else needs doing.',
+        'Recibirás una nueva si hace falta; no tienes que hacer nada más.',
       ].join('\n'),
     })
     return failed('the invitation changed meanwhile')
@@ -321,10 +321,10 @@ export async function takeOver(
   if (done === 'merged') {
     await send(ctx.db, ctx.clock, ctx.mail, 'invitation', {
       to: t.email,
-      subject: 'Use the most recent obsybrain invitation link',
+      subject: 'Usa el enlace más reciente de la invitación de obsybrain',
       text: [
-        'The link in one of the obsybrain invitations you just received does not work.',
-        'Use the most recent working link from obsybrain; it also covers:',
+        'El enlace de una de las invitaciones de obsybrain que acabas de recibir no funciona.',
+        'Usa el enlace más reciente de obsybrain que funciona; también cubre:',
         ...(await brainLines(ctx.db, t.add)),
       ].join('\n'),
     })
@@ -336,8 +336,8 @@ export async function takeOver(
     await notify(ctx.db, ctx.clock, ctx.mail, [t.previousBy], {
       kind: 'invitation.taken_over',
       brainId: null,
-      subject: `Your invitation of ${t.email} was taken over`,
-      text: `The service account "${ctx.who.name}" took over your invitation of ${t.email}: it mailed them a new link, and the one you had no longer works. The administration of obsybrain can still see and withdraw it.`,
+      subject: `Tu invitación de ${t.email} fue asumida`,
+      text: `La cuenta de servicio "${ctx.who.name}" asumió tu invitación de ${t.email}: le envió un enlace nuevo y el que tú habías creado dejó de funcionar. La administración de obsybrain puede seguir viéndola y retirarla.`,
     })
   }
   return true
@@ -353,15 +353,15 @@ export type InviteInput = {
 function grantsOf(v: unknown): Array<{ slug: string; role: Role }> {
   if (v === undefined || v === null) return []
   if (!Array.isArray(v) || v.length > 100) {
-    throw invalid('"brains" is a list of {"slug", "role"}.', 'Send at most 100 brains.')
+    throw invalid('"brains" es una lista de {"slug", "role"}.', 'Envía como máximo 100 brains.')
   }
   return v.map((g) => {
     const slug = (g as { slug?: unknown })?.slug
     const role = (g as { role?: unknown })?.role
     if (typeof slug !== 'string' || !ROLES.includes(role as Role)) {
       throw invalid(
-        'Each brain of an invitation has a "slug" and a "role" (curator, contributor or reader).',
-        'Fix the list of brains.',
+        'Cada brain de una invitación tiene un "slug" y un "role" (curador, colaborador o lector).',
+        'Corrige la lista de brains.',
       )
     }
     return { slug, role: role as Role }
@@ -371,18 +371,18 @@ function grantsOf(v: unknown): Array<{ slug: string; role: Role }> {
 // Who may invite: the administration, anyone and anywhere; a curator, when the installation allows it,
 // only to brains they curate, and never as an administrator or with the right to create brains.
 export async function invite(ctx: Ctx, input: InviteInput): Promise<Invited[]> {
-  inWeb(ctx, 'Inviting people')
+  inWeb(ctx, 'Invitar a personas')
   const raw = Array.isArray(input.emails) ? input.emails : [input.emails]
   if (raw.length === 0 || raw.length > MAX_EMAILS) {
-    throw invalid(`Invite 1 to ${MAX_EMAILS} emails at a time.`, 'Send "emails" as a list.')
+    throw invalid(`Invita de 1 a ${MAX_EMAILS} correos por vez.`, 'Envía "emails" como una lista.')
   }
   const emails: string[] = []
   for (const v of raw) {
     const e = emailOf(v)
     if (!e)
       throw invalid(
-        `"${String(v).slice(0, 80)}" is not an email.`,
-        'Give plain emails such as ana@example.com.',
+        `"${String(v).slice(0, 80)}" no es un correo electrónico.`,
+        'Indica correos simples como ana@example.com.',
       )
     if (!emails.includes(e)) emails.push(e)
   }
@@ -399,16 +399,16 @@ export async function invite(ctx: Ctx, input: InviteInput): Promise<Invited[]> {
         throw new AppError(
           403,
           'forbidden',
-          'Only the administration invites new people to this installation.',
-          'Ask the administration, or add someone who already has an account to your brain.',
+          'Solo la administración invita a nuevas personas en esta instalación.',
+          'Pídeselo a la administración, o añade a tu brain a alguien que ya tenga cuenta.',
         )
       }
       if (isAdmin || canCreateBrains || asked.length === 0) {
         throw new AppError(
           403,
           'forbidden',
-          'A curator invites people only to the brains they curate, with a role there.',
-          'Choose brains you curate; the administration gives wider permissions.',
+          'Un curador solo puede invitar a los brains que cura, con un rol en ellos.',
+          'Elige brains que tú cures; la administración concede permisos más amplios.',
         )
       }
     }
@@ -425,10 +425,10 @@ export async function invite(ctx: Ctx, input: InviteInput): Promise<Invited[]> {
       if (has) {
         throw conflict(
           'email_taken',
-          `${email} already has an account${has.status === 'removed' ? ' (removed)' : ''}.`,
+          `${email} ya tiene una cuenta${has.status === 'removed' ? ' (dada de baja)' : ''}.`,
           has.status === 'removed'
-            ? 'The administration can reactivate it, then add it to brains.'
-            : 'Add that person to the brain as a member instead.',
+            ? 'La administración puede reactivarla y luego añadirla a brains.'
+            : 'Añade a esa persona al brain como miembro.',
         )
       }
       const stored = await storeInvitation(db, ctx.clock, {
@@ -497,13 +497,13 @@ export async function listInvitations(
   ctx: Ctx,
   o: { status?: string | null; cursor?: string | null; limit?: string | null } = {},
 ): Promise<{ invitations: InvitationListed[]; next: string | null }> {
-  inWeb(ctx, 'Managing invitations')
+  inWeb(ctx, 'Gestionar invitaciones')
   const admin = ctx.who.isAdmin && ctx.who.kind === 'person'
   const status = o.status || null
   if (status !== null && !(INVITATION_STATUSES as readonly string[]).includes(status))
     throw invalid(
-      `There is no invitation status "${status}".`,
-      `Use one of: ${INVITATION_STATUSES.join(', ')}.`,
+      `No existe el estado de invitación "${status}".`,
+      `Usa uno de: ${INVITATION_STATUSES.join(', ')}.`,
     )
   const c = decode(o.cursor ?? undefined)
   const limit = limitOf(o.limit)
@@ -556,13 +556,13 @@ async function inReach(ctx: Ctx, db: Db, r: Row): Promise<boolean> {
 
 async function mine(ctx: Ctx, db: Db, id: string, resend: boolean): Promise<Row> {
   const r = await db.one<Row>('SELECT * FROM invitations WHERE id = $1 FOR UPDATE', [id])
-  if (!r || !(await inReach(ctx, db, r))) throw notFound('invitation')
+  if (!r || !(await inReach(ctx, db, r))) throw notFound('invitación')
   if (resend && !(ctx.who.isAdmin && ctx.who.kind === 'person') && !(await installation(db)).curatorsInvite) {
     throw new AppError(
       403,
       'forbidden',
-      'Curators may no longer invite in this installation.',
-      'Ask the administration to resend or withdraw it.',
+      'Los curadores ya no pueden invitar en esta instalación.',
+      'Pide a la administración que la reenvíe o la retire.',
     )
   }
   return r
@@ -570,7 +570,7 @@ async function mine(ctx: Ctx, db: Db, id: string, resend: boolean): Promise<Row>
 
 // A new link (the old one stops working) for 72 more hours, sent again.
 export async function resendInvitation(ctx: Ctx, id: string): Promise<Invited> {
-  inWeb(ctx, 'Managing invitations')
+  inWeb(ctx, 'Gestionar invitaciones')
   const token = newSecret()
   const now = ctx.clock()
   const expiresAt = new Date(now.getTime() + INVITE_HOURS * 3_600_000)
@@ -579,8 +579,8 @@ export async function resendInvitation(ctx: Ctx, id: string): Promise<Invited> {
     if (r.used_at != null || r.revoked_at != null) {
       throw conflict(
         'invitation_closed',
-        'This invitation was already used or withdrawn.',
-        'Invite the email again if it still needs access.',
+        'Esta invitación ya se usó o se retiró.',
+        'Vuelve a invitar a ese correo si todavía necesita acceso.',
       )
     }
     // One new link a minute per invitation: a mailbox is not flooded, and links are not churned.
@@ -590,8 +590,8 @@ export async function resendInvitation(ctx: Ctx, id: string): Promise<Invited> {
       const e = new AppError(
         429,
         'too_soon',
-        'A new link for this invitation was made less than a minute ago.',
-        `Wait ${wait} s, then make another; the last link still works.`,
+        'Se creó un enlace nuevo para esta invitación hace menos de un minuto.',
+        `Espera ${wait} s y crea otro; el último enlace sigue funcionando.`,
       )
       e.extra = { retryAfter: wait }
       e.headers = { 'retry-after': String(wait) }
@@ -624,7 +624,7 @@ export async function resendInvitation(ctx: Ctx, id: string): Promise<Invited> {
 }
 
 export async function revokeInvitation(ctx: Ctx, id: string): Promise<void> {
-  inWeb(ctx, 'Managing invitations')
+  inWeb(ctx, 'Gestionar invitaciones')
   await ctx.db.tx(async (db) => {
     // The email's turn first, as everyone takes it before brain and invitation rows (no deadlock with a service
     // inviting the same email into a brain that waits for it).
@@ -634,8 +634,8 @@ export async function revokeInvitation(ctx: Ctx, id: string): Promise<void> {
     if (r.used_at != null) {
       throw conflict(
         'invitation_closed',
-        'This invitation was already used.',
-        'Remove the person, or change their roles.',
+        'Esta invitación ya se usó.',
+        'Quita a la persona o cambia sus roles.',
       )
     }
     if (r.revoked_at != null) return
@@ -652,8 +652,8 @@ const badInvitation = () =>
   new AppError(
     400,
     'invitation_invalid',
-    'This invitation link is not valid: it expired, was already used, or was withdrawn.',
-    'Ask an administrator to send a new one.',
+    'Este enlace de invitación no es válido: expiró, ya se usó o se retiró.',
+    'Pide a un administrador que envíe uno nuevo.',
   )
 
 // What the invitation page shows before the person accepts.
@@ -690,7 +690,7 @@ export async function acceptInvitation(
   if (typeof input.token !== 'string' || !input.token) throw badInvitation()
   const name = typeof input.name === 'string' ? input.name.trim() : ''
   if (!name || name.length > 80)
-    throw invalid('Your name has 1 to 80 characters.', 'Type the name others will see.')
+    throw invalid('Tu nombre tiene de 1 a 80 caracteres.', 'Escribe el nombre que verán los demás.')
   const password = checkPassword(input.password)
   const hash = await hashPassword(password)
   const now = clock()

@@ -4,48 +4,49 @@
 // restore, and the file the installation key is saved in. Who may do what is the server's.
 
 const FAILURES: Record<string, string> = {
-  disk_full: 'the disk of the copies is full',
-  no_permission: 'obsybrain cannot write in the folder of the copies',
-  no_installation_secret: 'the installation has no key (OBSY_BRAIN_SECRET is not set)',
-  weak_installation_key: 'the installation key is too short to protect a copy',
-  database: 'the database did not answer as expected',
-  busy: 'writes were still running after a minute',
-  failed: 'it failed',
+  disk_full: 'el disco de las copias está lleno',
+  no_permission: 'obsybrain no puede escribir en la carpeta de las copias',
+  no_installation_secret: 'la instalación no tiene clave (OBSY_BRAIN_SECRET no está configurada)',
+  weak_installation_key: 'la clave de instalación es demasiado corta para proteger una copia',
+  database: 'la base de datos no respondió como se esperaba',
+  busy: 'había escrituras corriendo después de un minuto',
+  failed: 'falló',
 }
 const HOW: Record<string, string> = {
-  disk_full: 'Free space in the folder of the copies, or keep fewer, then make a copy again.',
+  disk_full: 'Libera espacio en la carpeta de las copias, o conserva menos, y haz una copia otra vez.',
   no_permission:
-    'Let the user that runs obsybrain write in the folder of the copies, then make a copy again.',
-  no_installation_secret: 'Set OBSY_BRAIN_SECRET for the service, restart it, then make a copy again.',
-  weak_installation_key: 'Rotate to a long random key on the machine (obsybrain.sh key rotate).',
-  database: 'Make a copy again; if it fails again, look at the log of the service.',
-  busy: 'Make a copy again in a few minutes.',
-  failed: 'Make a copy again; if it fails again, look at the log of the service.',
+    'Permite que el usuario que corre obsybrain escriba en la carpeta de las copias, y haz una copia otra vez.',
+  no_installation_secret:
+    'Configura OBSY_BRAIN_SECRET para el servicio, reinícialo, y haz una copia otra vez.',
+  weak_installation_key: 'Rota a una clave larga y aleatoria en la máquina (obsybrain.sh key rotate).',
+  database: 'Haz una copia otra vez; si falla otra vez, mira el log del servicio.',
+  busy: 'Haz una copia otra vez en unos minutos.',
+  failed: 'Haz una copia otra vez; si falla otra vez, mira el log del servicio.',
 }
 
 // Why the last copy failed, in words; an unknown category still says it failed.
 export function failureText(category: string): string {
   const why = FAILURES[category] ?? FAILURES.failed
-  return `The last copy failed: ${why}. ${HOW[category] ?? HOW.failed}`
+  return `La última copia falló: ${why}. ${HOW[category] ?? HOW.failed}`
 }
 
 const WARNINGS: Record<string, string> = {
-  fsync_failed: 'the folder could not be flushed to disk',
-  status_not_saved: 'its status could not be saved next to the copies',
-  disk_full: 'the disk of the copies filled up right after it',
-  no_permission: 'obsybrain could not write its status in the folder of the copies',
+  fsync_failed: 'no se pudo vaciar la carpeta al disco',
+  status_not_saved: 'no se pudo guardar su estado junto a las copias',
+  disk_full: 'el disco de las copias se llenó justo después',
+  no_permission: 'obsybrain no pudo escribir su estado en la carpeta de las copias',
 }
 
 // A copy kept whole, but with something after it not done.
 export function warningText(code: string): string {
-  return `A copy was kept whole, but ${WARNINGS[code] ?? 'something after it was not done'}. Check the disk of the copies.`
+  return `Una copia se conservó completa, pero ${WARNINGS[code] ?? 'algo posterior no se hizo'}. Revisa el disco de las copias.`
 }
 
 const REASONS: Record<string, string> = {
-  scheduled: 'Daily',
-  manual: 'By hand',
-  'pre-update': 'Before an update',
-  'pre-restore': 'Before a restore',
+  scheduled: 'Diaria',
+  manual: 'A mano',
+  'pre-update': 'Antes de una actualización',
+  'pre-restore': 'Antes de una restauración',
 }
 export const reasonLabel = (reason: string) => REASONS[reason] ?? reason
 
@@ -76,18 +77,18 @@ export function restoreBlocked(
   item: { needsOldKey: boolean },
   o: { running: boolean; online: boolean },
 ): string | null {
-  if (!o.online) return 'You are offline: restoring needs the server.'
+  if (!o.online) return 'Estás sin conexión: restaurar necesita el servidor.'
   if (item.needsOldKey)
-    return 'Made with an older key: restore it on the machine with that key (obsybrain restore --key-file).'
-  if (o.running) return 'A copy is being made: restore when it ends.'
+    return 'Hecha con una clave más vieja: restáurala en la máquina con esa clave (obsybrain restore --key-file).'
+  if (o.running) return 'Se está haciendo una copia: restaura cuando termine.'
   return null
 }
 
 // What is wrong with the name typed to confirm a restore, or null when it is the installation's, exactly.
 export function confirmProblem(typed: string, name: string): string | null {
   if (typed === name) return null
-  if (!typed) return `Type the name of this installation: ${name}`
-  return `Type the name exactly as it is: ${name}`
+  if (!typed) return `Escribe el nombre de esta instalación: ${name}`
+  return `Escribe el nombre exactamente como es: ${name}`
 }
 
 // The file the installation key is saved in holds the key alone, so `obsybrain restore --key-file <file>` reads it as
@@ -113,9 +114,9 @@ export function lastUpdateOf(x: unknown): LastUpdate | null {
   return { ok: u.ok, from: u.from, to: u.to, at: u.at, log: typeof u.log === 'string' ? u.log : null }
 }
 export function lastUpdateText(u: LastUpdate): string {
-  if (u.ok) return `Updated from ${u.from} to ${u.to}.`
+  if (u.ok) return `Actualizado de ${u.from} a ${u.to}.`
   return (
-    `The update from ${u.from} to ${u.to} failed. obsybrain went back to ${u.from} with the data as it was just ` +
-    'before the update: nothing written was lost, and sessions and keys still work.'
+    `La actualización de ${u.from} a ${u.to} falló. obsybrain volvió a ${u.from} con los datos tal como estaban justo ` +
+    'antes de la actualización: nada de lo escrito se perdió, y las sesiones y claves siguen funcionando.'
   )
 }

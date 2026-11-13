@@ -66,11 +66,11 @@ test('the list is a page: it scrolls, and the frame is not in canvas mode', asyn
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
   await page.setViewportSize({ width: 1366, height: 768 })
   await page.goto(`${GRAPH}?view=list`)
-  await expect(page.getByRole('table', { name: /Pages of the wiki/ }).locator('tbody tr')).toHaveCount(50)
+  await expect(page.getByRole('table', { name: /Páginas del wiki/ }).locator('tbody tr')).toHaveCount(50)
   await expect(page.locator('.frame')).not.toHaveAttribute('data-mode', 'canvas')
   expect(await page.evaluate(() => document.scrollingElement?.scrollHeight ?? 0)).toBeGreaterThan(768)
   // Back to the graph by its button: the frame becomes a canvas again.
-  await page.getByRole('button', { name: 'Graph', exact: true }).click()
+  await page.getByRole('button', { name: 'Grafo', exact: true }).click()
   await settled(page)
   await expect(page.locator('.frame')).toHaveAttribute('data-mode', 'canvas')
 })
@@ -97,9 +97,9 @@ test('CA8: the canvas controls at its edges; the filters open over the picture w
   expect(views.top - canvas.top).toBeLessThan(32)
   const tools = page.locator('.graph-tools')
   for (const [name, key] of [
-    ['Fit', '0'],
-    ['Zoom in', '+'],
-    ['Zoom out', '-'],
+    ['Ajustar', '0'],
+    ['Acercar', '+'],
+    ['Alejar', '-'],
   ] as const) {
     const b = tools.getByRole('button', { name, exact: true })
     await expect(b).toHaveAttribute('aria-keyshortcuts', key)
@@ -171,7 +171,7 @@ test('CA8: the inspector folds and unfolds at the right without moving the pictu
   expect(await box(page, 'canvas.graph-canvas'), 'the canvas keeps its size').toEqual(size)
   expect(await canvas.getAttribute('data-active'), 'the picture has not moved').toBe(before)
   // Fit: the page under the keyboard is drawn left of the panel.
-  await page.getByRole('button', { name: 'Fit', exact: true }).click()
+  await page.getByRole('button', { name: 'Ajustar', exact: true }).click()
   const p = await box(page, '#graph-inspector')
   await expect
     .poll(async () => Number(((await canvas.getAttribute('data-active')) ?? '').split(',')[0]))
@@ -201,10 +201,10 @@ test('CA9: the canvas by keyboard: Tab to it, arrows walk the pages, Enter opens
   await settled(page)
   const canvas = page.getByRole('application', { name: /^Graph of \d+ items$/ })
   // The zoom tools come just before it: Tab from the last one reaches the canvas.
-  await page.getByRole('button', { name: 'Zoom out', exact: true }).focus()
+  await page.getByRole('button', { name: 'Alejar', exact: true }).focus()
   await page.keyboard.press('Tab')
   await expect(canvas).toBeFocused()
-  const said = page.locator('[aria-live="polite"]').filter({ hasText: /Enter to inspect/ })
+  const said = page.locator('[aria-live="polite"]').filter({ hasText: /Enter para inspeccionar/ })
   await expect(said).toHaveCount(1)
   // Each arrow moves the keyboard to another page (Right then Down may come
   // back to where it started: each step is checked on its own). The start is read once it is drawn.
@@ -310,7 +310,7 @@ test('CA9: with reduced motion nothing moves on the canvas screen', async ({ bro
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
   await page.goto(GRAPH)
   await settled(page)
-  await page.getByRole('button', { name: 'Expand the side bar' }).click()
+  await page.getByRole('button', { name: 'Expandir la barra lateral' }).click()
   await page.getByRole('button', { name: 'Inspector', exact: true }).click()
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0)
   const t = await page
@@ -336,7 +336,7 @@ test('the inspector: link rows keep Inspect at the right of their first line; no
   await page.locator('canvas.graph-canvas').focus()
   await page.keyboard.press('Enter')
   const inspector = page.getByRole('complementary', { name: /^Inspector \S/ })
-  await expect(inspector.getByRole('link', { name: 'Open page' })).toBeVisible()
+  await expect(inspector.getByRole('link', { name: 'Abrir página' })).toBeVisible()
   const rows = inspector.locator('.inspector-links li')
   await expect(rows.first()).toBeVisible()
   const seen = await rows.evaluateAll((lis) =>
@@ -405,7 +405,7 @@ function pickingAndClearance() {
     const said =
       (await page
         .locator('[aria-live="polite"]')
-        .filter({ hasText: /Enter to inspect/ })
+        .filter({ hasText: /Enter para inspeccionar/ })
         .textContent()) ?? ''
     const title = said.split('. ')[0] as string
     const [x, y] = await xyOf(page, 'data-active')
@@ -489,7 +489,7 @@ function pickingAndClearance() {
       await page.getByRole('button', { name: 'Inspector', exact: true }).click()
       const canvas = page.locator('canvas.graph-canvas')
       const sent = Number(await canvas.getAttribute('data-sent-seq'))
-      await page.getByRole('button', { name: 'Fit', exact: true }).click()
+      await page.getByRole('button', { name: 'Ajustar', exact: true }).click()
       // The picture of the state Fit sent, not one already on its way (review R3-2).
       await expect.poll(async () => Number(await canvas.getAttribute('data-sent-seq'))).toBeGreaterThan(sent)
       await upToDate(page)
@@ -551,7 +551,7 @@ function pickingAndClearance() {
     await canvas.focus()
     await page.keyboard.press('Enter')
     await expect(page.getByRole('complementary', { name: /^Inspector \S/ })).toBeVisible()
-    await page.getByRole('button', { name: 'Fit', exact: true }).click()
+    await page.getByRole('button', { name: 'Ajustar', exact: true }).click()
     await upToDate(page)
     const c = await box(page, 'canvas.graph-canvas')
     const controls = await Promise.all(

@@ -157,15 +157,18 @@ describe('imported authors (migration 0023)', { skip: skipPg }, () => {
     }
     const done = await w.callWeb(adminWeb, 'POST', `/v1/admin/authors/${author}/anonymise`)
     assert.equal(done.status, 200, done.text)
-    assert.deepEqual(done.body.author, { id: author, name: 'Former author' })
-    assert.equal((await w.db.one('SELECT name FROM accounts WHERE id = $1', [author]))?.name, 'Former author')
+    assert.deepEqual(done.body.author, { id: author, name: 'Autor anterior' })
+    assert.equal(
+      (await w.db.one('SELECT name FROM accounts WHERE id = $1', [author]))?.name,
+      'Autor anterior',
+    )
     const audit = await w.db.one(
       "SELECT actor_id, target, outcome FROM audit WHERE action = 'author.anonymise' ORDER BY id DESC LIMIT 1",
     )
     assert.deepEqual(audit, { actor_id: admin.id, target: author, outcome: 'ok' })
     // Still an author that cannot sign in, and still listed (now as «Former author»).
     const again = await w.callWeb(adminWeb, 'GET', '/v1/admin/authors')
-    assert.equal((again.body.authors as Array<{ name: string }>)[0]?.name, 'Former author')
+    assert.equal((again.body.authors as Array<{ name: string }>)[0]?.name, 'Autor anterior')
     assert.equal((await w.db.one('SELECT kind FROM accounts WHERE id = $1', [author]))?.kind, 'author')
   })
 })

@@ -60,10 +60,13 @@ export async function listRepos(ctx: Ctx, slug: string) {
 }
 
 async function asCurator(ctx: Ctx, slug: string) {
-  inWeb(ctx, 'Linking repositories')
+  inWeb(ctx, 'Vincular repositorios')
   const { brain, role } = await inBrain(ctx, { slug })
   if (!atLeast(role, 'curator')) {
-    throw invalid(`Only curators of "${slug}" link repositories to it.`, 'Ask a curator of the brain.')
+    throw invalid(
+      `Solo los curadores de "${slug}" le vinculan repositorios.`,
+      'Pídeselo a quien cure el brain.',
+    )
   }
   return brain
 }
@@ -71,8 +74,8 @@ async function asCurator(ctx: Ctx, slug: string) {
 // An archived brain is read-only: no new link (agents could not write to it anyway). Unlinking stays.
 const ARCHIVED_LINK = () =>
   denied(
-    'This brain is archived, so no repository can be linked to it.',
-    'A curator of the brain can unarchive it first.',
+    'Este brain está archivado, así que no se le puede vincular ningún repositorio.',
+    'Quien cure el brain puede desarchivarlo primero.',
   )
 
 export async function linkRepo(ctx: Ctx, slug: string, url: unknown) {
@@ -81,8 +84,8 @@ export async function linkRepo(ctx: Ctx, slug: string, url: unknown) {
   const key = repoKey(url)
   if (!key) {
     throw invalid(
-      'That is not a repository address.',
-      'Use the full address, e.g. github.com/org/repo (or the output of "git remote get-url origin").',
+      'Esa no es la dirección de un repositorio.',
+      'Usa la dirección completa, p. ej. github.com/org/repo (o la salida de "git remote get-url origin").',
     )
   }
   // Linking is per brain: what other brains link is never shown, nor in the way.
@@ -104,7 +107,7 @@ export async function unlinkRepo(ctx: Ctx, slug: string, url: unknown) {
         brain.id,
       ])
     : undefined
-  if (!r) throw notFound('linked repository')
+  if (!r) throw notFound('repositorio vinculado')
   await ok(ctx, 'repo.unlink', brain.id, key ?? '')
 }
 
@@ -119,7 +122,7 @@ async function workedIn(ctx: Ctx, slug: string) {
 }
 
 const HOW_TO_LINK =
-  'A curator can link this repository to a brain in the obsybrain web (the brain’s settings, Repositories); until then, name the brain in each call.'
+  'Quien cure un brain puede vincular este repositorio a un brain en la web de obsybrain (los ajustes del brain, Repositorios); hasta entonces, nombra el brain en cada llamada.'
 
 // Which brain is this repository's: the brains linked to the first address that has any the key can
 // see. One is the answer; several are listed for the agent to choose. A folder on the agent's machine
@@ -128,14 +131,14 @@ export async function resolveRepo(ctx: Ctx, repos: unknown) {
   const list = Array.isArray(repos) ? repos : repos === undefined ? [] : [repos]
   if (list.length === 0 || list.length > 20 || list.some((x) => typeof x !== 'string')) {
     throw invalid(
-      'Give 1 to 20 repository addresses ("repos").',
-      'Pass the remote of the repository you work in, such as the output of "git remote get-url origin".',
+      'Da de 1 a 20 direcciones de repositorio ("repos").',
+      'Pasa el remote del repositorio en el que trabajas, como la salida de "git remote get-url origin".',
     )
   }
   if (list.every((x) => /^(\/|~|[a-z]:\\|\.)/i.test(String(x).trim()))) {
     throw invalid(
-      'That is a folder on your machine; obsybrain can only match repository addresses.',
-      'Run "git remote get-url origin" in that folder and pass its output.',
+      'Esa es una carpeta de tu máquina; obsybrain solo puede asociar direcciones de repositorio.',
+      'Ejecuta "git remote get-url origin" en esa carpeta y pasa su salida.',
     )
   }
   const keys = list.map(repoKey).filter((k): k is string => k !== null)
@@ -161,9 +164,9 @@ export async function resolveRepo(ctx: Ctx, repos: unknown) {
         brain: null,
         repo: key,
         brains: seen,
-        message: `This repository is linked to "${only.slug}", a brain you have not worked in yet.`,
+        message: `Este repositorio está vinculado a "${only.slug}", un brain en el que aún no trabajaste.`,
         howToProceed:
-          'Ask the person whether to use it. If they agree, pass it as "brain" in your calls; after the first entry it is chosen alone.',
+          'Pregúntale a la persona si usarlo. Si acepta, pásalo como "brain" en tus llamadas; tras la primera entrada se elige solo.',
       }
     }
     if (seen.length > 1) {
@@ -171,8 +174,8 @@ export async function resolveRepo(ctx: Ctx, repos: unknown) {
         brain: null,
         repo: key,
         brains: seen,
-        message: 'Several of your brains are linked to this repository.',
-        howToProceed: 'Ask the person which one, and pass it as "brain" in your calls.',
+        message: 'Varios de tus brains están vinculados a este repositorio.',
+        howToProceed: 'Pregúntale a la persona cuál, y pásalo como "brain" en tus llamadas.',
       }
     }
   }
@@ -185,7 +188,7 @@ export async function resolveRepo(ctx: Ctx, repos: unknown) {
   return {
     brain: null,
     repos: keys,
-    message: 'No brain you can use is linked to this repository.',
+    message: 'Ningún brain que puedas usar está vinculado a este repositorio.',
     howToProceed: HOW_TO_LINK,
     candidates,
   }

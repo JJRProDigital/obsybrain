@@ -202,7 +202,7 @@ test('a click on a page opens it in words big enough to read; it and its neighbo
   const panel = page.getByRole('complementary', { name: /^Inspector \S/ })
   await expect(panel).toBeVisible()
   await expect(panel.locator('.inspector-address')).toHaveText(item.key.slice(2))
-  await expect(panel.getByRole('link', { name: 'Open page' })).toBeVisible()
+  await expect(panel.getByRole('link', { name: 'Abrir página' })).toBeVisible()
   await expect(panel.locator('.summary')).toBeVisible()
   const size = (sel: string) =>
     panel
@@ -247,10 +247,10 @@ test('the pages without links sit evenly on a ring around all the others', async
     expect(r, 'outside the linked pages').toBeGreaterThan(reach)
     expect(Math.abs(r - (radii[0] as number)), 'on one ring').toBeLessThan(2)
   }
-  // In their own colour, and listed as "No links".
+  // In their own colour, and listed as "Sin enlaces".
   expect(new Set(lone.map((it) => it.colour)).size).toBe(1)
   expect(linked.some((it) => it.colour === lone[0]?.colour)).toBe(false)
-  await expect(page.locator('.graph-communities').getByText('No links')).toBeVisible()
+  await expect(page.locator('.graph-communities').getByText('Sin enlaces')).toBeVisible()
 })
 
 test('the Communities panel lists the clusters the picture is coloured by, biggest first, and hides them', async ({
@@ -262,7 +262,7 @@ test('the Communities panel lists the clusters the picture is coloured by, bigge
   await page.goto(GRAPH)
   await settled(page)
   const panel = page.locator('.graph-communities')
-  await expect(panel.getByRole('checkbox', { name: 'Select all' })).toBeChecked()
+  await expect(panel.getByRole('checkbox', { name: 'Seleccionar todas' })).toBeChecked()
   const rows = panel.locator('ul .com-row')
   const n = await rows.count()
   expect(n).toBeGreaterThan(2)
@@ -283,20 +283,20 @@ test('the Communities panel lists the clusters the picture is coloured by, bigge
   expect(after.filter((it) => it.community !== 0 && it.shown).length).toBe(
     before.filter((it) => it.community !== 0 && it.shown).length,
   )
-  await expect(panel.getByRole('checkbox', { name: 'Select all' })).not.toBeChecked()
+  await expect(panel.getByRole('checkbox', { name: 'Seleccionar todas' })).not.toBeChecked()
   // Hover does not find a hidden page.
   await expect(page.getByRole('application', { name: /^Graph of \d+ items$/ })).toHaveAttribute(
     'aria-label',
     `Graph of ${after.filter((it) => it.shown).length} items`,
   )
   // Select all brings every one back; unticking it hides them all.
-  await panel.getByRole('checkbox', { name: 'Select all' }).check()
+  await panel.getByRole('checkbox', { name: 'Seleccionar todas' }).check()
   await expect
     .poll(async () => (await items(page)).filter((it) => it.shown).length)
     .toBe(before.filter((it) => it.shown).length)
-  await panel.getByRole('checkbox', { name: 'Select all' }).uncheck()
+  await panel.getByRole('checkbox', { name: 'Seleccionar todas' }).uncheck()
   await expect.poll(async () => (await items(page)).filter((it) => it.shown).length).toBe(0)
-  await panel.getByRole('checkbox', { name: 'Select all' }).check()
+  await panel.getByRole('checkbox', { name: 'Seleccionar todas' }).check()
   expect(firstName.length).toBeGreaterThan(0)
   // The panel folds from its head, and never covers the middle of the picture.
   const c = await canvasBox(page)
@@ -462,7 +462,7 @@ test('the canvas is a panel with its strip; the communities fold from their head
   expect(corners).toBe(8)
   const strip = page.locator('.graph-strip')
   await expect(strip.locator('.panel-num')).toHaveText('01')
-  await expect(strip.getByRole('heading', { level: 1 })).toHaveText('Graph')
+  await expect(strip.getByRole('heading', { level: 1 })).toHaveText('Grafo')
   await expect(strip).toContainText('Growth')
   await expect(strip).toContainText('what your agents know')
   const shown = Number(await page.locator('canvas.graph-canvas').getAttribute('data-items'))
@@ -487,7 +487,7 @@ test('the canvas is a panel with its strip; the communities fold from their head
   const p = (await panel.boundingBox()) as { x: number; y: number; width: number; height: number }
   expect(p.y).toBeGreaterThanOrEqual(s.y + s.height)
   expect(c.x + c.width - (p.x + p.width)).toBeLessThan(32)
-  const select = panel.getByRole('checkbox', { name: 'Select all' })
+  const select = panel.getByRole('checkbox', { name: 'Seleccionar todas' })
   await expect(select).toBeVisible()
   await panel.locator('summary').click()
   await expect(select).toBeHidden()

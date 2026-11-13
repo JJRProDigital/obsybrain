@@ -206,7 +206,7 @@ describe('F8: a quota of invitation mails per service account and hour', { skip:
     ])
     assert.equal(over.status, 429, over.text)
     assert.equal(over.body.error?.code, 'invite_quota')
-    assert.match(String(over.body.error?.howToProceed), /hour|minutes?/)
+    assert.match(String(over.body.error?.howToProceed), /hora|minutos?/)
     assert.equal((over.body.error as Json | undefined)?.retryAfter, 50 * 60)
     assert.equal(await open('q3@example.com'), undefined)
     assert.equal(w.mails.length, mails)

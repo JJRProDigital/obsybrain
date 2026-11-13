@@ -61,24 +61,24 @@ export type GraphFilters = { q?: string; type?: string; status?: string; tag?: s
 // (comma separated), a link kind, and words, a tag and a prefix of at most 200 characters.
 export function checkFilters(o: GraphFilters & { prefix?: string }): void {
   if (o.type !== undefined && !(PAGE_TYPES as readonly string[]).includes(o.type))
-    throw invalid(`"type" is one of: ${PAGE_TYPES.join(', ')}.`, 'Fix "type".')
+    throw invalid(`"type" es uno de: ${PAGE_TYPES.join(', ')}.`, 'Corrige "type".')
   if (
     o.status !== undefined &&
     !o.status.split(',').every((x) => (PAGE_STATUSES as readonly string[]).includes(x))
   )
     throw invalid(
-      `"status" is one or more of: ${PAGE_STATUSES.join(', ')}, separated by commas.`,
-      'Fix "status".',
+      `"status" es uno o más de: ${PAGE_STATUSES.join(', ')}, separados por comas.`,
+      'Corrige "status".',
     )
   if (o.linkKind !== undefined && !(GRAPH_KINDS as readonly string[]).includes(o.linkKind))
-    throw invalid(`"linkKind" is one of: ${GRAPH_KINDS.join(', ')}.`, 'Fix "linkKind".')
+    throw invalid(`"linkKind" es uno de: ${GRAPH_KINDS.join(', ')}.`, 'Corrige "linkKind".')
   for (const [k, v] of [
     ['q', o.q],
     ['prefix', o.prefix],
     ['tag', o.tag],
   ] as const) {
     if (v !== undefined && v.length > 200)
-      throw invalid(`"${k}" has at most 200 characters.`, `Shorten "${k}".`)
+      throw invalid(`"${k}" tiene como máximo 200 caracteres.`, `Acorta "${k}".`)
   }
 }
 
@@ -341,8 +341,8 @@ export async function wikiGraph(
 ): Promise<GraphView> {
   if (o.prefix !== undefined && !PREFIX.test(o.prefix))
     throw invalid(
-      '"prefix" is the start of an address: one or more parts of lowercase letters, digits and dashes, split by "/".',
-      'Fix "prefix".',
+      '"prefix" es el inicio de una dirección: una o más partes de letras minúsculas, dígitos y guiones, separadas por "/".',
+      'Corrige "prefix".',
     )
   checkFilters(o)
   const { brain } = await inBrain(ctx, { slug })

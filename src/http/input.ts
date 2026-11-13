@@ -6,7 +6,10 @@ export type Obj = Record<string, unknown>
 export function obj(body: unknown): Obj {
   if (body === undefined || body === null) return {}
   if (typeof body !== 'object' || Array.isArray(body)) {
-    throw invalid('The request body must be a JSON object.', 'Send a JSON object such as {"name": "…"}.')
+    throw invalid(
+      'El cuerpo de la petición debe ser un objeto JSON.',
+      'Envía un objeto JSON como {"name": "…"}.',
+    )
   }
   return body as Obj
 }
@@ -14,12 +17,12 @@ export function obj(body: unknown): Obj {
 export function str(o: Obj, key: string, opt: { required?: boolean; max?: number } = {}): string | undefined {
   const v = o[key]
   if (v === undefined || v === null) {
-    if (opt.required) throw invalid(`"${key}" is required.`, `Add "${key}" to the request.`)
+    if (opt.required) throw invalid(`"${key}" es obligatorio.`, `Añade "${key}" a la petición.`)
     return undefined
   }
-  if (typeof v !== 'string') throw invalid(`"${key}" must be a string.`, `Send "${key}" as text.`)
+  if (typeof v !== 'string') throw invalid(`"${key}" debe ser texto.`, `Envía "${key}" como texto.`)
   if (opt.max !== undefined && v.length > opt.max) {
-    throw invalid(`"${key}" is longer than ${opt.max} characters.`, `Shorten "${key}".`)
+    throw invalid(`"${key}" tiene más de ${opt.max} caracteres.`, `Acórtalo.`)
   }
   return v
 }
@@ -36,14 +39,14 @@ export function strList(
   const v = o[key]
   if (v === undefined || v === null) return undefined
   if (!Array.isArray(v) || v.some((x) => typeof x !== 'string')) {
-    throw invalid(`"${key}" must be a list of strings.`, `Send "${key}" as ["…", "…"].`)
+    throw invalid(`"${key}" debe ser una lista de textos.`, `Envía "${key}" como ["…", "…"].`)
   }
   if (opt.maxItems !== undefined && v.length > opt.maxItems) {
-    throw invalid(`"${key}" has more than ${opt.maxItems} items.`, `Send at most ${opt.maxItems}.`)
+    throw invalid(`"${key}" tiene más de ${opt.maxItems} elementos.`, `Envía como máximo ${opt.maxItems}.`)
   }
   const maxLen = opt.maxLen
   if (maxLen !== undefined && v.some((x) => (x as string).length > maxLen)) {
-    throw invalid(`An item of "${key}" is longer than ${opt.maxLen} characters.`, 'Shorten it.')
+    throw invalid(`Un elemento de "${key}" tiene más de ${opt.maxLen} caracteres.`, 'Acórtalo.')
   }
   return v as string[]
 }
@@ -55,13 +58,13 @@ export function int(
 ): number | undefined {
   const v = o[key]
   if (v === undefined || v === null) {
-    if (opt.required) throw invalid(`"${key}" is required.`, `Add "${key}" to the request.`)
+    if (opt.required) throw invalid(`"${key}" es obligatorio.`, `Añade "${key}" a la petición.`)
     return undefined
   }
   if (typeof v !== 'number' || !Number.isInteger(v))
-    throw invalid(`"${key}" must be a whole number.`, `Fix "${key}".`)
+    throw invalid(`"${key}" debe ser un número entero.`, `Corrige "${key}".`)
   if ((opt.min !== undefined && v < opt.min) || (opt.max !== undefined && v > opt.max)) {
-    throw invalid(`"${key}" must be between ${opt.min} and ${opt.max}.`, `Fix "${key}".`)
+    throw invalid(`"${key}" debe estar entre ${opt.min} y ${opt.max}.`, `Corrige "${key}".`)
   }
   return v
 }
@@ -69,7 +72,7 @@ export function int(
 export function bool(o: Obj, key: string): boolean | undefined {
   const v = o[key]
   if (v === undefined || v === null) return undefined
-  if (typeof v !== 'boolean') throw invalid(`"${key}" must be true or false.`, `Fix "${key}".`)
+  if (typeof v !== 'boolean') throw invalid(`"${key}" debe ser verdadero o falso.`, `Corrige "${key}".`)
   return v
 }
 
@@ -82,7 +85,7 @@ export function oneOf<T extends string>(
   const v = str(o, key, { required })
   if (v === undefined) return undefined
   if (!(values as readonly string[]).includes(v)) {
-    throw invalid(`"${key}" must be one of: ${values.join(', ')}.`, `Use one of those values for "${key}".`)
+    throw invalid(`"${key}" debe ser uno de: ${values.join(', ')}.`, `Usa uno de esos valores para "${key}".`)
   }
   return v as T
 }
@@ -121,6 +124,6 @@ export function day(v: string | null, field: string): Date | undefined {
     d.getUTCFullYear() < 1 ||
     d.getUTCFullYear() > 9999
   )
-    throw invalid(`"${field}" is not a date.`, 'Send a day like 2026-10-29, or an ISO instant.')
+    throw invalid(`"${field}" no es una fecha.`, 'Envía un día como 2026-10-29, o un instante ISO.')
   return d
 }

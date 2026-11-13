@@ -63,7 +63,7 @@ describe('what a field says before anything is sent', () => {
     assert.equal(rateProblem('60', 60, 10000), null)
     assert.equal(rateProblem('10000', 60, 10000), null)
     for (const bad of ['', '59', '10001', '1.5', 'many', '-1']) {
-      assert.match(rateProblem(bad, 60, 10000) ?? '', /60.+10,000/, bad)
+      assert.match(rateProblem(bad, 60, 10000) ?? '', /60.+10\.000/, bad)
     }
   })
 
@@ -109,7 +109,7 @@ describe('what a field says before anything is sent', () => {
     assert.equal(logoProblem({ type: 'image/png', size: 1000 }), null)
     assert.equal(logoProblem({ type: 'image/webp', size: 2 * 1024 * 1024 }), null)
     assert.match(logoProblem({ type: 'image/svg+xml', size: 10 }) ?? '', /SVG/)
-    assert.match(logoProblem({ type: 'image/gif', size: 10 }) ?? '', /PNG, JPEG or WebP/)
+    assert.match(logoProblem({ type: 'image/gif', size: 10 }) ?? '', /PNG, JPEG o WebP/)
     assert.match(logoProblem({ type: 'image/png', size: 2 * 1024 * 1024 + 1 }) ?? '', /2 MB/)
   })
 })
@@ -210,21 +210,21 @@ describe('the audit: the view and the download ask for the same rows', () => {
 
   it("a line's time where the person is: date and time, in the same zone as the day filters", () => {
     const at = '2026-10-28T23:30:00.000Z'
-    assert.equal(localWhen(at, 'Europe/Madrid'), '29 Oct 2026, 00:30')
-    assert.equal(localWhen(at, 'Pacific/Kiritimati'), '29 Oct 2026, 13:30')
-    assert.equal(localWhen(at, 'UTC'), '28 Oct 2026, 23:30')
+    assert.equal(localWhen(at, 'Europe/Madrid'), '29 oct 2026, 00:30')
+    assert.equal(localWhen(at, 'Pacific/Kiritimati'), '29 oct 2026, 13:30')
+    assert.equal(localWhen(at, 'UTC'), '28 oct 2026, 23:30')
   })
 })
 
 describe('naming what is secret, and progress', () => {
   it('the mail password only by whether it is set: no part of it', () => {
-    assert.equal(secretLabel(true), 'Set')
-    assert.equal(secretLabel(false), 'Not set')
+    assert.equal(secretLabel(true), 'Configurado')
+    assert.equal(secretLabel(false), 'Sin configurar')
   })
 
   it('processing says how far it got, in words', () => {
-    assert.equal(progressLabel({ done: 1200, total: 3400 }), '1,200 of 3,400 texts processed (35%)')
-    assert.equal(progressLabel({ done: 0, total: 0 }), 'Nothing to process yet')
-    assert.equal(progressLabel({ done: 10, total: 10 }), 'All 10 texts processed')
+    assert.equal(progressLabel({ done: 1200, total: 3400 }), '1200 de 3400 textos procesados (35%)')
+    assert.equal(progressLabel({ done: 0, total: 0 }), 'Nada para procesar todavía')
+    assert.equal(progressLabel({ done: 10, total: 10 }), 'Los 10 textos procesados')
   })
 })

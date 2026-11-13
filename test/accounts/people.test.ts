@@ -101,7 +101,7 @@ describe('people and keys', { skip: skipPg }, () => {
     assert.equal(login.status, 200)
     const again = await accept(tokenOf(mail.text), 'Dani again')
     assert.deepEqual([again.status, again.body.error?.code], [400, 'invitation_invalid'])
-    assert.match(String(again.body.error?.howToProceed), /administrator/)
+    assert.match(String(again.body.error?.howToProceed), /administración/)
     // 72 hours later the other link no longer works.
     const late = await w.mailTo('late@example.com')
     w.advance(72 * 3_600_000 + 1000)
@@ -185,8 +185,8 @@ describe('people and keys', { skip: skipPg }, () => {
       }),
     ]) {
       assert.equal(r.status, 403, r.text)
-      assert.match(String(r.body.error?.message), /you are reader/)
-      assert.match(String(r.body.error?.howToProceed), /Ask a curator of the brain \(Ana\)/)
+      assert.match(String(r.body.error?.message), /tú eres reader/)
+      assert.match(String(r.body.error?.howToProceed), /Pídeselo a quien cure el brain \(Ana\)/)
     }
     const denied = await w.db.query("SELECT * FROM audit WHERE actor_id = $1 AND outcome = 'denied'", [
       rita.id,
@@ -197,7 +197,7 @@ describe('people and keys', { skip: skipPg }, () => {
   it('CA6: the last curator cannot be removed or demoted; with another curator it can', async () => {
     const demote = await w.callWeb(anaWeb, 'PUT', `/v1/brains/blog/members/${ana.id}`, { role: 'reader' })
     assert.deepEqual([demote.status, demote.body.error?.code], [409, 'last_curator'])
-    assert.match(String(demote.body.error?.howToProceed), /another member curator first/)
+    assert.match(String(demote.body.error?.howToProceed), /otro miembro/)
     const leave = await w.callWeb(anaWeb, 'DELETE', `/v1/brains/blog/members/${ana.id}`)
     assert.equal(leave.status, 409)
     const hugo = await w.person('Hugo')
@@ -230,7 +230,7 @@ describe('people and keys', { skip: skipPg }, () => {
     assert.equal((await w.call(eric.key, 'GET', '/v1/brains/yt/entries')).status, 200)
     assert.equal((await audited('admin.join')).length, 1)
     const notices = (await w.callWeb(anaWeb, 'GET', '/v1/me/notices')).body.notices as Array<{ text: string }>
-    assert.ok(notices.some((n) => /administration\) joined "yt"/.test(n.text)))
+    assert.ok(notices.some((n) => /administración\) entró en "yt"/.test(n.text)))
   })
 
   it('CA8: a token is seen once; then only its last 4, its last use and its client', async () => {
@@ -242,7 +242,7 @@ describe('people and keys', { skip: skipPg }, () => {
     })
     assert.equal(made.status, 201, made.text)
     const t = made.body.token as { id: string; secret: string; last4: string }
-    assert.match(String(made.body.message), /only this once/)
+    assert.match(String(made.body.message), /solo esta vez/)
     await fetch(`${w.base}/v1/me`, {
       headers: { authorization: `Bearer ${t.secret}`, 'user-agent': 'claude-code/2.1' },
     })
@@ -260,7 +260,7 @@ describe('people and keys', { skip: skipPg }, () => {
       perm: 'read',
       allBrains: true,
     })
-    assert.match(String(all.body.note), /including brains you join later/)
+    assert.match(String(all.body.note), /te sumes después/)
     assert.equal(
       (
         await w.callWeb(anaWeb, 'POST', '/v1/me/tokens', {
@@ -332,7 +332,7 @@ describe('people and keys', { skip: skipPg }, () => {
       (members.body.former as Array<{ accountId: string; name: string; label: string }>).find(
         (f) => f.accountId === juan.id,
       ),
-      { accountId: juan.id, name: 'Juan', label: 'former member' },
+      { accountId: juan.id, name: 'Juan', label: 'ex miembro' },
     )
     // Reactivated, the person is back in their brains; the old keys stay revoked.
     assert.equal((await w.callWeb(adminWeb, 'POST', `/v1/admin/accounts/${juan.id}/restore`)).status, 200)
@@ -352,7 +352,7 @@ describe('people and keys', { skip: skipPg }, () => {
       role: 'curator',
     })
     assert.equal(cur.status, 400)
-    assert.match(String(cur.body.error?.message), /never a curator/)
+    assert.match(String(cur.body.error?.message), /nunca es curadora/)
     const add = await w.callWeb(anaWeb, 'POST', '/v1/brains/yt/members', {
       account: factory.id,
       role: 'reader',
@@ -443,7 +443,7 @@ describe('people and keys', { skip: skipPg }, () => {
         transport: () => ({ send: async (m) => void w.mails.push(m) }),
       })) >= 1,
     )
-    assert.match((await w.mailTo(email)).subject, /"short one" ends soon/)
+    assert.match((await w.mailTo(email)).subject, /"short one" vence pronto/)
     const count = w.mails.filter((m) => m.to === email).length
     await remindExpiringTokens(w.db, w.clock, {
       secret: TEST_SECRET,
@@ -526,7 +526,7 @@ describe('people and keys', { skip: skipPg }, () => {
     assert.equal(p.status, 201, p.text)
     const email = String((await w.db.one('SELECT email FROM accounts WHERE id = $1', [mo.id]))?.email)
     const m = await w.mailTo(email)
-    assert.match(m.text, /Bot proposed 1 change to the wiki of "notes"/)
+    assert.match(m.text, /Bot propuso 1 cambio a la wiki de "notes"/)
     assert.match(m.text, /\/b\/notes\/proposals\/prp_/)
     assert.ok(!/Secret plan|Nobody should/.test(m.text + m.subject))
   })
@@ -574,7 +574,7 @@ describe('people and keys', { skip: skipPg }, () => {
     const r = await w.raw('POST', '/v1/auth/reset', { body: { email } })
     assert.equal(r.status, 202)
     const m = await w.mailTo(email, /Reset your obsybrain password/)
-    assert.match(m.text, /once, for 1 hour/)
+    assert.match(m.text, /una sola vez y durante 1 hora/)
     const token = tokenOf(m.text)
     const ok = await w.raw('POST', '/v1/auth/reset/confirm', {
       body: { token, password: 'a brand new password' },

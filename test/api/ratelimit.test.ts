@@ -54,7 +54,7 @@ describe('the rate limit per key', { skip: skipPg }, () => {
       retryAfter: number
     }
     assert.equal(e.code, 'rate_limited')
-    assert.match(e.message, /600 requests per minute/)
+    assert.match(e.message, /600 peticiones por minuto/)
     assert.match(e.howToProceed, /60 seconds/)
     assert.equal(e.retryAfter, 60)
     // Another key is not slowed down by this one.
@@ -109,7 +109,7 @@ describe('the rate limit per key', { skip: skipPg }, () => {
       assert.equal((await w.call(k.key, 'GET', '/v1/me')).status, 200)
       const r = await w.call(k.key, 'GET', '/v1/me')
       assert.equal(r.status, 429)
-      assert.match(r.body.error?.message ?? '', /2 requests per minute/)
+      assert.match(r.body.error?.message ?? '', /2 peticiones por minuto/)
     } finally {
       w.advance(60_000)
       await limitTo(600)

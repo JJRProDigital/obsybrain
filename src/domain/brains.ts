@@ -1,5 +1,5 @@
 // Brains: create, list, read, archive, delete; and the memberships that give access to them (spec B1
-// «Cerebros»; the full membership management is spec B4).
+// «Brains»; the full membership management is spec B4).
 import type { Role } from '../auth/can.ts'
 import { roleIn } from '../auth/principal.ts'
 import { brainNotFound, conflict, invalid } from '../core/errors.ts'
@@ -26,7 +26,7 @@ export type NewBrain = {
 
 function text(v: string | undefined, max: number, field: string): string {
   const s = (v ?? '').trim()
-  if (s.length > max) throw invalid(`The ${field} is longer than ${max} characters.`, `Shorten the ${field}.`)
+  if (s.length > max) throw invalid(`El ${field} tiene más de ${max} caracteres.`, `Acorta el ${field}.`)
   return s
 }
 
@@ -40,7 +40,7 @@ export async function addMember(
   if (role === 'curator') {
     const a = await db.one<{ kind: string }>('SELECT kind FROM accounts WHERE id = $1', [accountId])
     if (a?.kind === 'service') {
-      throw invalid('A service account is never a curator.', 'Give it the contributor or reader role.')
+      throw invalid('Una cuenta de servicio nunca es curadora.', 'Dale el rol contributor o reader.')
     }
   }
   await db.query(
@@ -80,8 +80,8 @@ export async function createBrain(
   const slug = (input.slug ?? '').trim()
   if (!SLUG.test(slug) || slug.length < 2 || slug.length > 64) {
     throw invalid(
-      'A brain name (slug) is 2 to 64 lowercase letters, digits and single hyphens.',
-      'Use something like "youtube-channel".',
+      'El nombre de un brain (slug) es de 2 a 64 letras minúsculas, dígitos y guiones simples.',
+      'Usa algo como "youtube-channel".',
     )
   }
   const name = text(input.name, 80, 'name') || slug
@@ -101,8 +101,8 @@ export async function createBrain(
     if (ctx.who.kind === 'service') {
       if (!named) {
         throw invalid(
-          'A service account must name the first curator of a brain it creates.',
-          'Pass "firstCurator": the email of a person who will curate it.',
+          'Una cuenta de servicio debe nombrar a la primera persona curadora de un brain que crea.',
+          'Pasa "firstCurator": el correo de la persona que lo curará.',
         )
       }
       const found = named.includes('@')
@@ -115,10 +115,10 @@ export async function createBrain(
       else if (EMAIL.test(named) && !found && ctx.who.canInvite) pendingEmail = named.toLowerCase()
       else {
         throw invalid(
-          'The first curator must be an active person account.',
+          'La primera persona curadora debe ser una cuenta de persona activa.',
           ctx.who.canInvite
-            ? 'Name an existing person, or an email to invite.'
-            : 'Name an existing person (this service account may not invite).',
+            ? 'Nombra a una persona existente, o un correo para invitar.'
+            : 'Nombra a una persona existente (esta cuenta de servicio no puede invitar).',
         )
       }
     }
@@ -134,8 +134,8 @@ export async function createBrain(
       if (open && open.invited_by !== ctx.who.accountId) {
         throw conflict(
           'invitation_pending_elsewhere',
-          `${pendingEmail} has an open obsybrain invitation from someone else.`,
-          'Ask an administrator of obsybrain to resend or withdraw that invitation, then create the brain again, or name another first curator.',
+          `${pendingEmail} tiene una invitación de obsybrain abierta de otra persona.`,
+          'Pide a un administrador de obsybrain que reenvíe o retire esa invitación y vuelve a crear el brain, o nombra otra primera persona curadora.',
         )
       }
     }
@@ -147,7 +147,7 @@ export async function createBrain(
       )
     } catch (err) {
       if ((err as { code?: string }).code === '23505') {
-        throw conflict('brain_exists', `A brain named "${slug}" already exists.`, 'Choose another name.')
+        throw conflict('brain_exists', `Ya existe un brain llamado "${slug}".`, 'Elige otro nombre.')
       }
       throw err
     }
@@ -235,13 +235,16 @@ export async function setArchived(ctx: Ctx, slug: string, archived: boolean): Pr
 // a member to delete; exporting first (spec B7) does need it.
 // Deleting is done in the web, signed in as a person: an administrator's token cannot.
 export async function deleteBrain(ctx: Ctx, slug: string, confirm: string): Promise<void> {
-  inWeb(ctx, 'Deleting a brain')
+  inWeb(ctx, 'Eliminar un brain')
   await allow(ctx, 'brain.delete', {})
   await ctx.db.tx(async (db) => {
     const row = await db.one<{ id: string }>('SELECT id FROM brains WHERE slug = $1 FOR UPDATE', [slug])
     if (!row) throw brainNotFound()
     if (confirm !== slug) {
-      throw invalid('To delete a brain, type its name to confirm.', `Send {"confirm": "${slug}"}.`)
+      throw invalid(
+        'Para eliminar un brain, escribe su nombre para confirmar.',
+        `Envía {"confirm": "${slug}"}.`,
+      )
     }
     // Short keys writing to this brain are revoked, not erased: a running agent learns its key was
     // revoked, and the audit keeps pointing at a key that exists.

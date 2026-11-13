@@ -119,7 +119,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
       problems.map((p) => p.op),
       [1],
     )
-    assert.match(problems[0]?.message ?? '', /voices\/bare.*cites no sources/)
+    assert.match(problems[0]?.message ?? '', /voices\/bare.*no cita ninguna fuente/)
     assert.equal(await w.db.one("SELECT 1 FROM proposals WHERE title = 'Two pages'"), undefined)
   })
 
@@ -165,18 +165,21 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
     })
     assert.equal(r.status, 400)
     const text = JSON.stringify((r.body.error as unknown as { problems: Problem[] }).problems)
-    assert.match(text, /not a valid address/)
-    assert.match(text, /already taken by the page/)
-    assert.match(text, /reserved: it was an address of the page now at \\"style\/intro-length\\"/)
-    assert.match(text, /no entry \\"ent_000000000000\\"/)
+    assert.match(text, /no es una dirección válida/)
+    assert.match(text, /ya la toma la página/)
+    assert.match(
+      text,
+      /está reservada: era una dirección de la página que ahora está en \\"style\/intro-length\\"/,
+    )
+    assert.match(text, /No existe la entrada \\"ent_000000000000\\"/)
     assert.match(text, /baseRevision/)
-    assert.match(text, /no page at \\"nowhere\/at-all\\"/)
+    assert.match(text, /No hay ninguna página en \\"nowhere\/at-all\\"/)
     const many = await propose(factory.key, {
       title: 'Too many',
       ops: Array.from({ length: 51 }, (_, i) => create(`bulk/p${i}`)),
     })
     assert.equal(many.status, 400)
-    assert.match(JSON.stringify(many.body), /at most 50 operations/)
+    assert.match(JSON.stringify(many.body), /como máximo 50 operaciones/)
   })
 
   it('warnings that do not block: no links, empty summary, near-duplicate title', async () => {
@@ -245,7 +248,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
     assert.equal(again.status, 400)
     const byOther = await propose(ana.key, { title: 'P4', supersedes: p2.id, ops: [create('replace/one')] })
     assert.equal(byOther.status, 400)
-    assert.match(JSON.stringify(byOther.body), /Only the author/)
+    assert.match(JSON.stringify(byOther.body), /Solo quien propuso/)
   })
 
   it('the author withdraws a pending proposal; nobody else can', async () => {
@@ -498,7 +501,7 @@ describe('wiki proposals and reading', { skip: skipPg }, () => {
     for (const ops of cases) {
       const r = await propose(factory.key, { title: 'Self', ops })
       assert.equal(r.status, 400, JSON.stringify(ops))
-      assert.match(JSON.stringify(r.body), /itself/)
+      assert.match(JSON.stringify(r.body), /sí misma/)
     }
   })
 

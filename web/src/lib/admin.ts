@@ -39,12 +39,12 @@ export function installationSave(read: InstallationRead, edit: InstallationEdit)
 }
 
 const num = (s: string) => (/^-?\d+$/.test(s.trim()) ? Number(s.trim()) : Number.NaN)
-const thousands = (n: number) => n.toLocaleString('en')
+const thousands = (n: number) => n.toLocaleString('es')
 
 export function rateProblem(text: string, min: number, max: number): string | null {
   const v = num(text)
   if (Number.isInteger(v) && v >= min && v <= max) return null
-  return `A whole number from ${thousands(min)} to ${thousands(max)}.`
+  return `Un número entero de ${thousands(min)} a ${thousands(max)}.`
 }
 
 const LOCAL = new Set(['localhost', '127.0.0.1', '[::1]'])
@@ -53,7 +53,7 @@ const LOCAL = new Set(['localhost', '127.0.0.1', '[::1]'])
 export function factoryProblem(text: string): string | null {
   const raw = text.trim()
   if (!raw) return null
-  const how = 'Use an https address, such as https://factory.example.com (http only on this machine).'
+  const how = 'Usa una dirección https, como https://factory.example.com (http solo en esta máquina).'
   let u: URL
   try {
     u = new URL(raw)
@@ -70,8 +70,7 @@ export function factoryProblem(text: string): string | null {
   )
     return how
   const out = u.toString().replace(/\/+$/, '')
-  if (!SAFE_URL.test(out) || out.length > 300)
-    return 'Only letters, digits and . - _ ~ / : in its host and path.'
+  if (!SAFE_URL.test(out) || out.length > 300) return 'Solo letras, dígitos y . - _ ~ / : en su host y path.'
   return null
 }
 
@@ -106,12 +105,12 @@ export function mailProblems(
   const out: Partial<Record<string, string>> = {}
   const host = f.host.trim()
   if (!host || host.length > 253 || /[\s/]/.test(host))
-    out.host = 'The name of the mail server, such as smtp.example.com.'
+    out.host = 'El nombre del servidor de correo, como smtp.example.com.'
   const port = num(f.port)
   if (!Number.isInteger(port) || port < 1 || port > 65535)
-    out.port = 'A number from 1 to 65535: usually 587, or 465.'
+    out.port = 'Un número de 1 a 65535: normalmente 587, o 465.'
   if (!EMAIL.test(f.fromAddress.trim()))
-    out.fromAddress = 'The email mail is sent from, such as brain@example.com.'
+    out.fromAddress = 'El email desde el que sale el correo, como brain@example.com.'
   return out
 }
 
@@ -141,9 +140,9 @@ export const LOGO_MAX_BYTES = 2 * 1024 * 1024
 
 export function logoProblem(file: { type: string; size: number }): string | null {
   if (file.type === 'image/svg+xml')
-    return 'SVG is not accepted: it can carry scripts. Export the logo as PNG or WebP.'
-  if (!(LOGO_TYPES as readonly string[]).includes(file.type)) return 'Choose a PNG, JPEG or WebP image.'
-  if (file.size > LOGO_MAX_BYTES) return 'The logo is larger than 2 MB; a logo needs a few kilobytes.'
+    return 'No se acepta SVG: puede llevar scripts. Exporta el logo como PNG o WebP.'
+  if (!(LOGO_TYPES as readonly string[]).includes(file.type)) return 'Elige una imagen PNG, JPEG o WebP.'
+  if (file.size > LOGO_MAX_BYTES) return 'El logo pesa más de 2 MB; un logo necesita pocos kilobytes.'
   return null
 }
 
@@ -192,7 +191,7 @@ export function auditExportHref(q: AuditQuery & { before?: string }, upTo: strin
 }
 
 export function secretLabel(set: boolean): string {
-  return set ? 'Set' : 'Not set'
+  return set ? 'Configurado' : 'Sin configurar'
 }
 
 // The zone the person is in: the audit's days are filtered and its times shown in it.
@@ -200,13 +199,13 @@ export const localZone = (): string => Intl.DateTimeFormat().resolvedOptions().t
 
 export function localWhen(iso: string, timeZone: string = localZone()): string {
   const d = new Date(iso)
-  const day = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone })
-  const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone })
+  const day = d.toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric', timeZone })
+  const time = d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone })
   return `${day}, ${time}`
 }
 
 export function progressLabel(p: { done: number; total: number }): string {
-  if (p.total === 0) return 'Nothing to process yet'
-  if (p.done >= p.total) return `All ${thousands(p.total)} texts processed`
-  return `${thousands(p.done)} of ${thousands(p.total)} texts processed (${Math.floor((p.done / p.total) * 100)}%)`
+  if (p.total === 0) return 'Nada para procesar todavía'
+  if (p.done >= p.total) return `Los ${thousands(p.total)} textos procesados`
+  return `${thousands(p.done)} de ${thousands(p.total)} textos procesados (${Math.floor((p.done / p.total) * 100)}%)`
 }

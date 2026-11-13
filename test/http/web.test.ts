@@ -206,7 +206,7 @@ describe('the web when it is not built', () => {
     assert.notEqual(page, 'pass')
     if (page === 'pass') return
     assert.equal(page.status, 503)
-    assert.match(String(page.body), /The web is not built: run npm run build/)
+    assert.match(String(page.body), /La web no está compilada/)
     assert.equal(answerWeb(web, 'GET', '/v1/brains', ''), 'pass')
   })
 })

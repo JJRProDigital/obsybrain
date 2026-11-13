@@ -31,15 +31,15 @@ export function fileProblem(f: { name: string; size: number }): string | null {
 export const importAsk = (slug: string, name: string) => ({ path: { slug }, query: { name } })
 
 const count = (n: number, one: string, many: string) =>
-  n === 0 ? `no ${many}` : `${n} ${n === 1 ? one : many}`
+  n === 0 ? `sin ${many}` : `${n} ${n === 1 ? one : many}`
 
 export function importDone(
   r: Pick<ImportReport, 'kind' | 'pages' | 'entries' | 'links'>,
   file: string,
 ): string {
-  return `Imported ${count(r.pages, 'page', 'pages')}, ${count(r.entries, 'entry', 'entries')} and ${count(r.links, 'link', 'links')} from ${file}.`
+  return `Importadas ${count(r.pages, 'página', 'páginas')}, ${count(r.entries, 'entrada', 'entradas')} y ${count(r.links, 'enlace', 'enlaces')} de ${file}.`
 }
 
 export function whyText(why: ImportWhy): string {
-  return T.settings.import.why[why] ?? 'left out'
+  return T.settings.import.why[why] ?? 'quedó fuera'
 }

@@ -13,8 +13,8 @@ export function rateLimited(limit: number, retryAfter: number): AppError {
   const e = new AppError(
     429,
     'rate_limited',
-    `This key made more than ${limit} requests per minute.`,
-    `Wait ${retryAfter} seconds and retry; spread the requests out, or ask the administration to raise the limit.`,
+    `Esta clave hizo más de ${limit} peticiones por minuto.`,
+    `Espera ${retryAfter} segundos y reintenta; reparte las peticiones, o pide a la administración que suba el límite.`,
   )
   e.headers = { 'retry-after': String(retryAfter) }
   e.extra = { retryAfter }

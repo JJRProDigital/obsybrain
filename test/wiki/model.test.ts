@@ -51,19 +51,19 @@ describe('wiki words', () => {
     assert.ok(problems.every((p) => p.op === 3))
     const more: Problem[] = []
     readOp({ op: 'fly', address: 'a' }, 1, more)
-    assert.match(more[0]?.message ?? '', /Unknown operation "fly"/)
+    assert.match(more[0]?.message ?? '', /Operación desconocida "fly"/)
     const edit: Problem[] = []
     readOp({ op: 'edit', address: 'a', reason: 'r' }, 0, edit)
-    assert.match(edit[0]?.message ?? '', /changes at least one/)
+    assert.match(edit[0]?.message ?? '', /cambia al menos uno/)
     const self: Problem[] = []
     readOp({ op: 'link', address: 'a', kind: 'related', to: 'a', reason: 'r' }, 0, self)
-    assert.match(self[0]?.message ?? '', /itself/)
+    assert.match(self[0]?.message ?? '', /sí misma/)
   })
 
   it('a body over 100 000 characters is refused once secrets become marks', () => {
     const problems: Problem[] = []
     readOp({ op: 'merge', address: 'a', from: 'b', body: 'x'.repeat(100_001), reason: 'r' }, 0, problems)
-    assert.match(problems[0]?.message ?? '', /longer than 100000/)
+    assert.match(problems[0]?.message ?? '', /más de 100000/)
   })
 
   it('titles that share almost all their words are nearly the same', () => {

@@ -19,7 +19,7 @@ export type Member = {
   role: Role
   notifyProposals?: boolean
 }
-export type Former = { accountId: string; name: string; label: 'former member' }
+export type Former = { accountId: string; name: string; label: 'ex miembro' }
 
 // Members as the brain's members see them, and the people who wrote here and are no longer members,
 // so what they wrote still shows their name with «former member».
@@ -36,7 +36,7 @@ export async function listMembers(ctx: Ctx, slug: string) {
   const former: Former[] = []
   for (const r of rows) {
     if (r.status !== 'active') {
-      former.push({ accountId: String(r.account_id), name: String(r.name), label: 'former member' })
+      former.push({ accountId: String(r.account_id), name: String(r.name), label: 'ex miembro' })
       continue
     }
     members.push({
@@ -54,8 +54,7 @@ export async function listMembers(ctx: Ctx, slug: string) {
       WHERE e.brain_id = $1 AND NOT EXISTS (SELECT 1 FROM memberships m WHERE m.brain_id = $1 AND m.account_id = a.id)`,
     [brain.id],
   )
-  for (const a of authors)
-    former.push({ accountId: String(a.id), name: String(a.name), label: 'former member' })
+  for (const a of authors) former.push({ accountId: String(a.id), name: String(a.name), label: 'ex miembro' })
   // Whose email is pending is for curators; the others see only that one is.
   const pending = brain.pendingCuratorEmail
   return { members, former, pendingCurator: curator ? pending : pending !== null }
@@ -64,7 +63,7 @@ export async function listMembers(ctx: Ctx, slug: string) {
 // Who manages the members of this brain: its curators, and the administration (which does not need to
 // be a member to manage who is in it; reading it does need that).
 async function manager(ctx: Ctx, db: Db, slug: string): Promise<{ brainId: string; asCurator: boolean }> {
-  inWeb(ctx, 'Changing who is in a brain')
+  inWeb(ctx, 'Cambiar quién está en un brain')
   const b = await db.one<{ id: string }>('SELECT id FROM brains WHERE slug = $1 FOR UPDATE', [slug])
   if (!b) throw brainNotFound()
   const role = await memberRole(db, b.id, ctx.who.accountId)
@@ -75,8 +74,8 @@ async function manager(ctx: Ctx, db: Db, slug: string): Promise<{ brainId: strin
   throw new AppError(
     403,
     'forbidden',
-    `Only curators of "${slug}" change its members; you are ${role}.`,
-    'Ask a curator of the brain.',
+    `Solo los curadores de "${slug}" cambian sus miembros; tú eres ${role}.`,
+    'Pídeselo a quien cure el brain.',
   )
 }
 
@@ -89,27 +88,28 @@ async function lastCuratorCheck(db: Db, brainId: string, accountId: string, slug
   if ((r?.n ?? 0) === 0) {
     throw conflict(
       'last_curator',
-      `This is the last curator of "${slug}"; a brain always keeps one.`,
-      'Make another member curator first, then change this one.',
+      `Esta es la última persona curadora de "${slug}"; un brain siempre conserva una.`,
+      'Nombra curador primero a otro miembro y luego cambia este.',
     )
   }
 }
 
 async function accountOf(db: Db, ref: unknown) {
   const v = typeof ref === 'string' ? ref.trim() : ''
-  if (!v || v.length > 320) throw invalid('"account" is an account id or an email.', 'Name who to add.')
+  if (!v || v.length > 320)
+    throw invalid('"account" es un id de cuenta o un correo.', 'Indica a quién añadir.')
   const a = await db.one<{ id: string; kind: string; name: string; status: string }>(
     "SELECT id, kind, name, status FROM accounts WHERE kind <> 'author' AND (id = $1 OR (email IS NOT NULL AND email = lower($1)))",
     [v],
   )
   if (!a) {
     throw invalid(
-      'There is no account with that id or email.',
-      'Only people who already have an account can be added; the administration invites new ones.',
+      'No hay ninguna cuenta con ese id o correo.',
+      'Solo se puede añadir a quien ya tenga cuenta; las nuevas las invita la administración.',
     )
   }
   if (a.status !== 'active') {
-    throw invalid('That account was deactivated.', 'The administration can reactivate it first.')
+    throw invalid('Esa cuenta está desactivada.', 'La administración puede reactivarla primero.')
   }
   return a
 }
@@ -123,7 +123,7 @@ export async function setMember(
   adding = false,
 ) {
   if (!ROLES.includes(input.role as Role)) {
-    throw invalid('"role" is curator, contributor or reader.', 'Choose one of the three.')
+    throw invalid('"role" es curator, contributor o reader.', 'Elige uno de los tres.')
   }
   const role = input.role as Role
   const out = await ctx.db.tx(async (db) => {
@@ -131,7 +131,7 @@ export async function setMember(
     const { brainId, asCurator } = await manager(c, db, slug)
     const a = await accountOf(db, input.account)
     if (a.kind === 'service' && role === 'curator') {
-      throw invalid('A service account is never a curator.', 'Give it the contributor or reader role.')
+      throw invalid('Una cuenta de servicio nunca es curadora.', 'Dale el rol contributor o reader.')
     }
     const before = await db.one<{ role: Role }>(
       'SELECT role FROM memberships WHERE brain_id = $1 AND account_id = $2',
@@ -140,8 +140,8 @@ export async function setMember(
     if (adding && before) {
       throw conflict(
         'already_member',
-        `${a.name} is already a ${before.role} of "${slug}" — change their role in the list.`,
-        `Change the role with PUT /v1/brains/${slug}/members/${a.id}.`,
+        `${a.name} ya es ${before.role} de "${slug}" — cambia su rol en la lista.`,
+        `Cambia el rol con PUT /v1/brains/${slug}/members/${a.id}.`,
       )
     }
     if (before?.role === 'curator' && role !== 'curator') await lastCuratorCheck(db, brainId, a.id, slug)
@@ -164,8 +164,8 @@ export async function setMember(
     await notify(ctx.db, ctx.clock, ctx.mail, await curatorsOf(ctx.db, out.brainId), {
       kind: 'service.added',
       brainId: out.brainId,
-      subject: `A service account joined "${slug}"`,
-      text: `The administration (${ctx.who.name}) added the service account "${out.a.name}" to "${slug}" as ${role}.`,
+      subject: `Una cuenta de servicio entró en "${slug}"`,
+      text: `La administración (${ctx.who.name}) añadió la cuenta de servicio "${out.a.name}" a "${slug}" como ${role}.`,
     })
   }
   // The administration making itself a member is the same as joining: its curators see it.
@@ -173,8 +173,8 @@ export async function setMember(
     await notify(ctx.db, ctx.clock, ctx.mail, await curatorsOf(ctx.db, out.brainId), {
       kind: 'admin.joined',
       brainId: out.brainId,
-      subject: `The administration joined "${slug}"`,
-      text: `${ctx.who.name} (administration) joined "${slug}" as ${role}.`,
+      subject: `La administración entró en "${slug}"`,
+      text: `${ctx.who.name} (administración) entró en "${slug}" como ${role}.`,
     })
   }
   return { accountId: out.a.id, name: out.a.name, role }
@@ -187,7 +187,7 @@ export async function removeMember(ctx: Ctx, slug: string, accountId: string) {
     let brainId: string
     if (self) {
       // Anyone can leave a brain.
-      inWeb(ctx, 'Leaving a brain')
+      inWeb(ctx, 'Salir de un brain')
       const b = await db.one<{ id: string }>('SELECT id FROM brains WHERE slug = $1 FOR UPDATE', [slug])
       if (!b) throw brainNotFound()
       brainId = b.id
@@ -196,7 +196,7 @@ export async function removeMember(ctx: Ctx, slug: string, accountId: string) {
       'SELECT role FROM memberships WHERE brain_id = $1 AND account_id = $2',
       [brainId, accountId],
     )
-    if (!before) throw notFound('member')
+    if (!before) throw notFound('miembro')
     if (before.role === 'curator') await lastCuratorCheck(db, brainId, accountId, slug)
     await db.query('DELETE FROM memberships WHERE brain_id = $1 AND account_id = $2', [brainId, accountId])
     await ok(c, 'member.remove', brainId, accountId, `was ${before.role}`)
@@ -205,10 +205,13 @@ export async function removeMember(ctx: Ctx, slug: string, accountId: string) {
 
 // A curator chooses whether new proposals in this brain reach them by mail.
 export async function setNotify(ctx: Ctx, slug: string, on: boolean) {
-  inWeb(ctx, 'Choosing notices')
+  inWeb(ctx, 'Elegir los avisos')
   const { brain, role } = await inBrain(ctx, { slug })
   if (!atLeast(role, 'curator')) {
-    throw invalid('Only curators get notices of new proposals.', 'Ask a curator of the brain.')
+    throw invalid(
+      'Solo quienes curan reciben avisos de propuestas nuevas.',
+      'Pídeselo a quien cure el brain.',
+    )
   }
   await ctx.db.query('UPDATE memberships SET notify_proposals = $3 WHERE brain_id = $1 AND account_id = $2', [
     brain.id,

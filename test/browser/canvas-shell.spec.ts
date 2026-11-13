@@ -84,30 +84,30 @@ test('opened, the rail is 220px with the names, and stays open after a reload', 
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize(WIDE)
   await page.goto('/b/growth')
-  const nav = page.getByRole('navigation', { name: 'Sections of this brain' })
-  await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible()
-  const toggle = page.getByRole('button', { name: 'Expand the side bar' })
+  const nav = page.getByRole('navigation', { name: 'Secciones de este brain' })
+  await expect(nav.getByRole('link', { name: 'Resumen' })).toBeVisible()
+  const toggle = page.getByRole('button', { name: 'Expandir la barra lateral' })
   await expect(toggle).toHaveAttribute('aria-expanded', 'false')
   // Folded, a name is in the page for screen readers but not drawn.
   expect((await nav.getByText('Wiki', { exact: true }).boundingBox())?.width ?? 0).toBeLessThanOrEqual(1)
   await toggle.click()
-  const fold = page.getByRole('button', { name: 'Collapse the side bar' })
+  const fold = page.getByRole('button', { name: 'Plegar la barra lateral' })
   await expect(fold).toHaveAttribute('aria-expanded', 'true')
   await expect.poll(() => railWidth(page)).toBeCloseTo(220, 0)
   await expect(nav.getByText('Wiki', { exact: true })).toBeVisible()
   expect((await nav.getByText('Wiki', { exact: true }).boundingBox())?.width ?? 0).toBeGreaterThan(20)
   await page.reload()
-  await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Resumen' })).toBeVisible()
   expect(await railWidth(page)).toBeCloseTo(220, 0)
-  await expect(page.getByRole('button', { name: 'Collapse the side bar' })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'Plegar la barra lateral' })).toHaveAttribute(
     'aria-expanded',
     'true',
   )
   // Closed again, and remembered folded.
-  await page.getByRole('button', { name: 'Collapse the side bar' }).click()
+  await page.getByRole('button', { name: 'Plegar la barra lateral' }).click()
   await expect.poll(() => railWidth(page)).toBeCloseTo(56, 0)
   await page.reload()
-  await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Resumen' })).toBeVisible()
   expect(await railWidth(page)).toBeCloseTo(56, 0)
 })
 
@@ -119,7 +119,7 @@ test('folded, a name shows as a tooltip on keyboard focus and on hover; Esc hide
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize(WIDE)
   await page.goto('/b/growth')
-  const nav = page.getByRole('navigation', { name: 'Sections of this brain' })
+  const nav = page.getByRole('navigation', { name: 'Secciones de este brain' })
   const wiki = nav.getByRole('link', { name: 'Wiki' })
   const tip = wiki.locator('.rail-label')
   await expect(wiki).toBeVisible()
@@ -146,11 +146,11 @@ test('folded, a name shows as a tooltip on keyboard focus and on hover; Esc hide
     .toBe(true)
   // Hover.
   await page.locator('main').click({ position: { x: 600, y: 600 } })
-  await nav.getByRole('link', { name: 'Graph' }).hover()
+  await nav.getByRole('link', { name: 'Grafo' }).hover()
   await expect
     .poll(
       async () =>
-        ((await nav.getByRole('link', { name: 'Graph' }).locator('.rail-label').boundingBox())?.width ?? 0) >
+        ((await nav.getByRole('link', { name: 'Grafo' }).locator('.rail-label').boundingBox())?.width ?? 0) >
         20,
     )
     .toBe(true)
@@ -158,7 +158,7 @@ test('folded, a name shows as a tooltip on keyboard focus and on hover; Esc hide
   await expect
     .poll(
       async () =>
-        ((await nav.getByRole('link', { name: 'Graph' }).locator('.rail-label').boundingBox())?.width ?? 0) >
+        ((await nav.getByRole('link', { name: 'Grafo' }).locator('.rail-label').boundingBox())?.width ?? 0) >
         20,
     )
     .toBe(false)
@@ -179,7 +179,7 @@ test('the brain switcher opens, leads to another brain and closes by keyboard', 
   await expect(switcher).toHaveAttribute('aria-expanded', 'true')
   const menu = page.locator('#brain-switcher')
   await expect(menu.getByRole('link', { name: 'Growth' })).toHaveAttribute('aria-current', 'page')
-  await expect(menu.getByRole('link', { name: 'All brains' })).toBeVisible()
+  await expect(menu.getByRole('link', { name: 'Todos los brains' })).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(menu).toBeHidden()
   await expect(switcher).toBeFocused()
@@ -230,7 +230,7 @@ test('at 1920×1080 the overview shows its figures in one row and its three part
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize(WIDE)
   await page.goto('/b/growth')
-  const parts = ["Today's sessions", 'Waiting for review', 'Health'].map((name) =>
+  const parts = ["Today's sessions", 'Esperando revisión', 'Salud'].map((name) =>
     page.getByRole('region', { name, exact: true }),
   )
   for (const p of parts) await expect(p).toBeVisible()
@@ -240,7 +240,7 @@ test('at 1920×1080 the overview shows its figures in one row and its three part
   expect(Math.abs((health?.y ?? 0) - (today?.y ?? 0)), 'health beside today').toBeLessThanOrEqual(2)
   expect(today?.x ?? 0).toBeLessThan(waiting?.x ?? 0)
   expect(waiting?.x ?? 0).toBeLessThan(health?.x ?? 0)
-  const tiles = page.getByRole('region', { name: 'In numbers' }).getByRole('listitem')
+  const tiles = page.getByRole('region', { name: 'En números' }).getByRole('listitem')
   await expect(tiles).toHaveCount(5)
   const tops = await tiles.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)))
   expect(new Set(tops).size, 'one row of figures').toBe(1)
@@ -259,10 +259,10 @@ test('on a tablet the open rail is for the moment: not remembered, closed by a m
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize({ width: 900, height: 800 })
   await page.goto('/b/growth')
-  const nav = page.getByRole('navigation', { name: 'Sections of this brain' })
-  await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible()
+  const nav = page.getByRole('navigation', { name: 'Secciones de este brain' })
+  await expect(nav.getByRole('link', { name: 'Resumen' })).toBeVisible()
   expect(await railWidth(page), 'a remembered open rail is not brought back on a tablet').toBeCloseTo(56, 0)
-  const expand = page.getByRole('button', { name: 'Expand the side bar' })
+  const expand = page.getByRole('button', { name: 'Expandir la barra lateral' })
   await expand.click()
   await expect.poll(() => railWidth(page)).toBeCloseTo(220, 0)
   await page.keyboard.press('Escape')
@@ -290,13 +290,13 @@ test('on a tablet the open rail is for the moment: not remembered, closed by a m
   // Review A2: Tab out of the open rail (its last stop is the button that folds it) folds it.
   await expand.click()
   await expect.poll(() => railWidth(page)).toBeCloseTo(220, 0)
-  await page.getByRole('button', { name: 'Collapse the side bar' }).focus()
+  await page.getByRole('button', { name: 'Plegar la barra lateral' }).focus()
   await page.keyboard.press('Tab')
   await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('#rail')))).toBe(false)
   await expect.poll(() => railWidth(page)).toBeCloseTo(56, 0)
   await expand.click()
   await page.reload()
-  await expect(nav.getByRole('link', { name: 'Overview' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Resumen' })).toBeVisible()
   expect(await railWidth(page)).toBeCloseTo(56, 0)
   // The wide screen's choice is left as it was.
   expect(await page.evaluate(() => localStorage.getItem('rscb.rail'))).toBe('open')
@@ -312,7 +312,7 @@ test('at 1366×650 the folded rail scrolls its sections without cutting off a to
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize({ width: 1366, height: 650 })
   await page.goto('/b/growth/wiki')
-  const nav = page.getByRole('navigation', { name: 'Sections of this brain' })
+  const nav = page.getByRole('navigation', { name: 'Secciones de este brain' })
   const wiki = nav.getByRole('link', { name: 'Wiki' })
   await expect(wiki).toHaveAttribute('aria-current', 'page')
   await wiki.focus()
@@ -351,7 +351,7 @@ test('folded, a section the screen is inside is marked by the bar, not by colour
   await page.setViewportSize(WIDE)
   await page.goto('/b/growth/pages/audience/retention')
   const wiki = page
-    .getByRole('navigation', { name: 'Sections of this brain' })
+    .getByRole('navigation', { name: 'Secciones de este brain' })
     .getByRole('link', { name: 'Wiki' })
   await expect(wiki).toHaveAttribute('aria-current', 'true')
   const bar = await wiki.evaluate((el) => {

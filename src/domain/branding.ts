@@ -42,7 +42,7 @@ const badImage = (message: string) =>
     422,
     'invalid_image',
     message,
-    'Use a PNG, JPEG or WebP of at most 2 MB and 4096 pixels a side.',
+    'Usa una imagen PNG, JPEG o WebP de como máximo 2 MB y 4096 píxeles por lado.',
   )
 
 export async function setLogo(
@@ -52,32 +52,34 @@ export async function setLogo(
   adminOnly(ctx)
   if (typeof input.contentType !== 'string' || typeof input.data !== 'string' || !input.data) {
     throw invalid(
-      'Send "contentType" and the image in "data", as base64.',
-      'Such as {"contentType": "image/png", "data": "iVBOR…"}.',
+      'Envía "contentType" y la imagen en "data", como base64.',
+      'Por ejemplo {"contentType": "image/png", "data": "iVBOR…"}.',
     )
   }
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(input.data))
-    throw invalid('"data" is not base64.', 'Send the image as base64.')
+    throw invalid('"data" no es base64.', 'Envía la imagen como base64.')
   const bytes = Buffer.from(input.data, 'base64')
   if (bytes.length > LOGO_MAX_BYTES) {
     throw new AppError(
       413,
       'image_too_large',
-      'The logo is larger than 2 MB.',
-      'Use a smaller image; a logo needs a few kilobytes.',
+      'El logo pesa más de 2 MB.',
+      'Usa una imagen más chica; un logo necesita pocos kilobytes.',
     )
   }
   if (!(TYPES as readonly string[]).includes(input.contentType)) {
     throw badImage(
-      `A logo is a PNG, JPEG or WebP image, not "${input.contentType.slice(0, 60)}". SVG is not accepted: it can carry scripts.`,
+      `Un logo es una imagen PNG, JPEG o WebP, no "${input.contentType.slice(0, 60)}". SVG no se acepta: puede llevar scripts.`,
     )
   }
   const info = imageInfo(bytes)
-  if (!info) throw badImage('This file is not a PNG, JPEG or WebP image.')
+  if (!info) throw badImage('Este archivo no es una imagen PNG, JPEG o WebP.')
   if (info.type !== input.contentType)
-    throw badImage(`This file is a ${info.type}, not the ${input.contentType} it says.`)
+    throw badImage(`Este archivo es un ${info.type}, no el ${input.contentType} que dice.`)
   if (info.width > LOGO_MAX_PX || info.height > LOGO_MAX_PX) {
-    throw badImage(`The logo is ${info.width} × ${info.height} pixels; at most ${LOGO_MAX_PX} a side.`)
+    throw badImage(
+      `El logo mide ${info.width} × ${info.height} píxeles; como máximo ${LOGO_MAX_PX} por lado.`,
+    )
   }
   const sha = createHash('sha256').update(bytes).digest('hex')
   const at = ctx.clock()

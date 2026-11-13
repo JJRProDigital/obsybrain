@@ -6,7 +6,7 @@
 import type { Page } from '@playwright/test'
 import { expect, scenario, test } from './fixture.ts'
 
-const rows = (page: Page) => page.getByRole('table', { name: 'Audit lines' }).locator('tbody tr')
+const rows = (page: Page) => page.getByRole('table', { name: 'Líneas de auditoría' }).locator('tbody tr')
 
 test.describe('audit: times and days where the person is', () => {
   test.use({ timezoneId: 'Europe/Madrid' })
@@ -17,11 +17,11 @@ test.describe('audit: times and days where the person is', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', { 'admin-audit': 'much-data' })
     await page.goto('/admin/audit')
-    await expect(page.getByText('Days and times are in your time zone (Europe/Madrid).')).toBeVisible()
+    await expect(page.getByText('Días y horas están en tu zona horaria (Europe/Madrid).')).toBeVisible()
     await expect(rows(page).filter({ hasText: 'line 11' })).toContainText('29 Oct 2026, 00:30')
-    await page.getByLabel('From').fill('2026-10-29')
-    await page.getByLabel('To').fill('2026-10-29')
-    await page.getByRole('button', { name: 'Apply filters' }).click()
+    await page.getByLabel('Desde').fill('2026-10-29')
+    await page.getByLabel('Hasta').fill('2026-10-29')
+    await page.getByRole('button', { name: 'Aplicar filtros' }).click()
     await expect(rows(page).filter({ hasText: 'line 11' })).toHaveCount(1)
     await expect(rows(page).filter({ hasText: 'line 12' })).toHaveCount(0)
   })
@@ -37,9 +37,9 @@ test.describe('audit: at UTC+14', () => {
     await scenario(context, baseURL as string, 'signed-in', { 'admin-audit': 'much-data' })
     await page.goto('/admin/audit')
     await expect(rows(page).filter({ hasText: 'line 11' })).toContainText('29 Oct 2026, 13:30')
-    await page.getByLabel('From').fill('2026-10-29')
-    await page.getByLabel('To').fill('2026-10-29')
-    await page.getByRole('button', { name: 'Apply filters' }).click()
+    await page.getByLabel('Desde').fill('2026-10-29')
+    await page.getByLabel('Hasta').fill('2026-10-29')
+    await page.getByRole('button', { name: 'Aplicar filtros' }).click()
     await expect(rows(page).filter({ hasText: 'line 11' })).toHaveCount(1)
     // 10:30 UTC on the 29th is the 30th at UTC+14.
     await expect(rows(page).filter({ hasText: /line 0$/ })).toHaveCount(0)
@@ -56,13 +56,13 @@ test.describe('audit: the download is the view', () => {
     await page.goto('/admin/audit')
     await expect(rows(page)).toHaveCount(100)
     const first = (await rows(page).first().getAttribute('id'))?.replace('audit-', '')
-    const link = page.getByRole('link', { name: 'Download these lines (CSV)' })
+    const link = page.getByRole('link', { name: 'Descargar estas líneas (CSV)' })
     const before = (await link.getAttribute('href')) as string
     expect(new URL(before, 'http://x').searchParams.get('upTo')).toBe(first)
     // Typed, not applied: the file is still the view's.
-    await page.getByLabel('Action').fill('member.')
+    await page.getByLabel('Acción').fill('member.')
     await expect(link).toHaveAttribute('href', before)
-    await page.getByRole('button', { name: 'Show 100 more' }).click()
+    await page.getByRole('button', { name: 'Mostrar 100 más' }).click()
     await expect(rows(page).nth(100)).toBeFocused()
   })
 })
@@ -75,24 +75,26 @@ test.describe('mail: a new server needs its password again', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/email')
-    await expect(page.getByRole('group', { name: 'Password' })).toContainText('Keep the current one (set)')
+    await expect(page.getByRole('group', { name: 'Contraseña' })).toContainText(
+      'Conservar la actual (configurada)',
+    )
     await expect(page.locator('body')).not.toContainText('ends in …')
-    await page.getByLabel('Mail server').fill('smtp.other.example')
+    await page.getByLabel('Servidor de correo').fill('smtp.other.example')
     let sent = false
     page.on('request', (r) => {
       if (r.method() === 'PUT' && r.url().endsWith('/v1/admin/mail')) sent = true
     })
-    await page.getByRole('button', { name: 'Save mail settings' }).click()
-    await expect(page.getByRole('alert').filter({ hasText: 'Type it again' })).toBeVisible()
-    await expect(page.getByRole('radio', { name: 'Use a new one' })).toBeFocused()
+    await page.getByRole('button', { name: 'Guardar los ajustes de correo' }).click()
+    await expect(page.getByRole('alert').filter({ hasText: 'Escríbela otra vez' })).toBeVisible()
+    await expect(page.getByRole('radio', { name: 'Usar una nueva' })).toBeFocused()
     expect(sent).toBe(false)
-    await expect(page.getByText('It uses the saved settings: save your changes first.')).toBeVisible()
+    await expect(page.getByText('Usa los ajustes guardados: guarda primero tus cambios.')).toBeVisible()
   })
 
   test('a failed test says its category only', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/email')
-    const failures = page.getByRole('region', { name: 'Recent send failures' })
+    const failures = page.getByRole('region', { name: 'Fallos de envío recientes' })
     await expect(failures).toContainText('timeout')
     // The final review of B6: mail not sent because it was not set up is not a send failure; it is said
     // apart, once, by how many.
@@ -109,19 +111,19 @@ test.describe('limits: lowering asks first', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/limits')
-    await page.getByLabel('Requests per minute, per key').fill('300')
-    await page.getByRole('button', { name: 'Save the limit' }).click()
-    const dialog = page.getByRole('dialog', { name: 'Lower the limit for every key?' })
+    await page.getByLabel('Peticiones por minuto, por clave').fill('300')
+    await page.getByRole('button', { name: 'Guardar el límite' }).click()
+    const dialog = page.getByRole('dialog', { name: '¿Bajar el límite para todas las claves?' })
     await expect(dialog).toContainText('300 requests a minute instead of 600')
-    await dialog.getByRole('button', { name: 'Keep the current limit' }).click()
+    await dialog.getByRole('button', { name: 'Conservar el límite actual' }).click()
     // Nothing was saved; what was typed is still there.
     expect(
       ((await (await page.request.get('/v1/admin/settings')).json()) as { rateLimit: number }).rateLimit,
     ).toBe(600)
-    await expect(page.getByLabel('Requests per minute, per key')).toHaveValue('300')
-    await page.getByRole('button', { name: 'Save the limit' }).click()
-    await page.getByRole('dialog').getByRole('button', { name: 'Lower the limit' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Saved.' })).toBeFocused()
+    await expect(page.getByLabel('Peticiones por minuto, por clave')).toHaveValue('300')
+    await page.getByRole('button', { name: 'Guardar el límite' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Bajar el límite' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Guardado.' })).toBeFocused()
   })
 })
 
@@ -134,30 +136,32 @@ test.describe('meaning search: a new destination, a new acceptance', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/meaning')
     const openai = page.getByRole('region', { name: 'OpenAI' })
-    await openai.getByLabel('OpenAI API key').fill('sk-test-0123456789abcdefghij-k9Z2')
-    await openai.getByRole('button', { name: 'Save key' }).click()
+    await openai.getByLabel('Clave de API de OpenAI').fill('sk-test-0123456789abcdefghij-k9Z2')
+    await openai.getByRole('button', { name: 'Guardar la clave' }).click()
     const ollama = page.getByRole('region', { name: 'Ollama' })
-    await ollama.getByLabel('Ollama address').fill('http://localhost:11434')
-    await ollama.getByRole('button', { name: 'Save address' }).click()
-    await expect(ollama).toContainText('Address: http://localhost:11434')
-    const on = page.getByRole('region', { name: 'Turn on meaning search' })
+    await ollama.getByLabel('Dirección de Ollama').fill('http://localhost:11434')
+    await ollama.getByRole('button', { name: 'Guardar la dirección' }).click()
+    await expect(ollama).toContainText('Dirección: http://localhost:11434')
+    const on = page.getByRole('region', { name: 'Activar la búsqueda por significado' })
     await on.getByRole('radio', { name: /OpenAI/ }).check()
     await on.getByRole('checkbox', { name: /I understand/ }).check()
     await on.getByRole('radio', { name: /Ollama/ }).check()
     await expect(on.getByRole('checkbox', { name: /I understand/ })).not.toBeChecked()
-    await expect(on.getByRole('button', { name: 'Turn on meaning search' })).toHaveAttribute(
+    await expect(on.getByRole('button', { name: 'Activar la búsqueda por significado' })).toHaveAttribute(
       'aria-disabled',
       'true',
     )
     await on.getByRole('radio', { name: /OpenAI/ }).check()
     await on.getByRole('checkbox', { name: /I understand/ }).check()
-    await on.getByRole('button', { name: 'Turn on meaning search' }).click()
-    await expect(page.getByText('On with OpenAI (')).toBeVisible()
-    await expect(page.getByRole('region', { name: 'Change provider' })).toContainText('in use')
-    await openai.getByLabel('OpenAI API key').fill('sk-another-account-9876543210')
-    await openai.getByRole('button', { name: 'Save key' }).click()
+    await on.getByRole('button', { name: 'Activar la búsqueda por significado' }).click()
+    await expect(page.getByText('Activada con OpenAI (')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Cambiar de proveedor' })).toContainText('en uso')
+    await openai.getByLabel('Clave de API de OpenAI').fill('sk-another-account-9876543210')
+    await openai.getByRole('button', { name: 'Guardar la clave' }).click()
     await expect(
-      page.getByRole('status').filter({ hasText: 'Meaning search is off: OpenAI changed' }),
+      page
+        .getByRole('status')
+        .filter({ hasText: 'La búsqueda por significado está desactivada: OpenAI cambió' }),
     ).toBeFocused()
     await expect(page.getByText('Off: searches use words only.')).toBeVisible()
   })
@@ -171,15 +175,15 @@ test.describe('second review: an empty view, and why meaning search went off', (
   }) => {
     await scenario(context, baseURL as string, 'signed-in', { 'admin-audit': 'much-data' })
     await page.goto('/admin/audit')
-    await page.getByLabel('Action').fill('nothing.')
+    await page.getByLabel('Acción').fill('nothing.')
     const read = page.waitForResponse(
       (r) => r.url().includes('/v1/admin/audit?') && r.url().includes('nothing.'),
     )
-    await page.getByRole('button', { name: 'Apply filters' }).click()
+    await page.getByRole('button', { name: 'Aplicar filtros' }).click()
     const top = ((await (await read).json()) as { upTo: string }).upTo
-    await expect(page.getByText('No lines for these filters.')).toBeVisible()
+    await expect(page.getByText('No hay líneas para estos filtros.')).toBeVisible()
     const href = (await page
-      .getByRole('link', { name: 'Download these lines (CSV)' })
+      .getByRole('link', { name: 'Descargar estas líneas (CSV)' })
       .getAttribute('href')) as string
     expect(new URL(href, 'http://x').searchParams.get('upTo')).toBe(top)
   })
@@ -192,14 +196,14 @@ test.describe('second review: an empty view, and why meaning search went off', (
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/meaning')
     const openai = page.getByRole('region', { name: 'OpenAI' })
-    await openai.getByLabel('OpenAI API key').fill('sk-test-0123456789abcdefghij-k9Z2')
-    await openai.getByRole('button', { name: 'Save key' }).click()
-    const on = page.getByRole('region', { name: 'Turn on meaning search' })
+    await openai.getByLabel('Clave de API de OpenAI').fill('sk-test-0123456789abcdefghij-k9Z2')
+    await openai.getByRole('button', { name: 'Guardar la clave' }).click()
+    const on = page.getByRole('region', { name: 'Activar la búsqueda por significado' })
     await on.getByRole('radio', { name: /OpenAI/ }).check()
     await on.getByRole('checkbox', { name: /I understand/ }).check()
-    await on.getByRole('button', { name: 'Turn on meaning search' }).click()
-    await openai.getByLabel('OpenAI API key').fill('sk-another-account-9876543210')
-    await openai.getByRole('button', { name: 'Save key' }).click()
+    await on.getByRole('button', { name: 'Activar la búsqueda por significado' }).click()
+    await openai.getByLabel('Clave de API de OpenAI').fill('sk-another-account-9876543210')
+    await openai.getByRole('button', { name: 'Guardar la clave' }).click()
     await page.reload()
     await expect(page.getByText(/Turned off: the key or address of openai changed/)).toBeVisible()
   })

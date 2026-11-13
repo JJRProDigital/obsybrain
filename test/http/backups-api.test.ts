@@ -452,7 +452,7 @@ describe('the installation key of the first-time setup (wizard step «Installati
     assert.deepEqual(first.body, { key: TEST_SECRET, keyId: keyId(TEST_SECRET) })
     const second = await w.callWeb(session, 'POST', '/v1/setup/key', {})
     assert.deepEqual([second.status, second.body.error?.code], [404, 'not_found'], second.text)
-    assert.match(second.body.error?.howToProceed ?? '', /Backups & system/)
+    assert.match(second.body.error?.howToProceed ?? '', /Copias y sistema/)
     assert.doesNotMatch(second.text, new RegExp(TEST_SECRET))
     const line = await w.db.one<{ n: number }>(
       "SELECT count(*)::int AS n FROM audit WHERE action = 'installation_key.setup'",
@@ -509,7 +509,7 @@ describe('copies review: one copy at a time, said; a warning that retires', { sk
     try {
       const r = await w.callWeb(web, 'POST', '/v1/admin/backups', {})
       assert.deepEqual([r.status, r.body.error?.code], [409, 'backup_running'], r.text)
-      assert.match(r.body.error?.message ?? '', /the daily one/)
+      assert.match(r.body.error?.message ?? '', /la diaria/)
       assert.equal((await w.callWeb(web, 'GET', '/v1/admin/backups')).body.running, true)
     } finally {
       memory.busy = null
@@ -543,7 +543,7 @@ describe('copies review: one copy at a time, said; a warning that retires', { sk
       await new Promise((x) => setTimeout(x, 50))
       const r = await w.callWeb(web, 'POST', '/v1/admin/backups', {})
       assert.deepEqual([r.status, r.body.error?.code], [409, 'backup_running'], r.text)
-      assert.match(r.body.error?.message ?? '', /the daily one/)
+      assert.match(r.body.error?.message ?? '', /la diaria/)
     } finally {
       // The daily copy goes on whatever the assertions said, so a failure here never hangs the file.
       go()

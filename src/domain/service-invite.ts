@@ -32,8 +32,8 @@ export type ServiceInvited = { email: string; status: InviteStatus; reason?: Ref
 function peopleOf(v: unknown): Array<{ email: string; role: Role }> {
   if (!Array.isArray(v) || v.length < 1 || v.length > SERVICE_INVITE_MAX) {
     throw invalid(
-      `"people" is a list of 1 to ${SERVICE_INVITE_MAX} people: [{"email", "role"}].`,
-      `Send at most ${SERVICE_INVITE_MAX} at a time.`,
+      `"people" es una lista de 1 a ${SERVICE_INVITE_MAX} personas: [{"email", "role"}].`,
+      `Envía como máximo ${SERVICE_INVITE_MAX} por vez.`,
     )
   }
   const out: Array<{ email: string; role: Role }> = []
@@ -42,12 +42,12 @@ function peopleOf(v: unknown): Array<{ email: string; role: Role }> {
     const role = (p as { role?: unknown } | null)?.role
     if (!email || !(INVITE_ROLES as readonly unknown[]).includes(role)) {
       throw invalid(
-        'Each person has an "email" and a "role": curator or reader.',
-        'Fix the list of people (a service invites as curator or reader only).',
+        'Cada persona tiene un "email" y un "role": curator o reader.',
+        'Corrige la lista de personas (un servicio invita solo como curator o reader).',
       )
     }
     if (out.some((x) => x.email === email)) {
-      throw invalid(`${email} is in the list twice.`, 'Name each person once, with one role.')
+      throw invalid(`${email} está dos veces en la lista.`, 'Nombra a cada persona una vez, con un solo rol.')
     }
     out.push({ email, role: role as Role })
   }
@@ -60,11 +60,11 @@ export async function serviceInvite(
   input: { people: unknown },
   perHour: number = SERVICE_INVITES_PER_HOUR,
 ) {
-  serviceMainKey(ctx, 'Inviting people to a brain')
+  serviceMainKey(ctx, 'Invitar personas a un brain')
   if (!ctx.who.canInvite) {
     throw denied(
-      'This service account may not invite people.',
-      'Ask the administration of obsybrain to let it invite (Admin › Service accounts).',
+      'Esta cuenta de servicio no puede invitar a personas.',
+      'Pide a la administración de obsybrain que le habilite para invitar (Admin › Cuentas de servicio).',
     )
   }
   const people = peopleOf(input.people)
@@ -177,8 +177,8 @@ export async function serviceInvite(
     await notify(ctx.db, ctx.clock, ctx.mail, await curatorsOf(ctx.db, made.brainId), {
       kind: 'service.invited',
       brainId: made.brainId,
-      subject: `The service account "${ctx.who.name}" brought people into "${slug}"`,
-      text: `The service account "${ctx.who.name}" brought into "${slug}": ${names.join(', ')}.`,
+      subject: `La cuenta de servicio "${ctx.who.name}" incorporó personas a "${slug}"`,
+      text: `La cuenta de servicio "${ctx.who.name}" incorporó a "${slug}": ${names.join(', ')}.`,
     })
   }
   const byEmail = new Map(made.out.map((x) => [x.email, x]))

@@ -12,8 +12,8 @@ export const pageNotFound = (address: string) =>
   new AppError(
     404,
     'page_not_found',
-    `There is no page at "${address}" in this brain.`,
-    'Check the address in the map (GET /v1/brains/:slug/wiki/map), or propose the page.',
+    `No hay ninguna página en "${address}" en este brain.`,
+    'Comprueba la dirección en el mapa (GET /v1/brains/:slug/wiki/map) o propone la página.',
   )
 
 export type WikiPage = {
@@ -335,8 +335,8 @@ export async function pageRevision(
     throw new AppError(
       404,
       'revision_not_found',
-      `Page "${page.address}" has no revision ${n}.`,
-      'See its history.',
+      `La página "${page.address}" no tiene revisión ${n}.`,
+      'Mira su historial.',
     )
   }
   return fullRevision(r)
@@ -427,7 +427,7 @@ export async function wikiLog(
   o: { cursor?: string; limit?: number; kind?: string; page?: string } = {},
 ): Promise<PageOf<LogLine>> {
   if (o.kind !== undefined && !(LOG_KINDS as readonly string[]).includes(o.kind))
-    throw invalid(`"kind" is one of: ${LOG_KINDS.join(', ')}.`, 'Fix "kind".')
+    throw invalid(`"kind" es uno de: ${LOG_KINDS.join(', ')}.`, 'Corrige "kind".')
   const { brain } = await inBrain(ctx, { slug })
   const c = decode(o.cursor)
   const limit = o.limit ?? PAGE.default
@@ -477,17 +477,17 @@ export type WikiSettings = {
   approvalsSince: number
 }
 
-export const DEFAULT_GUIDE = `How to compile this brain's journal into its wiki.
+export const DEFAULT_GUIDE = `Cómo compilar el diario de este brain en su wiki.
 
-- One page per topic, entity, decision, guide or agent. Short pages; split rather than grow.
-- Every new page cites the journal entries it comes from. Never write what no entry says.
-- Link before you repeat: mention other pages with [[address]] and add typed links (related,
-  depends-on, contradicts, supersedes, part-of, example-of) where they hold.
-- One decision per "decision" page: context, what was decided, alternatives, consequences, status.
-- Corrections from people win over what agents wrote. Fold them into the pages they correct.
-- When entries add nothing new, list them as "collected" so they leave the uncompiled list.
-- Prefer editing an existing page over creating a near-duplicate; propose a merge when two overlap.
-- Say why in every operation's reason. A curator reads it before approving.`
+- Una página por tema, entidad, decisión, guía o agente. Páginas cortas; más vale dividir que crecer.
+- Cada página nueva cita las entradas del diario de las que viene. Nunca escribas lo que ninguna entrada diga.
+- Enlaza antes de repetir: menciona otras páginas con [[dirección]] y añade enlaces tipados (related,
+  depends-on, contradicts, supersedes, part-of, example-of) donde tengan sentido.
+- Una decisión por página de tipo "decision": contexto, qué se decidió, alternativas, consecuencias, estado.
+- Las correcciones de las personas ganan sobre lo que escribieron los agentes. Intégralas en las páginas que corrigen.
+- Cuando las entradas no aportan nada nuevo, lístalas como "collected" para que salgan de la lista de sin compilar.
+- Prefiere editar una página existente antes que crear un casi-duplicado; propone una fusión cuando dos se solapen.
+- Di por qué en la razón de cada operación. Quien cura la lee antes de aprobar.`
 
 export async function settingsOf(db: Db, brainId: string): Promise<WikiSettings> {
   const r = await db.one('SELECT * FROM wiki_settings WHERE brain_id = $1', [brainId])
@@ -548,7 +548,7 @@ function cursorFrom(cursor: string): { after: string } | { offset: number } {
   const a = Buffer.from(cursor, 'base64url').toString('utf8')
   if (/^#\d{1,7}$/.test(a)) return { offset: Number(a.slice(1)) }
   if (!a || a.length > 400 || a.startsWith('#'))
-    throw invalid('"cursor" is not one this list gave.', 'Use "next" unchanged.')
+    throw invalid('"cursor" no es uno que diera esta lista.', 'Usa "next" sin cambiarlo.')
   return { after: a }
 }
 const likeText = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`)
@@ -568,8 +568,8 @@ export async function listPages(
   const column = (o.sort === undefined ? 'address' : o.sort.replace(/^-/, '')) as keyof typeof SORTS
   if (!(PAGE_SORTS as string[]).includes(column))
     throw invalid(
-      `"sort" is one of: ${PAGE_SORTS.join(', ')}, with "-" before it for the other way.`,
-      'Fix "sort".',
+      `"sort" es uno de: ${PAGE_SORTS.join(', ')}, con "-" delante para el otro orden.`,
+      'Corrige "sort".',
     )
   const { brain } = await inBrain(ctx, { slug })
   const limit = o.limit ?? PAGE.default
@@ -625,9 +625,9 @@ export async function listPages(
   )
   const c = o.cursor === undefined ? null : cursorFrom(o.cursor)
   if (c && column === 'address' && !desc && !('after' in c))
-    throw invalid('"cursor" is not one this list gave.', 'Use "next" unchanged.')
+    throw invalid('"cursor" no es uno que diera esta lista.', 'Usa "next" sin cambiarlo.')
   if (c && (column !== 'address' || desc) && !('offset' in c))
-    throw invalid('"cursor" is not one this list gave.', 'Use "next" unchanged.')
+    throw invalid('"cursor" no es uno que diera esta lista.', 'Usa "next" sin cambiarlo.')
   const keyset = c && 'after' in c ? ` AND p.address COLLATE "C" > ${p(c.after)}` : ''
   const offset = c && 'offset' in c ? c.offset : 0
   const dir = desc ? 'DESC' : 'ASC'

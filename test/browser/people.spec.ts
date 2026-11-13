@@ -17,12 +17,12 @@ test.describe('invite', () => {
     await page.locator('#account-menu').getByRole('link', { name: 'People' }).click()
     await expect(page).toHaveURL(/\/people$/)
     await expect(page.getByRole('heading', { level: 1, name: 'People' })).toBeVisible()
-    const form = page.getByRole('form', { name: 'Invite people' })
+    const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('zoe@example.test, yan@example.test')
     await form.getByRole('checkbox', { name: 'Growth' }).check()
-    await form.getByLabel('Role in Growth').selectOption('contributor')
-    await form.getByRole('button', { name: 'Send invitations' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Invitations sent' })).toContainText(
+    await form.getByLabel('Rol en Growth').selectOption('contributor')
+    await form.getByRole('button', { name: 'Enviar invitaciones' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Invitaciones enviadas' })).toContainText(
       'zoe@example.test',
     )
     // The link went by mail: it is not shown.
@@ -41,16 +41,16 @@ test.describe('invite', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', {}, { mail: false })
     await page.goto('/people')
-    const form = page.getByRole('form', { name: 'Invite people' })
-    await expect(form).toContainText('This installation cannot send email')
+    const form = page.getByRole('form', { name: 'Invitar personas' })
+    await expect(form).toContainText('Esta instalación no puede enviar email')
     await form.getByLabel('Emails').fill('zoe@example.test')
-    await form.getByRole('button', { name: 'Create invitation link' }).click()
-    const shown = page.getByRole('region', { name: 'Links to send' })
+    await form.getByRole('button', { name: 'Crear enlace de invitación' }).click()
+    const shown = page.getByRole('region', { name: 'Enlaces para enviar' })
     await expect(shown).toContainText('zoe@example.test')
     await expect(shown).toContainText('/invite#token=')
-    await expect(shown).toContainText('Shown only now')
-    await expect(shown.getByRole('button', { name: 'Copy link' })).toBeVisible()
-    await shown.getByRole('button', { name: 'Done, I copied it' }).click()
+    await expect(shown).toContainText('Mostrado solo ahora.')
+    await expect(shown.getByRole('button', { name: 'Copiar el enlace' })).toBeVisible()
+    await shown.getByRole('button', { name: 'Listo, lo copié' }).click()
     await expect(page.getByText('/invite#token=')).toHaveCount(0)
     const kept = await page.evaluate(
       () => JSON.stringify({ ...localStorage, ...sessionStorage }) + location.href,
@@ -65,9 +65,9 @@ test.describe('invite', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/people')
-    const form = page.getByRole('form', { name: 'Invite people' })
+    const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('zoe@example.test, not-an-email')
-    await form.getByRole('button', { name: 'Send invitations' }).click()
+    await form.getByRole('button', { name: 'Enviar invitaciones' }).click()
     await expect(form.getByText('"not-an-email" is not an email')).toBeVisible()
     await expect(form.getByLabel('Emails')).toBeFocused()
     await expect(form.getByLabel('Emails')).toHaveValue('zoe@example.test, not-an-email')
@@ -80,11 +80,11 @@ test.describe('invite', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/people')
-    const form = page.getByRole('form', { name: 'Invite people' })
+    const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('ana@example.test')
-    await form.getByRole('button', { name: 'Send invitations' }).click()
+    await form.getByRole('button', { name: 'Enviar invitaciones' }).click()
     await expect(form.getByRole('alert')).toContainText('ana@example.test already has an account.')
-    await expect(form.getByRole('alert')).toContainText('Add that person to the brain as a member instead.')
+    await expect(form.getByRole('alert')).toContainText('Mejor añade a esa persona al brain como miembro.')
     await expect(form.getByLabel('Emails')).toHaveValue('ana@example.test')
   })
 })
@@ -96,16 +96,16 @@ test.describe('pending invitations', () => {
     const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
-    await bo.getByRole('button', { name: 'New link' }).click()
-    await expect(bo.getByRole('region', { name: 'Invitation for bo@example.test' })).toContainText(
+    await bo.getByRole('button', { name: 'Enlace nuevo' }).click()
+    await expect(bo.getByRole('region', { name: 'Invitación para bo@example.test' })).toContainText(
       '/invite#token=',
     )
-    await bo.getByRole('button', { name: 'Withdraw' }).click()
-    const confirm = page.getByRole('dialog', { name: 'Withdraw the invitation?' })
+    await bo.getByRole('button', { name: 'Retirar' }).click()
+    const confirm = page.getByRole('dialog', { name: '¿Retirar la invitación?' })
     await expect(confirm).toContainText('bo@example.test')
-    await confirm.getByRole('button', { name: 'Withdraw invitation' }).click()
+    await confirm.getByRole('button', { name: 'Retirar la invitación' }).click()
     await expect(bo).toContainText('withdrawn')
-    await expect(bo.getByRole('button', { name: 'Withdraw' })).toHaveCount(0)
+    await expect(bo.getByRole('button', { name: 'Retirar' })).toHaveCount(0)
   })
 })
 
@@ -119,21 +119,21 @@ test.describe('reset links', () => {
     // Reset links moved with the people to the administration (PR25a); People points there.
     await page.goto('/people')
     await page
-      .getByRole('region', { name: 'People in this installation' })
-      .getByRole('link', { name: 'Administration › People' })
+      .getByRole('region', { name: 'Personas en esta instalación' })
+      .getByRole('link', { name: 'Administración › Personas' })
       .click()
     await expect(page).toHaveURL(/\/admin\/people$/)
     const ana = page
-      .getByRole('region', { name: 'People in this installation' })
+      .getByRole('region', { name: 'Personas en esta instalación' })
       .getByRole('listitem')
       .filter({
         hasText: 'ana@example.test',
       })
-    await ana.getByRole('button', { name: 'Make a reset link' }).click()
+    await ana.getByRole('button', { name: 'Crear un enlace de restablecimiento' }).click()
     const shown = ana.getByRole('region', { name: /Reset link for Ana/ })
     await expect(shown).toContainText('/reset#token=')
     await expect(shown).toContainText('works once, for 1 hour')
-    await shown.getByRole('button', { name: 'Done, I copied it' }).click()
+    await shown.getByRole('button', { name: 'Listo, lo copié' }).click()
     await expect(page.getByText('/reset#token=')).toHaveCount(0)
   })
 })
@@ -149,8 +149,8 @@ test.describe('who may', () => {
     await page.getByRole('button', { name: /Account/ }).click()
     await expect(page.getByRole('link', { name: 'People' })).toHaveCount(0)
     await page.goto('/people')
-    await expect(page.getByRole('alert')).toContainText('Only the administration invites new people')
-    await expect(page.getByRole('alert')).toContainText('Ask the administration')
+    await expect(page.getByRole('alert')).toContainText('Solo la administración invita a personas nuevas')
+    await expect(page.getByRole('alert')).toContainText('Pídeselo a la administración')
   })
 
   test('at 320 px the page fits', async ({ page, context, baseURL }) => {
@@ -158,8 +158,8 @@ test.describe('who may', () => {
     await page.setViewportSize({ width: 320, height: 640 })
     await page.goto('/people')
     await page.getByLabel('Emails').fill('zoe@example.test')
-    await page.getByRole('button', { name: 'Create invitation link' }).click()
-    await expect(page.getByRole('region', { name: 'Links to send' })).toBeVisible()
+    await page.getByRole('button', { name: 'Crear enlace de invitación' }).click()
+    await expect(page.getByRole('region', { name: 'Enlaces para enviar' })).toBeVisible()
     await noSideScroll(page)
   })
 })
@@ -189,13 +189,13 @@ test.describe('links in view (P1, P2, P3)', () => {
     const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
-    await bo.getByRole('button', { name: 'New link for bo@example.test' }).click()
-    const copy = bo.getByRole('button', { name: 'Copy link' })
+    await bo.getByRole('button', { name: 'Enlace nuevo para bo@example.test' }).click()
+    const copy = bo.getByRole('button', { name: 'Copiar el enlace' })
     await expect(copy).toBeFocused()
     await inView(page, copy)
     await expect(bo).toContainText('/invite#token=')
     await expect(
-      page.getByRole('status').filter({ hasText: 'Link for bo@example.test is ready' }),
+      page.getByRole('status').filter({ hasText: 'El enlace para bo@example.test está listo' }),
     ).toHaveCount(1)
   })
 
@@ -206,11 +206,11 @@ test.describe('links in view (P1, P2, P3)', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', {}, { mail: false })
     await page.goto('/people')
-    const form = page.getByRole('form', { name: 'Invite people' })
+    const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('zoe@example.test')
-    await form.getByRole('button', { name: 'Create invitation link' }).click()
-    const shown = page.getByRole('region', { name: 'Links to send' })
-    const copy = shown.getByRole('button', { name: 'Copy link' })
+    await form.getByRole('button', { name: 'Crear enlace de invitación' }).click()
+    const shown = page.getByRole('region', { name: 'Enlaces para enviar' })
+    const copy = shown.getByRole('button', { name: 'Copiar el enlace' })
     await expect(copy).toBeFocused()
     await inView(page, copy)
   })
@@ -219,11 +219,11 @@ test.describe('links in view (P1, P2, P3)', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/people')
     const ana = page
-      .getByRole('region', { name: 'People in this installation' })
+      .getByRole('region', { name: 'Personas en esta instalación' })
       .getByRole('listitem')
       .filter({ hasText: 'ana@example.test' })
-    await ana.getByRole('button', { name: 'Make a reset link for Ana' }).click()
-    const copy = ana.getByRole('button', { name: 'Copy link' })
+    await ana.getByRole('button', { name: 'Crear un enlace de restablecimiento para Ana' }).click()
+    const copy = ana.getByRole('button', { name: 'Copiar el enlace' })
     await expect(copy).toBeFocused()
     await inView(page, copy)
     await expect(ana).toContainText('/reset#token=')
@@ -239,16 +239,16 @@ test.describe('links in view (P1, P2, P3)', () => {
     const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
-    await bo.getByRole('button', { name: 'New link for bo@example.test' }).click()
+    await bo.getByRole('button', { name: 'Enlace nuevo para bo@example.test' }).click()
     await expect(page.getByText('/invite#token=')).toHaveCount(1)
     // One new link a minute: a second press soon after says so, and the link shown still works.
-    await bo.getByRole('button', { name: 'New link for bo@example.test' }).click()
+    await bo.getByRole('button', { name: 'Enlace nuevo para bo@example.test' }).click()
     await expect(bo.getByRole('alert')).toContainText('less than a minute ago')
     await expect(page.getByText('/invite#token=')).toHaveCount(1)
-    await bo.getByRole('button', { name: 'Withdraw invitation for bo@example.test' }).click()
+    await bo.getByRole('button', { name: 'Retirar la invitación de bo@example.test' }).click()
     await page
-      .getByRole('dialog', { name: 'Withdraw the invitation?' })
-      .getByRole('button', { name: 'Withdraw invitation' })
+      .getByRole('dialog', { name: '¿Retirar la invitación?' })
+      .getByRole('button', { name: 'Retirar la invitación' })
       .click()
     await expect(bo).toContainText('withdrawn')
     await expect(page.getByText('/invite#token=')).toHaveCount(0)
@@ -263,15 +263,15 @@ test.describe('links in view (P1, P2, P3)', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', {}, { mail: false })
     await page.goto('/people')
-    const form = page.getByRole('form', { name: 'Invite people' })
+    const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('zoe@example.test')
-    await form.getByRole('button', { name: 'Create invitation link' }).click()
-    await expect(page.getByRole('region', { name: 'Links to send' })).toBeVisible()
+    await form.getByRole('button', { name: 'Crear enlace de invitación' }).click()
+    await expect(page.getByRole('region', { name: 'Enlaces para enviar' })).toBeVisible()
     const zoe = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
       hasText: 'zoe@example.test',
     })
-    await zoe.getByRole('button', { name: 'New link for zoe@example.test' }).click()
-    await expect(page.getByRole('region', { name: 'Links to send' })).toHaveCount(0)
+    await zoe.getByRole('button', { name: 'Enlace nuevo para zoe@example.test' }).click()
+    await expect(page.getByRole('region', { name: 'Enlaces para enviar' })).toHaveCount(0)
     await expect(page.getByText('/invite#token=')).toHaveCount(1)
   })
 
@@ -296,11 +296,11 @@ test.describe('links in view (P1, P2, P3)', () => {
     const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
-    await bo.getByRole('button', { name: 'Withdraw invitation for bo@example.test' }).click()
-    const dialog = page.getByRole('dialog', { name: 'Withdraw the invitation?' })
-    await expect(dialog.getByRole('button', { name: 'Keep it' })).toHaveCount(1)
-    await dialog.getByRole('button', { name: 'Withdraw invitation' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Invitation withdrawn' })).toBeVisible()
+    await bo.getByRole('button', { name: 'Retirar la invitación de bo@example.test' }).click()
+    const dialog = page.getByRole('dialog', { name: '¿Retirar la invitación?' })
+    await expect(dialog.getByRole('button', { name: 'Conservarlo' })).toHaveCount(1)
+    await dialog.getByRole('button', { name: 'Retirar la invitación' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Invitación retirada.' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 2, name: 'Invitations' })).toBeFocused()
   })
 
@@ -321,14 +321,14 @@ test.describe('links in view (P1, P2, P3)', () => {
     const rows = page.getByRole('region', { name: 'Invitations' }).locator('li[data-invitation]')
     await expect(rows).toHaveCount(20)
     expect(asked.at(-1)?.searchParams.get('limit')).toBe('20')
-    await page.getByRole('button', { name: 'Show more invitations' }).click()
+    await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
     await expect(rows).toHaveCount(40)
     await expect(rows.nth(20)).toBeFocused()
     expect(asked.at(-1)?.searchParams.get('cursor')).toBeTruthy()
-    await page.getByRole('button', { name: 'Show more invitations' }).click()
+    await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
     await expect(rows).toHaveCount(48)
     await expect(rows.nth(40)).toBeFocused()
-    await expect(page.getByRole('button', { name: 'Show more invitations' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Mostrar más invitaciones' })).toHaveCount(0)
   })
 
   // Review of PR26: after a filter change, «Show more» still put the keyboard on the first new one (the
@@ -347,19 +347,19 @@ test.describe('links in view (P1, P2, P3)', () => {
     await page.goto('/admin/invitations')
     const rows = page.getByRole('region', { name: 'Invitations' }).locator('li[data-invitation]')
     await expect(rows).toHaveCount(20)
-    await page.getByRole('button', { name: 'Show more invitations' }).click()
+    await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
     await expect(rows.nth(20)).toBeFocused()
-    await page.getByLabel('Show').selectOption('used')
+    await page.getByLabel('Mostrar').selectOption('used')
     await expect.poll(() => asked.at(-1)?.searchParams.get('status')).toBe('used')
     await expect(rows).toHaveCount(20)
     await expect(rows.filter({ hasNotText: 'accepted' })).toHaveCount(0)
-    await page.getByRole('button', { name: 'Show more invitations' }).click()
+    await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
     await expect(rows).toHaveCount(40)
     await expect(rows.nth(20)).toBeFocused()
     // Back to all: the first 20 again, and «Show more» lands on the 21st once more.
-    await page.getByLabel('Show').selectOption('all')
+    await page.getByLabel('Mostrar').selectOption('all')
     await expect(rows).toHaveCount(20)
-    await page.getByRole('button', { name: 'Show more invitations' }).click()
+    await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
     await expect(rows.nth(20)).toBeFocused()
   })
 })

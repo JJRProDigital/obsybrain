@@ -106,9 +106,9 @@ export async function openSession(
 ): Promise<Session> {
   // Everything stored is redacted first (pack rule 1), session purpose and reference included.
   const purpose = redact((o.purpose ?? '').trim()).text
-  if (purpose.length > 500) throw invalid('The purpose is longer than 500 characters.', 'Shorten it.')
+  if (purpose.length > 500) throw invalid('El propósito tiene más de 500 caracteres.', 'Acórtalo.')
   const ref = o.ref?.trim() ? redact(o.ref.trim()).text : null
-  if (ref && ref.length > 200) throw invalid('The reference is longer than 200 characters.', 'Shorten it.')
+  if (ref && ref.length > 200) throw invalid('La referencia tiene más de 200 caracteres.', 'Acórtala.')
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const { brain, role } = await inBrain(c, { slug }, 'share')
@@ -124,11 +124,11 @@ export async function openSession(
           WHERE id = $1 AND kind = 'short' AND parent_id = $2 AND revoked_at IS NULL FOR UPDATE`,
         [o.forKey, ctx.who.credential.id],
       )
-      if (!k || ctx.who.credential.kind !== 'main') throw notFound('short key')
+      if (!k || ctx.who.credential.kind !== 'main') throw notFound('clave corta')
       if (k.write_brain_id !== brain.id) {
         throw invalid(
-          'That short key writes in another brain.',
-          'Open the session in the brain the key writes to.',
+          'Esa clave corta escribe en otro brain.',
+          'Abre la sesión en el brain al que la clave escribe.',
         )
       }
       const open = await db.one(
@@ -136,7 +136,7 @@ export async function openSession(
         [k.id],
       )
       if (open)
-        throw conflict('session_open', 'That key already has an open session.', `Use session ${open.id}.`)
+        throw conflict('session_open', 'Esa clave ya tiene una sesión abierta.', `Usa la sesión ${open.id}.`)
       credentialId = String(k.id)
       bound = true
       sessionRef = k.ref == null ? null : String(k.ref)
@@ -163,9 +163,13 @@ export async function sessionFor(db: Db, ctx: Ctx, brainId: string, sessionId?: 
   const now = ctx.clock()
   if (sessionId) {
     const s = await db.one('SELECT * FROM sessions WHERE id = $1 FOR UPDATE', [sessionId])
-    if (!s || s.brain_id !== brainId || !(await owns(db, ctx.who, s))) throw notFound('session')
+    if (!s || s.brain_id !== brainId || !(await owns(db, ctx.who, s))) throw notFound('sesión')
     if (s.status !== 'open') {
-      throw conflict('session_closed', 'That session is closed.', 'Open a new session, or write without one.')
+      throw conflict(
+        'session_closed',
+        'Esa sesión está cerrada.',
+        'Abre una sesión nueva, o escribe sin una.',
+      )
     }
     return String(s.id)
   }
@@ -204,9 +208,9 @@ export async function touch(db: Db, sessionId: string, at: Date): Promise<void> 
 
 export async function loadSession(ctx: Ctx, id: string): Promise<{ session: Session; row: Row }> {
   const row = await ctx.db.one('SELECT * FROM sessions WHERE id = $1', [id])
-  if (!row) throw notFound('session')
+  if (!row) throw notFound('sesión')
   await inBrain(ctx, { id: String(row.brain_id) }).catch(() => {
-    throw notFound('session')
+    throw notFound('sesión')
   })
   return { session: sessionOf(row), row }
 }
@@ -216,9 +220,9 @@ export async function endSession(ctx: Ctx, id: string): Promise<Session> {
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const s = await db.one('SELECT * FROM sessions WHERE id = $1 FOR UPDATE', [id])
-    if (!s || !(await owns(db, ctx.who, s))) throw notFound('session')
+    if (!s || !(await owns(db, ctx.who, s))) throw notFound('sesión')
     const { brain, role } = await inBrain(c, { id: String(s.brain_id) }).catch(() => {
-      throw notFound('session')
+      throw notFound('sesión')
     })
     await allow(c, 'journal.write', { role, brainStatus: brain.status }, brain.id)
     if (s.status !== 'open') return sessionOf(s)

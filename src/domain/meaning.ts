@@ -13,7 +13,7 @@ import type { Ctx } from './context.ts'
 import { webOnly } from './wiki/review.ts'
 
 export const WARNING =
-  'The text of entries and pages will be sent to this provider to compute its meaning. What is sent cannot be taken back.'
+  'El texto de entradas y páginas se enviará a este proveedor para calcular su significado. Lo que se envía no se puede recuperar.'
 
 // Below this similarity, a result is not "about the same thing".
 export const MIN_SIMILARITY = 0.3
@@ -46,8 +46,8 @@ function adminInWeb(ctx: Ctx): void {
     throw new AppError(
       403,
       'forbidden',
-      'Only the administration turns meaning search on or off.',
-      'Ask the administration of this installation.',
+      'Solo la administración enciende o apaga la búsqueda por significado.',
+      'Pídeselo a la administración de esta instalación.',
     )
   }
 }
@@ -129,7 +129,7 @@ async function offForNewDestination(db: Db, ctx: Ctx, p: string, now: Date): Pro
             off_reason = $2 WHERE id = 1`,
     [
       now,
-      `Turned off: the key or address of ${p} changed in the administration. Accept the warning again to turn it on.`,
+      `Apagado: la clave o la dirección de ${p} cambió en la administración. Acepta el aviso de nuevo para encenderlo.`,
     ],
   )
   await audit(db, {
@@ -165,7 +165,7 @@ export async function getMeaning(ctx: Ctx) {
 
 function providerOf(name: string): ProviderName {
   const p = PROVIDERS.find((x) => x.name === name)
-  if (!p) throw notFound('meaning provider')
+  if (!p) throw notFound('proveedor de significado')
   return p.name
 }
 
@@ -179,8 +179,8 @@ export async function setProvider(ctx: Ctx, name: string, input: { key?: unknown
     const key = input.key
     if (typeof key !== 'string' || key.length < 20 || key.length > 300 || /\s/.test(key)) {
       throw invalid(
-        '"key" is the API key of the provider, as it gave it.',
-        'Paste the whole key, without spaces.',
+        '"key" es la clave de API del proveedor, tal como te la dio.',
+        'Pega la clave completa, sin espacios.',
       )
     }
     const sealed = seal(ctx.mail?.secret, key, 'meaning.openai')
@@ -218,8 +218,8 @@ export async function setProvider(ctx: Ctx, name: string, input: { key?: unknown
       url.length > 300
     ) {
       throw invalid(
-        '"url" is the address of the provider, such as http://localhost:11434.',
-        'Give a plain http or https address.',
+        '"url" es la dirección del proveedor, como http://localhost:11434.',
+        'Da una dirección http o https simple.',
       )
     }
     await ctx.db.tx(async (db) => {
@@ -254,8 +254,8 @@ export async function removeProvider(ctx: Ctx, name: string) {
       throw new AppError(
         409,
         'provider_in_use',
-        `Meaning search is on with ${p}: without its ${p === 'openai' ? 'key' : 'address'} it would stop.`,
-        'Turn meaning search off first, or set a new one in its place.',
+        `La búsqueda por significado está encendida con ${p}: sin su ${p === 'openai' ? 'clave' : 'dirección'} se detendría.`,
+        'Apaga primero la búsqueda por significado, o configura uno nuevo en su lugar.',
       )
     }
     // The environment's provider takes its place: another destination.
@@ -286,16 +286,16 @@ export async function enableMeaning(ctx: Ctx, input: { provider: string; accept:
   if (!p) {
     const names = Object.keys(ctx.meaning ?? {})
     throw invalid(
-      `The provider "${input.provider}" is not configured in this installation.`,
+      `El proveedor "${input.provider}" no está configurado en esta instalación.`,
       names.length
-        ? `Use one of: ${names.join(', ')}.`
-        : 'Set a key or address in Admin › Meaning search (or OBSY_BRAIN_OPENAI_KEY or OBSY_BRAIN_OLLAMA_URL for the server), then try again.',
+        ? `Usa uno de: ${names.join(', ')}.`
+        : 'Configura una clave o dirección en Admin › Búsqueda por significado (o OBSY_BRAIN_OPENAI_KEY u OBSY_BRAIN_OLLAMA_URL en el servidor) y vuelve a intentarlo.',
     )
   }
   if (input.accept !== true) {
     const err = invalid(
-      'Meaning search stays off until the warning is accepted.',
-      'Read the warning and send "accept": true.',
+      'La búsqueda por significado sigue apagada hasta que se acepte el aviso.',
+      'Lee el aviso y envía "accept": true.',
     )
     err.current = { warning: WARNING }
     throw err

@@ -304,7 +304,7 @@ describe('the proposals inbox of the web (PR21)', { skip: skipPg }, () => {
       corrections: { 0: mine },
     })
     assert.deepEqual([old.status, old.body.error?.code], [409, 'proposal_changed'], old.text)
-    assert.ok((old.body.error?.message ?? '').includes('purged'))
+    assert.ok((old.body.error?.message ?? '').includes('purgó'))
     assert.ok(!(await read('corr/jane')).body.includes('Jane Roe'))
     const dump = JSON.stringify(
       await w.db.query(

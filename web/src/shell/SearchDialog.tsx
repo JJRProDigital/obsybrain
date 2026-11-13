@@ -319,7 +319,7 @@ export function SearchDialog({ brain }: { brain: { slug: string; name: string } 
                   </div>
                 )}
                 {hits.length ? (
-                  <ul class="results" aria-label="Results" ref={list} onKeyDown={move}>
+                  <ul class="results" aria-label="Resultados" ref={list} onKeyDown={move}>
                     {hits.map((h, i) => {
                       const href = hrefOf(h)
                       const close = () => (searchOpen.value = false)

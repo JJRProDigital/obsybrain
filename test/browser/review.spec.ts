@@ -3,7 +3,7 @@
 // task against the fixture API.
 import { expect, INVITE, keepTheKey, PASSWORD, RESET, scenario, test } from './fixture.ts'
 
-const ENDED = 'Your session ended. Sign in again.'
+const ENDED = 'Tu sesión terminó. Inicia sesión otra vez.'
 
 test.describe('R1: the first steps point at the installation, not at the browser', () => {
   test('the command to connect an agent uses the public address the server gives', async ({
@@ -13,7 +13,7 @@ test.describe('R1: the first steps point at the installation, not at the browser
   }) => {
     await scenario(context, baseURL as string, 'signed-in', { home: 'empty' })
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Get started' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Para empezar' })).toBeVisible()
     const command = page.locator('pre.command')
     await expect(command).toHaveText(
       'claude mcp add --transport http obsybrain https://brain.example.test/mcp --scope user\nclaude mcp login obsybrain',
@@ -33,8 +33,8 @@ test.describe('R2: signing out', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Growth' })).toBeVisible()
     await s.endSessions()
     await page.getByRole('button', { name: /Account/ }).click()
-    await page.getByRole('button', { name: 'Sign out' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Signed out.' })).toBeVisible()
+    await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Sesión cerrada.' })).toBeVisible()
     await expect(page).toHaveURL(/\/sign-in$/)
     await page.waitForTimeout(300)
     await expect(page).toHaveURL(/\/sign-in$/)
@@ -51,8 +51,8 @@ test.describe('R3: dialogs', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/')
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
-    await page.getByRole('button', { name: /Search your brains/ }).click()
-    const dialog = page.getByRole('dialog', { name: 'Search' })
+    await page.getByRole('button', { name: /Buscar en tus brains/ }).click()
+    const dialog = page.getByRole('dialog', { name: 'Buscar' })
     await expect(dialog).toBeVisible()
     // Esc in the field, then the search opened again before the browser delivers the dialog's "close".
     const reopened = await page.evaluate(async () => {
@@ -91,20 +91,20 @@ test.describe('R4: a session that ends mid-use', () => {
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
     await page.locator('html[data-keys="on"]').waitFor({ state: 'attached' })
     await page.keyboard.press('Control+k')
-    await page.getByLabel('Search for').fill('retention')
+    await page.getByLabel('Buscar').fill('retention')
     await s.endSessions()
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/\/sign-in\?next=%2F%3Ffrom%3Dmail$/)
     await expect(page.getByRole('status').filter({ hasText: ENDED })).toBeVisible()
     await expect(page.getByLabel('Email')).toBeFocused()
     await page.getByLabel('Email').fill('eric@example.test')
-    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click()
     await expect(page).toHaveURL(/\/\?from=mail$/)
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
     // The search that was open when the session ended does not come back by itself.
     await page.waitForTimeout(300)
-    await expect(page.getByRole('dialog', { name: 'Search' })).toBeHidden()
+    await expect(page.getByRole('dialog', { name: 'Buscar' })).toBeHidden()
   })
 
   test('a plain visit to sign-in says nothing about a session, and the keyboard is on the email', async ({
@@ -132,10 +132,10 @@ test.describe('R5: moving between screens already loaded', () => {
     // Each move checks the session once; that check answers before the session is revoked.
     const checked = page.waitForResponse((r) => r.url().endsWith('/v1/me'))
     await page
-      .getByRole('navigation', { name: 'Sections of this brain' })
-      .getByRole('link', { name: 'All brains', exact: true })
+      .getByRole('navigation', { name: 'Secciones de este brain' })
+      .getByRole('link', { name: 'Todos los brains', exact: true })
       .click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
     expect((await checked).status()).toBe(200)
     await s.endSessions()
     await page.getByRole('link', { name: 'Growth' }).click()
@@ -148,12 +148,10 @@ test.describe('R6: invitations', () => {
   test('signed in, a used invitation says so and leads to the brains', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/invite#token=inv_not_a_real_token_000')
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'This invitation is already used' }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Esta invitación ya se usó' })).toBeVisible()
     const main = page.getByRole('main')
-    await expect(main.getByRole('link', { name: 'Go to your brains' })).toHaveAttribute('href', '/')
-    await expect(main.getByRole('link', { name: 'Sign in' })).toHaveCount(0)
+    await expect(main.getByRole('link', { name: 'Ir a tus brains' })).toHaveAttribute('href', '/')
+    await expect(main.getByRole('link', { name: 'Iniciar sesión' })).toHaveCount(0)
     await expect(page.locator('header a.brand')).toHaveAttribute('href', '/')
   })
 
@@ -161,7 +159,7 @@ test.describe('R6: invitations', () => {
     await scenario(context, baseURL as string, 'signed-out')
     await page.goto('/invite#token=inv_not_a_real_token_000')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'This invitation link does not work' }),
+      page.getByRole('heading', { level: 1, name: 'Este enlace de invitación no funciona' }),
     ).toBeVisible()
     await expect(page.locator('header a.brand')).toHaveAttribute('href', '/sign-in')
   })
@@ -174,7 +172,7 @@ test.describe('R6: invitations', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(`/invite#token=${INVITE}`)
     const notice = page.getByText(
-      'You are signed in as Eric. Accepting signs Eric out and continues as marta@example.test.',
+      'Tienes la sesión iniciada como Eric. Aceptar cierra la sesión de Eric y continúa como marta@example.test.',
     )
     await expect(notice).toBeVisible()
     const before = await notice.evaluate((n) => {
@@ -191,14 +189,14 @@ test.describe('R6: invitations', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-out')
     await page.goto(`/invite#token=${INVITE}`)
-    await page.getByLabel('Your name').fill('Marta')
-    await page.getByLabel('Choose a password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Create my account' }).click()
+    await page.getByLabel('Tu nombre').fill('Marta')
+    await page.getByLabel('Elige una contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Crear mi cuenta' }).click()
     await expect(page).toHaveURL(/\/$/)
     await expect(
       page
         .getByRole('status')
-        .filter({ hasText: 'Welcome — you joined Growth as contributor and Support as reader.' }),
+        .filter({ hasText: 'Bienvenido — te uniste a Growth como colaborador y Support como lector.' }),
     ).toBeVisible()
   })
 
@@ -210,12 +208,12 @@ test.describe('R6: invitations', () => {
     await scenario(context, baseURL as string, 'signed-out')
     await page.goto('/invite#token=inv_not_a_real_token_000')
     await expect(
-      page.getByRole('heading', { level: 1, name: 'This invitation link does not work' }),
+      page.getByRole('heading', { level: 1, name: 'Este enlace de invitación no funciona' }),
     ).toBeVisible()
     await page.evaluate((t) => {
       location.hash = `#token=${t}`
     }, INVITE)
-    await expect(page.getByRole('heading', { level: 1, name: 'Accept your invitation' })).toBeFocused()
+    await expect(page.getByRole('heading', { level: 1, name: 'Acepta tu invitación' })).toBeFocused()
   })
 })
 
@@ -227,8 +225,10 @@ test.describe('R6: reset links', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-out')
     await page.goto('/reset#token=rst_not_a_real_token_000')
-    await expect(page.getByRole('heading', { level: 1, name: 'This reset link does not work' })).toBeVisible()
-    await expect(page.getByLabel('New password')).toHaveCount(0)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Este enlace de restablecimiento no funciona' }),
+    ).toBeVisible()
+    await expect(page.getByLabel('Contraseña nueva')).toHaveCount(0)
   })
 
   test('a short new password is marked on its field, without asking the server', async ({
@@ -242,9 +242,9 @@ test.describe('R6: reset links', () => {
       if (r.url().endsWith('/v1/auth/reset/confirm')) sent++
     })
     await page.goto(`/reset#token=${RESET}`)
-    const field = page.getByLabel('New password')
+    const field = page.getByLabel('Contraseña nueva')
     await field.fill('too short')
-    await page.getByRole('button', { name: 'Save the new password' }).click()
+    await page.getByRole('button', { name: 'Guardar la contraseña nueva' }).click()
     await expect(field).toBeFocused()
     await expect(field).toHaveAttribute('aria-invalid', 'true')
     await expect(field).toHaveAccessibleDescription(/at least 12 characters/)
@@ -258,13 +258,13 @@ test.describe('R6: the small things', () => {
     await scenario(context, baseURL as string, 'fresh')
     await page.goto('/setup')
     await page.evaluate(() => localStorage.setItem('rscb.theme', 'light'))
-    await page.getByLabel('Name of this installation').fill('obsybrain')
-    await page.getByLabel('Your name').fill('Eric')
-    await page.getByLabel('Your email').fill('eric@example.test')
-    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
+    await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await page.getByLabel('Tu nombre').fill('Eric')
+    await page.getByLabel('Tu email').fill('eric@example.test')
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await keepTheKey(page)
-    const banner = page.getByRole('status').filter({ hasText: 'Brain is set up.' })
+    const banner = page.getByRole('status').filter({ hasText: 'Brain está configurado.' })
     await expect(banner).toBeVisible()
     const a = await banner.boundingBox()
     const b = await page.locator('.state.next').boundingBox()
@@ -293,7 +293,7 @@ test.describe('R6: the small things', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth')
     await expect(page.getByRole('heading', { level: 1, name: 'Growth' })).toBeVisible()
-    await expect(page.getByRole('region', { name: 'In numbers' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'En números' })).toBeVisible()
     await expect(page.getByRole('region', { name: "Today's sessions" })).toBeVisible()
   })
 })

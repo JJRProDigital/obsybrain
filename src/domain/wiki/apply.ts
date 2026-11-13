@@ -15,8 +15,8 @@ export class ApplyError extends AppError {
     super(
       409,
       'apply_failed',
-      index === undefined ? message : `Operation ${index}: ${message}`,
-      'Nothing was applied. Correct the operation, or return it to its author.',
+      index === undefined ? message : `Operación ${index}: ${message}`,
+      'No se aplicó nada. Corrige la operación, o devuélvesela a su autor.',
     )
   }
 }
@@ -84,7 +84,7 @@ export async function applyOps(
       [brainId, address],
     )
     if (r && !startRevision.has(String(r.id))) startRevision.set(String(r.id), Number(r.revision))
-    return r ?? fail(it, `there is no page at "${address}".`)
+    return r ?? fail(it, `no hay ninguna página en "${address}".`)
   }
   const checkEntries = async (it: ApplyItem, sources: Source[]) => {
     const ids = sources.flatMap((s) => ('entryId' in s ? [s.entryId] : []))
@@ -94,7 +94,7 @@ export async function applyOps(
       [brainId, ids],
     )
     const found = new Set(rows.map((r) => String(r.id)))
-    for (const id of ids) if (!found.has(id)) fail(it, `the source ${id} is not an entry of this brain.`)
+    for (const id of ids) if (!found.has(id)) fail(it, `la fuente ${id} no es una entrada de este brain.`)
   }
   const setSources = async (pageId: string, sources: Source[]) => {
     await db.query('DELETE FROM page_sources WHERE page_id = $1', [pageId])
@@ -127,7 +127,7 @@ export async function applyOps(
     }
   }
   const addLink = async (it: ApplyItem, from: Row, kind: LinkKind, to: Row) => {
-    if (from.id === to.id) fail(it, 'a page cannot link to itself.')
+    if (from.id === to.id) fail(it, 'una página no puede enlazarse a sí misma.')
     await db.query(
       `INSERT INTO page_links (brain_id, from_page, kind, to_page) VALUES ($1, $2, $3, $4)
        ON CONFLICT (from_page, kind, to_page) WHERE to_page IS NOT NULL DO NOTHING`,
@@ -209,7 +209,7 @@ export async function applyOps(
           'SELECT page_id FROM page_addresses WHERE brain_id = $1 AND address = $2',
           [brainId, o.address],
         )
-        if (taken) fail(it, `the address "${o.address}" is taken or reserved.`)
+        if (taken) fail(it, `la dirección "${o.address}" está tomada o reservada.`)
         await checkEntries(it, o.sources)
         const id = newId('pg')
         await db.query(
@@ -276,7 +276,7 @@ export async function applyOps(
           [brainId, o.to],
         )
         if (holder && holder.page_id !== p.id)
-          fail(it, `the address "${o.to}" is taken or reserved by another page.`)
+          fail(it, `la dirección "${o.to}" está tomada o reservada por otra página.`)
         if (!holder) {
           await db.query(
             'INSERT INTO page_addresses (brain_id, address, page_id, created_at) VALUES ($1,$2,$3,$4)',
@@ -284,7 +284,7 @@ export async function applyOps(
           )
         }
         await bump(String(p.id), 'address = $3', [o.to])
-        await revise(it, String(p.id), `moved from "${p.address}"`)
+        await revise(it, String(p.id), `movida desde "${p.address}"`)
         break
       }
       case 'link': {
@@ -313,14 +313,14 @@ export async function applyOps(
         const p = await page(it, o.address)
         const by =
           o.status === 'superseded' && o.supersededBy ? String((await page(it, o.supersededBy)).id) : null
-        if (by === p.id) fail(it, 'a page cannot supersede itself.')
+        if (by === p.id) fail(it, 'una página no se reemplaza a sí misma.')
         await setStatus(it, p, o.status, by)
         break
       }
       case 'merge': {
         const x = await page(it, o.address)
         const y = await page(it, o.from)
-        if (x.id === y.id) fail(it, 'a page cannot be merged into itself.')
+        if (x.id === y.id) fail(it, 'una página no se fusiona consigo misma.')
         const drop = new Set(o.dropSources.map(sourceKey))
         const ys = await db.query('SELECT entry_id, url, title FROM page_sources WHERE page_id = $1', [y.id])
         await addSources(
@@ -365,7 +365,7 @@ export async function applyOps(
         await db.query('UPDATE page_addresses SET page_id = $2 WHERE page_id = $1', [y.id, x.id])
         await bump(String(x.id), 'body = $3', [o.body])
         await setMentions({ id: String(x.id), address: String(x.address) }, o.body)
-        await revise(it, String(x.id), `merged "${y.address}" into it`)
+        await revise(it, String(x.id), `fusionada "${y.address}" en ella`)
         await setStatus(it, y, 'superseded', String(x.id))
         break
       }
@@ -375,9 +375,9 @@ export async function applyOps(
           p.id,
           o.toRevision,
         ])
-        if (!r) fail(it, `"${p.address}" has no revision ${o.toRevision}.`)
+        if (!r) fail(it, `"${p.address}" no tiene la revisión ${o.toRevision}.`)
         const old = r as Row
-        if (old.purged_at) fail(it, `revision ${o.toRevision} of "${p.address}" was purged.`)
+        if (old.purged_at) fail(it, `la revisión ${o.toRevision} de "${p.address}" fue purgada.`)
         await bump(String(p.id), 'type = $3, title = $4, summary = $5, body = $6, tags = $7', [
           old.type,
           old.title,
@@ -417,7 +417,7 @@ export async function applyOps(
           }
         }
         await setMentions({ id: String(p.id), address: String(p.address) }, String(old.body))
-        await revise(it, String(p.id), `back to revision ${o.toRevision}`)
+        await revise(it, String(p.id), `de vuelta a la revisión ${o.toRevision}`)
         break
       }
     }

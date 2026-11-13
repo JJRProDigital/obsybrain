@@ -22,8 +22,8 @@ export const webOnly = (ctx: Ctx): void => {
     throw new AppError(
       403,
       'web_only',
-      'Approval happens in the web.',
-      'Open the proposal in the obsybrain web. Agents and programs can propose, not approve or edit pages.',
+      'La aprobación se hace en la web.',
+      'Abre la propuesta en la web de obsybrain. Los agentes y programas pueden proponer, no aprobar ni editar páginas.',
     )
   }
 }

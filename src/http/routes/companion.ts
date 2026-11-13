@@ -21,7 +21,7 @@ function sharedOnly(r: PublicReq, path: string) {
   const proxied =
     h['x-forwarded-for'] !== undefined || h['x-forwarded-proto'] !== undefined || h.forwarded !== undefined
   if (!c || proxied || !fromSharedNetwork(r.conn.ip, c, c.proxies)) {
-    throw new AppError(404, 'no_such_route', `Nothing at ${path}.`, 'Check the method and path.')
+    throw new AppError(404, 'no_such_route', `Nada en ${path}.`, 'Revisa el método y la ruta.')
   }
   return c
 }
@@ -40,8 +40,8 @@ async function keyed(r: PublicReq, token: string): Promise<void> {
   throw new AppError(
     401,
     'unauthorized',
-    'The key of the companion setup is missing or wrong.',
-    'Send Authorization: Bearer <companionToken>, the key obsybrain.sh install --companion --json gave.',
+    'La clave de la configuración companion falta o es errónea.',
+    'Envía Authorization: Bearer <companionToken>, la clave que dio obsybrain.sh install --companion --json.',
   )
 }
 

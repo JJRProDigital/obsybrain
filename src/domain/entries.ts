@@ -63,48 +63,51 @@ function date(v: string | undefined, field: string): Date | null {
   if (v === undefined) return null
   const d = new Date(v)
   if (Number.isNaN(d.getTime()) || d.getUTCFullYear() < 1 || d.getUTCFullYear() > 9999)
-    throw invalid(`"${field}" is not a date.`, 'Send an ISO date such as 2026-11-30.')
+    throw invalid(`"${field}" no es una fecha.`, 'Envía una fecha ISO como 2026-11-30.')
   return d
 }
 
 // The checks that say exactly what is wrong (spec B1 «Bordes y errores»).
 export function validate(i: EntryInput): void {
   if (!(ENTRY_TYPES as readonly string[]).includes(i.type)) {
-    throw invalid(`Unknown entry type "${i.type}".`, `Use one of: ${ENTRY_TYPES.join(', ')}.`)
+    throw invalid(`Tipo de entrada desconocido "${i.type}".`, `Usa uno de: ${ENTRY_TYPES.join(', ')}.`)
   }
   const title = i.title.trim()
-  if (!title) throw invalid('An entry needs a title.', 'Give it a one-line title.')
+  if (!title) throw invalid('Una entrada necesita título.', 'Dale un título de una línea.')
   if (title.length > LIMITS.title) {
-    throw invalid(`The title is longer than ${LIMITS.title} characters.`, 'Make it one short line.')
+    throw invalid(`El título tiene más de ${LIMITS.title} caracteres.`, 'Hazlo una línea corta.')
   }
   if (!i.content.trim())
-    throw invalid('An entry needs content.', 'Say what, why, where and what you learned.')
+    throw invalid('Una entrada necesita contenido.', 'Di qué, por qué, dónde y qué aprendiste.')
   if (i.content.length > LIMITS.content) {
     throw invalid(
-      `The content is longer than ${LIMITS.content} characters.`,
-      'Split it into several entries, or save a reference to where the full text lives.',
+      `El contenido tiene más de ${LIMITS.content} caracteres.`,
+      'Divídelo en varias entradas o guarda una referencia a donde vive el texto completo.',
     )
   }
   if (i.topic !== undefined && (!TOPIC.test(i.topic) || i.topic.length > 200)) {
     throw invalid(
-      `"${i.topic}" is not a valid topic.`,
-      `A topic is lowercase words with hyphens, levels split by "/", e.g. "style/intro-length". Suggested: "${suggestKey(i.topic)}".`,
+      `"${i.topic}" no es un tema válido.`,
+      `Un tema son palabras en minúsculas con guiones, con niveles separados por "/", p. ej. "style/intro-length". Sugerido: "${suggestKey(i.topic)}".`,
     )
   }
   if ((i.tags?.length ?? 0) > LIMITS.tags || i.tags?.some((t) => !t.trim() || t.length > LIMITS.tag)) {
     throw invalid(
-      `Up to ${LIMITS.tags} tags of up to ${LIMITS.tag} characters.`,
-      'Remove or shorten some tags.',
+      `Hasta ${LIMITS.tags} etiquetas de hasta ${LIMITS.tag} caracteres.`,
+      'Quita o acorta algunas etiquetas.',
     )
   }
   if ((i.refs?.length ?? 0) > LIMITS.refs || i.refs?.some((r) => !r.trim() || r.length > LIMITS.ref)) {
     throw invalid(
-      `Up to ${LIMITS.refs} references of up to ${LIMITS.ref} characters.`,
-      'Remove or shorten some.',
+      `Hasta ${LIMITS.refs} referencias de hasta ${LIMITS.ref} caracteres.`,
+      'Quita o acorta algunas.',
     )
   }
   if (i.appliesTo !== undefined && (!i.appliesTo.trim() || i.appliesTo.length > LIMITS.appliesTo)) {
-    throw invalid(`"appliesTo" has 1 to ${LIMITS.appliesTo} characters.`, 'Name the agent, e.g. "narrator".')
+    throw invalid(
+      `"appliesTo" tiene de 1 a ${LIMITS.appliesTo} caracteres.`,
+      'Nombra al agente, p. ej. "narrator".',
+    )
   }
 }
 
@@ -222,8 +225,8 @@ export function fitsOnceRedacted(f: Record<string, unknown>): void {
     (f.refs as string[]).some((t) => t.length > LIMITS.ref)
   if (tooLong) {
     throw invalid(
-      'Once secrets are replaced by their marks, the text is longer than the limit.',
-      'Shorten the text, or remove the secrets yourself.',
+      'Cuando los secretos se reemplazan por sus marcas, el texto supera el límite.',
+      'Acorta el texto o quita tú los secretos.',
     )
   }
 }
@@ -275,8 +278,8 @@ async function write(
   if (o.requestKey !== undefined) {
     if (!o.requestKey.trim() || o.requestKey.length > 200) {
       throw invalid(
-        'A request key has 1 to 200 characters.',
-        'Use a fresh random id per request, e.g. a UUID.',
+        'Una clave de petición tiene de 1 a 200 caracteres.',
+        'Usa un id aleatorio nuevo por petición, p. ej. un UUID.',
       )
     }
     // Same key, same redacted request: the same receipt. Two retries racing are serialised here.
@@ -294,8 +297,8 @@ async function write(
       if (seen.request_hash === requestHash) return canonical(seen.receipt)
       throw conflict(
         'request_key_reused',
-        'This request key was already used for a different request.',
-        'Use a new request key for a new entry; reuse a key only to retry the very same request.',
+        'Esta clave de petición ya se usó para una petición distinta.',
+        'Usa una clave de petición nueva para una entrada nueva; reutiliza una clave solo para reintentar exactamente la misma petición.',
       )
     }
   }
@@ -402,7 +405,7 @@ async function write(
           "SELECT 1 FROM entries WHERE brain_id = $1 AND topic = $2 AND state <> 'active' LIMIT 1",
           [brainId, p.topic],
         )
-        if (gone) topicNote = 'the previous entry for this topic was forgotten; a new one was created'
+        if (gone) topicNote = 'la entrada anterior de este tema fue olvidada; se creó una nueva'
       }
       const id = newId('ent')
       await db.query(
@@ -489,8 +492,8 @@ async function revisionRow(
 export async function saveEntry(ctx: Ctx, slug: string, input: EntryInput): Promise<Receipt> {
   if (input.type === 'correction') {
     throw invalid(
-      'Agents cannot write corrections; only people can.',
-      'Save it as a "learning" or "preference" entry instead.',
+      'Los agentes no pueden escribir correcciones; solo las personas.',
+      'Guárdala como entrada de tipo "learning" o "preference".',
     )
   }
   const p = prepare(input)
@@ -519,7 +522,7 @@ export async function webCorrection(
   o: { decidedByKey?: boolean } = {},
 ): Promise<Receipt> {
   if (!o.decidedByKey && (ctx.who.credential.kind !== 'web' || ctx.who.kind !== 'person')) {
-    throw invalid('Only a person in the web writes corrections this way.', 'Use the obsybrain web.')
+    throw invalid('Solo una persona en la web escribe correcciones así.', 'Usa la web de obsybrain.')
   }
   return write(
     { ...ctx, db },
@@ -548,7 +551,7 @@ export async function addCorrection(
   },
 ): Promise<Receipt> {
   if (input.page !== undefined && input.entry !== undefined)
-    throw invalid('A correction is about one page or one entry, not both.', 'Send "page" or "entry".')
+    throw invalid('Una corrección va sobre una página o una entrada, no ambas.', 'Envía "page" o "entry".')
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const { brain, role } = await inBrain(c, { slug }, 'share')
@@ -567,7 +570,7 @@ export async function addCorrection(
         "SELECT id FROM entries WHERE id = $1 AND brain_id = $2 AND state = 'active'",
         [input.entry.trim(), brain.id],
       )
-      if (!e) throw notFound('entry')
+      if (!e) throw notFound('entrada')
       refs.push(`entry:${e.id}`)
     }
     const p = prepare({
@@ -686,15 +689,15 @@ export async function summarizeSession(
 ): Promise<Receipt> {
   const p = prepare({
     type: 'summary',
-    title: input.title?.trim() || 'Session summary',
+    title: input.title?.trim() || 'Resumen de sesión',
     content: input.content,
   })
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const s = await db.one('SELECT * FROM sessions WHERE id = $1 FOR UPDATE', [sessionId])
-    if (!s || !(await ownsSession(db, ctx.who, s))) throw notFound('session')
+    if (!s || !(await ownsSession(db, ctx.who, s))) throw notFound('sesión')
     const { brain, role } = await inBrain(c, { id: String(s.brain_id) }, 'share').catch(() => {
-      throw notFound('session')
+      throw notFound('sesión')
     })
     await allow(c, 'journal.write', { role, brainStatus: brain.status }, brain.id)
     if (s.status !== 'open') {
@@ -706,7 +709,11 @@ export async function summarizeSession(
         )
         if (seen && seen.receipt.entryId === s.summary_entry_id) return canonical(seen.receipt)
       }
-      throw conflict('session_closed', 'That session is already closed.', 'Open a new session for new work.')
+      throw conflict(
+        'session_closed',
+        'Esa sesión ya está cerrada.',
+        'Abre una sesión nueva para el trabajo nuevo.',
+      )
     }
     const receipt = await write(ctx, db, brain.id, p, agentWriter(ctx), {
       sessionId,
@@ -864,11 +871,11 @@ export async function getEntry(
   o: { history?: boolean } = {},
 ): Promise<{ entry: Entry & Byline; session: SessionRef; relations: EntryRelation[]; history?: Revision[] }> {
   const row = await ctx.db.one('SELECT * FROM entries WHERE id = $1', [id])
-  if (!row) throw notFound('entry')
+  if (!row) throw notFound('entrada')
   const { role } = await inBrain(ctx, { id: String(row.brain_id) }).catch(() => {
-    throw notFound('entry')
+    throw notFound('entrada')
   })
-  if (row.state === 'forgotten' && role !== 'curator') throw notFound('entry')
+  if (row.state === 'forgotten' && role !== 'curator') throw notFound('entrada')
   const entry = withByline(entryOf(row), (await bylines(ctx.db, [id])).get(id))
   const relations = row.state === 'purged' ? [] : await relationsOf(ctx.db, id, role === 'curator')
   const session = (await sessionRefs(ctx.db, [entry.sessionId])).get(entry.sessionId) as SessionRef

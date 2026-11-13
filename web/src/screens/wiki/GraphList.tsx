@@ -177,13 +177,13 @@ function GroupsTable({
                 <th scope="row" class={it.loose ? undefined : 'mono'}>
                   {name}
                 </th>
-                <td class="num">{n.toLocaleString('en-US')}</td>
+                <td class="num">{n.toLocaleString('es')}</td>
                 <td>
                   {Object.entries(types)
                     .map(([t, c]) => `${T.wiki.typesPlural[t] ?? t} ${c}`)
                     .join(', ')}
                 </td>
-                <td class="num">{links.toLocaleString('en-US')}</td>
+                <td class="num">{links.toLocaleString('es')}</td>
                 <td>
                   <RowActions label={g.rowActions(name)}>
                     <button

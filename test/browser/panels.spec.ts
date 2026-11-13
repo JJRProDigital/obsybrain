@@ -15,7 +15,7 @@ const SCREENS = [
   {
     name: 'wiki page',
     path: '/b/growth/pages/audience/retention',
-    ready: (p: Page) => p.getByRole('heading', { name: 'Links', exact: true }),
+    ready: (p: Page) => p.getByRole('heading', { name: 'Enlaces', exact: true }),
   },
   { name: 'proposals', path: '/b/growth/proposals', ready: (p: Page) => p.locator('ul.list') },
 ] as const

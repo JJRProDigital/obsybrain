@@ -97,8 +97,8 @@ const notFound = (pathname: string): WebReply => ({
   body: JSON.stringify({
     error: {
       code: 'no_such_route',
-      message: `Nothing at GET ${pathname.slice(0, 200)}.`,
-      howToProceed: 'Check the path.',
+      message: `Nada en GET ${pathname.slice(0, 200)}.`,
+      howToProceed: 'Revisa la ruta.',
     },
   }),
 })
@@ -146,7 +146,7 @@ export function answerWeb(
     return {
       status: 503,
       headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', ...SECURITY },
-      body: 'The web is not built: run npm run build. The API at /v1 works without it.\n',
+      body: 'La web no está compilada: ejecuta npm run build. La API en /v1 funciona sin ella.\n',
     }
   }
   if (pathname === '/assets' || pathname.startsWith('/assets/')) {

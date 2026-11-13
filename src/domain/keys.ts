@@ -78,10 +78,10 @@ export async function mintPersonToken(
   },
 ): Promise<Minted> {
   if (!Number.isInteger(o.days) || o.days < 1 || o.days > MAX_TOKEN_DAYS) {
-    throw invalid(`A token lasts 1 to ${MAX_TOKEN_DAYS} days.`, 'Choose 30, 90 or 365 days.')
+    throw invalid(`Un token dura de 1 a ${MAX_TOKEN_DAYS} días.`, 'Elige 30, 90 o 365 días.')
   }
   if (!o.allBrains && !(o.brainIds && o.brainIds.length > 0)) {
-    throw invalid('A token needs its brains: all of yours, or a list.', 'Pass allBrains or brainIds.')
+    throw invalid('Un token necesita sus brains: todos los tuyos o una lista.', 'Pasa allBrains o brainIds.')
   }
   const now = clock()
   return insert(db, now, {
@@ -107,10 +107,11 @@ export async function mintWebSession(
 ): Promise<Minted> {
   const hours = o.hours ?? WEB_SESSION_HOURS.default
   if (!Number.isInteger(hours) || hours < 1 || hours > WEB_SESSION_HOURS.max) {
-    throw invalid(`A web session lasts 1 to ${WEB_SESSION_HOURS.max} hours.`, 'Sign in again.')
+    throw invalid(`Una sesión web dura de 1 a ${WEB_SESSION_HOURS.max} horas.`, 'Inicia sesión de nuevo.')
   }
   const acc = await db.one<{ kind: string }>('SELECT kind FROM accounts WHERE id = $1', [o.accountId])
-  if (acc?.kind !== 'person') throw invalid('Only people sign in to the web.', 'Name a person account.')
+  if (acc?.kind !== 'person')
+    throw invalid('Solo las personas inician sesión en la web.', 'Nombra una cuenta de persona.')
   const now = clock()
   return insert(db, now, {
     accountId: o.accountId,
@@ -129,7 +130,7 @@ export async function mintMainKey(
 ): Promise<Minted> {
   const acc = await db.one<{ kind: string }>('SELECT kind FROM accounts WHERE id = $1', [o.accountId])
   if (acc?.kind !== 'service')
-    throw invalid('Main keys belong to service accounts.', 'Name a service account.')
+    throw invalid('Las claves principales son de cuentas de servicio.', 'Nombra una cuenta de servicio.')
   return insert(db, clock(), {
     accountId: o.accountId,
     kind: 'main',
@@ -158,18 +159,19 @@ export async function mintShortKey(ctx: Ctx, r: ShortKeyRequest): Promise<Minted
   const ref = redact((r.ref ?? '').trim()).text
   if (!ref || ref.length > 200) {
     throw invalid(
-      'A short key needs a reference of 1 to 200 characters.',
-      'Pass "ref", such as "run r_x, step 3".',
+      'Una clave corta necesita una referencia de 1 a 200 caracteres.',
+      'Pasa "ref", como "run r_x, paso 3".',
     )
   }
   if (!Number.isInteger(r.ttlMinutes) || r.ttlMinutes < 1 || r.ttlMinutes > MAX_SHORT_MINUTES) {
     throw invalid(
-      `A short key lasts 1 to ${MAX_SHORT_MINUTES} minutes.`,
-      'Renew it before it ends if the job is longer.',
+      `Una clave corta dura de 1 a ${MAX_SHORT_MINUTES} minutos.`,
+      'Renuévala antes de que venza si el trabajo es más largo.',
     )
   }
   const agent = r.agent?.trim() || null
-  if (agent && agent.length > 80) throw invalid('The agent name is longer than 80 characters.', 'Shorten it.')
+  if (agent && agent.length > 80)
+    throw invalid('El nombre del agente tiene más de 80 caracteres.', 'Acórtalo.')
   const brainId = async (slug: string, min: Role): Promise<string> => {
     const b = await ctx.db.one<{ id: string }>('SELECT id FROM brains WHERE slug = $1', [slug])
     if (!b) throw brainNotFound()
@@ -177,8 +179,8 @@ export async function mintShortKey(ctx: Ctx, r: ShortKeyRequest): Promise<Minted
     if (!role) throw brainNotFound()
     if (!atLeast(role, min)) {
       throw denied(
-        `This service account is ${role} in "${slug}"; the key needs ${min}.`,
-        'Ask a curator of the brain for that role, or mint a narrower key.',
+        `Esta cuenta de servicio es ${role} en "${slug}"; la clave necesita ${min}.`,
+        'Pídele ese rol a quien cure el brain, o acuña una clave más limitada.',
       )
     }
     return b.id
@@ -197,16 +199,16 @@ export async function mintShortKey(ctx: Ctx, r: ShortKeyRequest): Promise<Minted
     )
     if (!who) {
       throw invalid(
-        '"onBehalf" must be an active person account of this installation.',
-        'Pass the id or email of a real account, or leave it out.',
+        '"onBehalf" debe ser una cuenta de persona activa de esta instalación.',
+        'Pasa el id o el correo de una cuenta real, u omítelo.',
       )
     }
     onBehalfId = who.id
   }
   if (readBrainIds.length > 0 && !onBehalfId) {
     throw invalid(
-      'A short key with read-only brains must say on behalf of whom it reads them.',
-      'Pass "onBehalf": the person who launched the job.',
+      'Una clave corta con brains de solo lectura debe decir en nombre de quién los lee.',
+      'Pasa "onBehalf": la persona que lanzó el trabajo.',
     )
   }
   const now = ctx.clock()
@@ -243,9 +245,9 @@ export async function revokeKey(ctx: Ctx, id: string): Promise<void> {
   const whole =
     c.kind === 'web' || c.kind === 'main' || (c.kind === 'token' && c.allBrains && c.perm === 'write')
   const mine = k && whole && (k.account_id === ctx.who.accountId || k.parent_account === ctx.who.accountId)
-  if (!k || !(self || mine || (ctx.who.isAdmin && ctx.who.kind === 'person'))) throw notFound('key')
+  if (!k || !(self || mine || (ctx.who.isAdmin && ctx.who.kind === 'person'))) throw notFound('clave')
   if (ctx.who.credential.perm === 'read') {
-    throw denied('This key is read-only.', 'Use a key with read + write permission.')
+    throw denied('Esta clave es de solo lectura.', 'Usa una clave con permiso de lectura y escritura.')
   }
   const now = ctx.clock()
   await ctx.db.query(

@@ -43,8 +43,8 @@ export const brandingRoutes: Route[] = [
         throw new AppError(
           404,
           'no_logo',
-          'This installation has no logo.',
-          'The administration can add one in Admin › Branding; until then the web shows the RSC mark.',
+          'Esta instalación no tiene logo.',
+          'La administración puede añadir uno en Admin › Marca; hasta entonces la web muestra el símbolo.',
         )
       }
       const etag = `"${logo.sha256}"`

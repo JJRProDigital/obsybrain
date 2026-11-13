@@ -1334,7 +1334,7 @@ describe('the fixture API', () => {
       ['Old Colleague (imported)'],
     )
     const done = await call('POST', `/v1/admin/authors/${list.authors[0]?.id}/anonymise`, o)
-    assert.deepEqual((done.body as { author: unknown }).author, { id: 'acc_author1', name: 'Former author' })
+    assert.deepEqual((done.body as { author: unknown }).author, { id: 'acc_author1', name: 'Autor anterior' })
     assert.equal((await call('POST', '/v1/admin/authors/acc_nobody/anonymise', o)).status, 404)
     const member = fx.scenario('member')
     const ana = { scenario: member.id, cookie: 'rscb_session=fx.acc_ana' }

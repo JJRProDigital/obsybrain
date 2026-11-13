@@ -44,12 +44,17 @@ export const brainNotFound = () =>
   new AppError(
     404,
     'brain_not_found',
-    'No brain with that name is available to you.',
-    'Check the name with GET /v1/brains, or ask a curator of that brain to add you.',
+    'No hay ningún brain con ese nombre disponible para ti.',
+    'Comprueba el nombre con GET /v1/brains, o pide a quien cure ese brain que te añada.',
   )
 
 export const notFound = (what: string) =>
-  new AppError(404, 'not_found', `No ${what} with that id is available to you.`, `Check the ${what} id.`)
+  new AppError(
+    404,
+    'not_found',
+    `Ese id de ${what} no existe o no está disponible para ti.`,
+    `Comprueba el id de ${what} y vuelve a intentarlo.`,
+  )
 
 export const invalid = (message: string, howToProceed: string) =>
   new AppError(400, 'invalid_request', message, howToProceed)

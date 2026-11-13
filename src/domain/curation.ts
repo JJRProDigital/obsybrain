@@ -15,18 +15,18 @@ import { lockMeaning } from './meaning.ts'
 
 const PERSONS_ONLY = () =>
   invalid(
-    'A correction is a person’s word; it is changed or forgotten by a person, in the web.',
-    'Ask a curator of the brain to do it in the web, or write a new entry.',
+    'Una corrección es la palabra de una persona; la cambia u olvida una persona, en la web.',
+    'Pídeselo a quien cure el brain para que lo haga en la web, o escribe una entrada nueva.',
   )
 
 async function load(ctx: Ctx, db: Db, id: string): Promise<{ row: Row; at: InBrain }> {
   const row = await db.one('SELECT * FROM entries WHERE id = $1 FOR UPDATE', [id])
-  if (!row) throw notFound('entry')
+  if (!row) throw notFound('entrada')
   const at = await inBrain({ ...ctx, db }, { id: String(row.brain_id) }, 'share').catch(() => {
-    throw notFound('entry')
+    throw notFound('entrada')
   })
-  if (row.state === 'purged') throw notFound('entry')
-  if (row.state === 'forgotten' && at.role !== 'curator') throw notFound('entry')
+  if (row.state === 'purged') throw notFound('entrada')
+  if (row.state === 'forgotten' && at.role !== 'curator') throw notFound('entrada')
   return { row, at }
 }
 
@@ -55,22 +55,22 @@ export async function editEntry(ctx: Ctx, id: string, e: EntryEdit): Promise<Ent
     if (row.type === 'correction' && !personInWeb(ctx)) throw PERSONS_ONLY()
     if (e.type !== undefined && (e.type === 'correction') !== (row.type === 'correction')) {
       throw invalid(
-        'An entry does not become a correction, nor a correction another type, by editing it.',
-        'Write a new correction in the web, or a new entry of the other type.',
+        'Una entrada no se convierte en corrección, ni una corrección en otro tipo, al editarla.',
+        'Escribe una corrección nueva en la web, o una entrada nueva del otro tipo.',
       )
     }
     if (row.state !== 'active') {
       throw conflict(
         'entry_forgotten',
-        'This entry is forgotten.',
-        'Recover it first (curators), then edit it.',
+        'Esta entrada está olvidada.',
+        'Recupérala primero (curadores) y luego edítala.',
       )
     }
     if (Number(row.revision) !== e.baseRevision) {
       const err = conflict(
         'entry_changed',
-        `The entry changed since revision ${e.baseRevision}; it is now at revision ${row.revision}.`,
-        'Read the current version (in "current"), apply your change to it and send it with its revision.',
+        `La entrada cambió desde la revisión ${e.baseRevision}; ahora está en la revisión ${row.revision}.`,
+        'Lee la versión actual (en "current"), aplica tu cambio sobre ella y envíalo con su revisión.',
       )
       err.current = entryOf(row)
       throw err
@@ -122,7 +122,7 @@ export async function editEntry(ctx: Ctx, id: string, e: EntryEdit): Promise<Ent
 
 export async function forgetEntry(ctx: Ctx, id: string, reason: string): Promise<Entry> {
   const why = redact(reason.trim()).text
-  if (!why || why.length > 500) throw invalid('Say why, in 1 to 500 characters.', 'Add a short reason.')
+  if (!why || why.length > 500) throw invalid('Di por qué, en 1 a 500 caracteres.', 'Añade una razón corta.')
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const { row, at } = await load(ctx, db, id)
@@ -163,8 +163,8 @@ export async function recoverEntry(ctx: Ctx, id: string): Promise<Entry> {
       if (taken) {
         throw conflict(
           'topic_taken',
-          `Another entry (${taken.id}) now holds the topic "${row.topic}".`,
-          'Forget that entry first, or keep this one forgotten.',
+          `Otra entrada (${taken.id}) tiene ahora el tema "${row.topic}".`,
+          'Olvida esa entrada primero, o deja esta olvidada.',
         )
       }
     }
@@ -184,7 +184,7 @@ export async function pinEntry(ctx: Ctx, id: string, pinned: boolean): Promise<E
     const { row, at } = await load(ctx, db, id)
     await allow(c, 'entry.pin', { role: at.role, brainStatus: at.brain.status }, at.brain.id)
     if (row.state !== 'active')
-      throw conflict('entry_forgotten', 'This entry is forgotten.', 'Recover it first.')
+      throw conflict('entry_forgotten', 'Esta entrada está olvidada.', 'Recupérala primero.')
     const out = await db.one('UPDATE entries SET pinned = $2, updated_at = $3 WHERE id = $1 RETURNING *', [
       id,
       pinned,
@@ -199,7 +199,7 @@ function when(v: string | null | undefined, field: string): Date | null | undefi
   if (v === null) return null
   const d = new Date(v)
   if (Number.isNaN(d.getTime()) || d.getUTCFullYear() < 1 || d.getUTCFullYear() > 9999)
-    throw invalid(`"${field}" is not a date.`, 'Send an ISO date, or null to clear it.')
+    throw invalid(`"${field}" no es una fecha.`, 'Envía una fecha ISO, o null para quitarla.')
   return d
 }
 
@@ -249,7 +249,7 @@ export async function joinAsAdmin(c: Ctx, brainId: string, why: string): Promise
     brainId,
     kind: 'entry.changed',
     targetId: null,
-    label: `${c.who.name} (administration) joined`,
+    label: `${c.who.name} (administración) entró`,
   })
   return true
 }
@@ -319,11 +319,11 @@ export async function purgeEntry(
   await allow(ctx, 'entry.purge', {})
   const why = redact(reason.trim()).text
   if (!why || why.length > 500)
-    throw invalid('Write why it is purged, in 1 to 500 characters.', 'Add the reason.')
+    throw invalid('Escribe por qué se purga, en 1 a 500 caracteres.', 'Añade la razón.')
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const row = await db.one('SELECT * FROM entries WHERE id = $1 FOR UPDATE', [id])
-    if (!row) throw notFound('entry')
+    if (!row) throw notFound('entrada')
     const brainId = String(row.brain_id)
     const joined = await joinAsAdmin(c, brainId, 'joined to purge an entry')
     if (row.state !== 'purged') await scrubEntry(c, id, why)
@@ -331,7 +331,8 @@ export async function purgeEntry(
     return {
       entry: entryOf(out as Row),
       joined,
-      backupsNote: 'Backups taken before this purge still hold the content until they rotate out.',
+      backupsNote:
+        'Las copias de seguridad tomadas antes de esta purga siguen conteniendo el contenido hasta que roten.',
     }
   })
 }

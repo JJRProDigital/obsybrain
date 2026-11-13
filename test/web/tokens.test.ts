@@ -297,6 +297,7 @@ describe("Brain's tokens over the shared ones (tokens.css)", () => {
   }
 
   it("Brain keeps the brand's gold accent (hue 81) over the shared sheet", () => {
-    for (const t of ['light', 'dark'] as const) assert.match(theme(brain, t).get('--accent') ?? '', / 81\.\d\)$/)
+    for (const t of ['light', 'dark'] as const)
+      assert.match(theme(brain, t).get('--accent') ?? '', / 81\.\d\)$/)
   })
 })

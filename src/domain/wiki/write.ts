@@ -45,9 +45,12 @@ async function rebuilt(db: Db, brainId: string, r: Stored, now: Date): Promise<W
 const sha = (s: string) => createHash('sha256').update(s).digest('hex')
 
 export async function writeWiki(ctx: Ctx, slug: string, input: WriteInput): Promise<WriteReceipt> {
-  const pkg = readPackage(ctx, input, 'A write')
+  const pkg = readPackage(ctx, input, 'Una escritura')
   if (input.requestKey !== undefined && (!input.requestKey.trim() || input.requestKey.length > 200)) {
-    throw invalid('A request key has 1 to 200 characters.', 'Use a fresh random id per request, e.g. a UUID.')
+    throw invalid(
+      'Una clave de petición tiene de 1 a 200 caracteres.',
+      'Usa un id aleatorio nuevo por petición, p. ej. un UUID.',
+    )
   }
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
@@ -83,8 +86,8 @@ export async function writeWiki(ctx: Ctx, slug: string, input: WriteInput): Prom
         }
         throw conflict(
           'request_key_reused',
-          'This request key was already used for a different request.',
-          'Use a new request key for a new write; reuse a key only to retry the very same request.',
+          'Esta clave de petición ya se usó para una petición distinta.',
+          'Usa una clave de petición nueva para una escritura nueva; reutiliza una clave solo para reintentar exactamente la misma petición.',
         )
       }
     }
@@ -94,8 +97,8 @@ export async function writeWiki(ctx: Ctx, slug: string, input: WriteInput): Prom
       const err = new AppError(
         400,
         'write_invalid',
-        `The write has ${problems.length} problem${problems.length === 1 ? '' : 's'}; nothing was written.`,
-        'Fix each problem listed in "problems" and send it again.',
+        `La escritura tiene ${problems.length} problema${problems.length === 1 ? '' : 's'}; no se escribió nada.`,
+        'Corrige cada problema listado en "problems" y envíala de nuevo.',
       )
       err.problems = problems
       throw err
@@ -112,8 +115,8 @@ export async function writeWiki(ctx: Ctx, slug: string, input: WriteInput): Prom
       if (now && now.revision !== o.baseRevision) {
         const err = conflict(
           'page_changed',
-          `"${o.address}" changed since revision ${o.baseRevision}; it is at ${now.revision}. Nothing was written.`,
-          'Apply your change to the current version (in "current") and send it again with its revision.',
+          `"${o.address}" cambió desde la revisión ${o.baseRevision}; está en la ${now.revision}. No se escribió nada.`,
+          'Aplica tu cambio sobre la versión actual (en "current") y envíalo de nuevo con su revisión.',
         )
         err.current = await getPage(c, slug, o.address)
         throw err
@@ -125,13 +128,13 @@ export async function writeWiki(ctx: Ctx, slug: string, input: WriteInput): Prom
       keep: true,
       meta: {
         kind: 'write',
-        summary: `Written directly by ${name}: ${pkg.title}`,
+        summary: `Escrito directamente por ${name}: ${pkg.title}`,
         reason: pkg.reason || (ops.length === 1 ? (ops[0]?.reason ?? '') : ''),
         keyName: name,
         maintenance: Boolean(input.maintenance),
       },
     })
-    if (!applied) throw invalid('Nothing to write.', 'Send at least one operation.')
+    if (!applied) throw invalid('Nada que escribir.', 'Envía al menos una operación.')
     const { revised, logId } = applied
     // The entries it cites, and those collected without changes, are compiled, as with an approved proposal.
     const cited = new Set<string>(pkg.collected)

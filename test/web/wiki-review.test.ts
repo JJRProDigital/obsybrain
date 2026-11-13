@@ -242,6 +242,6 @@ describe('text shown out of markdown', () => {
       ],
     })
     assert.match(html, /title="audience\/intros"[^>]*>Writing intros<\/a>/)
-    assert.match(html, /Weekly review<span class="link-note"> \(stale\)<\/span>/)
+    assert.match(html, /Weekly review<span class="link-note"> \(desactualizada\)<\/span>/)
   })
 })

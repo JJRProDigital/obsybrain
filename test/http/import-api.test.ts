@@ -370,7 +370,7 @@ describe('the import route and the command (CA19)', { skip: skipPg }, () => {
       for (const slug of ['other', 'slow']) {
         const r = await upload(w, { session: S('eric') }, slug, zip)
         assert.deepEqual([r.status, r.body.error?.code], [409, 'import_busy'], slug)
-        assert.match(r.text, /Another import is running/)
+        assert.match(r.text, /Otra importación está corriendo/)
       }
     } finally {
       first.stop()

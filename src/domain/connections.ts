@@ -121,34 +121,34 @@ async function fetchClient(db: Db, now: Date, clientId: string, policy: FetchPol
   try {
     u = new URL(clientId)
   } catch {
-    throw bad('invalid_client', 'The client id is not an address.')
+    throw bad('invalid_client', 'El id de cliente no es una dirección.')
   }
   if (u.hash || u.username || u.password || u.pathname === '/' || clientId.length > 500) {
-    throw bad('invalid_client', 'A client id document address needs a path, and no fragment or credentials.')
+    throw bad(
+      'invalid_client',
+      'La dirección del documento de un cliente necesita una ruta, y sin fragmento ni credenciales.',
+    )
   }
   let doc: Record<string, unknown>
   try {
     const got = await fetchJson(clientId, policy)
     if (!got || typeof got !== 'object' || Array.isArray(got))
-      throw new FetchRefused('The document is not an object.')
+      throw new FetchRefused('El documento no es un objeto.')
     doc = got as Record<string, unknown>
   } catch (err) {
     // Brain's own reasons only: a network error says nothing about what is out there.
     const why =
-      err instanceof FetchRefused && !/could not be fetched/.test(err.message) ? ` ${err.message}` : ''
-    throw bad('invalid_client', `The client's document could not be fetched or used.${why}`)
+      err instanceof FetchRefused && !/no se pudo obtener\.?$/.test(err.message) ? ` ${err.message}` : ''
+    throw bad('invalid_client', `El documento del cliente no se pudo obtener ni usar.${why}`)
   }
   if (doc.client_id !== clientId) {
-    throw bad(
-      'invalid_client',
-      'The client document does not name itself with the address it was fetched from.',
-    )
+    throw bad('invalid_client', 'El documento del cliente no se nombra con la dirección de la que se obtuvo.')
   }
   const uris = doc.redirect_uris
   if (!Array.isArray(uris) || uris.length === 0 || uris.length > 20 || uris.some((x) => !cleanUri(x))) {
     throw bad(
       'invalid_client',
-      'The client document lists no usable return address (https, this machine, or an app scheme).',
+      'El documento del cliente no lista ninguna dirección de retorno utilizable (https, esta máquina o un esquema de app).',
     )
   }
   const c: Client = {
@@ -174,7 +174,7 @@ export async function clientOf(
   policy: FetchPolicy,
 ): Promise<Client> {
   if (typeof clientId !== 'string' || !clientId || clientId.length > 500) {
-    throw bad('invalid_client', 'A client id is required.')
+    throw bad('invalid_client', 'Se requiere un id de cliente.')
   }
   const now = clock()
   const row = await db.one<Row>('SELECT * FROM oauth_clients WHERE client_id = $1', [clientId])
@@ -185,7 +185,7 @@ export async function clientOf(
       now.getTime() - (row.fetched_at as Date).getTime() < CIMD_REFRESH_HOURS * 3_600_000
     if (!fresh) return fetchClient(db, now, clientId, policy)
   }
-  if (!row) throw bad('invalid_client', 'This client is not known to obsybrain.')
+  if (!row) throw bad('invalid_client', 'Este cliente no es conocido por obsybrain.')
   return {
     clientId: String(row.client_id),
     kind: row.kind as Client['kind'],
@@ -206,14 +206,14 @@ export async function registerClient(db: Db, clock: Clock, body: Record<string, 
   ) {
     throw bad(
       'invalid_redirect_uri',
-      `Give 1 to ${DCR_MAX_URIS} return addresses: https, this machine (http://127.0.0.1 or localhost), or an app scheme.`,
+      `Da de 1 a ${DCR_MAX_URIS} direcciones de retorno: https, esta máquina (http://127.0.0.1 o localhost) o un esquema de app.`,
     )
   }
   const method = body.token_endpoint_auth_method
   if (method !== undefined && method !== 'none') {
     throw bad(
       'invalid_client_metadata',
-      'obsybrain registers public clients only (token_endpoint_auth_method "none").',
+      'obsybrain registra solo clientes públicos (token_endpoint_auth_method "none").',
     )
   }
   const name = clientName(body.client_name, 'Unnamed app')
@@ -257,13 +257,10 @@ export async function checkClientAndReturn(
   const client = await clientOf(db, clock, q.client_id, policy)
   const redirectUri = typeof q.redirect_uri === 'string' ? q.redirect_uri : ''
   if (!redirectUri || !redirectAllowed(redirectUri)) {
-    throw bad(
-      'invalid_request',
-      'The return address is missing, or is neither encrypted nor on this machine.',
-    )
+    throw bad('invalid_request', 'La dirección de retorno falta, o no es cifrada ni está en esta máquina.')
   }
   if (!redirectMatches(client.redirectUris, redirectUri)) {
-    throw bad('invalid_request', 'The return address is not one this client registered.')
+    throw bad('invalid_request', 'La dirección de retorno no es una que este cliente registró.')
   }
   return { client, redirectUri }
 }
@@ -278,18 +275,21 @@ export async function checkRequest(
   base: { client: Client; redirectUri: string },
 ): Promise<AuthzRequest> {
   const state = typeof q.state === 'string' && q.state.length <= 1000 ? q.state : null
-  if (q.response_type !== 'code') throw bad('unsupported_response_type', 'Only "code" is supported.')
+  if (q.response_type !== 'code') throw bad('unsupported_response_type', 'Solo se admite "code".')
   if (
     q.code_challenge_method !== 'S256' ||
     typeof q.code_challenge !== 'string' ||
     !B64URL.test(q.code_challenge)
   ) {
-    throw bad('invalid_request', 'A PKCE challenge with method S256 is required.')
+    throw bad('invalid_request', 'Se requiere un desafío PKCE con método S256.')
   }
   const iss = await issuer(db)
   const asked = typeof q.resource === 'string' ? q.resource.replace(/\/+$/, '') : ''
   if (asked !== resourceOf(iss) && asked !== iss) {
-    throw bad('invalid_target', `"resource" must be this installation's MCP address, ${resourceOf(iss)}.`)
+    throw bad(
+      'invalid_target',
+      `"resource" debe ser la dirección MCP de esta instalación: ${resourceOf(iss)}.`,
+    )
   }
   return {
     ...base,
@@ -350,10 +350,9 @@ export async function issueCode(
   accountId: string,
   choice: { brainIds: string[]; perm: 'read' | 'write' },
 ): Promise<string> {
-  if (choice.brainIds.length === 0) throw bad('invalid_request', 'Choose at least one brain.')
+  if (choice.brainIds.length === 0) throw bad('invalid_request', 'Elige al menos un brain.')
   for (const id of choice.brainIds) {
-    if (!(await memberRole(db, id, accountId)))
-      throw bad('invalid_request', 'A chosen brain is not one of yours.')
+    if (!(await memberRole(db, id, accountId))) throw bad('invalid_request', 'Un brain elegido no es tuyo.')
   }
   const code = newSecret()
   const now = clock()
@@ -420,9 +419,9 @@ const tokens = (access: string, refresh: string, perm: string) => ({
 export async function exchangeCode(db: Db, clock: Clock, b: Record<string, unknown>) {
   const code = typeof b.code === 'string' ? b.code : ''
   const verifier = typeof b.code_verifier === 'string' ? b.code_verifier : ''
-  if (!code) throw bad('invalid_request', 'The code is missing.')
+  if (!code) throw bad('invalid_request', 'Falta el código.')
   if (!VERIFIER.test(verifier))
-    throw bad('invalid_grant', 'The PKCE proof (code_verifier) is missing or malformed.')
+    throw bad('invalid_grant', 'La prueba PKCE (code_verifier) falta o está malformada.')
   const now = clock()
   // Spent before anything is checked, and for good: a failed try uses the code up.
   const c = await db.one<Row>(
@@ -431,22 +430,21 @@ export async function exchangeCode(db: Db, clock: Clock, b: Record<string, unkno
   )
   return db.tx(async (tx) => {
     if (!c || (c.expires_at as Date).getTime() <= now.getTime()) {
-      throw bad('invalid_grant', 'The code is unknown, used or expired. Sign in again.')
+      throw bad('invalid_grant', 'El código es desconocido, ya se usó o expiró. Inicia sesión de nuevo.')
     }
-    if (b.client_id !== c.client_id) throw bad('invalid_grant', 'The code was given to another client.')
+    if (b.client_id !== c.client_id) throw bad('invalid_grant', 'El código se le dio a otro cliente.')
     if (b.redirect_uri !== c.redirect_uri)
-      throw bad('invalid_grant', 'The return address differs from the one of the sign-in.')
-    if (!same(s256(verifier), String(c.challenge)))
-      throw bad('invalid_grant', 'The PKCE proof does not match.')
+      throw bad('invalid_grant', 'La dirección de retorno difiere de la del inicio de sesión.')
+    if (!same(s256(verifier), String(c.challenge))) throw bad('invalid_grant', 'La prueba PKCE no coincide.')
     if (
       typeof b.resource === 'string' &&
       b.resource.replace(/\/+$/, '') !== c.resource &&
       b.resource.replace(/\/+$/, '') !== (await issuer(tx))
     ) {
-      throw bad('invalid_target', 'The resource differs from the one of the sign-in.')
+      throw bad('invalid_target', 'El recurso difiere del del inicio de sesión.')
     }
     const acc = await tx.one<Row>('SELECT status FROM accounts WHERE id = $1', [c.account_id])
-    if (acc?.status !== 'active') throw bad('invalid_grant', 'The account is no longer active.')
+    if (acc?.status !== 'active') throw bad('invalid_grant', 'La cuenta ya no está activa.')
     const client = await tx.one<Row>('SELECT name FROM oauth_clients WHERE client_id = $1', [c.client_id])
     const refresh = newSecret()
     const id = newId('app')
@@ -496,9 +494,9 @@ export function hostOf(uri: string): string {
   try {
     const u = new URL(uri)
     if (u.protocol === 'https:') return u.host
-    if (u.protocol === 'http:') return `${u.host} (this computer)`
+    if (u.protocol === 'http:') return `${u.host} (esta computadora)`
     // The scheme goes in brackets, after the words: "claude.ai:" must not read as the domain.
-    return `an app on this device (${u.protocol})`
+    return `una app en este dispositivo (${u.protocol})`
   } catch {
     return uri.slice(0, 100)
   }
@@ -508,7 +506,7 @@ export function hostOf(uri: string): string {
 // the whole connection ends. A connection idle 90 days, or a year old, asks to sign in again (CA29).
 export async function refreshGrant(db: Db, clock: Clock, b: Record<string, unknown>) {
   const token = typeof b.refresh_token === 'string' ? b.refresh_token : ''
-  if (!token) throw bad('invalid_request', 'The refresh token is missing.')
+  if (!token) throw bad('invalid_request', 'Falta el refresh token.')
   const now = clock()
   const h = hashSecret(token)
   // An old refresh token used again means it leaked: the connection ends for good (the refusal that
@@ -519,7 +517,10 @@ export async function refreshGrant(db: Db, clock: Clock, b: Record<string, unkno
     [h],
   )
   if (replay && now.getTime() - (replay.used_at as Date).getTime() < REFRESH_RACE_SECONDS * 1000) {
-    throw bad('invalid_grant', 'This refresh token was just used by another request. Use the new one it got.')
+    throw bad(
+      'invalid_grant',
+      'Este refresh token acaba de usarse en otra petición. Usa el nuevo que recibió.',
+    )
   }
   if (replay) {
     await endGrant(db, String(replay.id), now)
@@ -532,7 +533,10 @@ export async function refreshGrant(db: Db, clock: Clock, b: Record<string, unkno
       outcome: 'denied',
       detail: 'an old refresh token was used again; the connection was ended',
     })
-    throw bad('invalid_grant', 'This refresh token was already used, so the connection ended. Sign in again.')
+    throw bad(
+      'invalid_grant',
+      'Este refresh token ya se usó, así que la conexión terminó. Inicia sesión de nuevo.',
+    )
   }
   return db.tx(async (tx) => {
     const g = await tx.one<Row>(
@@ -540,9 +544,10 @@ export async function refreshGrant(db: Db, clock: Clock, b: Record<string, unkno
         WHERE g.refresh_hash = $1 FOR UPDATE OF g`,
       [h],
     )
-    if (!g) throw bad('invalid_grant', 'This refresh token is unknown or was already used. Sign in again.')
+    if (!g)
+      throw bad('invalid_grant', 'Este refresh token es desconocido o ya se usó. Inicia sesión de nuevo.')
     if (b.client_id !== g.client_id)
-      throw bad('invalid_grant', 'This refresh token belongs to another client (send its "client_id").')
+      throw bad('invalid_grant', 'Este refresh token pertenece a otro cliente (envía su "client_id").')
     const idle = now.getTime() - (g.last_used_at as Date).getTime() > 90 * 86_400_000
     if (
       g.revoked_at != null ||
@@ -553,7 +558,7 @@ export async function refreshGrant(db: Db, clock: Clock, b: Record<string, unkno
     ) {
       throw bad(
         'invalid_grant',
-        'This connection ended (revoked, unused for 90 days, or a year old). Sign in again.',
+        'Esta conexión terminó (revocada, sin uso por 90 días o de más de un año). Inicia sesión de nuevo.',
       )
     }
     const next = newSecret()
@@ -622,7 +627,7 @@ const appView = async (db: Db, r: Row, now: Date) => {
   return {
     id: String(r.id),
     name: String(r.client_name),
-    nameNote: 'Declared by the app, not verified.',
+    nameNote: 'Declarado por la app, sin verificar.',
     returnsTo: String(r.redirect_host),
     brains: slugs.map((s) => String(s.slug)),
     perm: String(r.perm),
@@ -645,7 +650,7 @@ const live = (r: Row, now: Date) =>
 
 // «Connected apps» in the profile: the live ones.
 export async function listApps(ctx: Ctx) {
-  inWeb(ctx, 'Seeing your connected apps')
+  inWeb(ctx, 'Ver tus apps conectadas')
   const now = ctx.clock()
   const rows = await ctx.db.query(
     `SELECT g.*, i.key_epoch FROM oauth_grants g CROSS JOIN installation i
@@ -667,13 +672,13 @@ export async function adminApps(ctx: Ctx, accountId: string) {
 
 // The person, or the administration, ends a connection: its keys stop at the next request.
 export async function revokeApp(ctx: Ctx, id: string) {
-  inWeb(ctx, 'Revoking a connected app')
+  inWeb(ctx, 'Revocar una app conectada')
   const admin = ctx.who.isAdmin && ctx.who.kind === 'person'
   const g = await ctx.db.one<Row>(
     'SELECT account_id FROM oauth_grants WHERE id = $1 AND revoked_at IS NULL',
     [id],
   )
-  if (!g || !(admin || g.account_id === ctx.who.accountId)) throw notFound('connected app')
+  if (!g || !(admin || g.account_id === ctx.who.accountId)) throw notFound('app conectada')
   await endGrant(ctx.db, id, ctx.clock())
   await ok(
     ctx,

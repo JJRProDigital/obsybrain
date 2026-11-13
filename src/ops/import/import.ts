@@ -41,8 +41,8 @@ export const notEmpty = () =>
   new AppError(
     409,
     'brain_not_empty',
-    'This brain already has pages, entries or proposals; an import goes only into an empty brain. Nothing was changed.',
-    'Create a new brain and import into it.',
+    'Este brain ya tiene páginas, entradas o propuestas; una importación solo entra en un brain vacío. No cambió nada.',
+    'Crea un brain nuevo e importa en él.',
   )
 
 // One import at a time in this process (review of PR32): its zip is held in memory (up to 50 MB) and read whole, so a
@@ -57,8 +57,8 @@ export const importBusy = () =>
   new AppError(
     409,
     'import_busy',
-    'Another import is running. Try again in a minute.',
-    'Wait a minute and import again.',
+    'Otra importación está corriendo. Vuelve a intentarlo en un minuto.',
+    'Espera un minuto e importa de nuevo.',
   )
 // The turn of an import: taken before its body is read, given back once its answer is sent (or the client left).
 export function takeImportTurn(): () => void {
@@ -80,13 +80,13 @@ export function archiveError(err: unknown): unknown {
         413,
         'archive_too_large',
         err.message,
-        'Import a smaller folder: at most 200 MB of files and 20 000 files.',
+        'Importa una carpeta más chica: como máximo 200 MB de archivos y 20 000 archivos.',
       )
     : new AppError(
         422,
         'invalid_archive',
         err.message,
-        'Make the zip again from the folder (with no links in it) and import it.',
+        'Vuelve a hacer el zip desde la carpeta (sin enlaces dentro) e impórtalo.',
       )
 }
 
@@ -105,7 +105,7 @@ async function hasContent(db: Db, brainId: string): Promise<boolean> {
 
 // Who may import here, and whether the brain is still empty: asked before anything of the file is read.
 export async function mayImport(ctx: Ctx, slug: string): Promise<void> {
-  inWeb(ctx, 'Importing into a brain')
+  inWeb(ctx, 'Importar en un brain')
   const { brain, role } = await inBrain(ctx, { slug })
   await allow(ctx, 'brain.import', { role, brainStatus: brain.status }, brain.id)
   if (await hasContent(ctx.db, brain.id)) throw notEmpty()
@@ -126,8 +126,8 @@ export async function importTree(
       throw new AppError(
         400,
         'invalid_request',
-        'The import was stopped: its request ended.',
-        'Import again.',
+        'La importación se detuvo: su petición terminó.',
+        'Importa de nuevo.',
       )
   }
   await mayImport(ctx, slug)

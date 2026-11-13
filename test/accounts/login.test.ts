@@ -67,7 +67,10 @@ describe('signing in', { skip: skipPg }, () => {
     assert.equal(fifth.status, 429)
     const sixth = await login(email, PW)
     assert.deepEqual([sixth.status, sixth.body.error?.code], [429, 'too_many_attempts'])
-    assert.match(String(sixth.body.error?.message), /Try again in \d+ seconds \(at \d\d:\d\d:\d\d UTC\)/)
+    assert.match(
+      String(sixth.body.error?.message),
+      /Vuelve a intentarlo en \d+ segundos \(a las \d\d:\d\d:\d\d UTC\)/,
+    )
     assert.equal(
       sixth.headers.get('retry-after'),
       String((sixth.body.error as unknown as { retryAfter: number }).retryAfter),

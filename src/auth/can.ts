@@ -48,19 +48,19 @@ const OK: Decision = { ok: true }
 const no = (reason: string, howToProceed: string): Decision => ({ ok: false, reason, howToProceed })
 
 const READ_ONLY = no(
-  'This key is read-only.',
-  'Use a key with read + write permission, or create one in your profile.',
+  'Esta clave es de solo lectura.',
+  'Usa una clave con permiso de lectura y escritura, o crea una en tu perfil.',
 )
 const ARCHIVED = no(
-  'This brain is archived, so it is read-only.',
-  'A curator of the brain can unarchive it (POST /v1/brains/:slug/unarchive).',
+  'Este brain está archivado, así que es de solo lectura.',
+  'Quien cure el brain puede desarchivarlo (POST /v1/brains/:slug/unarchive).',
 )
 
 function needRole(role: Role | null | undefined, min: Role): Decision {
   if (atLeast(role ?? null, min)) return OK
   return no(
-    `This needs the ${min} role in the brain; you are ${role ?? 'not a member'}.`,
-    `Ask a curator of the brain for the ${min} role.`,
+    `Esto necesita el rol ${min} en el brain; ${role ? `tú eres ${role}` : 'tú no eres miembro'}.`,
+    `Pide el rol ${min} a quien cure el brain.`,
   )
 }
 
@@ -72,12 +72,15 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
       return needRole(f.role, 'reader')
     case 'brain.create':
       if (actor.credential.kind === 'short') {
-        return no('A short key cannot create brains.', 'Use the main key of the service account.')
+        return no(
+          'Una clave corta no puede crear brains.',
+          'Usa la clave principal de la cuenta de servicio.',
+        )
       }
       if (actor.isAdmin || actor.canCreateBrains) return OK
       return no(
-        'You are not allowed to create brains.',
-        'Ask the administration of this installation for the "can create brains" permission.',
+        'No tienes permiso para crear brains.',
+        'Pide a la administración de esta instalación el permiso "can create brains".',
       )
     case 'brain.archive':
     case 'brain.export':
@@ -90,7 +93,10 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
     }
     case 'brain.delete':
       if (actor.isAdmin && actor.kind === 'person') return OK
-      return no('Only the administration can delete a brain.', 'Ask the administration of this installation.')
+      return no(
+        'Solo la administración puede eliminar un brain.',
+        'Pídeselo a la administración de esta instalación.',
+      )
     case 'journal.write':
     case 'relation.write':
     case 'wiki.propose': {
@@ -104,8 +110,8 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
       if (atLeast(f.role ?? null, 'curator')) return OK
       if (f.isOwner && atLeast(f.role ?? null, 'contributor')) return OK
       return no(
-        'Only the author of an entry or a curator of the brain can change it.',
-        'Ask a curator of the brain, or write a new entry.',
+        'Solo el autor de una entrada o quien cure el brain puede cambiarla.',
+        'Pídeselo a quien cure el brain, o escribe una entrada nueva.',
       )
     }
     // A person, in the web, superseding an entry or dismissing a correction decides about someone's word:
@@ -116,8 +122,8 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
       if (atLeast(f.role ?? null, 'curator')) return OK
       if (f.isOwner && atLeast(f.role ?? null, 'contributor')) return OK
       return no(
-        'Only the author of an entry or a curator of the brain can supersede it, or dismiss it when it is a correction.',
-        'Ask a curator of the brain, or mark that the two entries contradict each other.',
+        'Solo el autor de una entrada o quien cure el brain puede reemplazarla, o descartarla cuando es una corrección.',
+        'Pídeselo a quien cure el brain, o marca que las dos entradas se contradicen.',
       )
     }
     case 'wiki.decide':
@@ -128,12 +134,15 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
     }
     case 'entry.purge':
       if (actor.isAdmin && actor.kind === 'person') return OK
-      return no('Only the administration can purge.', 'Ask the administration, or forget the entry instead.')
+      return no(
+        'Solo la administración puede purgar.',
+        'Pídeselo a la administración, u olvida la entrada en su lugar.',
+      )
     case 'correction.relay': {
       if (actor.kind !== 'service' || actor.credential.kind !== 'main') {
         return no(
-          'Agents cannot write corrections; only people can.',
-          'Save it as a "learning" or "preference" entry instead.',
+          'Los agentes no pueden escribir correcciones; solo las personas.',
+          'Guárdala como entrada de tipo "learning" o "preference".',
         )
       }
       const r = needRole(f.role, 'contributor')
@@ -141,8 +150,8 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
       if (f.brainStatus === 'archived') return ARCHIVED
       if (!atLeast(f.onBehalfRole ?? null, 'contributor')) {
         return no(
-          'A correction must speak for a person who is a contributor or curator of the brain.',
-          'Relay it on behalf of a member with that role, or ask a curator to add that person.',
+          'Una corrección debe hablar por una persona que sea contributor o curadora del brain.',
+          'Retransmítela en nombre de un miembro con ese rol, o pide a un curador que añada a esa persona.',
         )
       }
       return OK
@@ -151,8 +160,8 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
     case 'correction.write': {
       if (actor.kind !== 'person' || actor.credential.kind !== 'web') {
         return no(
-          'Corrections are a person’s word, written by that person in the web; agents cannot write them.',
-          'Save it as a "learning" or "preference" entry instead, or ask a person to add the correction in the obsybrain web.',
+          'Las correcciones son la palabra de una persona, escrita por ella en la web; los agentes no pueden escribirlas.',
+          'Guárdala como entrada de tipo "learning" o "preference", o pide a una persona que añada la corrección en la web de obsybrain.',
         )
       }
       const r = needRole(f.role, 'contributor')
@@ -161,6 +170,9 @@ export function can(actor: Actor, action: Action, f: Facts = {}): Decision {
     }
     case 'key.short':
       if (actor.kind === 'service' && actor.credential.kind === 'main') return OK
-      return no('Only a service account can mint short keys, with its main key.', 'Use the main key.')
+      return no(
+        'Solo una cuenta de servicio puede acuñar claves cortas, con su clave principal.',
+        'Usa la clave principal.',
+      )
   }
 }

@@ -77,8 +77,8 @@ describe('what a state says', () => {
     )
     assert.equal(v.kind, 'forbidden')
     assert.doesNotMatch(`${v.message} ${v.howToProceed}`, /\/v1|GET |POST |PUT |DELETE |API/)
-    assert.match(v.message, /does not exist|not one of its members/)
-    assert.match(v.howToProceed, /curator/)
+    assert.match(v.message, /no existe|uno de sus miembros/)
+    assert.match(v.howToProceed, /curador/)
   })
 
   it('any refusal that names a route gets the web’s words for how to go on', () => {
@@ -98,8 +98,8 @@ describe('what a state says', () => {
   })
 
   it('writes are off while offline or while the same action is in flight, with the reason', () => {
-    assert.match(writeBlocked({ online: false, pending: false }) ?? '', /offline/i)
-    assert.match(writeBlocked({ online: true, pending: true }) ?? '', /in progress|sending/i)
+    assert.match(writeBlocked({ online: false, pending: false }) ?? '', /sin conexión/i)
+    assert.match(writeBlocked({ online: true, pending: true }) ?? '', /en curso|Enviando/i)
     assert.equal(writeBlocked({ online: true, pending: false }), null)
   })
 })

@@ -11,7 +11,7 @@ export const connectRoutes: Route[] = [
   route('GET /v1/connect', async (r) => {
     const agent = r.query.get('agent') || undefined
     if (agent !== undefined && !(AGENT_IDS as readonly string[]).includes(agent)) {
-      throw invalid(`There is no kit for the agent "${agent}".`, `Use one of: ${AGENT_IDS.join(', ')}.`)
+      throw invalid(`No hay kit para el agente "${agent}".`, `Usa uno de: ${AGENT_IDS.join(', ')}.`)
     }
     const slug = r.query.get('brain') || null
     // A brain the key cannot see is not found, like everywhere else.
@@ -19,8 +19,8 @@ export const connectRoutes: Route[] = [
     const pub = (await installation(r.db)).publicUrl
     if (!pub) {
       throw invalid(
-        'This installation has no public address yet.',
-        'An administrator sets it in the settings of the installation.',
+        'Esta instalación todavía no tiene dirección pública.',
+        'Un administrador la configura en los ajustes de la instalación.',
       )
     }
     const mcpUrl = `${pub.replace(/\/+$/, '')}/mcp`

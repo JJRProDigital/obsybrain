@@ -30,20 +30,20 @@ async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   const h1 = page.getByRole('heading', { level: 1 })
   await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up obsybrain') {
-    await page.getByLabel('Name of this installation').fill('obsybrain')
-    await page.getByLabel('Address people open').fill(baseURL)
-    await page.getByLabel('Your name').fill(ADMIN.name)
-    await page.getByLabel('Your email').fill(ADMIN.email)
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
+  if (where === 'Configurar obsybrain') {
+    await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await page.getByLabel('Dirección que abre la gente').fill(baseURL)
+    await page.getByLabel('Tu nombre').fill(ADMIN.name)
+    await page.getByLabel('Tu email').fill(ADMIN.email)
+    await page.getByLabel('Contraseña', { exact: true }).fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await keepTheKey(page)
-  } else if (where === 'Sign in') {
+  } else if (where === 'Iniciar sesión') {
     await page.getByLabel('Email').fill(ADMIN.email)
-    await page.getByLabel('Password').fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Contraseña').fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
   }
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
 }
 
 test('CA19: a new brain shows three first steps; an agent writing marks steps 1 and 2 by itself', async ({
@@ -52,19 +52,19 @@ test('CA19: a new brain shows three first steps; an agent writing marks steps 1 
   baseURL,
 }) => {
   await signedInAdmin(page, baseURL as string)
-  await page.getByRole('button', { name: 'Create brain' }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Create a brain' })
-  await dialog.getByLabel('Name').fill('Lifecycle')
-  await dialog.getByLabel('What it is for').fill('What we learn walking the first days.')
-  await dialog.getByRole('button', { name: 'Create brain' }).click()
+  await page.getByRole('button', { name: 'Crear brain' }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'Crear un brain' })
+  await dialog.getByLabel('Nombre').fill('Lifecycle')
+  await dialog.getByLabel('Para qué sirve').fill('What we learn walking the first days.')
+  await dialog.getByRole('button', { name: 'Crear brain' }).click()
   await expect(page).toHaveURL(/\/b\/lifecycle$/)
-  const steps = page.getByRole('region', { name: 'First steps' }).getByRole('listitem')
+  const steps = page.getByRole('region', { name: 'Primeros pasos' }).getByRole('listitem')
   await expect(steps).toHaveCount(3)
-  await expect(steps.nth(0)).toContainText('To do')
-  await expect(steps.nth(1)).toContainText('To do')
+  await expect(steps.nth(0)).toContainText('Por hacer')
+  await expect(steps.nth(1)).toContainText('Por hacer')
   // The third, importing a folder (B7 PR32): its own walk is test/e2e/import.spec.ts.
-  await expect(steps.nth(2)).toContainText('Import a documentation folder')
-  await expect(steps.nth(2)).toContainText('To do')
+  await expect(steps.nth(2)).toContainText('Importar una carpeta de documentación')
+  await expect(steps.nth(2)).toContainText('Por hacer')
   // The agent: a token of the administrator, used by a program that is not the web.
   const made = await page.request.post('/v1/me/tokens', {
     headers: WEB,
@@ -79,22 +79,22 @@ test('CA19: a new brain shows three first steps; an agent writing marks steps 1 
     data: { type: 'learning', title: 'First thing', content: 'The agent wrote its first entry.' },
   })
   expect(saved.status()).toBe(201)
-  await expect(steps.nth(0)).toContainText('Done', { timeout: 5_000 })
-  await expect(steps.nth(1)).toContainText('Done')
+  await expect(steps.nth(0)).toContainText('Hecho', { timeout: 5_000 })
+  await expect(steps.nth(1)).toContainText('Hecho')
   // With an entry, the brain is no longer empty: the third step says an import can no longer be taken.
   await expect(steps.nth(2)).toContainText('only into an empty brain')
   expect(page.url()).toBe(url)
-  await expect(page.getByRole('region', { name: 'In numbers' })).toContainText('1 entry')
+  await expect(page.getByRole('region', { name: 'En números' })).toContainText('1 entrada')
   await expect(page.getByRole('region', { name: "Today's sessions" }).getByRole('listitem')).toHaveCount(1)
 })
 
 // A new brain and a token for an agent that writes in it (a program, not the web).
 async function brainWithAgent(page: Page, name: string): Promise<{ slug: string; secret: string }> {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Create brain' }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Create a brain' })
-  await dialog.getByLabel('Name').fill(name)
-  await dialog.getByRole('button', { name: 'Create brain' }).click()
+  await page.getByRole('button', { name: 'Crear brain' }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'Crear un brain' })
+  await dialog.getByLabel('Nombre').fill(name)
+  await dialog.getByRole('button', { name: 'Crear brain' }).click()
   const slug = name.toLowerCase()
   await expect(page).toHaveURL(new RegExp(`/b/${slug}$`))
   const made = await page.request.post('/v1/me/tokens', {
@@ -123,8 +123,8 @@ test('L1: a tab hidden before the first event marks the steps within 3 s of bein
 }) => {
   await signedInAdmin(page, baseURL as string)
   const { slug, secret } = await brainWithAgent(page, 'Hidden')
-  const steps = page.getByRole('region', { name: 'First steps' }).getByRole('listitem')
-  await expect(steps.nth(0)).toContainText('To do')
+  const steps = page.getByRole('region', { name: 'Primeros pasos' }).getByRole('listitem')
+  await expect(steps.nth(0)).toContainText('Por hacer')
   await hideTab(page, true)
   const saved = await request.post(`/v1/brains/${slug}/entries`, {
     headers: { authorization: `Bearer ${secret}` },
@@ -134,8 +134,8 @@ test('L1: a tab hidden before the first event marks the steps within 3 s of bein
   // Let the live feed deliver it while the tab is hidden.
   await page.waitForTimeout(1500)
   await hideTab(page, false)
-  await expect(steps.nth(0)).toContainText('Done', { timeout: 3_000 })
-  await expect(steps.nth(1)).toContainText('Done', { timeout: 3_000 })
+  await expect(steps.nth(0)).toContainText('Hecho', { timeout: 3_000 })
+  await expect(steps.nth(1)).toContainText('Hecho', { timeout: 3_000 })
 })
 
 test('L2: leaving a brain for home and coming back shows what the agent wrote meanwhile', async ({
@@ -145,26 +145,26 @@ test('L2: leaving a brain for home and coming back shows what the agent wrote me
 }) => {
   await signedInAdmin(page, baseURL as string)
   const { slug, secret } = await brainWithAgent(page, 'Revisit')
-  const steps = page.getByRole('region', { name: 'First steps' }).getByRole('listitem')
-  await expect(steps.nth(0)).toContainText('To do')
-  await page.getByRole('link', { name: 'All brains', exact: true }).click()
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  const steps = page.getByRole('region', { name: 'Primeros pasos' }).getByRole('listitem')
+  await expect(steps.nth(0)).toContainText('Por hacer')
+  await page.getByRole('link', { name: 'Todos los brains', exact: true }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
   const saved = await request.post(`/v1/brains/${slug}/entries`, {
     headers: { authorization: `Bearer ${secret}` },
     data: { type: 'learning', title: 'Written while away', content: 'The person was on home.' },
   })
   expect(saved.status()).toBe(201)
   await page.getByRole('link', { name: 'Revisit' }).click()
-  await expect(steps.nth(0)).toContainText('Done', { timeout: 3_000 })
-  await expect(page.getByRole('region', { name: 'In numbers' })).toContainText('1 entry')
+  await expect(steps.nth(0)).toContainText('Hecho', { timeout: 3_000 })
+  await expect(page.getByRole('region', { name: 'En números' })).toContainText('1 entrada')
 })
 
 test('home: the card of the new brain carries its numbers and my role', async ({ page, baseURL }) => {
   await signedInAdmin(page, baseURL as string)
   const card = page.getByRole('listitem').filter({ has: page.getByRole('link', { name: 'Lifecycle' }) })
-  await expect(card).toContainText('1 entry')
+  await expect(card).toContainText('1 entrada')
   await expect(card).toContainText('curator')
-  await expect(card).toContainText('Last activity')
+  await expect(card).toContainText('Última actividad')
 })
 
 test('the first invitation from the web goes by email; the invitee joins; the panel goes', async ({
@@ -175,12 +175,12 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
   await signedInAdmin(page, baseURL as string)
   // Inside the web, without reloading: People is shown again later from what it loaded now.
   await page.getByRole('banner').getByRole('link', { name: 'People' }).click()
-  const form = page.getByRole('form', { name: 'Invite people' })
+  const form = page.getByRole('form', { name: 'Invitar personas' })
   await form.getByLabel('Emails').fill('lena@example.test')
   await form.getByRole('checkbox', { name: 'Lifecycle' }).check()
-  await form.getByLabel('Role in Lifecycle').selectOption('contributor')
-  await form.getByRole('button', { name: 'Send invitations' }).click()
-  await expect(page.getByRole('status').filter({ hasText: 'Invitation sent' })).toContainText(
+  await form.getByLabel('Rol en Lifecycle').selectOption('contributor')
+  await form.getByRole('button', { name: 'Enviar invitaciones' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Invitación enviada' })).toContainText(
     'lena@example.test',
   )
   const lena = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
@@ -193,9 +193,9 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
   const ctx = await browser.newContext()
   const p = await ctx.newPage()
   await p.goto(link)
-  await p.getByLabel('Your name').fill('Lena')
-  await p.getByLabel('Choose a password').fill('a long passphrase for lena')
-  await p.getByRole('button', { name: 'Create my account' }).click()
+  await p.getByLabel('Tu nombre').fill('Lena')
+  await p.getByLabel('Elige una contraseña').fill('a long passphrase for lena')
+  await p.getByRole('button', { name: 'Crear mi cuenta' }).click()
   await expect(p.getByRole('link', { name: 'Lifecycle' })).toBeVisible()
   // A contributor may not invite: no People page in her menu.
   await p.getByRole('button', { name: /Account/ }).click()
@@ -205,7 +205,7 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
   // Back to home and to People inside the web (no reload): both show that Lena joined.
   await page.getByRole('banner').getByRole('link', { name: /home/ }).click()
   await expect(page.getByRole('link', { name: 'Lifecycle' })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Invite people' })).toHaveCount(0)
+  await expect(page.getByRole('region', { name: 'Invitar personas' })).toHaveCount(0)
   await page.getByRole('banner').getByRole('link', { name: 'People' }).click()
   await expect(lena).toContainText('accepted')
 })
@@ -214,14 +214,14 @@ test('the administration makes a reset link for a person, shown once', async ({ 
   await signedInAdmin(page, baseURL as string)
   await page.goto('/admin/people')
   const lena = page
-    .getByRole('region', { name: 'People in this installation' })
+    .getByRole('region', { name: 'Personas en esta instalación' })
     .getByRole('listitem')
     .filter({
       hasText: 'lena@example.test',
     })
-  await lena.getByRole('button', { name: 'Make a reset link' }).click()
+  await lena.getByRole('button', { name: 'Crear un enlace de restablecimiento' }).click()
   const shown = lena.getByRole('region', { name: /Reset link for Lena/ })
   await expect(shown).toContainText('/reset#token=')
-  await shown.getByRole('button', { name: 'Done, I copied it' }).click()
+  await shown.getByRole('button', { name: 'Listo, lo copié' }).click()
   await expect(page.getByText('/reset#token=')).toHaveCount(0)
 })

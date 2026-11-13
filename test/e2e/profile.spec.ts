@@ -41,20 +41,20 @@ async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   const h1 = page.getByRole('heading', { level: 1 })
   await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up obsybrain') {
-    await page.getByLabel('Name of this installation').fill('obsybrain')
-    await page.getByLabel('Address people open').fill(baseURL)
-    await page.getByLabel('Your name').fill(ADMIN.name)
-    await page.getByLabel('Your email').fill(ADMIN.email)
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
+  if (where === 'Configurar obsybrain') {
+    await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await page.getByLabel('Dirección que abre la gente').fill(baseURL)
+    await page.getByLabel('Tu nombre').fill(ADMIN.name)
+    await page.getByLabel('Tu email').fill(ADMIN.email)
+    await page.getByLabel('Contraseña', { exact: true }).fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await keepTheKey(page)
-  } else if (where === 'Sign in') {
+  } else if (where === 'Iniciar sesión') {
     await page.getByLabel('Email').fill(ADMIN.email)
-    await page.getByLabel('Password').fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Contraseña').fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
   }
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
 }
 
 // An invited person, from the email onward: the first five actions are the same on both routes.
@@ -75,16 +75,20 @@ async function invitedToConnect(browser: Browser, admin: Page, name: string) {
   }
   const t0 = Date.now()
   await act('open the link of the email', () => p.goto(link))
-  await expect(p.getByRole('heading', { name: 'Accept your invitation' })).toBeVisible()
-  await act('type the name', () => p.getByLabel('Your name').fill(name))
-  await act('type a password', () => p.getByLabel('Choose a password').fill(`a long passphrase for ${name}`))
-  await act('click «Create my account»', () => p.getByRole('button', { name: 'Create my account' }).click())
-  await expect(p.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(p.getByRole('heading', { name: 'Acepta tu invitación' })).toBeVisible()
+  await act('type the name', () => p.getByLabel('Tu nombre').fill(name))
+  await act('type a password', () =>
+    p.getByLabel('Elige una contraseña').fill(`a long passphrase for ${name}`),
+  )
+  await act('click «Create my account»', () => p.getByRole('button', { name: 'Crear mi cuenta' }).click())
+  await expect(p.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
   await act('click «Connect your agent»', () =>
-    p.getByRole('main').getByRole('link', { name: 'Connect your agent' }).click(),
+    p.getByRole('main').getByRole('link', { name: 'Conecta tu agente' }).click(),
   )
   await expect(p.getByRole('tab', { name: 'Claude Code' })).toHaveAttribute('aria-selected', 'true')
-  await expect(p.getByRole('region', { name: 'Live check' })).toContainText('Waiting for your agent…')
+  await expect(p.getByRole('region', { name: 'Comprobación en vivo' })).toContainText(
+    'Esperando a tu agente…',
+  )
   return { ctx, p, steps, act, t0 }
 }
 
@@ -187,10 +191,10 @@ test('CA1, standard route: from the invitation email to a connected Claude Code,
   expect(made.status()).toBe(201)
   const { ctx, p, steps, act, t0 } = await invitedToConnect(browser, page, 'Nora')
   const panel = p.getByRole('tabpanel', { name: 'Claude Code' })
-  const standard = panel.getByRole('region', { name: 'Standard connection' })
+  const standard = panel.getByRole('region', { name: 'Conexión estándar' })
   await expect(standard).toContainText('Recommended')
   await act('click «Copy» on the command', () =>
-    standard.getByRole('button', { name: 'Copy: Add obsybrain for all your projects and sign in' }).click(),
+    standard.getByRole('button', { name: 'Copiar: Add obsybrain for all your projects and sign in' }).click(),
   )
   const command = await clipboard(p)
   expect(command).toBe(
@@ -202,17 +206,19 @@ test('CA1, standard route: from the invitation email to a connected Claude Code,
   // The consent page starts from the brain of her invitation, with read and write: one click.
   await expect(agent.consent.getByRole('checkbox', { name: /CA1/ })).toBeChecked()
   await expect(agent.consent.getByRole('radio', { name: /Read and write/ })).toBeChecked()
-  await act('click «Approve»', () => agent.consent.getByRole('button', { name: 'Approve' }).click())
+  await act('click «Approve»', () => agent.consent.getByRole('button', { name: 'Aprobar' }).click())
   const key = await agent.exchange()
   // The exchange alone is not the agent reaching obsybrain.
   await p.waitForTimeout(2_500)
-  await expect(p.getByRole('region', { name: 'Live check' })).toContainText('Waiting for your agent…')
+  await expect(p.getByRole('region', { name: 'Comprobación en vivo' })).toContainText(
+    'Esperando a tu agente…',
+  )
   await act('type «claude» in the terminal', async () => {})
-  const first = await act('press Enter (Claude Code starts and connects)', () => initialize(base, key))
+  const first = await act('pulsa Enter (Claude Code arranca y se conecta)', () => initialize(base, key))
   expect(first.status).toBe(200)
-  const check = p.getByRole('region', { name: 'Live check' })
-  await expect(check).toContainText('Connected', { timeout: 15_000 })
-  await expect(check).toContainText('Claude Code reached obsybrain')
+  const check = p.getByRole('region', { name: 'Comprobación en vivo' })
+  await expect(check).toContainText('Conectado', { timeout: 15_000 })
+  await expect(check).toContainText('Claude Code alcanzó obsybrain')
   const seconds = (Date.now() - t0) / 1000
   mkdirSync(dirname(MEASURES), { recursive: true })
   writeFileSync(
@@ -234,9 +240,9 @@ test('CA1, token route (the alternative): the same person path, counted honestly
   await signedInAdmin(page, base)
   const { ctx, p, steps, act, t0 } = await invitedToConnect(browser, page, 'Tomas')
   const panel = p.getByRole('tabpanel', { name: 'Claude Code' })
-  const tokenPart = panel.getByRole('region', { name: 'Token connection' })
-  await act('click «Create a token»', () => tokenPart.getByRole('button', { name: 'Create a token' }).click())
-  const once = tokenPart.getByRole('region', { name: 'Your new token' })
+  const tokenPart = panel.getByRole('region', { name: 'Conexión por token' })
+  await act('click «Create a token»', () => tokenPart.getByRole('button', { name: 'Crear un token' }).click())
+  const once = tokenPart.getByRole('region', { name: 'Tu token nuevo' })
   // A terminal of a computer of her own: a home of its own.
   const home = mkdtempSync(join(tmpdir(), 'ca1-home-'))
   const shell = (script: string, input = '') =>
@@ -255,7 +261,7 @@ test('CA1, token route (the alternative): the same person path, counted honestly
     expect(save).toContain('read -rs t')
     await act('paste it in a terminal', async () => {})
     await act('press Enter (a hidden prompt asks for the token)', async () => {})
-    await act('click «Copy the token»', () => once.getByRole('button', { name: 'Copy the token' }).click())
+    await act('click «Copy the token»', () => once.getByRole('button', { name: 'Copiar el token' }).click())
     const token = await clipboard(p)
     await act('paste the token at the hidden prompt', async () => {})
     await act('press Enter', async () => shell(save, `${token}\n`))
@@ -287,15 +293,15 @@ test('CA1, token route (the alternative): the same person path, counted honestly
     ).mcpServers['obsybrain']?.headers.Authorization
     const expanded = shell(`source ~/.bashrc && printf '%s' "${header}"`)
     expect(expanded).toBe(`Bearer ${token}`)
-    const first = await act('press Enter (Claude Code starts and connects)', () =>
+    const first = await act('pulsa Enter (Claude Code arranca y se conecta)', () =>
       initialize(base, expanded.slice('Bearer '.length)),
     )
     expect(first.status).toBe(200)
   } finally {
     rmSync(home, { recursive: true, force: true })
   }
-  const check = p.getByRole('region', { name: 'Live check' })
-  await expect(check).toContainText('Connected', { timeout: 15_000 })
+  const check = p.getByRole('region', { name: 'Comprobación en vivo' })
+  await expect(check).toContainText('Conectado', { timeout: 15_000 })
   const seconds = (Date.now() - t0) / 1000
   mkdirSync(dirname(MEASURES), { recursive: true })
   writeFileSync(
@@ -303,10 +309,10 @@ test('CA1, token route (the alternative): the same person path, counted honestly
     `${existsSync(MEASURES) ? readFileSync(MEASURES, 'utf8') : ''}CA1 token route: ${steps.length} actions, ${seconds.toFixed(1)} s (reported; the alternative)\n${steps.map((x, i) => `  ${i + 1}. ${x}`).join('\n')}\n`,
   )
   // Done: the token is hidden; the profile lists it, used, by its last 4 characters only.
-  await tokenPart.getByRole('button', { name: 'Done, hide the token' }).click()
-  await p.getByRole('link', { name: 'your profile' }).click()
+  await tokenPart.getByRole('button', { name: 'Listo, ocultar el token' }).click()
+  await p.getByRole('link', { name: 'tu perfil' }).click()
   await expect(p.getByRole('region', { name: 'Tokens' }).getByRole('listitem').first()).toContainText(
-    /Used just now/,
+    /Usado justo ahora/,
   )
   await ctx.close()
 })
@@ -318,14 +324,14 @@ test('CA13: a token made in the profile is shown once, then never again, on the 
   await signedInAdmin(page, baseURL as string)
   await page.goto('/profile')
   const tokens = page.getByRole('region', { name: 'Tokens' })
-  await tokens.getByRole('button', { name: 'Create a token' }).click()
-  await tokens.getByLabel('Name').fill('CA13 e2e')
-  await tokens.getByLabel('Read only').check()
-  await tokens.getByRole('button', { name: 'Create token' }).click()
-  const once = tokens.getByRole('region', { name: 'Your new token' })
+  await tokens.getByRole('button', { name: 'Crear un token' }).click()
+  await tokens.getByLabel('Nombre').fill('CA13 e2e')
+  await tokens.getByLabel('Solo lectura').check()
+  await tokens.getByRole('button', { name: 'Crear token' }).click()
+  const once = tokens.getByRole('region', { name: 'Tu token nuevo' })
   const secret = String(await once.locator('pre code').textContent()).trim()
   expect(secret).toMatch(/^rscb_/)
-  await once.getByRole('button', { name: 'Done, hide the token' }).click()
+  await once.getByRole('button', { name: 'Listo, ocultar el token' }).click()
   await expect(once).toHaveCount(0)
   const kept = await page.evaluate(
     () =>
@@ -347,8 +353,8 @@ test('CA13: a token made in the profile is shown once, then never again, on the 
     (await page.request.get('/v1/me', { headers: { authorization: `Bearer ${secret}` } })).status(),
   ).toBe(200)
   const row = tokens.getByRole('listitem').filter({ hasText: 'CA13 e2e' })
-  await row.getByRole('button', { name: 'Revoke' }).click()
-  await row.getByRole('button', { name: 'Revoke CA13 e2e' }).click()
+  await row.getByRole('button', { name: 'Revocar' }).click()
+  await row.getByRole('button', { name: 'Revocar CA13 e2e' }).click()
   await expect(tokens.getByRole('status')).toContainText('CA13 e2e is revoked.')
   const after = await page.request.get('/v1/me', { headers: { authorization: `Bearer ${secret}` } })
   expect(after.status()).toBe(401)
@@ -375,14 +381,14 @@ test('G6: a new password from the profile signs the person out of their other se
   const p = await here.newPage()
   await p.goto('/sign-in')
   await p.getByLabel('Email').fill(email)
-  await p.getByLabel('Password').fill(ADMIN.password)
-  await p.getByRole('button', { name: 'Sign in' }).click()
-  await expect(p.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await p.getByLabel('Contraseña').fill(ADMIN.password)
+  await p.getByRole('button', { name: 'Iniciar sesión' }).click()
+  await expect(p.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
   await p.goto('/profile')
-  const form = p.getByRole('form', { name: 'Change your password' })
-  await form.getByLabel('Current password').fill(ADMIN.password)
-  await form.getByLabel('New password').fill('a brand new passphrase for pia')
-  await form.getByRole('button', { name: 'Change password' }).click()
+  const form = p.getByRole('form', { name: 'Cambia tu contraseña' })
+  await form.getByLabel('Contraseña actual').fill(ADMIN.password)
+  await form.getByLabel('Contraseña nueva').fill('a brand new passphrase for pia')
+  await form.getByRole('button', { name: 'Cambiar contraseña' }).click()
   await expect(form.getByRole('status')).toContainText('Password changed.')
   expect((await p.request.get('/v1/me')).status()).toBe(200)
   expect((await elsewhere.request.get('/v1/me')).status()).toBe(401)

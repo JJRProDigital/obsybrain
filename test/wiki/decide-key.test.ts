@@ -270,7 +270,7 @@ describe('deciding proposals with a key (v0.7)', { skip: skipPg }, () => {
     for (const key of [plain, eric.key]) {
       const r = await w.call(key, 'POST', `/v1/proposals/${id}/approve`, { fingerprint: fp })
       assert.deepEqual([r.status, r.body.error?.code], [403, 'web_only'], r.text)
-      assert.match(r.body.error?.howToProceed ?? '', /permission to write to the wiki/)
+      assert.match(r.body.error?.howToProceed ?? '', /permiso de escribir en la wiki/)
       const back = await w.call(key, 'POST', `/v1/proposals/${id}/return`, {
         fingerprint: fp,
         comment: 'No.',

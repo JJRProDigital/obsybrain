@@ -17,7 +17,7 @@ async function ask(r: Req, retry: boolean) {
   adminOnly(ctx)
   const body = obj(r.body)
   // Only these two are read. Everything else in the body is ignored.
-  await reauth(ctx, r.conn, r.secret, { password: body.password, code: body.code }, 'Updating obsybrain')
+  await reauth(ctx, r.conn, r.secret, { password: body.password, code: body.code }, 'Actualizar obsybrain')
   const view = releaseView(r.releases?.state() ?? null, VERSION)
   const no = r.updates.refusal(view, retry)
   if (no) throw no

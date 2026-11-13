@@ -30,7 +30,7 @@ export function decode(cursor: string | undefined): Cursor | null {
     )
       return c
   } catch {}
-  throw invalid('The cursor is not valid.', 'Use the "next" value of the previous page, unchanged.')
+  throw invalid('El cursor no es válido.', 'Usa el valor "next" de la página anterior, sin cambiarlo.')
 }
 
 export const encode = (at: Date, id: string) =>
@@ -40,7 +40,7 @@ export function limitOf(v: string | null | undefined): number {
   if (v == null || v === '') return PAGE.default
   const n = Number(v)
   if (!Number.isInteger(n) || n < 1 || n > PAGE.max) {
-    throw invalid(`"limit" must be between 1 and ${PAGE.max}.`, `Ask for at most ${PAGE.max} per page.`)
+    throw invalid(`"limit" debe estar entre 1 y ${PAGE.max}.`, `Pide como máximo ${PAGE.max} por página.`)
   }
   return n
 }
@@ -114,9 +114,9 @@ export async function listSessions(
 ): Promise<Page<SessionView> & { liveFrom: string; facets?: SessionFacets }> {
   const { brain } = await inBrain(ctx, { slug })
   if (f.status !== undefined && !(SESSION_STATUSES as readonly string[]).includes(f.status))
-    throw invalid(`Unknown status "${f.status}".`, `Use one of: ${SESSION_STATUSES.join(', ')}.`)
+    throw invalid(`Estado desconocido "${f.status}".`, `Usa uno de: ${SESSION_STATUSES.join(', ')}.`)
   if (f.type !== undefined && !(ENTRY_TYPES as readonly string[]).includes(f.type))
-    throw invalid(`Unknown entry type "${f.type}".`, `Use one of: ${ENTRY_TYPES.join(', ')}.`)
+    throw invalid(`Tipo de entrada desconocido "${f.type}".`, `Usa uno de: ${ENTRY_TYPES.join(', ')}.`)
   await closeIdle(ctx.db, ctx.clock())
   // Read first: every event numbered up to here is already in what follows, so a live stream resumed
   // from this id misses nothing.
@@ -192,9 +192,9 @@ async function facetsOf(ctx: Ctx, brainId: string): Promise<SessionFacets> {
 // One session, with the fields of the list; one in a brain the caller cannot read does not exist.
 export async function sessionView(ctx: Ctx, id: string): Promise<SessionView> {
   const row = await ctx.db.one(`${SESSION_SELECT} WHERE s.id = $1`, [id])
-  if (!row) throw notFound('session')
+  if (!row) throw notFound('sesión')
   await inBrain(ctx, { id: String(row.brain_id) }).catch(() => {
-    throw notFound('session')
+    throw notFound('sesión')
   })
   return sessionViewOf(row)
 }
@@ -237,8 +237,8 @@ export async function listEntries(
   if (f.about !== undefined) {
     if (!isAddress(f.about))
       throw invalid(
-        '"about" is the address of a page, like "style/intros".',
-        'Use the address as the wiki shows it.',
+        '"about" es la dirección de una página, como "style/intros".',
+        'Usa la dirección tal como la muestra la wiki.',
       )
     params.push(f.about)
     const at = `$${params.length}`
@@ -313,7 +313,7 @@ export async function listView(
   let where: string
   if (view === 'forgotten') {
     if (role !== 'curator') {
-      throw denied('Only curators see forgotten entries.', 'Ask a curator of the brain.')
+      throw denied('Solo los curadores ven las entradas olvidadas.', 'Pídeselo a quien cure el brain.')
     }
     where = "state = 'forgotten'"
   } else if (view === 'to-review') {
@@ -372,4 +372,4 @@ export async function around(
   return { before: before.reverse().map(entryOf), entry: entryOf(row), after: after.map(entryOf) }
 }
 
-const notFoundEntry = () => notFound('entry')
+const notFoundEntry = () => notFound('entrada')

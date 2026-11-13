@@ -89,7 +89,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
       { brainId: await brainId('made'), role: 'reader' },
     ])
     const mail = await w.mailTo('new.person@example.com', /invited you/)
-    assert.match(mail.subject, /^rsc-factory invited you/)
+    assert.match(mail.subject, /^rsc-factory te invitó/)
   })
 
   it('C6, CA6b: a member is never lowered; a reader asked for as curator is raised ("raised")', async () => {
@@ -164,7 +164,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     const quiet = await invite('quiet', [{ email: ana.email, role: 'reader' }], mute.key)
     assert.equal(quiet.status, 403, quiet.text)
     assert.equal(quiet.body.error?.code, 'forbidden')
-    assert.match(String(quiet.body.error?.howToProceed), /administration/)
+    assert.match(String(quiet.body.error?.howToProceed), /administración/)
     const short = await w.call(factory.key, 'POST', '/v1/keys/short', {
       writeBrain: 'made',
       ref: 'run r_0000aaaa step 1',
@@ -404,7 +404,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     const r = await w.call(factory.key, 'POST', '/v1/brains', { slug: 'upfront', firstCurator: email })
     assert.equal(r.status, 409, r.text)
     assert.equal(r.body.error?.code, 'invitation_pending_elsewhere')
-    assert.match(String(r.body.error?.howToProceed), /resend or withdraw/)
+    assert.match(String(r.body.error?.howToProceed), /reenvíe o la retire/)
     assert.equal(await w.db.one("SELECT 1 FROM brains WHERE slug = 'upfront'"), undefined, 'no brain')
     assert.equal(w.mails.length, mails, 'no mail')
     assert.equal(await spent(), before, 'no quota spent')
@@ -516,8 +516,8 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
       w.beforeMail = undefined
     }
     const last = await w.mailTo(email)
-    assert.match(last.subject, /no longer valid/)
-    assert.match(last.text, /no longer valid/)
+    assert.match(last.subject, /ya no es válida/)
+    assert.match(last.text, /ya no es válida/)
     // It says which brain the dead link was for, and only that one (never the other invitation's brains).
     assert.match(last.text, /^- made$/m)
     assert.doesNotMatch(last.text, /lost-src/)
@@ -547,7 +547,7 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
       [await brainId('twice-src'), await brainId('made'), await brainId('other-made')].sort(),
     )
     assert.equal(
-      w.mails.filter((m) => m.to === email && /no longer valid/.test(m.subject)).length,
+      w.mails.filter((m) => m.to === email && /ya no es válida/.test(m.subject)).length,
       0,
       'no follow-up mail',
     )
@@ -558,9 +558,9 @@ describe('a service invites people to the brains it created', { skip: skipPg }, 
     assert.equal(told.length, 1, 'the previous inviter is told once')
     // The first request's link opens nothing: the person is told to use the latest working link, which also
     // covers the brain that request was for (and only that one is named).
-    const hint = w.mails.filter((m) => m.to === email && /most recent/.test(m.subject))
+    const hint = w.mails.filter((m) => m.to === email && /más reciente/.test(m.subject))
     assert.equal(hint.length, 1, 'one short follow-up')
-    assert.match(String(hint[0]?.text), /most recent working link/)
+    assert.match(String(hint[0]?.text), /más reciente de obsybrain que funciona/)
     assert.match(String(hint[0]?.text), /^- made$/m)
     assert.doesNotMatch(String(hint[0]?.text), /other-made|twice-src/)
   })

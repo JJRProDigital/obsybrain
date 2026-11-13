@@ -53,15 +53,16 @@ export async function installation(db: Db): Promise<Installation> {
 // no credentials, query or fragment; only characters SAFE_URL allows, so it is plain text wherever it goes.
 export function factoryUrlOf(v: unknown): string | null {
   if (v === null) return null
-  const how = 'Give the address of RSC Factory, such as https://factory.example.com, or null for none.'
+  const how =
+    'Da la dirección de RSC Factory, por ejemplo https://factory.example.com, o null para no poner ninguna.'
   if (typeof v !== 'string' || !v.trim() || v.length > 300)
-    throw invalid('"factoryUrl" is the address of RSC Factory.', how)
+    throw invalid('"factoryUrl" es la dirección de RSC Factory.', how)
   const raw = v.trim()
   let u: URL
   try {
     u = new URL(raw)
   } catch {
-    throw invalid('"factoryUrl" is not an address.', how)
+    throw invalid('"factoryUrl" no es una dirección.', how)
   }
   const local = u.protocol === 'http:' && LOCAL_HOSTS.has(u.hostname)
   if (
@@ -72,13 +73,13 @@ export function factoryUrlOf(v: unknown): string | null {
     raw.includes('#')
   ) {
     throw invalid(
-      '"factoryUrl" must be an https address (or http on this machine), without credentials, query or fragment.',
+      '"factoryUrl" debe ser una dirección https (o http en esta máquina), sin credenciales, query ni fragmento.',
       how,
     )
   }
   const out = u.toString().replace(/\/+$/, '')
   if (!SAFE_URL.test(out) || out.length > 300) {
-    throw invalid('"factoryUrl" may only hold letters, digits and . - _ ~ / : in its host and path.', how)
+    throw invalid('"factoryUrl" solo puede tener letras, dígitos y . - _ ~ / : en su host y su ruta.', how)
   }
   return out
 }
@@ -96,8 +97,8 @@ export function insecureWarning(publicUrl: string | undefined | null): string | 
   }
   if (u.protocol === 'https:' || LOCAL_HOSTS.has(u.hostname)) return null
   return (
-    'This address is not local and not encrypted: passwords would travel in clear over the network. ' +
-    'Give obsybrain a domain with HTTPS, open it on its local address (http://localhost), or reach it through a tunnel.'
+    'Esta dirección no es local ni está cifrada: las contraseñas viajarían en claro por la red. ' +
+    'Dale a obsybrain un dominio con HTTPS, ábrelo en su dirección local (http://localhost) o accede a través de un túnel.'
   )
 }
 
@@ -107,27 +108,27 @@ export function requireSecure(conn: ConnFacts): void {
   throw new AppError(
     403,
     'insecure_connection',
-    'This connection is not encrypted, so obsybrain does not accept a password over it.',
-    'Open obsybrain over HTTPS (a domain with a certificate, or a tunnel), or on its local address from the same machine.',
+    'Esta conexión no está cifrada, así que obsybrain no acepta una contraseña por ella.',
+    'Abre obsybrain por HTTPS (un dominio con certificado o un túnel), o en su dirección local desde la misma máquina.',
   )
 }
 
 function publicUrlOf(v: unknown): string {
   if (typeof v !== 'string' || v.length > 300)
     throw invalid(
-      '"publicUrl" is the address people open.',
-      'Give an address such as https://brain.example.com.',
+      '"publicUrl" es la dirección que abre la gente.',
+      'Da una dirección como https://brain.example.com.',
     )
   let u: URL
   try {
     u = new URL(v.trim())
   } catch {
-    throw invalid('"publicUrl" is not an address.', 'Give an address such as https://brain.example.com.')
+    throw invalid('"publicUrl" no es una dirección.', 'Da una dirección como https://brain.example.com.')
   }
   if ((u.protocol !== 'https:' && u.protocol !== 'http:') || u.hash || u.search || u.username || u.password) {
     throw invalid(
-      '"publicUrl" must be a plain http or https address.',
-      'Give an address such as https://brain.example.com.',
+      '"publicUrl" debe ser una dirección http o https simple.',
+      'Da una dirección como https://brain.example.com.',
     )
   }
   // Checked after normalising: percent-encoding can make the stored form longer than what was typed.
@@ -136,28 +137,28 @@ function publicUrlOf(v: unknown): string {
   // characters no shell reads as anything but text.
   if (!SAFE_URL.test(out)) {
     throw invalid(
-      '"publicUrl" may only hold letters, digits and . - _ ~ / : in its host and path.',
-      'Give an address such as https://brain.example.com or https://example.com/brain.',
+      '"publicUrl" solo puede tener letras, dígitos y . - _ ~ / : en su host y su ruta.',
+      'Da una dirección como https://brain.example.com o https://example.com/brain.',
     )
   }
   if (out.length > 300) {
     throw invalid(
-      '"publicUrl" is longer than 300 characters.',
-      'Give the address people open, without a long path.',
+      '"publicUrl" tiene más de 300 caracteres.',
+      'Da la dirección que abre la gente, sin una ruta larga.',
     )
   }
   return out
 }
 
 const text = (v: unknown, field: string): string => {
-  if (typeof v !== 'string') throw invalid(`"${field}" is text.`, `Give the ${field}.`)
+  if (typeof v !== 'string') throw invalid(`"${field}" es texto.`, `Da el ${field}.`)
   return v
 }
 
 function nameOf(v: unknown): string {
   const n = typeof v === 'string' ? v.trim() : ''
   if (!n || n.length > 80)
-    throw invalid('The installation needs a name of 1 to 80 characters.', 'For example "Acme obsybrain".')
+    throw invalid('La instalación necesita un nombre de 1 a 80 caracteres.', 'Por ejemplo "Acme obsybrain".')
   return n
 }
 
@@ -168,7 +169,7 @@ export type SetupInput = {
 }
 
 export const setupGone = () =>
-  new AppError(404, 'setup_done', 'This installation is already set up.', 'Sign in instead.')
+  new AppError(404, 'setup_done', 'Esta instalación ya está configurada.', 'Inicia sesión en su lugar.')
 
 // Runs once, as one transaction: the installation row is locked, so two setups at once make one admin.
 // `also`: more to do in the same transaction (companion mode creates Factory's service account), so a

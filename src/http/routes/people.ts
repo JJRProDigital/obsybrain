@@ -121,7 +121,7 @@ export const peopleRoutes: Route[] = [
   route('PUT /v1/brains/:slug/notify', async (r) => {
     const on = bool(obj(r.body), 'notifyProposals')
     if (on === undefined)
-      throw invalid('"notifyProposals" is true or false.', 'Send {"notifyProposals": true}.')
+      throw invalid('"notifyProposals" es verdadero o falso.', 'Envía {"notifyProposals": true}.')
     return { body: await setNotify(ctxOf(r), r.params.slug as string, on) }
   }),
 
@@ -198,7 +198,7 @@ export const peopleRoutes: Route[] = [
       body: {
         account: { id: s.id },
         key: { id: s.key.id, secret: s.key.secret },
-        message: 'Copy the key now: obsybrain shows it only this once.',
+        message: 'Copia la clave ahora: obsybrain la muestra solo esta vez.',
       },
     }
   }),
@@ -208,7 +208,7 @@ export const peopleRoutes: Route[] = [
       status: 201,
       body: {
         key: { id: k.id, secret: k.secret },
-        message: 'Copy the key now: obsybrain shows it only this once.',
+        message: 'Copia la clave ahora: obsybrain la muestra solo esta vez.',
       },
     }
   }),

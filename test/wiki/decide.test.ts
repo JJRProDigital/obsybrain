@@ -77,7 +77,7 @@ describe('wiki decisions in the web', { skip: skipPg }, () => {
     const fp = (await review(id)).fingerprint
     const byToken = await w.call(eric.key, 'POST', `/v1/proposals/${id}/approve`, { fingerprint: fp })
     assert.deepEqual([byToken.status, byToken.body.error?.code], [403, 'web_only'])
-    assert.equal(byToken.body.error?.message, 'Approval happens in the web.')
+    assert.equal(byToken.body.error?.message, 'La aprobación se hace en la web.')
     assert.equal((await w.call(eric.key, 'GET', `/v1/proposals/${id}/review`)).status, 403)
     assert.equal(
       (await w.call(eric.key, 'PATCH', '/v1/brains/yt/pages/ca9/page', { body: 'x' })).body.error?.code,
@@ -404,7 +404,7 @@ describe('wiki decisions in the web', { skip: skipPg }, () => {
     assert.deepEqual(rs.map((r) => r.status).sort(), [200, 409])
     const second = rs.find((r) => r.status === 409)
     assert.equal(second?.body.error?.code, 'already_decided')
-    assert.match(second?.body.error?.message ?? '', /Already approved by (Eric|Eva)/)
+    assert.match(second?.body.error?.message ?? '', /Ya "approved" por (Eric|Eva)/)
     const n = await w.db.one<{ n: number }>(
       "SELECT count(*)::int AS n FROM page_revisions r JOIN pages p ON p.id = r.page_id WHERE p.address = 'ca19/page'",
     )

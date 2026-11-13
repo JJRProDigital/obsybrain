@@ -48,12 +48,12 @@ export const journalRoutes: Route[] = [
     const uncompiled = r.query.get('uncompiled')
     if (uncompiled !== null && uncompiled !== '' && !['1', 'true', '0', 'false'].includes(uncompiled))
       throw invalid(
-        '"uncompiled" is 1 or 0.',
-        'Send uncompiled=1 for sessions with entries still to compile.',
+        '"uncompiled" es 1 o 0.',
+        'Envía uncompiled=1 para las sesiones con entradas todavía sin compilar.',
       )
     const agents = r.query.get('agents')
     if (agents !== null && agents !== '' && !['1', 'true', '0', 'false'].includes(agents))
-      throw invalid('"agents" is 1 or 0.', 'Send agents=1 for the sessions of agents and services only.')
+      throw invalid('"agents" es 1 o 0.', 'Envía agents=1 para solo las sesiones de agentes y servicios.')
     return {
       body: await listSessions(
         ctxOf(r),

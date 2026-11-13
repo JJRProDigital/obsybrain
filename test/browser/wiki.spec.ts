@@ -14,20 +14,20 @@ test.describe('the map', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth')
     await page
-      .getByRole('navigation', { name: 'Sections of this brain' })
+      .getByRole('navigation', { name: 'Secciones de este brain' })
       .getByRole('link', { name: 'Wiki' })
       .click()
     await expect(page).toHaveURL(/\/b\/growth\/wiki$/)
     await expect(page.getByRole('heading', { level: 1, name: 'Wiki' })).toBeFocused()
     await expect(page).toHaveTitle(/^Wiki · /)
     await expect(page.getByText('The audience, the product and how we decide.')).toBeVisible()
-    await expect(page.getByRole('heading', { level: 2, name: 'Topics' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: 'Temas' })).toBeVisible()
     const retention = page.getByRole('link', { name: 'Retention', exact: true })
     await expect(retention).toBeVisible()
     await expect(page.getByText('What keeps viewers watching.')).toBeVisible()
     // Superseded and retired pages are on the map too (review of PR19), and say so in words.
     await expect(page.getByRole('listitem').filter({ hasText: 'Old intros' }).locator('.tag')).toHaveText(
-      'Superseded',
+      'Reemplazada',
     )
     await retention.click()
     await expect(page).toHaveURL(new RegExp(`${RETENTION}$`))
@@ -41,21 +41,21 @@ test.describe('the map', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/wiki')
-    await page.getByLabel('Type').selectOption('decision')
+    await page.getByLabel('Tipo').selectOption('decision')
     await expect(page).toHaveURL(/\?type=decision$/)
     await expect(page.getByRole('link', { name: 'Annual plans' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Retention', exact: true })).toHaveCount(0)
     await page.reload()
-    await expect(page.getByLabel('Type')).toHaveValue('decision')
+    await expect(page.getByLabel('Tipo')).toHaveValue('decision')
     await expect(page.getByRole('link', { name: 'Annual plans' })).toBeVisible()
-    await page.getByLabel('Type').selectOption('')
-    await page.getByLabel('Tag').selectOption('metric')
+    await page.getByLabel('Tipo').selectOption('')
+    await page.getByLabel('Etiqueta').selectOption('metric')
     await expect(page.getByRole('link', { name: 'Retention', exact: true })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Annual plans' })).toHaveCount(0)
-    await page.getByLabel('Tag').selectOption('')
-    await page.getByLabel('Filter by words').fill('no page says this')
-    await expect(page.getByText('No results for these filters.')).toBeVisible()
-    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await page.getByLabel('Etiqueta').selectOption('')
+    await page.getByLabel('Filtrar por palabras').fill('no page says this')
+    await expect(page.getByText('No hay resultados para estos filtros.')).toBeVisible()
+    await page.getByRole('button', { name: 'Quitar los filtros' }).click()
     await expect(page.getByRole('link', { name: 'Retention', exact: true })).toBeVisible()
     await expect(page).toHaveURL(/\/wiki$/)
   })
@@ -63,8 +63,8 @@ test.describe('the map', () => {
   test('empty: says how pages arrive', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in', { map: 'empty' })
     await page.goto('/b/growth/wiki')
-    await expect(page.getByRole('heading', { name: 'This wiki has no pages yet' })).toBeVisible()
-    await expect(page.getByText('Pages arrive when a curator approves a proposal')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Este wiki todavía no tiene páginas' })).toBeVisible()
+    await expect(page.getByText('Las páginas llegan cuando un curador aprueba una propuesta')).toBeVisible()
   })
 
   test('loading shows its shape; an error says what happened and recovers', async ({
@@ -81,7 +81,7 @@ test.describe('the map', () => {
     const alert = page.getByRole('alert')
     await expect(alert).toContainText('Something went wrong on the server')
     await s.state('map', 'normal')
-    await alert.getByRole('button', { name: 'Try again' }).click()
+    await alert.getByRole('button', { name: 'Probar otra vez' }).click()
     await expect(page.getByRole('link', { name: 'Retention', exact: true })).toBeVisible()
   })
 
@@ -103,14 +103,17 @@ test.describe('the map', () => {
     await expect(group.getByRole('listitem')).toHaveCount(12)
     await group.getByRole('button', { name: /^Show all \d+$/ }).click()
     await expect.poll(() => group.getByRole('listitem').count()).toBeGreaterThan(12)
-    await expect(group.getByRole('button', { name: 'Show fewer' })).toHaveAttribute('aria-expanded', 'true')
+    await expect(group.getByRole('button', { name: 'Mostrar menos' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
     await noSideScroll(page)
   })
 
   test('a brain the person cannot read says so and who to ask', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in', { brain: 'forbidden' })
     await page.goto('/b/growth/wiki')
-    await expect(page.getByRole('alert')).toContainText('Ask a curator of that brain to add you')
+    await expect(page.getByRole('alert')).toContainText('Pide a un curador de ese brain que te añada')
   })
 })
 
@@ -125,10 +128,10 @@ test.describe('a page', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Retention' })).toBeVisible()
     await expect(page).toHaveTitle(/^Retention · /)
     const head = page.locator('.page-meta')
-    await expect(head).toContainText('Topic')
+    await expect(head).toContainText('Tema')
     await expect(head).toContainText('Current')
     await expect(head).toContainText('audience/retention')
-    await expect(head).toContainText('Revision 3')
+    await expect(head).toContainText('Revisión 3')
     const body = page.locator('.prose')
     await expect(body.getByRole('heading', { level: 2, name: 'What keeps viewers' })).toBeVisible()
     await expect(body.getByRole('listitem').first()).toContainText('Start with the question')
@@ -149,15 +152,15 @@ test.describe('a page', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(RETENTION)
-    const links = page.getByRole('region', { name: 'Links' })
-    const from = links.getByRole('group', { name: 'From this page' })
-    await expect(from.getByRole('heading', { name: 'Mentions' })).toBeVisible()
-    await expect(from.getByRole('heading', { name: 'Related' })).toBeVisible()
-    await expect(from.getByRole('heading', { name: 'Depends on' })).toBeVisible()
+    const links = page.getByRole('region', { name: 'Enlaces' })
+    const from = links.getByRole('group', { name: 'Desde esta página' })
+    await expect(from.getByRole('heading', { name: 'Menciona' })).toBeVisible()
+    await expect(from.getByRole('heading', { name: 'Relacionada con' })).toBeVisible()
+    await expect(from.getByRole('heading', { name: 'Depende de' })).toBeVisible()
     await expect(from.getByRole('listitem').filter({ hasText: 'drafts/hooks-that-work' })).toContainText(
       'no page yet',
     )
-    const to = links.getByRole('group', { name: 'To this page' })
+    const to = links.getByRole('group', { name: 'Hacia esta página' })
     await expect(to.getByRole('link', { name: 'Writing intros' })).toBeVisible()
   })
 
@@ -173,10 +176,10 @@ test.describe('a page', () => {
       .getByRole('link', { name: /drafts\/hooks-that-work/ })
       .click()
     await expect(
-      page.getByRole('heading', { level: 1, name: 'No page at drafts/hooks-that-work' }),
+      page.getByRole('heading', { level: 1, name: 'No hay página en drafts/hooks-that-work' }),
     ).toBeVisible()
     await expect(page.getByText('A link to it is kept as a reminder')).toBeVisible()
-    await page.getByRole('link', { name: 'Back to the wiki' }).click()
+    await page.getByRole('link', { name: 'Volver al wiki' }).click()
     await expect(page.getByRole('heading', { level: 1, name: 'Wiki' })).toBeVisible()
   })
 
@@ -188,13 +191,15 @@ test.describe('a page', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/pages/audience/old-intros')
     const note = page.getByRole('note')
-    await expect(note).toContainText('Superseded')
+    await expect(note).toContainText('Reemplazada')
     await note.getByRole('link', { name: 'audience/intros' }).click()
     await expect(page.getByRole('heading', { level: 1, name: 'Writing intros' })).toBeVisible()
     await page.goto('/b/growth/pages/legal/consent-2024')
     await expect(page.getByRole('note')).toContainText('Retired: kept for its history only.')
     await page.goto('/b/growth/pages/guides/weekly-review')
-    await expect(page.getByRole('note')).toContainText('Stale: this page may be out of date')
+    await expect(page.getByRole('note')).toContainText(
+      'Desactualizada: esta página puede estar desactualizada',
+    )
   })
 
   test('CA4: a source opens beside the page, which stays; Esc closes it and the keyboard returns', async ({
@@ -204,7 +209,7 @@ test.describe('a page', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(RETENTION)
-    const sources = page.getByRole('region', { name: 'Sources' })
+    const sources = page.getByRole('region', { name: 'Fuentes' })
     // A forgotten source keeps its place, says so, and opens nothing.
     await expect(sources).toContainText('forgotten since')
     const open = sources.getByRole('button', { name: 'Short intros keep viewers' })
@@ -251,7 +256,7 @@ test.describe('a page', () => {
     const alert = page.getByRole('alert')
     await expect(alert).toContainText('Something went wrong on the server')
     await s.state('page', 'normal')
-    await alert.getByRole('button', { name: 'Try again' }).click()
+    await alert.getByRole('button', { name: 'Probar otra vez' }).click()
     await expect(page.getByRole('heading', { level: 1, name: 'Retention' })).toBeVisible()
     await context.setOffline(true)
     await expect(page.getByText('You are offline.')).toBeVisible()
@@ -270,7 +275,7 @@ test.describe('a page', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Retention' })).toBeVisible()
     await noSideScroll(page)
     await page
-      .getByRole('region', { name: 'Sources' })
+      .getByRole('region', { name: 'Fuentes' })
       .getByRole('button', { name: 'Short intros keep viewers' })
       .click()
     await expect(page.getByRole('dialog', { name: 'Short intros keep viewers' })).toBeVisible()
@@ -288,16 +293,16 @@ test.describe('the history of a page', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(RETENTION)
-    const recent = page.getByRole('region', { name: 'Recent changes' })
+    const recent = page.getByRole('region', { name: 'Cambios recientes' })
     await expect(recent.getByRole('listitem')).toHaveCount(3)
-    await expect(recent.getByRole('listitem').first()).toContainText('Revision 3')
-    await recent.getByRole('link', { name: 'All 3 revisions and their differences' }).click()
+    await expect(recent.getByRole('listitem').first()).toContainText('Revisión 3')
+    await recent.getByRole('link', { name: 'Todas las 3 revisiones y sus diferencias' }).click()
     await expect(page).toHaveURL(new RegExp(`${RETENTION}\\?view=history$`))
-    const list = page.getByRole('region', { name: 'Revisions' })
+    const list = page.getByRole('region', { name: 'Revisiones' })
     await expect(list.getByRole('listitem')).toHaveCount(3)
-    await expect(list.getByRole('listitem').nth(0)).toContainText('Revision 3 · edited by Eric')
-    await expect(list.getByRole('listitem').nth(1)).toContainText('Revision 2 · edited by Ana')
-    await expect(list.getByRole('listitem').nth(2)).toContainText('Revision 1 · created by Eric')
+    await expect(list.getByRole('listitem').nth(0)).toContainText('Revisión 3 · edición a mano por Eric')
+    await expect(list.getByRole('listitem').nth(1)).toContainText('Revisión 2 · edición a mano por Ana')
+    await expect(list.getByRole('listitem').nth(2)).toContainText('Revisión 1 · propuesta aprobada por Eric')
   })
 
   test('the differences between any two revisions, word by word, kept in the address', async ({
@@ -308,21 +313,21 @@ test.describe('the history of a page', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(`${RETENTION}?view=history`)
     // The last two by default.
-    await expect(page.getByRole('heading', { name: 'Changes from revision 2 to 3' })).toBeVisible()
-    await page.getByLabel('From', { exact: true }).selectOption('1')
-    await page.getByLabel('To', { exact: true }).selectOption('3')
-    await page.getByRole('button', { name: 'Show the differences' }).click()
+    await expect(page.getByRole('heading', { name: 'Cambios de la revisión 2 a la 3' })).toBeVisible()
+    await page.getByLabel('Desde', { exact: true }).selectOption('1')
+    await page.getByLabel('Hasta', { exact: true }).selectOption('3')
+    await page.getByRole('button', { name: 'Mostrar las diferencias' }).click()
     await expect(page).toHaveURL(/compare=1%2C3|compare=1,3/)
-    const diff = page.getByRole('region', { name: 'Changes from revision 1 to 3' })
+    const diff = page.getByRole('region', { name: 'Cambios de la revisión 1 a la 3' })
     // Revision 1 said "Long intros lose viewers."; revision 3 adds a line about the greeting.
     await expect(diff.locator('del').filter({ hasText: 'viewers' })).not.toHaveCount(0)
     await expect(diff.locator('ins').filter({ hasText: 'greeting' })).not.toHaveCount(0)
-    await expect(diff.getByRole('heading', { name: 'Body' })).toBeVisible()
-    await expect(diff.getByRole('heading', { name: 'Title' })).toHaveCount(0)
+    await expect(diff.getByRole('heading', { name: 'Cuerpo' })).toBeVisible()
+    await expect(diff.getByRole('heading', { name: 'Título' })).toHaveCount(0)
     // Added and removed say so in words too, for those who do not see the colour.
     await expect(diff.locator('ins').first().locator('.sr-only')).toHaveText('added:')
     await page.reload()
-    await expect(page.getByRole('region', { name: 'Changes from revision 1 to 3' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Cambios de la revisión 1 a la 3' })).toBeVisible()
     await noSideScroll(page)
   })
 
@@ -333,19 +338,21 @@ test.describe('the history of a page', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(`${RETENTION}?view=history`)
-    const list = page.getByRole('region', { name: 'Revisions' })
+    const list = page.getByRole('region', { name: 'Revisiones' })
     // The current one has nothing to restore.
     await expect(list.getByRole('listitem').nth(0).getByRole('button')).toHaveCount(0)
-    await list.getByRole('button', { name: 'Restore revision 1' }).click()
-    const ask = page.getByRole('dialog', { name: 'Restore revision 1?' })
-    await expect(ask).toContainText('Nothing is deleted')
-    await ask.getByRole('button', { name: 'Restore revision 1' }).click()
+    await list.getByRole('button', { name: 'Restaurar la revisión 1' }).click()
+    const ask = page.getByRole('dialog', { name: '¿Restaurar la revisión 1?' })
+    await expect(ask).toContainText('Nada se elimina')
+    await ask.getByRole('button', { name: 'Restaurar la revisión 1' }).click()
     await expect(
-      page.getByRole('status').filter({ hasText: 'Restored revision 1 as revision 4.' }),
+      page.getByRole('status').filter({ hasText: 'Revisión 1 restaurada como la revisión 4.' }),
     ).toBeVisible()
     await expect(list.getByRole('listitem')).toHaveCount(4)
-    await expect(list.getByRole('listitem').nth(0)).toContainText('Revision 4 · restored revision 1 by Eric')
-    await expect(page.locator('.page-meta')).toContainText('Revision 4')
+    await expect(list.getByRole('listitem').nth(0)).toContainText(
+      'Revisión 4 · restaurada la revisión 1 por Eric',
+    )
+    await expect(page.locator('.page-meta')).toContainText('Revisión 4')
   })
 
   test('who read the page: a curator sees it; anyone else sees neither it nor the restore', async ({
@@ -356,7 +363,7 @@ test.describe('the history of a page', () => {
     await scenario(curator, baseURL as string, 'signed-in')
     const c = await curator.newPage()
     await c.goto(RETENTION)
-    const readers = c.getByRole('region', { name: 'Who read this' })
+    const readers = c.getByRole('region', { name: 'Quién la leyó' })
     await expect(readers).toContainText('Ana')
     await expect(readers).toContainText('with Claude Code')
     await curator.close()
@@ -365,10 +372,10 @@ test.describe('the history of a page', () => {
     const m = await member.newPage()
     await m.goto(RETENTION)
     await expect(m.getByRole('heading', { level: 1, name: 'Retention' })).toBeVisible()
-    await expect(m.getByRole('region', { name: 'Sources' })).toBeVisible()
-    await expect(m.getByRole('region', { name: 'Who read this' })).toHaveCount(0)
+    await expect(m.getByRole('region', { name: 'Fuentes' })).toBeVisible()
+    await expect(m.getByRole('region', { name: 'Quién la leyó' })).toHaveCount(0)
     await m.goto(`${RETENTION}?view=history`)
-    await expect(m.getByRole('region', { name: 'Revisions' }).getByRole('listitem')).toHaveCount(3)
+    await expect(m.getByRole('region', { name: 'Revisiones' }).getByRole('listitem')).toHaveCount(3)
     await expect(m.getByRole('button', { name: /^Restore/ })).toHaveCount(0)
     await member.close()
   })
@@ -376,7 +383,7 @@ test.describe('the history of a page', () => {
   test('a history that does not load says so and recovers', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in', { trail: 'error' })
     await page.goto(RETENTION)
-    await expect(page.getByRole('region', { name: 'Who read this' }).getByRole('alert')).toContainText(
+    await expect(page.getByRole('region', { name: 'Quién la leyó' }).getByRole('alert')).toContainText(
       'Something went wrong',
     )
     // The page itself is still there.
@@ -388,7 +395,7 @@ test.describe('the history of a page', () => {
 // sources, status and address — and an edit on a page someone saved meanwhile loses nothing (CA10).
 test.describe('editing a page', () => {
   const EDIT = `${RETENTION}?view=edit`
-  const bodyField = (page: import('@playwright/test').Page) => page.getByLabel('Body', { exact: true })
+  const bodyField = (page: import('@playwright/test').Page) => page.getByLabel('Cuerpo', { exact: true })
 
   test('write, preview, complete a [[link]], save: a new revision says so', async ({
     page,
@@ -398,15 +405,15 @@ test.describe('editing a page', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(RETENTION)
     await page
-      .getByRole('navigation', { name: 'Views of this page' })
-      .getByRole('link', { name: 'Edit' })
+      .getByRole('navigation', { name: 'Vistas de esta página' })
+      .getByRole('link', { name: 'Editar' })
       .click()
     await expect(page).toHaveURL(new RegExp(`${RETENTION}\\?view=edit$`))
     await expect(page.getByRole('heading', { level: 1, name: 'Edit Retention' })).toBeVisible()
     const body = bodyField(page)
     await expect(body).toHaveValue(/What keeps viewers/)
     await body.fill('Short intros win. See [[aud')
-    const list = page.getByRole('listbox', { name: 'Pages to link' })
+    const list = page.getByRole('listbox', { name: 'Páginas para enlazar' })
     await expect(list.getByRole('option', { name: /audience\/intros/ })).toBeVisible()
     await expect(body).toHaveAttribute('aria-expanded', 'true')
     // Next to the line being typed, even at the end of a long body (walk of PR19: under the field it was
@@ -419,19 +426,19 @@ test.describe('editing a page', () => {
     await body.press('Enter')
     await expect(body).toHaveValue('Short intros win. See [[audience/intros]]')
     await expect(list).toHaveCount(0)
-    await page.getByRole('button', { name: 'Preview' }).click()
+    await page.getByRole('button', { name: 'Vista previa' }).click()
     const preview = page.locator('.preview.prose')
     await expect(preview.getByRole('link', { name: 'Writing intros' })).toHaveAttribute(
       'title',
       'audience/intros',
     )
-    await page.getByRole('button', { name: 'Write' }).click()
-    await page.getByLabel('Summary').fill('Short intros keep viewers.')
-    await page.getByRole('button', { name: 'Save changes' }).click()
+    await page.getByRole('button', { name: 'Escribir' }).click()
+    await page.getByLabel('Resumen').fill('Short intros keep viewers.')
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
     await expect(page).toHaveURL(new RegExp(`${RETENTION}$`))
-    await expect(page.getByRole('status').filter({ hasText: 'Saved as revision 4.' })).toBeVisible()
+    await expect(page.getByRole('status').filter({ hasText: 'Guardado como la revisión 4.' })).toBeVisible()
     await expect(page.locator('.prose')).toContainText('Short intros win.')
-    await expect(page.locator('.page-meta')).toContainText('Revision 4')
+    await expect(page.locator('.page-meta')).toContainText('Revisión 4')
     await expect(page.getByRole('heading', { level: 1, name: 'Retention' })).toBeFocused()
   })
 
@@ -453,23 +460,23 @@ test.describe('editing a page', () => {
         body: 'Eva says: intros of 5 seconds.',
       }),
     })
-    await page.getByRole('button', { name: 'Save changes' }).click()
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
     const conflict = page.getByRole('region', { name: 'Eva saved revision 4 while you edited' })
     await expect(conflict).toBeVisible()
-    await expect(conflict).toContainText('It is at revision 4 now. Nothing of yours was saved')
-    const theirs = conflict.getByRole('region', { name: 'What Eva changed' })
+    await expect(conflict).toContainText('Está en la revisión 4 ahora. Nada tuyo se guardó')
+    const theirs = conflict.getByRole('region', { name: 'Lo que cambió Eva' })
     await expect(theirs.locator('ins').filter({ hasText: 'Eva' })).not.toHaveCount(0)
-    await expect(conflict.getByLabel('Your text')).toHaveValue('My careful rewrite of the retention page.')
+    await expect(conflict.getByLabel('Tu texto')).toHaveValue('My careful rewrite of the retention page.')
     await expect(bodyField(page)).toHaveValue('My careful rewrite of the retention page.')
     // A reload keeps it too.
     await page.reload()
-    await expect(page.getByText('Your unsaved changes in this tab are back.')).toBeVisible()
+    await expect(page.getByText('Tus cambios sin guardar en esta pestaña volvieron.')).toBeVisible()
     await expect(bodyField(page)).toHaveValue('My careful rewrite of the retention page.')
-    await page.getByRole('button', { name: 'Save changes' }).click()
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
     await expect(conflict).toBeVisible()
-    await conflict.getByRole('radio', { name: 'Keep mine' }).check()
-    await conflict.getByRole('button', { name: 'Save this result' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Saved as revision 5.' })).toBeVisible()
+    await conflict.getByRole('radio', { name: 'Conservar el mío' }).check()
+    await conflict.getByRole('button', { name: 'Guardar este resultado' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Guardado como la revisión 5.' })).toBeVisible()
     await expect(page.locator('.prose')).toContainText('My careful rewrite')
   })
 
@@ -484,28 +491,28 @@ test.describe('editing a page', () => {
     await fetch(`${baseURL}/__fixture/scenarios/${s.id}/wiki-edit`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ brain: 'growth', address: 'audience/retention', body: 'Theirs.' }),
+      body: JSON.stringify({ brain: 'growth', address: 'audience/retention', body: 'El suyo.' }),
     })
-    await page.getByRole('button', { name: 'Save changes' }).click()
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
     const conflict = page.getByRole('region', { name: 'Eva saved revision 4 while you edited' })
-    await conflict.getByRole('button', { name: 'Start again from theirs' }).click()
-    await expect(bodyField(page)).toHaveValue('Theirs.')
-    await expect(page.getByLabel('Your text')).toHaveValue('Mine.')
-    await bodyField(page).fill('Theirs. And mine.')
-    await page.getByRole('button', { name: 'Save changes' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Saved as revision 5.' })).toBeVisible()
+    await conflict.getByRole('button', { name: 'Empezar de nuevo desde el suyo' }).click()
+    await expect(bodyField(page)).toHaveValue('El suyo.')
+    await expect(page.getByLabel('Tu texto')).toHaveValue('Mine.')
+    await bodyField(page).fill('El suyo. Y el mío.')
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Guardado como la revisión 5.' })).toBeVisible()
   })
 
   test('a draft survives a reload and can be discarded', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(EDIT)
-    await page.getByLabel('Title', { exact: true }).fill('Retention, again')
+    await page.getByLabel('Título', { exact: true }).fill('Retention, again')
     await page.reload()
-    await expect(page.getByLabel('Title', { exact: true })).toHaveValue('Retention, again')
-    await page.getByRole('button', { name: 'Discard my changes' }).click()
-    await expect(page.getByLabel('Title', { exact: true })).toHaveValue('Retention')
+    await expect(page.getByLabel('Título', { exact: true })).toHaveValue('Retention, again')
+    await page.getByRole('button', { name: 'Descartar mis cambios' }).click()
+    await expect(page.getByLabel('Título', { exact: true })).toHaveValue('Retention')
     await page.reload()
-    await expect(page.getByLabel('Title', { exact: true })).toHaveValue('Retention')
+    await expect(page.getByLabel('Título', { exact: true })).toHaveValue('Retention')
   })
 
   test('problems the server finds are listed, the text stays; offline, saving says why it cannot', async ({
@@ -515,13 +522,13 @@ test.describe('editing a page', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(EDIT)
-    await page.getByLabel('Title', { exact: true }).fill('x'.repeat(201))
-    await page.getByRole('button', { name: 'Save changes' }).click()
+    await page.getByLabel('Título', { exact: true }).fill('x'.repeat(201))
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
     await expect(page.getByRole('alert')).toContainText('"title" is longer than 200 characters.')
-    await expect(page.getByLabel('Title', { exact: true })).toHaveValue('x'.repeat(201))
+    await expect(page.getByLabel('Título', { exact: true })).toHaveValue('x'.repeat(201))
     await context.setOffline(true)
     await expect(page.getByText('You are offline.').first()).toBeVisible()
-    const save = page.getByRole('button', { name: 'Save changes' })
+    const save = page.getByRole('button', { name: 'Guardar los cambios' })
     await expect(save).toHaveAttribute('aria-disabled', 'true')
     await context.setOffline(false)
   })
@@ -533,18 +540,18 @@ test.describe('editing a page', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(EDIT)
-    const sources = page.getByRole('group', { name: 'Sources' })
+    const sources = page.getByRole('group', { name: 'Fuentes' })
     await sources
       .getByRole('listitem')
       .filter({ hasText: 'ent_fx_gone' })
-      .getByRole('button', { name: 'Remove' })
+      .getByRole('button', { name: 'Quitar' })
       .click()
-    await sources.getByLabel('Or a link').fill('https://example.test/notes')
-    await sources.getByLabel('Its title').fill('Team notes')
-    await sources.getByRole('button', { name: 'Add source' }).click()
+    await sources.getByLabel('O un enlace').fill('https://example.test/notes')
+    await sources.getByLabel('Su título').fill('Team notes')
+    await sources.getByRole('button', { name: 'Añadir fuente' }).click()
     await expect(sources.getByRole('listitem').filter({ hasText: 'Team notes' })).toBeVisible()
-    await page.getByRole('button', { name: 'Save changes' }).click()
-    const read = page.getByRole('region', { name: 'Sources' })
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
+    const read = page.getByRole('region', { name: 'Fuentes' })
     await expect(read.getByRole('link', { name: 'Team notes' })).toBeVisible()
     await expect(read).not.toContainText('forgotten since')
   })
@@ -556,42 +563,44 @@ test.describe('editing a page', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(EDIT)
-    const links = page.getByRole('region', { name: 'Typed links' })
+    const links = page.getByRole('region', { name: 'Enlaces tipados' })
     await links.getByLabel('Kind').selectOption('example-of')
-    const to = links.getByLabel('To page')
+    const to = links.getByLabel('Hacia la página')
     await to.fill('pricing')
     await links.getByRole('option', { name: /product\/pricing/ }).click()
     await expect(to).toHaveValue('product/pricing')
-    await links.getByRole('button', { name: 'Add link' }).click()
+    await links.getByRole('button', { name: 'Añadir enlace' }).click()
     await expect(
-      page.getByRole('status').filter({ hasText: 'Linked: Example of product/pricing.' }),
+      page.getByRole('status').filter({ hasText: 'Enlazada: Ejemplo de product/pricing.' }),
     ).toBeVisible()
     const added = links
       .getByRole('listitem')
       .filter({ hasText: 'product/pricing' })
-      .filter({ hasText: 'Example of' })
-    await added.getByRole('button', { name: 'Remove' }).click()
+      .filter({ hasText: 'Ejemplo de' })
+    await added.getByRole('button', { name: 'Quitar' }).click()
     await expect(
-      page.getByRole('status').filter({ hasText: 'Removed the link: Example of product/pricing.' }),
+      page.getByRole('status').filter({ hasText: 'Se quitó el enlace: Ejemplo de product/pricing.' }),
     ).toBeVisible()
     // The form moved on to the new revision: saving it does not conflict. Status and address are part
     // of the same Save (review of PR19).
-    await page.getByLabel('Summary').fill('Still what keeps viewers.')
-    const status = page.getByRole('group', { name: 'Status and address' })
-    await status.getByLabel('Status').selectOption('stale')
-    await page.getByRole('button', { name: 'Save changes' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'The page is stale now.' })).toBeVisible()
+    await page.getByLabel('Resumen').fill('Still what keeps viewers.')
+    const status = page.getByRole('group', { name: 'Estado y dirección' })
+    await status.getByLabel('Estado').selectOption('stale')
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
+    await expect(
+      page.getByRole('status').filter({ hasText: 'La página está desactualizada ahora.' }),
+    ).toBeVisible()
     await page.goto(EDIT)
-    await status.getByLabel('Address', { exact: true }).fill('audience/what-keeps-viewers')
-    await page.getByRole('button', { name: 'Save changes' }).click()
+    await status.getByLabel('Dirección', { exact: true }).fill('audience/what-keeps-viewers')
+    await page.getByRole('button', { name: 'Guardar los cambios' }).click()
     await expect(page).toHaveURL(/\/pages\/audience\/what-keeps-viewers$/)
     await expect(
-      page.getByRole('status').filter({ hasText: 'The page lives at audience/what-keeps-viewers now' }),
+      page.getByRole('status').filter({ hasText: 'La página vive en audience/what-keeps-viewers ahora' }),
     ).toBeVisible()
     // Its old address still leads to it.
     await page.goto(RETENTION)
     await expect(page).toHaveURL(/\/pages\/audience\/what-keeps-viewers$/)
-    await expect(page.getByText('You followed an old address (audience/retention)')).toBeVisible()
+    await expect(page.getByText('Seguiste una dirección vieja (audience/retention)')).toBeVisible()
   })
 
   test('someone who is not a curator has no edit, and the address says who may', async ({
@@ -603,11 +612,11 @@ test.describe('editing a page', () => {
     await page.goto(RETENTION)
     await expect(page.getByRole('heading', { level: 1, name: 'Retention' })).toBeVisible()
     await expect(
-      page.getByRole('navigation', { name: 'Views of this page' }).getByRole('link', { name: 'Edit' }),
+      page.getByRole('navigation', { name: 'Vistas de esta página' }).getByRole('link', { name: 'Editar' }),
     ).toHaveCount(0)
     await page.goto(EDIT)
-    await expect(page.getByText('Only curators of this brain edit its pages by hand.')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Save changes' })).toHaveCount(0)
+    await expect(page.getByText('Solo los curadores de este brain editan sus páginas a mano.')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Guardar los cambios' })).toHaveCount(0)
   })
 
   test('at 320 px the editor fits', async ({ page, context, baseURL }) => {
@@ -629,37 +638,37 @@ test.describe('decisions', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth')
     await page
-      .getByRole('navigation', { name: 'Sections of this brain' })
+      .getByRole('navigation', { name: 'Secciones de este brain' })
       .getByRole('link', { name: 'Decisions' })
       .click()
     await expect(page.getByRole('heading', { level: 1, name: 'Decisions' })).toBeFocused()
     const list = page.getByRole('list', { name: 'Decisions' })
     await expect(list.getByRole('listitem')).toHaveCount(2)
-    await expect(list.getByRole('listitem').filter({ hasText: 'Monthly only' })).toContainText('Superseded')
-    await page.getByLabel('Status').selectOption('superseded')
+    await expect(list.getByRole('listitem').filter({ hasText: 'Monthly only' })).toContainText('Reemplazada')
+    await page.getByLabel('Estado').selectOption('superseded')
     await expect(page).toHaveURL(/status=superseded/)
     await expect(list.getByRole('listitem')).toHaveCount(1)
-    await page.getByLabel('Status').selectOption('')
-    await page.getByLabel('Filter by words').fill('two months')
+    await page.getByLabel('Estado').selectOption('')
+    await page.getByLabel('Filtrar por palabras').fill('two months')
     await expect(list.getByRole('listitem')).toHaveCount(1)
     await list.getByRole('link', { name: 'Annual plans' }).click()
     await expect(page.getByRole('heading', { level: 1, name: 'Annual plans' })).toBeVisible()
     await page.goBack()
-    await page.getByLabel('Filter by words').fill('nothing like this')
-    await expect(page.getByText('No results for these filters.')).toBeVisible()
-    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await page.getByLabel('Filtrar por palabras').fill('nothing like this')
+    await expect(page.getByText('No hay resultados para estos filtros.')).toBeVisible()
+    await page.getByRole('button', { name: 'Quitar los filtros' }).click()
     await expect(list.getByRole('listitem')).toHaveCount(2)
   })
 
   test('empty, loading, an error, a lot of them', async ({ page, context, baseURL }) => {
     const s = await scenario(context, baseURL as string, 'signed-in', { decisions: 'empty' })
     await page.goto('/b/growth/wiki/decisions')
-    await expect(page.getByRole('heading', { name: 'No decisions yet' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Aún sin decisiones' })).toBeVisible()
     await s.state('decisions', 'error')
     await page.reload()
     await expect(page.getByRole('alert')).toContainText('Something went wrong')
     await s.state('decisions', 'much-data')
-    await page.getByRole('button', { name: 'Try again' }).click()
+    await page.getByRole('button', { name: 'Probar otra vez' }).click()
     await expect
       .poll(() => page.getByRole('list', { name: 'Decisions' }).getByRole('listitem').count())
       .toBeGreaterThan(20)
@@ -680,28 +689,28 @@ test.describe('the log', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth')
     await page
-      .getByRole('navigation', { name: 'Sections of this brain' })
+      .getByRole('navigation', { name: 'Secciones de este brain' })
       .getByRole('link', { name: 'Log' })
       .click()
     await expect(page.getByRole('heading', { level: 1, name: 'Log' })).toBeFocused()
-    const list = page.getByRole('list', { name: 'Changes' })
+    const list = page.getByRole('list', { name: 'Cambios' })
     const first = list.getByRole('listitem').first()
     await expect(first).toContainText('by ')
-    await page.getByLabel('Kind of change').selectOption('direct')
+    await page.getByLabel('Tipo de cambio').selectOption('direct')
     await expect(page).toHaveURL(/kind=direct/)
-    await expect(list.getByRole('listitem').first()).toContainText('Direct edit')
-    await expect(list.getByRole('listitem').filter({ hasNotText: 'Direct edit' })).toHaveCount(0)
-    await page.getByLabel('Kind of change').selectOption('')
-    await page.getByLabel('Page', { exact: true }).fill('product/pricing')
-    await page.getByRole('button', { name: 'Apply' }).click()
+    await expect(list.getByRole('listitem').first()).toContainText('Edición a mano')
+    await expect(list.getByRole('listitem').filter({ hasNotText: 'Edición a mano' })).toHaveCount(0)
+    await page.getByLabel('Tipo de cambio').selectOption('')
+    await page.getByLabel('Página', { exact: true }).fill('product/pricing')
+    await page.getByRole('button', { name: 'Aplicar' }).click()
     await expect(page).toHaveURL(/page=product%2Fpricing/)
     await expect(list.getByRole('listitem')).toHaveCount(1)
     await list.getByRole('link', { name: 'product/pricing' }).click()
     await expect(page.getByRole('heading', { level: 1, name: 'Annual plans' })).toBeVisible()
     await page.goBack()
-    await page.getByLabel('Kind of change').selectOption('purge')
-    await expect(page.getByText('No results for these filters.')).toBeVisible()
-    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await page.getByLabel('Tipo de cambio').selectOption('purge')
+    await expect(page.getByText('No hay resultados para estos filtros.')).toBeVisible()
+    await page.getByRole('button', { name: 'Quitar los filtros' }).click()
     await expect(page).toHaveURL(/\/wiki\/log$/)
   })
 
@@ -712,11 +721,11 @@ test.describe('the log', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/wiki/log')
-    await page.getByLabel('Kind of change').selectOption('write')
+    await page.getByLabel('Tipo de cambio').selectOption('write')
     await expect(page).toHaveURL(/kind=write/)
-    const line = page.getByRole('list', { name: 'Changes' }).getByRole('listitem')
+    const line = page.getByRole('list', { name: 'Cambios' }).getByRole('listitem')
     await expect(line).toHaveCount(1)
-    await expect(line).toContainText('Written directly')
+    await expect(line).toContainText('Escrito directamente')
     await expect(line).toContainText('with the key Claude Code laptop')
     await expect(line).toContainText('Cleanup')
   })
@@ -724,9 +733,9 @@ test.describe('the log', () => {
   test('a long log goes by pages, «Show more» adds the next', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in', { log: 'much-data' })
     await page.goto('/b/growth/wiki/log')
-    const list = page.getByRole('list', { name: 'Changes' })
+    const list = page.getByRole('list', { name: 'Cambios' })
     await expect(list.getByRole('listitem')).toHaveCount(50)
-    await page.getByRole('button', { name: 'Show more' }).click()
+    await page.getByRole('button', { name: 'Mostrar más' }).click()
     await expect(list.getByRole('listitem')).toHaveCount(100)
     await page.setViewportSize({ width: 320, height: 640 })
     await noSideScroll(page)
@@ -735,7 +744,7 @@ test.describe('the log', () => {
   test('empty and an error', async ({ page, context, baseURL }) => {
     const s = await scenario(context, baseURL as string, 'signed-in', { log: 'empty' })
     await page.goto('/b/growth/wiki/log')
-    await expect(page.getByRole('heading', { name: 'Nothing has changed in this wiki yet' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Todavía no cambió nada en este wiki' })).toBeVisible()
     await s.state('log', 'error')
     await page.reload()
     await expect(page.getByRole('alert')).toContainText('Something went wrong')
@@ -750,29 +759,29 @@ test('a wiki page found by search opens, and the search closes', async ({ page, 
     .getByRole('button', { name: /Search/ })
     .first()
     .click()
-  const dialog = page.getByRole('dialog', { name: 'Search' })
-  await dialog.getByLabel('Search for').fill('retention')
-  await dialog.getByLabel('Search for').press('Enter')
+  const dialog = page.getByRole('dialog', { name: 'Buscar' })
+  await dialog.getByLabel('Buscar').fill('retention')
+  await dialog.getByLabel('Buscar').press('Enter')
   await dialog.getByRole('link', { name: 'Retention' }).first().click()
   await expect(dialog).toHaveCount(0)
   await expect(page.getByRole('heading', { level: 1, name: 'Retention' })).toBeVisible()
 })
 
-// Walk of PR19: "Save mine over theirs" puts my changes on top of theirs; a part only they changed keeps
+// Walk of PR19: "Guardar el mío sobre el suyo" puts my changes on top of theirs; a part only they changed keeps
 // their words (it used to put back the old summary they had just fixed).
 test('saving mine over theirs keeps what only they changed', async ({ page, context, baseURL }) => {
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/b/growth/pages/audience/retention?view=edit')
-  await page.getByLabel('Title', { exact: true }).fill('Retention, by Eric')
+  await page.getByLabel('Título', { exact: true }).fill('Retention, by Eric')
   await fetch(`${baseURL}/__fixture/scenarios/${s.id}/wiki-edit`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ brain: 'growth', address: 'audience/retention', body: 'Eva rewrote the body.' }),
   })
-  await page.getByRole('button', { name: 'Save changes' }).click()
+  await page.getByRole('button', { name: 'Guardar los cambios' }).click()
   const conflict = page.getByRole('region', { name: 'Eva saved revision 4 while you edited' })
-  await conflict.getByRole('button', { name: 'Save this result' }).click()
-  await expect(page.getByRole('status').filter({ hasText: 'Saved as revision 5.' })).toBeVisible()
+  await conflict.getByRole('button', { name: 'Guardar este resultado' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Guardado como la revisión 5.' })).toBeVisible()
   await expect(page.getByRole('heading', { level: 1, name: 'Retention, by Eric' })).toBeVisible()
   await expect(page.locator('.prose')).toContainText('Eva rewrote the body.')
 })
@@ -786,14 +795,14 @@ test('the body saves with Ctrl+Enter, and never suggests the page itself', async
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/b/growth/pages/audience/retention?view=edit')
-  const body = page.getByLabel('Body', { exact: true })
+  const body = page.getByLabel('Cuerpo', { exact: true })
   await expect(body).toHaveAttribute('aria-keyshortcuts', 'Control+Enter Meta+Enter')
   await body.fill('Kept short. [[audience/')
-  const list = page.getByRole('listbox', { name: 'Pages to link' })
+  const list = page.getByRole('listbox', { name: 'Páginas para enlazar' })
   await expect(list.getByRole('option', { name: /audience\/intros/ })).toBeVisible()
   await expect(list.getByRole('option', { name: /audience\/retention/ })).toHaveCount(0)
   await body.press('Escape')
   await body.fill('Kept short.')
   await body.press('Control+Enter')
-  await expect(page.getByRole('status').filter({ hasText: 'Saved as revision 4.' })).toBeVisible()
+  await expect(page.getByRole('status').filter({ hasText: 'Guardado como la revisión 4.' })).toBeVisible()
 })

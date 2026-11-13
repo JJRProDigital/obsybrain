@@ -27,20 +27,20 @@ async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   const h1 = page.getByRole('heading', { level: 1 })
   await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up obsybrain') {
-    await page.getByLabel('Name of this installation').fill('obsybrain')
-    await page.getByLabel('Address people open').fill(baseURL)
-    await page.getByLabel('Your name').fill(ADMIN.name)
-    await page.getByLabel('Your email').fill(ADMIN.email)
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
+  if (where === 'Configurar obsybrain') {
+    await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await page.getByLabel('Dirección que abre la gente').fill(baseURL)
+    await page.getByLabel('Tu nombre').fill(ADMIN.name)
+    await page.getByLabel('Tu email').fill(ADMIN.email)
+    await page.getByLabel('Contraseña', { exact: true }).fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await keepTheKey(page)
-  } else if (where === 'Sign in') {
+  } else if (where === 'Iniciar sesión') {
     await page.getByLabel('Email').fill(ADMIN.email)
-    await page.getByLabel('Password').fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Contraseña').fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
   }
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
 }
 
 // A person invited to the brain with a role, signed in in a context of their own.
@@ -121,17 +121,17 @@ test('an agent proposes; CA17: a reader sees the inbox read-only, with whom to a
     create('intros/greeting'),
   ])
   ids.back = await propose(request, 'One page too many', [create('intros/extra')])
-  ids.live = await propose(request, 'Decided by another curator', [create('intros/live')])
+  ids.live = await propose(request, 'Decidida por otro curador', [create('intros/live')])
 
   const rita = await person(browser, page, 'Rita', 'reader')
   const r = await rita.newPage()
   await r.goto(INBOX)
-  await expect(r.getByRole('heading', { level: 1, name: 'Proposals' })).toBeVisible()
-  await expect(r.getByRole('list', { name: 'Pending proposals' }).getByRole('listitem')).toHaveCount(3)
-  await expect(r.getByText('ask a curator of Inbox e2e (Eric) for the curator role')).toBeVisible()
+  await expect(r.getByRole('heading', { level: 1, name: 'Propuestas' })).toBeVisible()
+  await expect(r.getByRole('list', { name: 'Propuestas pendientes' }).getByRole('listitem')).toHaveCount(3)
+  await expect(r.getByText('pide el rol de curador a un curador de Inbox e2e (Eric)')).toBeVisible()
   await r.getByRole('link', { name: 'Three pages about intros' }).click()
-  await expect(r.getByRole('article', { name: /^Change 1:/ })).toContainText('New page intros/short')
-  await expect(r.getByRole('button', { name: 'Approve all' })).toHaveCount(0)
+  await expect(r.getByRole('article', { name: /^Change 1:/ })).toContainText('Página nueva intros/short')
+  await expect(r.getByRole('button', { name: 'Aprobar todo' })).toHaveCount(0)
   await expect(r.getByRole('checkbox')).toHaveCount(0)
   // The server refuses her the same.
   const review = (await (await r.request.get(`/v1/proposals/${ids.three}/review`)).json()) as {
@@ -161,11 +161,11 @@ test('CA2: at 375 px a curator approves two of three changes and returns the thi
     .click()
   await expect(page).toHaveURL(new RegExp(`${INBOX}$`))
   await page.getByRole('link', { name: 'Three pages about intros' }).click()
-  await page.getByRole('checkbox', { name: 'Approve change 1' }).check()
-  await page.getByRole('checkbox', { name: 'Approve change 2' }).check()
-  await page.getByLabel('Comment for the agent').fill('No page about greetings: we cut them.')
-  await page.getByRole('button', { name: 'Approve selected & return the rest' }).click()
-  const done = page.getByRole('status').filter({ hasText: 'Approved in part' })
+  await page.getByRole('checkbox', { name: 'Aprobar el cambio 1' }).check()
+  await page.getByRole('checkbox', { name: 'Aprobar el cambio 2' }).check()
+  await page.getByLabel('Comentario para el agente').fill('No page about greetings: we cut them.')
+  await page.getByRole('button', { name: 'Aprobar los elegidos y devolver el resto' }).click()
+  const done = page.getByRole('status').filter({ hasText: 'Aprobada en parte' })
   await expect(done).toBeVisible()
   await expect(done.getByRole('link', { name: 'intros/short' })).toBeVisible()
   const width = await page.evaluate(() => document.documentElement.scrollWidth)
@@ -197,9 +197,9 @@ test('CA2b: at 375 px a curator returns a proposal with a comment; nothing appli
   await page.setViewportSize({ width: 375, height: 812 })
   await signedInAdmin(page, baseURL as string)
   await page.goto(`${INBOX}/${ids.back}`)
-  await page.getByLabel('Comment for the agent').fill('One page is enough.')
-  await page.getByRole('button', { name: 'Return', exact: true }).click()
-  await expect(page.getByRole('status').filter({ hasText: 'Returned with your comment' })).toBeVisible()
+  await page.getByLabel('Comentario para el agente').fill('One page is enough.')
+  await page.getByRole('button', { name: 'Devolver', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Devuelta con tu comentario' })).toBeVisible()
   expect(await pageStatus(request, 'intros/extra')).toBe(404)
   const p = (await (
     await request.get(`/v1/proposals/${ids.back}`, { headers: { authorization: `Bearer ${agent}` } })
@@ -216,17 +216,21 @@ test('another curator approves it while I look: «approved by … just now», re
   const eva = await person(browser, page, 'Eva', 'curator')
   const e = await eva.newPage()
   await e.goto(`${INBOX}/${ids.live}`)
-  await expect(e.getByRole('button', { name: 'Approve all' })).toBeVisible()
+  await expect(e.getByRole('button', { name: 'Aprobar todo' })).toBeVisible()
   // Eva's live feed is open before Eric decides.
   await e.waitForTimeout(500)
   await page.goto(`${INBOX}/${ids.live}`)
   await page.locator('main h1').focus()
   // CA3 on the real server: `a` approves.
   await page.keyboard.press('a')
-  await expect(page.getByRole('status').filter({ hasText: 'Approved. These pages changed:' })).toBeVisible()
-  await expect(e.getByText('Approved by Eric just now. This proposal is read-only now.')).toBeVisible({
-    timeout: 5_000,
-  })
-  await expect(e.getByRole('button', { name: 'Approve all' })).toHaveCount(0)
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Aprobada. Estas páginas cambiaron:' }),
+  ).toBeVisible()
+  await expect(e.getByText('Aprobada por Eric recién. Esta propuesta es de solo lectura ahora.')).toBeVisible(
+    {
+      timeout: 5_000,
+    },
+  )
+  await expect(e.getByRole('button', { name: 'Aprobar todo' })).toHaveCount(0)
   await eva.close()
 })

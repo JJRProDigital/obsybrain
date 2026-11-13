@@ -390,7 +390,7 @@ describe('the journal', { skip: skipPg }, () => {
   it('CA22 and errors: limits, types and permissions say what to do', async () => {
     const long = await save(ana.key, { type: 'note', title: 't', content: 'x'.repeat(32_001) })
     assert.equal(long.status, 400)
-    assert.match(long.body.error?.howToProceed ?? '', /Split/)
+    assert.match(long.body.error?.howToProceed ?? '', /Divídelo/)
     const type = await save(ana.key, { type: 'rant', title: 't', content: 'c' })
     assert.match(type.body.error?.howToProceed ?? '', /decision, learning/)
     const ro = await save(reader.key, { type: 'note', title: 't', content: 'c' })
@@ -647,6 +647,9 @@ describe('the journal', { skip: skipPg }, () => {
     assert.equal(content.length, 31_998)
     const r = await save(ana.key, { type: 'note', title: 't', content })
     assert.equal(r.status, 400)
-    assert.match(String((r.body.error as { message: string }).message), /Once secrets are replaced/)
+    assert.match(
+      String((r.body.error as { message: string }).message),
+      /los secretos se reemplazan por sus marcas/,
+    )
   })
 })

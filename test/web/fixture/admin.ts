@@ -160,8 +160,8 @@ const changed = (moved: string[], current: unknown): Answer => ({
   body: {
     error: {
       code: 'settings_changed',
-      message: `Someone changed ${moved.join(', ')} since you read ${moved.length === 1 ? 'it' : 'them'}.`,
-      howToProceed: 'Read the current values in "current", then save your change again on top of them.',
+      message: `Alguien cambió ${moved.join(', ')} desde que ${moved.length === 1 ? 'lo' : 'los'} leíste.`,
+      howToProceed: 'Lee los valores actuales en "current" y vuelve a guardar tu cambio sobre ellos.',
       current,
     },
   },
@@ -324,8 +324,8 @@ export const MAINTENANCE_REFUSAL: Answer = {
   body: {
     error: {
       code: 'under_maintenance',
-      message: 'obsybrain is under maintenance, retry after 20 seconds',
-      howToProceed: 'Send it again after that time; reading keeps working meanwhile.',
+      message: `obsybrain está en mantenimiento, reintenta en 20 segundos`,
+      howToProceed: 'Envíalo de nuevo pasado ese tiempo; la lectura sigue funcionando mientras tanto.',
       retryAfter: 20,
     },
     retryAfter: 20,
@@ -637,7 +637,7 @@ export const ADMIN_OPS: Record<string, Op> = {
         const a = fxOf(c.s).authors.find((x) => x.id === c.params.id)
         if (!a)
           return err(404, 'not_found', 'No author with that id is available to you.', 'Check the author id.')
-        a.name = 'Former author'
+        a.name = 'Autor anterior'
         audited(c, 'author.anonymise', '')
         return { status: 200, body: { author: { id: a.id, name: a.name } } }
       },
@@ -843,7 +843,7 @@ export const ADMIN_OPS: Record<string, Op> = {
             body: {
               error: {
                 code: 'invalid_request',
-                message: 'Meaning search stays off until the warning is accepted.',
+                message: 'La búsqueda por significado queda apagada hasta aceptar el aviso.',
                 howToProceed: 'Read the warning and send "accept": true.',
                 current: { warning: WARNING },
               },
@@ -1118,7 +1118,7 @@ export const ADMIN_OPS: Record<string, Op> = {
               error: {
                 code: 'wrong_key',
                 message: `This copy was made with another installation key (id ${copy.keyId}).`,
-                howToProceed: 'Restore it with that key, on the machine: obsybrain restore --key-file.',
+                howToProceed: 'Restáurala con esa clave, en la máquina: obsybrain restore --key-file.',
                 needs: copy.keyId,
               },
             },

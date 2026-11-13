@@ -21,9 +21,12 @@ export const importRoutes: Route[] = [
     ...route('POST /v1/brains/:slug/import', async (r) => {
       const name = r.query.get('name') ?? 'upload.zip'
       if (!name.trim() || name.length > 200)
-        throw invalid('"name" is the name of the zip, at most 200 characters.', 'Send name=<the file name>.')
+        throw invalid(
+          '"name" es el nombre del zip, de como máximo 200 caracteres.',
+          'Envía name=<el nombre del archivo>.',
+        )
       if (!Buffer.isBuffer(r.body) || r.body.length === 0)
-        throw invalid('The body is the zip to import.', 'Send the .zip file as the body of the request.')
+        throw invalid('El cuerpo es el zip a importar.', 'Envía el archivo .zip como cuerpo de la petición.')
       let tree: ReturnType<typeof treeFromZip>
       try {
         tree = treeFromZip(r.body)

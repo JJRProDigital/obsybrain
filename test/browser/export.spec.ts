@@ -19,7 +19,7 @@ async function audit(page: Page, where: string) {
   expect(bad).toEqual([])
 }
 
-const part = (page: Page) => page.getByRole('region', { name: 'Export', exact: true })
+const part = (page: Page) => page.getByRole('region', { name: 'Exportar', exact: true })
 
 test.describe('exporting a brain', () => {
   test('a curator saves the readable export; the screen says the file and its size', async ({
@@ -32,11 +32,11 @@ test.describe('exporting a brain', () => {
     const p = part(page)
     await expect(p).toBeVisible()
     await expect(p.getByRole('radio', { name: /Readable/ })).toBeChecked()
-    await expect(p.getByRole('checkbox', { name: 'Include forgotten entries' })).not.toBeChecked()
+    await expect(p.getByRole('checkbox', { name: 'Incluir las entradas olvidadas' })).not.toBeChecked()
     await audit(page, 'export ready')
     const [file] = await Promise.all([
       page.waitForEvent('download'),
-      p.getByRole('button', { name: 'Download the export' }).click(),
+      p.getByRole('button', { name: 'Descargar la exportación' }).click(),
     ])
     expect(file.suggestedFilename()).toMatch(/^obsybrain-growth-readable-\d{8}T\d{6}Z\.zip$/)
     const saved = filesOf(readFileSync(await file.path()))
@@ -62,11 +62,11 @@ test.describe('exporting a brain', () => {
     await page.keyboard.press('ArrowDown')
     await expect(p.getByRole('radio', { name: /Faithful/ })).toBeChecked()
     await page.keyboard.press('Tab')
-    await expect(p.getByRole('checkbox', { name: 'Include forgotten entries' })).toBeFocused()
+    await expect(p.getByRole('checkbox', { name: 'Incluir las entradas olvidadas' })).toBeFocused()
     await page.keyboard.press('Space')
-    await expect(p.getByRole('checkbox', { name: 'Include forgotten entries' })).toBeChecked()
+    await expect(p.getByRole('checkbox', { name: 'Incluir las entradas olvidadas' })).toBeChecked()
     await page.keyboard.press('Tab')
-    await expect(p.getByRole('button', { name: 'Download the export' })).toBeFocused()
+    await expect(p.getByRole('button', { name: 'Descargar la exportación' })).toBeFocused()
     const [file] = await Promise.all([page.waitForEvent('download'), page.keyboard.press('Enter')])
     expect(file.suggestedFilename()).toMatch(/^obsybrain-growth-faithful-/)
     const saved = filesOf(readFileSync(await file.path()))
@@ -83,12 +83,12 @@ test.describe('exporting a brain', () => {
     await page.goto('/b/growth/settings/archive')
     const p = part(page)
     const downloading = page.waitForEvent('download')
-    await p.getByRole('button', { name: 'Download the export' }).click()
-    await expect(p.getByRole('status')).toContainText('Preparing the export')
+    await p.getByRole('button', { name: 'Descargar la exportación' }).click()
+    await expect(p.getByRole('status')).toContainText('Preparando la exportación')
     await expect(p.getByRole('button', { name: /Preparing/ })).toBeDisabled()
     await downloading
-    await expect(p.getByRole('status')).toContainText('Saved')
-    await expect(p.getByRole('button', { name: 'Download the export' })).toBeEnabled()
+    await expect(p.getByRole('status')).toContainText('Guardada')
+    await expect(p.getByRole('button', { name: 'Descargar la exportación' })).toBeEnabled()
   })
 
   test('a refusal says what happened and what to do, and nothing is saved', async ({
@@ -103,7 +103,7 @@ test.describe('exporting a brain', () => {
     page.on('download', () => {
       saved = true
     })
-    await p.getByRole('button', { name: 'Download the export' }).click()
+    await p.getByRole('button', { name: 'Descargar la exportación' }).click()
     const alert = p.getByRole('alert')
     await expect(alert).toContainText('Something went wrong')
     await expect(alert).toBeFocused()
@@ -116,12 +116,12 @@ test.describe('exporting a brain', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/settings/archive')
     // The screen is drawn first: offline before it loads is another state (the page's own).
-    await expect(part(page).getByRole('button', { name: 'Download the export' })).toBeEnabled()
+    await expect(part(page).getByRole('button', { name: 'Descargar la exportación' })).toBeEnabled()
     await context.setOffline(true)
-    await expect(part(page).getByRole('button', { name: 'Download the export' })).toBeDisabled()
+    await expect(part(page).getByRole('button', { name: 'Descargar la exportación' })).toBeDisabled()
     await expect(part(page)).toContainText(/offline|connection/i)
     await context.setOffline(false)
-    await expect(part(page).getByRole('button', { name: 'Download the export' })).toBeEnabled()
+    await expect(part(page).getByRole('button', { name: 'Descargar la exportación' })).toBeEnabled()
   })
 
   test('at 320 px it fits without sideways scroll, and passes the audit', async ({

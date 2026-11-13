@@ -85,11 +85,11 @@ describe('the last update, in words', () => {
     const at = '2026-11-03T12:00:00.000Z'
     assert.equal(
       lastUpdateText({ ok: true, from: '0.1.0', to: '0.2.0', at, log: null }),
-      'Updated from 0.1.0 to 0.2.0.',
+      'Actualizado de 0.1.0 a 0.2.0.',
     )
     const failed = lastUpdateText({ ok: false, from: '0.2.0', to: '0.3.0', at, log: 'x' })
-    assert.match(failed, /^The update from 0\.2\.0 to 0\.3\.0 failed\./)
-    assert.match(failed, /went back to 0\.2\.0/)
-    assert.match(failed, /sessions and keys still work/)
+    assert.match(failed, /^La actualización de 0\.2\.0 a 0\.3\.0 falló\./)
+    assert.match(failed, /volvió a 0\.2\.0/)
+    assert.match(failed, /las sesiones y claves siguen funcionando/)
   })
 })

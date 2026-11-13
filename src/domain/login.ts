@@ -21,8 +21,8 @@ export const RESET_MINUTES = 60
 const wrong = () =>
   unauthorized(
     'bad_credentials',
-    'The email or the password is not right.',
-    'Check them, or reset your password.',
+    'El correo o la contraseña no son correctos.',
+    'Revísalos o restablece tu contraseña.',
   )
 
 // The wait after the n-th failure in a row: none before five, then 1 minute doubling up to 1 hour.
@@ -33,15 +33,15 @@ export function brakeSeconds(failures: number): number {
 
 // Signing in may send the person to reset their password; inside the web (the profile) they are signed in
 // already, so the advice there is only to wait.
-const SIGN_IN_WAIT = 'Wait, then try again; or reset your password.'
-const PROFILE_WAIT = 'Wait, then try again.'
+const SIGN_IN_WAIT = 'Espera y vuelve a intentarlo; o restablece tu contraseña.'
+const PROFILE_WAIT = 'Espera y vuelve a intentarlo.'
 
 function braked(until: Date, now: Date, how = SIGN_IN_WAIT): AppError {
   const s = Math.max(1, Math.ceil((until.getTime() - now.getTime()) / 1000))
   const err = new AppError(
     429,
     'too_many_attempts',
-    `Too many failed attempts in a row. Try again in ${s} seconds (at ${until.toISOString().slice(11, 19)} UTC).`,
+    `Demasiados intentos fallidos seguidos. Vuelve a intentarlo en ${s} segundos (a las ${until.toISOString().slice(11, 19)} UTC).`,
     how,
   )
   err.headers = { 'retry-after': String(s) }
@@ -124,7 +124,7 @@ async function profileCode(
       ctx.db,
       key,
       now,
-      invalid('The code is not right.', 'Type the 6 digits your current app shows now.'),
+      invalid('El código no es correcto.', 'Escribe los 6 dígitos que tu app actual muestra ahora.'),
       PROFILE_WAIT,
     )
   }
@@ -208,8 +208,8 @@ export async function checkCredentials(
       await giveBack(db, email)
       throw unauthorized(
         'code_required',
-        'This account asks for the code of its authenticator app.',
-        'Send "code" with the 6 digits.',
+        'Esta cuenta pide el código de su app de autenticación.',
+        'Envía "code" con los 6 dígitos.',
       )
     }
     const step = checkTotp(
@@ -233,8 +233,8 @@ export async function checkCredentials(
         now,
         unauthorized(
           'bad_code',
-          'The code is not right, or was already used.',
-          'Wait for the next code and try again.',
+          'El código no es correcto o ya se usó.',
+          'Espera el siguiente código y vuelve a intentarlo.',
         ),
       )
     }
@@ -252,8 +252,8 @@ function openSeed(secret: string | undefined, sealed: string): string {
     throw new AppError(
       409,
       'installation_secret_changed',
-      'The second factor of this account cannot be checked: the installation secret changed.',
-      'Ask the administration to put back the previous OBSY_BRAIN_SECRET, or to reset your second factor.',
+      'No se puede comprobar el segundo factor de esta cuenta: el secreto de la instalación cambió.',
+      'Pide a la administración que vuelva a poner el OBSY_BRAIN_SECRET anterior, o que reinicie tu segundo factor.',
     )
   }
 }
@@ -369,11 +369,11 @@ export async function adminResetLink(
     throw new AppError(
       403,
       'forbidden',
-      'Only the administration makes reset links.',
-      'Ask the administration.',
+      'Solo la administración crea enlaces de restablecimiento.',
+      'Pídeselo a la administración.',
     )
   const a = await ctx.db.one("SELECT id FROM accounts WHERE id = $1 AND kind = 'person'", [accountId])
-  if (!a) throw notFound('account')
+  if (!a) throw notFound('cuenta')
   const now = ctx.clock()
   const token = await newReset(ctx.db, accountId, ctx.who.accountId, now)
   await audit(ctx.db, {
@@ -394,8 +394,8 @@ const badLink = () =>
   new AppError(
     400,
     'link_invalid',
-    'This reset link is not valid: it expired, was already used, or is wrong.',
-    'Ask for a new one.',
+    'Este enlace de restablecimiento no es válido: expiró, ya se usó o es erróneo.',
+    'Pide uno nuevo.',
   )
 
 // Whether a reset link still works, before the person types a new password (spec B6 «Reset»). It does
@@ -468,8 +468,8 @@ export async function reauth(
   if (!password || password.length > PASSWORD.max) {
     throw unauthorized(
       'reauth_failed',
-      `${what} asks for your password again.`,
-      'Type the password you sign in with in "password".',
+      `${what} vuelve a pedir tu contraseña.`,
+      'Escribe la contraseña con la que inicias sesión en "password".',
     )
   }
   const waiting = await attempt(ctx.db, key, now)
@@ -486,8 +486,8 @@ export async function reauth(
       now,
       unauthorized(
         'reauth_failed',
-        'The password is not right.',
-        'Type the password you sign in with. Forgot it? Sign out and reset it from the sign-in page.',
+        'La contraseña no es correcta.',
+        'Escribe la contraseña con la que inicias sesión. ¿La olvidaste? Cierra la sesión y restablécela desde la página de inicio de sesión.',
       ),
       PROFILE_WAIT,
     )
@@ -523,9 +523,9 @@ export async function reauth(
         unauthorized(
           'reauth_failed',
           code
-            ? 'The code is not right, or was already used.'
-            : 'This account has a second factor: the code of the authenticator app is asked too.',
-          'Type the 6 digits your app shows now in "code".',
+            ? 'El código no es correcto o ya se usó.'
+            : 'Esta cuenta tiene segundo factor: también se pide el código de la app de autenticación.',
+          'Escribe los 6 dígitos que tu app muestra ahora en "code".',
         ),
         PROFILE_WAIT,
       )
@@ -544,10 +544,13 @@ export async function changePassword(
   secret: string | undefined,
   input: { current: unknown; next: unknown; code?: unknown },
 ): Promise<void> {
-  inWeb(ctx, 'Changing a password')
+  inWeb(ctx, 'Cambiar la contraseña')
   const current = typeof input.current === 'string' ? input.current : ''
   if (!current || current.length > PASSWORD.max) {
-    throw invalid('Send your current password in "current".', 'Type the password you sign in with now.')
+    throw invalid(
+      'Envía tu contraseña actual en "current".',
+      'Escribe la contraseña con la que inicias sesión ahora.',
+    )
   }
   const next = checkPassword(input.next)
   const key = ctx.who.email ?? `account:${ctx.who.accountId}`
@@ -567,8 +570,8 @@ export async function changePassword(
       new AppError(
         400,
         'wrong_password',
-        'The current password is not right.',
-        'Type it again. Forgot it? Sign out and reset it from the sign-in page ("Forgot your password?").',
+        'La contraseña actual no es correcta.',
+        'Escríbela de nuevo. ¿La olvidaste? Cierra la sesión y restablécela desde la página de inicio de sesión ("¿Olvidaste tu contraseña?").',
       ),
       PROFILE_WAIT,
     )
@@ -598,10 +601,13 @@ export async function changePassword(
         key,
         now,
         code
-          ? invalid('The code is not right, or was already used.', 'Type the 6 digits your app shows now.')
+          ? invalid(
+              'El código no es correcto o ya se usó.',
+              'Escribe los 6 dígitos que tu app muestra ahora.',
+            )
           : invalid(
-              'This account has a second factor: send the code of the authenticator app in "code" too.',
-              'Type the 6 digits your app shows now.',
+              'Esta cuenta tiene segundo factor: envía también el código de la app de autenticación en "code".',
+              'Escribe los 6 dígitos que tu app muestra ahora.',
             ),
         PROFILE_WAIT,
       )
@@ -653,9 +659,10 @@ export async function startTotp(ctx: Ctx, secret: string | undefined, code?: unk
 export async function confirmTotp(ctx: Ctx, secret: string | undefined, code: unknown) {
   webOnly(ctx)
   const a = await ctx.db.one<Row>('SELECT totp_pending FROM accounts WHERE id = $1', [ctx.who.accountId])
-  if (!a?.totp_pending) throw invalid('There is no second factor being set up.', 'Start it first.')
+  if (!a?.totp_pending) throw invalid('No hay ningún segundo factor en preparación.', 'Inícialo primero.')
   const step = checkTotp(openSeed(secret, String(a.totp_pending)), String(code ?? ''), ctx.clock(), null)
-  if (step === null) throw invalid('The code is not right.', 'Type the 6 digits your app shows now.')
+  if (step === null)
+    throw invalid('El código no es correcto.', 'Escribe los 6 dígitos que tu app muestra ahora.')
   await ctx.db.query(
     'UPDATE accounts SET totp_secret = totp_pending, totp_pending = NULL, totp_last_step = $2 WHERE id = $1',
     [ctx.who.accountId, step],
@@ -694,12 +701,12 @@ export async function disableTotp(ctx: Ctx, secret: string | undefined, code: un
 export async function adminResetTotp(ctx: Ctx, accountId: string) {
   webOnly(ctx)
   if (!ctx.who.isAdmin)
-    throw new AppError(403, 'forbidden', 'Only the administration does this.', 'Ask the administration.')
+    throw new AppError(403, 'forbidden', 'Solo la administración hace esto.', 'Pídeselo a la administración.')
   const r = await ctx.db.one(
     'UPDATE accounts SET totp_secret = NULL, totp_pending = NULL, totp_last_step = NULL WHERE id = $1 RETURNING id',
     [accountId],
   )
-  if (!r) throw notFound('account')
+  if (!r) throw notFound('cuenta')
   await audit(ctx.db, {
     at: ctx.clock(),
     actorId: ctx.who.accountId,

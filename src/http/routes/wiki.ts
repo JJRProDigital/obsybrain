@@ -46,7 +46,7 @@ function whole(v: string | null, name: string, min: number, max: number): number
   if (v === null || v === '') return undefined
   const n = Number(v)
   if (!Number.isSafeInteger(n) || n < min || n > max) {
-    throw invalid(`"${name}" must be a whole number from ${min} to ${max}.`, `Fix "${name}".`)
+    throw invalid(`"${name}" debe ser un número entero de ${min} a ${max}.`, `Corrige "${name}".`)
   }
   return n
 }
@@ -55,7 +55,7 @@ function whole(v: string | null, name: string, min: number, max: number): number
 function looseOf(v: string | null): true | undefined {
   if (v === null) return undefined
   if (v !== '1')
-    throw invalid('"loose" is "1" or left out.', 'Send loose=1 to open the pages gathered at a level.')
+    throw invalid('"loose" es "1" o se omite.', 'Envía loose=1 para abrir las páginas agrupadas en un nivel.')
   return true
 }
 
@@ -63,7 +63,7 @@ export const wikiRoutes: Route[] = [
   route('GET /v1/brains/:slug/wiki/map', async (r) => {
     const status = q(r.query.get('status'))
     if (status !== undefined && status !== 'all')
-      throw invalid('"status" is "all", or left out for current pages only.', 'Fix "status".')
+      throw invalid('"status" es "all", o se omite para solo las páginas actuales.', 'Corrige "status".')
     return { body: await wikiMap(ctxOf(r), r.params.slug as string, { all: status === 'all' }) }
   }),
   route('GET /v1/brains/:slug/wiki/decisions', async (r) => ({
@@ -106,8 +106,8 @@ export const wikiRoutes: Route[] = [
     for (const k of r.query.keys())
       if (!['prefix', 'loose', 'q', 'type', 'status', 'tag', 'linkKind'].includes(k))
         throw invalid(
-          `"${k}" is not a parameter of the graph.`,
-          'Use prefix, loose, q, type, status, tag or linkKind.',
+          `"${k}" no es un parámetro del grafo.`,
+          'Usa prefix, loose, q, type, status, tag o linkKind.',
         )
     const loose = looseOf(r.query.get('loose'))
     return {
@@ -156,7 +156,7 @@ export const wikiRoutes: Route[] = [
       const parts = compare.split(',')
       const [a, b] = parts.map((x) => whole(x, 'compare', 1, 1_000_000))
       if (parts.length !== 2 || a === undefined || b === undefined)
-        throw invalid('"compare" is two revisions, e.g. 3,5.', 'Fix "compare".')
+        throw invalid('"compare" son dos revisiones, p. ej. 3,5.', 'Corrige "compare".')
       const body = {
         a: await pageRevision(ctxOf(r), slug, address, a),
         b: await pageRevision(ctxOf(r), slug, address, b),
@@ -172,7 +172,7 @@ export const wikiRoutes: Route[] = [
     // The page and its history in one read (the web shows both on one visit: one read, not two).
     const include = q(r.query.get('include'))
     if (include !== undefined && include !== 'history')
-      throw invalid('"include" is "history", or left out.', 'Fix "include".')
+      throw invalid('"include" es "history", o se omite.', 'Corrige "include".')
     const ctx = ctxOf(r)
     const reading = await getPage(ctx, slug, address)
     await track(ctx.root ?? ctx.db, ctx, {

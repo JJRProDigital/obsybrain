@@ -35,7 +35,7 @@ export async function notify(
       await send(db, clock, outbox, n.mailKind ?? 'notice', {
         to: a.email,
         subject: n.subject,
-        text: `${n.text}\n\nOpen obsybrain to see it: ${base}/\n`,
+        text: `${n.text}\n\nAbre obsybrain para verlo: ${base}/\n`,
       })
     }
   }
@@ -72,8 +72,8 @@ export async function myNotices(ctx: Ctx) {
       name: String(t.name),
       last4: String(t.last4),
       expiresAt: (t.expires_at as Date).toISOString(),
-      message: `Your token "${t.name}" ends on ${(t.expires_at as Date).toISOString().slice(0, 10)}.`,
-      action: { label: 'Create a new token', method: 'POST', path: '/v1/me/tokens' },
+      message: `Tu token "${t.name}" vence el ${(t.expires_at as Date).toISOString().slice(0, 10)}.`,
+      action: { label: 'Crear un token nuevo', method: 'POST', path: '/v1/me/tokens' },
     })),
     notices: rows.map((r) => ({
       id: String(r.id),
@@ -117,12 +117,12 @@ export async function remindExpiringTokens(
   for (const r of rows) {
     const sent = await send(db, clock, outbox, 'token_expiry', {
       to: String(r.email),
-      subject: `Your obsybrain token "${r.name}" ends soon`,
+      subject: `Tu token de obsybrain "${r.name}" vence pronto`,
       text: [
-        `Your token "${r.name}" ends on ${(r.expires_at as Date).toISOString().slice(0, 10)}.`,
-        'Agents that use it will stop working then.',
+        `Tu token "${r.name}" vence el ${(r.expires_at as Date).toISOString().slice(0, 10)}.`,
+        'Los agentes que lo usen dejarán de funcionar en ese momento.',
         '',
-        `Create a new one in your profile: ${base}/profile/tokens`,
+        `Crea uno nuevo en tu perfil: ${base}/profile/tokens`,
       ].join('\n'),
     })
     // A send that failed is tried again on the next round.

@@ -243,7 +243,7 @@ export async function writeReadable(db: Db, zip: Zip, o: ExportOptions): Promise
           ['client', e.s_client == null ? null : String(e.s_client)],
           ['ref', e.ref == null ? null : String(e.ref)],
           ['purpose', String(e.purpose)],
-        ])}\n# ${journalText(oneLine(String(e.purpose) || `Session of ${minute(e.opened_at)}`))}\n`,
+        ])}\n# ${journalText(oneLine(String(e.purpose) || `Sesión de ${minute(e.opened_at)}`))}\n`,
       )
     }
     entries += 1
@@ -282,7 +282,7 @@ export async function writeReadable(db: Db, zip: Zip, o: ExportOptions): Promise
     const key = `${p.type} · ${p.address.split('/')[0]}`
     groups.set(key, [...(groups.get(key) ?? []), p])
   }
-  if (!pages.length) index.push('No pages yet.')
+  if (!pages.length) index.push('Todavía no hay páginas.')
   for (const [key, list] of groups) {
     index.push(`## ${key}`, '')
     for (const p of list) {
@@ -307,7 +307,7 @@ export async function writeReadable(db: Db, zip: Zip, o: ExportOptions): Promise
             (p) =>
               `- ${link(fileOf.get(p.id) as string, p.title)}${p.status === 'current' ? '' : ` (${p.status})`} — ${minute(p.createdAt)}${p.summary.trim() ? ` — ${plain(oneLine(p.summary))}` : ''}`,
           )
-        : ['No decisions yet.']),
+        : ['Todavía no hay decisiones.']),
     ].join('\n')}\n`,
   )
 
@@ -347,19 +347,19 @@ export async function writeReadable(db: Db, zip: Zip, o: ExportOptions): Promise
         '\\[\\[wiki links]]',
       ),
       '',
-      '## What is here',
+      '## Qué hay aquí',
       '',
-      `- \`wiki/\`: the wiki, one page a file at its address (${plural(pages.length, 'page', 'pages')}). Each file starts with a header: type, status, tags, summary, sources and typed links (related, depends-on, contradicts, supersedes, part-of, example-of). Retired pages are not here.`,
-      `- \`raw/journal/\`: the journal, one note a session in folders by year and month (${plural(notes, 'note', 'notes')}, ${plural(entries, 'entry', 'entries')}). Each entry is a section with a block anchor (^id); the sources of a page link to it.`,
-      '- `index.md`: the map of the wiki, by type and area.',
-      '- `decisions.md`: the decisions, newest first.',
-      '- `log.md`: what changed in the wiki and why, newest first.',
+      `- \`wiki/\`: la wiki, una página por archivo en su dirección (${plural(pages.length, 'página', 'páginas')}). Cada archivo empieza con un encabezado: tipo, estado, etiquetas, resumen, fuentes y enlaces tipados (related, depends-on, contradicts, supersedes, part-of, example-of). Las páginas retiradas no están aquí.`,
+      `- \`raw/journal/\`: el diario, una nota por sesión en carpetas por año y mes (${plural(notes, 'nota', 'notas')}, ${plural(entries, 'entrada', 'entradas')}). Cada entrada es una sección con un block anchor (^id); las fuentes de una página enlazan a ella.`,
+      '- `index.md`: el mapa de la wiki, por tipo y área.',
+      '- `decisions.md`: las decisiones, de lo más nuevo a lo más viejo.',
+      '- `log.md`: qué cambió en la wiki y por qué, de lo más nuevo a lo más viejo.',
       '',
       o.includeForgotten
-        ? 'Forgotten entries are included, each marked "forgotten: true". Purged entries are never exported.'
-        : 'Forgotten and purged entries are not exported.',
+        ? 'Las entradas olvidadas se incluyen, cada una marcada como "forgotten: true". Las entradas purgadas nunca se exportan.'
+        : 'Las entradas olvidadas y purgadas no se exportan.',
       '',
-      'This export is for reading. To move a brain to another installation with its history, use the faithful export.',
+      'Esta exportación es para leer. Para mover un brain a otra instalación con su historial, usa la exportación faithful.',
     ].join('\n')}\n`,
   )
 }

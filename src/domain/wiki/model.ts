@@ -116,25 +116,26 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
     problems.push({ op: i, message })
     return null
   }
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return bad('An operation must be a JSON object.')
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    return bad('Una operación debe ser un objeto JSON.')
   const o = raw as Raw
   const kind = o.op
   if (typeof kind !== 'string' || !(OP_KINDS as readonly string[]).includes(kind)) {
-    return bad(`Unknown operation "${shown(kind)}". Use one of: ${OP_KINDS.join(', ')}.`)
+    return bad(`Operación desconocida "${shown(kind)}". Usa una de: ${OP_KINDS.join(', ')}.`)
   }
   const before = problems.length
   const text = (key: string, max: number, required: boolean): string | undefined => {
     const v = o[key]
     if (v === undefined || v === null) {
-      if (required) problems.push({ op: i, message: `"${key}" is required for "${kind}".` })
+      if (required) problems.push({ op: i, message: `"${key}" es obligatorio para "${kind}".` })
       return undefined
     }
     if (typeof v !== 'string') {
-      problems.push({ op: i, message: `"${key}" must be text.` })
+      problems.push({ op: i, message: `"${key}" debe ser texto.` })
       return undefined
     }
     const r = redact(key === 'body' ? v : v.trim()).text
-    if (r.length > max) problems.push({ op: i, message: `"${key}" is longer than ${max} characters.` })
+    if (r.length > max) problems.push({ op: i, message: `"${key}" tiene más de ${max} caracteres.` })
     return r
   }
   const addr = (key: string): string => {
@@ -142,7 +143,7 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
     if (!isAddress(v)) {
       problems.push({
         op: i,
-        message: `"${key}" is not a valid address: lowercase words with hyphens, levels split by "/", e.g. "audience/retention".`,
+        message: `"${key}" no es una dirección válida: palabras en minúsculas con guiones, niveles separados por "/", p. ej. "audience/retention".`,
       })
       return ''
     }
@@ -150,18 +151,18 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
   }
   const reason = text('reason', WIKI_LIMITS.reason, true) ?? ''
   if (typeof o.reason === 'string' && !reason.trim())
-    problems.push({ op: i, message: 'Say why, in "reason".' })
+    problems.push({ op: i, message: 'Di por qué, en "reason".' })
   const address = addr('address')
   const pageType = (required: boolean): PageType | undefined => {
     const v = o.type
     if (v === undefined || v === null) {
-      if (required) problems.push({ op: i, message: '"type" is required for "create".' })
+      if (required) problems.push({ op: i, message: '"type" es obligatorio para "create".' })
       return undefined
     }
     if (typeof v !== 'string' || !(PAGE_TYPES as readonly string[]).includes(v)) {
       problems.push({
         op: i,
-        message: `Unknown page type "${shown(v)}". Use one of: ${PAGE_TYPES.join(', ')}.`,
+        message: `Tipo de página desconocido "${shown(v)}". Usa uno de: ${PAGE_TYPES.join(', ')}.`,
       })
       return undefined
     }
@@ -171,14 +172,14 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
     const v = o.tags
     if (v === undefined || v === null) return undefined
     if (!Array.isArray(v) || v.some((t) => typeof t !== 'string' || !t.trim())) {
-      problems.push({ op: i, message: '"tags" must be a list of non-empty texts.' })
+      problems.push({ op: i, message: '"tags" debe ser una lista de textos no vacíos.' })
       return undefined
     }
     const out = [...new Set((v as string[]).map((t) => redact(t.trim()).text))]
     if (out.length > WIKI_LIMITS.tags || out.some((t) => t.length > WIKI_LIMITS.tag)) {
       problems.push({
         op: i,
-        message: `Up to ${WIKI_LIMITS.tags} tags of up to ${WIKI_LIMITS.tag} characters.`,
+        message: `Hasta ${WIKI_LIMITS.tags} etiquetas de hasta ${WIKI_LIMITS.tag} caracteres.`,
       })
     }
     return out
@@ -187,12 +188,12 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
     const v = o[key]
     if (v === undefined || v === null) return undefined
     if (!Array.isArray(v)) {
-      problems.push({ op: i, message: `"${key}" must be a list.` })
+      problems.push({ op: i, message: `"${key}" debe ser una lista.` })
       return undefined
     }
     // Limits count distinct items; a list far over any limit is refused before reading it.
     if (v.length > WIKI_LIMITS.sources * 10) {
-      problems.push({ op: i, message: `At most ${WIKI_LIMITS.sources} ${key}.` })
+      problems.push({ op: i, message: `Como máximo ${WIKI_LIMITS.sources} ${key}.` })
       return undefined
     }
     const out: Source[] = []
@@ -204,13 +205,13 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
         const url = redact(x.url).text
         const title = typeof x.title === 'string' ? redact(x.title.trim()).text : undefined
         if (url.length > WIKI_LIMITS.url || (title?.length ?? 0) > WIKI_LIMITS.sourceTitle) {
-          problems.push({ op: i, message: 'A source address or its title is too long.' })
+          problems.push({ op: i, message: 'La dirección de una fuente o su título es demasiado larga.' })
         }
         out.push(title ? { url, title } : { url })
       } else {
         problems.push({
           op: i,
-          message: `Each item of "${key}" is {"entryId": "ent_…"} or {"url": "https://…", "title"?: "…"}.`,
+          message: `Cada elemento de "${key}" es {"entryId": "ent_…"} o {"url": "https://…", "title"?: "…"}.`,
         })
       }
     }
@@ -218,14 +219,17 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
     const seen = new Set<string>()
     const distinct = out.filter((s) => !seen.has(sourceKey(s)) && Boolean(seen.add(sourceKey(s))))
     if (distinct.length > WIKI_LIMITS.sources)
-      problems.push({ op: i, message: `At most ${WIKI_LIMITS.sources} ${key}.` })
+      problems.push({ op: i, message: `Como máximo ${WIKI_LIMITS.sources} ${key}.` })
     return distinct
   }
   const links = (key: string): LinkRef[] => {
     const v = o[key]
     if (v === undefined || v === null) return []
     if (!Array.isArray(v) || v.length > WIKI_LIMITS.links * 10) {
-      problems.push({ op: i, message: `"${key}" must be a list of at most ${WIKI_LIMITS.links} links.` })
+      problems.push({
+        op: i,
+        message: `"${key}" debe ser una lista de como máximo ${WIKI_LIMITS.links} enlaces.`,
+      })
       return []
     }
     const out: LinkRef[] = []
@@ -238,7 +242,7 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
       ) {
         problems.push({
           op: i,
-          message: `Each link is {"kind": one of ${LINK_KINDS.join(', ')}, "to": "<address>"}.`,
+          message: `Cada enlace es {"kind": uno de ${LINK_KINDS.join(', ')}, "to": "<dirección>"}.`,
         })
         continue
       }
@@ -246,14 +250,17 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
         out.push({ kind: x.kind as LinkKind, to: x.to })
     }
     if (out.length > WIKI_LIMITS.links) {
-      problems.push({ op: i, message: `"${key}" must be a list of at most ${WIKI_LIMITS.links} links.` })
+      problems.push({
+        op: i,
+        message: `"${key}" debe ser una lista de como máximo ${WIKI_LIMITS.links} enlaces.`,
+      })
     }
     return out
   }
   const linkKind = (): LinkKind => {
     const v = o.kind
     if (typeof v !== 'string' || !(LINK_KINDS as readonly string[]).includes(v)) {
-      problems.push({ op: i, message: `"kind" must be one of: ${LINK_KINDS.join(', ')}.` })
+      problems.push({ op: i, message: `"kind" debe ser uno de: ${LINK_KINDS.join(', ')}.` })
       return 'related'
     }
     return v as LinkKind
@@ -261,11 +268,11 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
   const whole = (key: string, required: boolean): number | undefined => {
     const v = o[key]
     if (v === undefined || v === null) {
-      if (required) problems.push({ op: i, message: `"${key}" is required for "${kind}".` })
+      if (required) problems.push({ op: i, message: `"${key}" es obligatorio para "${kind}".` })
       return undefined
     }
     if (typeof v !== 'number' || !Number.isSafeInteger(v) || v < 1) {
-      problems.push({ op: i, message: `"${key}" must be a revision number (1 or more).` })
+      problems.push({ op: i, message: `"${key}" debe ser un número de revisión (1 o más).` })
       return undefined
     }
     return v
@@ -275,7 +282,7 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
   switch (kind as OpKind) {
     case 'create': {
       const title = text('title', WIKI_LIMITS.title, true) ?? ''
-      if (o.title !== undefined && !title) problems.push({ op: i, message: 'A page needs a title.' })
+      if (o.title !== undefined && !title) problems.push({ op: i, message: 'Una página necesita título.' })
       op = {
         op: 'create',
         address,
@@ -289,7 +296,7 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
         reason,
       }
       if (op.links.some((l) => l.to === address))
-        problems.push({ op: i, message: 'A page cannot link to itself.' })
+        problems.push({ op: i, message: 'Una página no puede enlazarse a sí misma.' })
       break
     }
     case 'edit': {
@@ -300,7 +307,7 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
       if (t) e.type = t
       const title = text('title', WIKI_LIMITS.title, false)
       if (title !== undefined) {
-        if (!title) problems.push({ op: i, message: 'A page needs a title.' })
+        if (!title) problems.push({ op: i, message: 'Una página necesita título.' })
         e.title = title
       }
       const summary = text('summary', WIKI_LIMITS.summary, false)
@@ -314,7 +321,7 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
       if ([e.type, e.title, e.summary, e.body, e.tags, e.sources].every((x) => x === undefined)) {
         problems.push({
           op: i,
-          message: 'An edit changes at least one of type, title, summary, body, tags, sources.',
+          message: 'Una edición cambia al menos uno de type, title, summary, body, tags, sources.',
         })
       }
       op = e
@@ -323,17 +330,18 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
     case 'move':
       op = { op: 'move', address, to: addr('to'), reason }
       if (op.to && op.to === address)
-        problems.push({ op: i, message: 'The new address is the same as the old one.' })
+        problems.push({ op: i, message: 'La dirección nueva es igual a la vieja.' })
       break
     case 'link':
     case 'unlink':
       op = { op: kind as 'link' | 'unlink', address, kind: linkKind(), to: addr('to'), reason }
-      if (op.to && op.to === address) problems.push({ op: i, message: 'A page cannot link to itself.' })
+      if (op.to && op.to === address)
+        problems.push({ op: i, message: 'Una página no puede enlazarse a sí misma.' })
       break
     case 'status': {
       const v = o.status
       if (typeof v !== 'string' || !(PAGE_STATUSES as readonly string[]).includes(v)) {
-        problems.push({ op: i, message: `"status" must be one of: ${PAGE_STATUSES.join(', ')}.` })
+        problems.push({ op: i, message: `"status" debe ser uno de: ${PAGE_STATUSES.join(', ')}.` })
       }
       const s: Extract<Op, { op: 'status' }> = {
         op: 'status',
@@ -343,16 +351,18 @@ export function readOp(raw: unknown, i: number, problems: Problem[]): Op | null 
       }
       if (s.status === 'superseded') {
         s.supersededBy = addr('supersededBy')
-        if (s.supersededBy === address) problems.push({ op: i, message: 'A page cannot supersede itself.' })
+        if (s.supersededBy === address)
+          problems.push({ op: i, message: 'Una página no se reemplaza a sí misma.' })
       } else if (o.supersededBy !== undefined) {
-        problems.push({ op: i, message: '"supersededBy" only goes with status "superseded".' })
+        problems.push({ op: i, message: '"supersededBy" solo va con el estado "superseded".' })
       }
       op = s
       break
     }
     case 'merge': {
       const from = addr('from')
-      if (from && from === address) problems.push({ op: i, message: 'A page cannot be merged into itself.' })
+      if (from && from === address)
+        problems.push({ op: i, message: 'Una página no se fusiona consigo misma.' })
       op = {
         op: 'merge',
         address,

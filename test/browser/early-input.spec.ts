@@ -51,7 +51,7 @@ test('add a correction: a page typed the moment its field appears is kept', asyn
   await scenario(context, baseURL as string, 'member')
   await early(page, '#correction-page', { text: 'retention', event: 'input' })
   await page.goto('/b/growth/journal/correct')
-  await page.getByLabel('A page of the wiki').check()
+  await page.getByLabel('Una página del wiki').check()
   await expect.poll(() => given(page)).toBe('retention')
   await page.waitForTimeout(400)
   await expect(page.locator('#correction-page')).toHaveValue('retention')

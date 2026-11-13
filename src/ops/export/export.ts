@@ -1,4 +1,4 @@
-// Exporting a brain (spec B7 «Exportar un cerebro», plan §3.5): its curators only, in the web (someone outside is
+// Exporting a brain (spec B7 «Exportar un brain», plan §3.5): its curators only, in the web (someone outside is
 // told it does not exist; the administration exports once it has joined and made itself a curator, pack rule 3),
 // in either format, with forgotten entries only when asked. The export is checked, audited and told to the brain
 // first. Then it is prepared, at the server's own pace, into a private file from one short snapshot (REPEATABLE
@@ -54,13 +54,13 @@ export type ExportFile = {
 export function exportQuery(format: string | null, includeForgotten: string | null) {
   if (!(EXPORT_FORMATS as readonly string[]).includes(format ?? ''))
     throw invalid(
-      '"format" is "readable" or "faithful".',
-      'Send format=readable (to read) or format=faithful (to import elsewhere).',
+      '"format" es "readable" o "faithful".',
+      'Envía format=readable (para leer) o format=faithful (para importar en otro lado).',
     )
   if (includeForgotten !== null && includeForgotten !== '0' && includeForgotten !== '1')
     throw invalid(
-      '"includeForgotten" is 1 or 0.',
-      'Send includeForgotten=1 to include forgotten entries, or leave it out.',
+      '"includeForgotten" es 1 o 0.',
+      'Envía includeForgotten=1 para incluir las entradas olvidadas, u omítelo.',
     )
   return { format: format as ExportFormat, includeForgotten: includeForgotten === '1' }
 }
@@ -75,23 +75,23 @@ const busy = () =>
   new AppError(
     409,
     'export_busy',
-    'Another export is being prepared. Try again in a minute.',
-    'Wait a minute and download the export again.',
+    'Otra exportación se está preparando. Vuelve a intentarlo en un minuto.',
+    'Espera un minuto y descarga la exportación de nuevo.',
   )
 const noSpace = () =>
   new AppError(
     507,
     'export_no_space',
-    'The server does not have enough free disk space to prepare this export.',
-    'Ask an administrator to free disk space on the server, then try again.',
+    'El servidor no tiene espacio en disco suficiente para preparar esta exportación.',
+    'Pide a un administrador que libere espacio en el servidor y vuelve a intentarlo.',
   )
 
 const unsafe = () =>
   new AppError(
     500,
     'export_folder_unsafe',
-    'The folder where exports are prepared is not a private folder of obsybrain.',
-    'Ask an administrator: it must be a folder (not a link) owned by the user obsybrain runs as, with mode 700.',
+    'La carpeta donde se preparan las exportaciones no es una carpeta privada de obsybrain.',
+    'Pídeselo a un administrador: debe ser una carpeta (no un enlace) del usuario con el que corre obsybrain, con modo 700.',
   )
 
 // The folder of the server's data (next to the copies) where exports are prepared: made private when it is not
@@ -141,8 +141,8 @@ const abandoned = () =>
   new AppError(
     499,
     'client_left',
-    'The client left before the export was ready.',
-    'Download the export again.',
+    'El cliente se fue antes de que la exportación estuviera lista.',
+    'Descarga la exportación de nuevo.',
   )
 
 export async function exportBrain(
@@ -151,7 +151,7 @@ export async function exportBrain(
   o: { format: ExportFormat; includeForgotten: boolean },
   place: { dir: string | null; signal?: AbortSignal } = { dir: null },
 ): Promise<ExportFile> {
-  inWeb(ctx, 'Exporting a brain')
+  inWeb(ctx, 'Exportar un brain')
   const { brain, role } = await inBrain(ctx, { slug })
   await allow(ctx, 'brain.export', { role, brainStatus: brain.status }, brain.id)
   if (EXPORT_STATE.building >= EXPORT_LIMITS.building) throw busy()

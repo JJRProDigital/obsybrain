@@ -21,13 +21,13 @@
 		templates
 		respond <<PAGE
 			<!doctype html>
-			<html lang="en">
+			<html lang="es">
 			<head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="robots" content="noindex">
 			<meta http-equiv="refresh" content="10">
-			<title>obsybrain is being updated</title>
+			<title>obsybrain se está actualizando</title>
 			<style>
 			:root { color-scheme: light dark; }
 			body { margin: 0; padding: 16px; font: 16px/1.5 system-ui, sans-serif; }
@@ -38,10 +38,10 @@
 			</head>
 			<body>
 			<main>
-			<h1>obsybrain is being updated</h1>
-			<p>{{if fileExists "/step.txt"}}{{include "/step.txt" | html}}{{else}}Getting ready.{{end}}</p>
-			<p>Your work is safe. This page reloads every 10 seconds and goes back to obsybrain when the update ends.</p>
-			<p><a href="">Reload now</a></p>
+			<h1>obsybrain se está actualizando</h1>
+			<p>{{if fileExists "/step.txt"}}{{include "/step.txt" | html}}{{else}}Preparando todo.{{end}}</p>
+			<p>Tu trabajo está a salvo. Esta página se recarga cada 10 segundos y vuelve a obsybrain cuando termina la actualización.</p>
+			<p><a href="">Recargar ahora</a></p>
 			</main>
 			</body>
 			</html>
@@ -49,6 +49,6 @@
 	}
 	handle {
 		header Content-Type application/json
-		respond `{"error":{"code":"under_maintenance","message":"obsybrain is under maintenance, retry after 30 seconds","howToProceed":"Send it again after that time."},"retryAfter":30}` 503
+		respond `{"error":{"code":"under_maintenance","message":"obsybrain está en mantenimiento, reintenta en 30 segundos","howToProceed":"Envíalo de nuevo pasado ese tiempo."},"retryAfter":30}` 503
 	}
 }

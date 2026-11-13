@@ -100,7 +100,7 @@ export async function readTrail(
 ): Promise<{ items: TrailLine[]; next: number | null; older?: Older }> {
   const { brain, role } = await inBrain(ctx, { slug })
   const given = [q.ref, q.session, q.page].filter((v) => v !== undefined).length
-  if (given > 1) throw invalid('Ask by one of "ref", "session" or "page".', 'Keep only one of them.')
+  if (given > 1) throw invalid('Pide por uno de "ref", "session" o "page".', 'Deja solo uno de ellos.')
   const limit = q.limit ?? 100
   const params: unknown[] = [brain.id]
   const p = (v: unknown) => {

@@ -58,7 +58,10 @@ describe('groupsOf', () => {
 
   it('says why a group goes together, change by change, counted from 1', () => {
     const ops = [op(0), op(1, { dependsOn: [0] }), op(2, { dependsOn: [0, 1] })]
-    assert.equal(togetherWhy([0, 1, 2], ops), 'Change 2 needs change 1; change 3 needs changes 1 and 2.')
+    assert.equal(
+      togetherWhy([0, 1, 2], ops),
+      'El cambio 2 necesita el cambio 1; el cambio 3 necesita los cambios 1 y 2.',
+    )
   })
 })
 
@@ -89,20 +92,20 @@ describe('needsBase', () => {
 describe('blockers', () => {
   const ops = [op(0), op(1), op(2, { stale: { base: null, current: {}, proposed: {} } })]
   it('approve all waits for every old base; it needs no comment', () => {
-    assert.match(blockers(ops, none).all ?? '', /Change 3 .*older version.*confirm you checked it/)
+    assert.match(blockers(ops, none).all ?? '', /El cambio 3 .*versión más vieja.*confirma que lo revisaste/)
     assert.equal(blockers(ops, { ...none, baseReviewed: [2] }).all, null)
   })
   it('approve selected needs a choice that is not everything, and a comment for the rest', () => {
     const ok = { ...none, selected: [0, 1] }
-    assert.match(blockers(ops, none).some ?? '', /Choose/)
-    assert.match(blockers(ops, ok).some ?? '', /Write why/)
+    assert.match(blockers(ops, none).some ?? '', /Elige/)
+    assert.match(blockers(ops, ok).some ?? '', /Escribe en el comentario/)
     assert.equal(blockers(ops, { ...ok, comment: 'Not the third.' }).some, null)
-    assert.match(blockers(ops, { ...ok, selected: [0, 1, 2], comment: 'x' }).some ?? '', /Approve all/)
-    assert.match(blockers(ops, { ...ok, selected: [2], comment: 'x' }).some ?? '', /Change 3/)
+    assert.match(blockers(ops, { ...ok, selected: [0, 1, 2], comment: 'x' }).some ?? '', /Aprobar todo/)
+    assert.match(blockers(ops, { ...ok, selected: [2], comment: 'x' }).some ?? '', /El cambio 3/)
     assert.equal(blockers(ops, { ...ok, selected: [2], comment: 'x', baseReviewed: [2] }).some, null)
   })
   it('return needs a comment; spaces are not one', () => {
-    assert.match(blockers(ops, { ...none, comment: '  ' }).back ?? '', /Write why/)
+    assert.match(blockers(ops, { ...none, comment: '  ' }).back ?? '', /Escribe en el comentario/)
     assert.equal(blockers(ops, { ...none, comment: 'No.' }).back, null)
   })
   it('the comment is needed only for what the person is doing: «needs» says whether it is the comment', () => {
@@ -175,15 +178,15 @@ describe('decidedNotice', () => {
   it('another person decided the proposal on screen: who and how', () => {
     assert.deepEqual(decidedNotice(e({}), 'prp_1', 'acc_eric'), {
       who: 'Eva',
-      text: 'Approved by Eva just now. This proposal is read-only now.',
+      text: 'Aprobada por Eva recién. Esta propuesta es de solo lectura ahora.',
     })
     assert.equal(
       decidedNotice(e({ target: { id: 'prp_1', label: 'partially_approved' } }), 'prp_1', 'acc_eric')?.text,
-      'Partly approved by Eva just now. This proposal is read-only now.',
+      'Aprobada en parte por Eva recién. Esta propuesta es de solo lectura ahora.',
     )
     assert.equal(
       decidedNotice(e({ target: { id: 'prp_1', label: 'returned' } }), 'prp_1', 'acc_eric')?.text,
-      'Returned by Eva just now. This proposal is read-only now.',
+      'Devuelta por Eva recién. Esta propuesta es de solo lectura ahora.',
     )
     // Spec v0.7: decided with a key; the status comes first in the label.
     assert.equal(
@@ -192,7 +195,7 @@ describe('decidedNotice', () => {
         'prp_1',
         'acc_eric',
       )?.text,
-      'Returned by Eva just now. This proposal is read-only now.',
+      'Devuelta por Eva recién. Esta propuesta es de solo lectura ahora.',
     )
     assert.equal(
       decidedNotice(
@@ -200,7 +203,7 @@ describe('decidedNotice', () => {
         'prp_1',
         'acc_eric',
       )?.text,
-      'Withdrawn by Eva just now. This proposal is read-only now.',
+      'Retirada por Eva recién. Esta propuesta es de solo lectura ahora.',
     )
   })
   it('nothing for another proposal, another kind, or my own decision', () => {
@@ -214,14 +217,17 @@ describe('decidedNotice', () => {
 describe('opWords', () => {
   it('says each kind of change as a person would', () => {
     const w = (o: Record<string, unknown>) => opWords({ address: 'a/x', reason: 'r', ...o } as ReviewOp['op'])
-    assert.equal(w({ op: 'create' }), 'New page a/x')
-    assert.equal(w({ op: 'edit' }), 'Edit a/x')
-    assert.equal(w({ op: 'move', to: 'b/y' }), 'Move a/x to b/y')
-    assert.equal(w({ op: 'link', to: 'b/y', kind: 'depends-on' }), 'Link a/x to b/y (depends on)')
-    assert.equal(w({ op: 'unlink', to: 'b/y', kind: 'related' }), 'Remove the link a/x to b/y (related to)')
-    assert.equal(w({ op: 'status', status: 'stale' }), 'Mark a/x stale')
-    assert.equal(w({ op: 'merge', from: 'b/y' }), 'Merge b/y into a/x')
-    assert.equal(w({ op: 'revert', toRevision: 3 }), 'Restore a/x to revision 3')
+    assert.equal(w({ op: 'create' }), 'Página nueva a/x')
+    assert.equal(w({ op: 'edit' }), 'Editar a/x')
+    assert.equal(w({ op: 'move', to: 'b/y' }), 'Mover a/x a b/y')
+    assert.equal(w({ op: 'link', to: 'b/y', kind: 'depends-on' }), 'Enlazar a/x con b/y (depende de)')
+    assert.equal(
+      w({ op: 'unlink', to: 'b/y', kind: 'related' }),
+      'Quitar el enlace de a/x con b/y (relacionado con)',
+    )
+    assert.equal(w({ op: 'status', status: 'stale' }), 'Marcar a/x desactualizada')
+    assert.equal(w({ op: 'merge', from: 'b/y' }), 'Fusionar b/y en a/x')
+    assert.equal(w({ op: 'revert', toRevision: 3 }), 'Restaurar a/x a la revisión 3')
   })
 })
 
@@ -269,8 +275,14 @@ describe('editIsOld', () => {
 describe('chooseNote', () => {
   const ops = [op(0), op(1, { dependsOn: [0] }), op(2)]
   it('says what came along or went with a choice', () => {
-    assert.equal(chooseNote([], [0, 1], 1, true, ops), 'Also chose change 1, which change 2 needs.')
-    assert.equal(chooseNote([0, 1], [], 0, false, ops), 'Also left out change 2, which needs change 1.')
+    assert.equal(
+      chooseNote([], [0, 1], 1, true, ops),
+      'También elegiste el cambio 1, que el cambio 2 necesita.',
+    )
+    assert.equal(
+      chooseNote([0, 1], [], 0, false, ops),
+      'También dejaste fuera el cambio 2, que necesita el cambio 1.',
+    )
     assert.equal(chooseNote([], [2], 2, true, ops), null)
   })
 })
@@ -278,8 +290,8 @@ describe('chooseNote', () => {
 describe('approveKeyHold', () => {
   it('`a` approves all only with nothing chosen and nothing written', () => {
     assert.equal(approveKeyHold(none), null)
-    assert.match(approveKeyHold({ ...none, selected: [0] }) ?? '', /You chose some changes/)
-    assert.match(approveKeyHold({ ...none, comment: 'x' }) ?? '', /You wrote a comment/)
+    assert.match(approveKeyHold({ ...none, selected: [0] }) ?? '', /Elegiste algunos cambios/)
+    assert.match(approveKeyHold({ ...none, comment: 'x' }) ?? '', /Escribiste un comentario/)
     assert.equal(approveKeyHold({ ...none, comment: '   ' }), null)
   })
 })

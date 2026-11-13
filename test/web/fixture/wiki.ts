@@ -650,7 +650,7 @@ const notCurator = err(
   403,
   'forbidden',
   'Your role in this brain does not allow this: it needs curator.',
-  'Ask a curator of the brain (Eric) for the curator role.',
+  'Pide el rol curator a quien cure el brain (Eric).',
 )
 
 function changed(w: Wiki, revised: ReturnType<typeof revise>) {

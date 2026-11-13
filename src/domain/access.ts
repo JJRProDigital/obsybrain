@@ -22,8 +22,8 @@ export function serviceMainKey(ctx: Ctx, what: string): void {
   throw new AppError(
     403,
     'key_not_allowed',
-    `${what} takes the main key of a service account.`,
-    'Call it with the main key of the service account (obsybrain › Admin › Service accounts).',
+    `${what} exige la clave principal de una cuenta de servicio.`,
+    'Llámalo con la clave principal de la cuenta de servicio (obsybrain › Admin › Cuentas de servicio).',
   )
 }
 
@@ -41,10 +41,13 @@ export async function checkAccess(
   ctx: Ctx,
   input: { person: unknown; brains: unknown },
 ): Promise<AccessAnswer> {
-  serviceMainKey(ctx, 'Asking what a person may read')
+  serviceMainKey(ctx, 'Preguntar qué puede leer una persona')
   const person = typeof input.person === 'string' ? input.person.trim() : ''
   if (!person || person.length > 200) {
-    throw invalid('"person" is the email or account id of a person (1 to 200 characters).', 'Fix "person".')
+    throw invalid(
+      '"person" es el correo o el id de cuenta de una persona (1 a 200 caracteres).',
+      'Corrige "person".',
+    )
   }
   const asked = input.brains
   if (
@@ -54,8 +57,8 @@ export async function checkAccess(
     asked.some((s) => typeof s !== 'string' || s.length < 1 || s.length > 64)
   ) {
     throw invalid(
-      `"brains" is a list of 1 to ${ACCESS_MAX_BRAINS} brain names (slugs).`,
-      'Send "brains" as ["…", "…"].',
+      `"brains" es una lista de 1 a ${ACCESS_MAX_BRAINS} nombres de brain (slugs).`,
+      'Envía "brains" como ["…", "…"].',
     )
   }
   const slugs = [...new Set(asked as string[])]

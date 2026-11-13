@@ -25,8 +25,8 @@ const notThisKey = () =>
   new AppError(
     403,
     'web_only',
-    'Approval happens in the web.',
-    'Open the proposal in the obsybrain web, as a curator; or ask a curator of the brain to give this key the permission to write to the wiki, and it decides over MCP (brain_decide) and the API.',
+    'La aprobación se hace en la web.',
+    'Abre la propuesta en la web de obsybrain, como curador; o pídele a quien cure el brain que le dé a esta clave el permiso de escribir en la wiki, y decide por MCP (brain_decide) y la API.',
   )
 
 // Who decided through a key, as the log and the activity say it: the key's owner and the key's name.
@@ -50,10 +50,10 @@ async function load(
   byKey: ByKey | null
 }> {
   const row = await ctx.db.one(`SELECT * FROM proposals WHERE id = $1${lock ? ' FOR UPDATE' : ''}`, [id])
-  if (!row) throw notFound('proposal')
+  if (!row) throw notFound('propuesta')
   const { brain, role } = await inBrain(ctx, { id: String(row.brain_id) }, lock ? 'share' : null).catch(
     () => {
-      throw notFound('proposal')
+      throw notFound('propuesta')
     },
   )
   const web = ctx.who.credential.kind === 'web'
@@ -88,7 +88,10 @@ async function decisionOf(ctx: Ctx, s: Stored): Promise<Decision> {
 
 const checkRequestKey = (k: string | undefined) => {
   if (k !== undefined && (!k.trim() || k.length > 200))
-    throw invalid('A request key has 1 to 200 characters.', 'Use a fresh random id per request, e.g. a UUID.')
+    throw invalid(
+      'Una clave de petición tiene de 1 a 200 caracteres.',
+      'Usa un id aleatorio nuevo por petición, p. ej. un UUID.',
+    )
 }
 
 // Same key, same request: the same decision (CA8). Two retries racing are serialised here, as a direct write's are;
@@ -111,8 +114,8 @@ async function once(
     if (seen.request_hash !== hash) {
       throw conflict(
         'request_key_reused',
-        'This request key was already used for a different request.',
-        'Use a new request key for a new decision; reuse a key only to retry the very same request.',
+        'Esta clave de petición ya se usó para una petición distinta.',
+        'Usa una clave de petición nueva para una decisión nueva; reutiliza una clave solo para reintentar exactamente la misma petición.',
       )
     }
     return { again: await decisionOf(ctx, seen.receipt), keep: async () => {} }
@@ -139,8 +142,8 @@ async function stillAsSeen(ctx: Ctx, row: Row, seen: string): Promise<ProposalOp
   if (row.status === 'superseded') {
     const err = conflict(
       'proposal_changed',
-      'Its author replaced this proposal; nothing was applied.',
-      'Review the new version (in "current").',
+      'Su autor reemplazó esta propuesta; no se aplicó nada.',
+      'Revisa la versión nueva (en "current").',
     )
     err.current = { supersededBy: row.superseded_by }
     throw err
@@ -150,9 +153,9 @@ async function stillAsSeen(ctx: Ctx, row: Row, seen: string): Promise<ProposalOp
     const err = conflict(
       'already_decided',
       row.decided_by
-        ? `Already ${String(row.status).replace('_', ' ')} by ${by?.name ?? 'someone'} on ${(row.decided_at as Date).toISOString()}.`
-        : `This proposal is ${row.status}.`,
-      'Nothing to do; open the brain log to see what changed.',
+        ? `Ya "${String(row.status).replace('_', ' ')}" por ${by?.name ?? 'alguien'} el ${(row.decided_at as Date).toISOString()}.`
+        : `Esta propuesta está "${row.status}".`,
+      'Nada que hacer; abre el registro del brain para ver qué cambió.',
     )
     err.current = { status: row.status, decidedBy: row.decided_by, decidedAt: row.decided_at }
     throw err
@@ -163,8 +166,8 @@ async function stillAsSeen(ctx: Ctx, row: Row, seen: string): Promise<ProposalOp
   if (fingerprint(row, ops, await wikiPurges(ctx.db, String(row.brain_id))) !== seen) {
     const err = conflict(
       'proposal_changed',
-      'The proposal changed while you were looking at it; nothing was applied.',
-      'Review it again (the new version is in "current").',
+      'La propuesta cambió mientras la mirabas; no se aplicó nada.',
+      'Revísala de nuevo (la versión nueva está en "current").',
     )
     err.current = await buildReview(ctx, row, true)
     throw err
@@ -177,7 +180,7 @@ const commentOf = (raw: string | undefined): string | undefined => {
   // Stored and shown to the agent: redacted first, like every stored text (pack rule 1).
   const c = redact(raw.trim()).text
   if (!c || c.length > WIKI_LIMITS.comment) {
-    throw invalid(`A comment has 1 to ${WIKI_LIMITS.comment} characters.`, 'Say why, briefly.')
+    throw invalid(`Un comentario tiene de 1 a ${WIKI_LIMITS.comment} caracteres.`, 'Di por qué, brevemente.')
   }
   return c
 }
@@ -194,15 +197,15 @@ async function teach(
   const author = await ctx.db.one<{ name: string }>('SELECT name FROM accounts WHERE id = $1', [
     row.author_id,
   ])
-  const appliesTo = String(row.agent ?? author?.name ?? 'the proposer').slice(0, 80)
+  const appliesTo = String(row.agent ?? author?.name ?? 'quien propuso').slice(0, 80)
   const which = returned.map((o) => `${o.index} (${o.op.op} ${o.op.address})`).join(', ')
   await webCorrection(
     ctx,
     ctx.db,
     brainId,
     {
-      title: `Returned: ${String(row.title)}`.slice(0, 200),
-      content: `${comment}\n\nReturned operations of proposal ${row.id}: ${which}.`.slice(0, 32_000),
+      title: `Devuelta: ${String(row.title)}`.slice(0, 200),
+      content: `${comment}\n\nOperaciones devueltas de la propuesta ${row.id}: ${which}.`.slice(0, 32_000),
       appliesTo,
       refs: [String(row.id)],
     },
@@ -229,7 +232,7 @@ function overlay(
 ): Record<string, unknown> | null {
   const allowed = CORRECTABLE[op.op] ?? []
   if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
-    problems.push({ op: i, message: 'A correction is an object of the fields you edited.' })
+    problems.push({ op: i, message: 'Una corrección es un objeto con los campos que editaste.' })
     return null
   }
   const out: Record<string, unknown> = { ...op }
@@ -240,11 +243,11 @@ function overlay(
       problems.push({
         op: i,
         message: allowed.length
-          ? `A correction of a ${op.op} changes only ${allowed.join(', ')}; not "${key}".`
-          : `A ${op.op} operation cannot be corrected; return it instead.`,
+          ? `Una corrección de un ${op.op} cambia solo ${allowed.join(', ')}; no "${key}".`
+          : `Una operación ${op.op} no se puede corregir; devuélvela en su lugar.`,
       })
     } else if (typeof v !== 'string') {
-      problems.push({ op: i, message: `"${key}" is text.` })
+      problems.push({ op: i, message: `"${key}" es texto.` })
     } else {
       out[key] = v
       words += 1
@@ -253,21 +256,21 @@ function overlay(
   if (words === 0 && allowed.length) {
     problems.push({
       op: i,
-      message: `A correction changes at least one of ${allowed.join(', ')} (to accept an old base as it is, mark it "base reviewed").`,
+      message: `Una corrección cambia al menos uno de ${allowed.join(', ')} (para aceptar una base vieja tal como está, márcala como "base revisada").`,
     })
   }
   if (revision !== undefined) {
     if (op.op !== 'edit' || typeof revision !== 'number' || !Number.isSafeInteger(revision) || revision < 1)
-      problems.push({ op: i, message: '"revision" is the revision of the page you saw (edits only).' })
+      problems.push({ op: i, message: '"revision" es la revisión de la página que viste (solo ediciones).' })
     else out.baseRevision = revision
   }
   if (typeof seen !== 'number' || !Number.isSafeInteger(seen) || seen < 0) {
-    problems.push({ op: i, message: '"purges" echoes the "purges" of the review you corrected.' })
+    problems.push({ op: i, message: '"purges" repite los "purges" de la revisión que corregiste.' })
   } else if (seen !== purges && !problems.some((p) => p.op === i)) {
     const err = conflict(
       'proposal_changed',
-      'Text was purged from this wiki after your edit was written; nothing was applied.',
-      'Review it again and write your edit anew from what the pages hold now.',
+      'Se purgó texto de esta wiki después de que se escribiera tu edición; no se aplicó nada.',
+      'Revísala de nuevo y escribe tu edición desde lo que las páginas contienen ahora.',
     )
     err.current = { purged: true }
     throw err
@@ -279,7 +282,7 @@ export type Decision = { proposal: Proposal; ops: ProposalOp[]; applied: Revised
 
 // The activity's label of a decision: its status, first (the web's live notice reads it), then the key, if one.
 const decidedLabel = (status: string, byKey: ByKey | null) =>
-  byKey ? `${status} with the key ${byKey.key}` : status
+  byKey ? `${status} con la clave ${byKey.key}` : status
 
 export type ApproveInput = {
   fingerprint: string
@@ -312,10 +315,13 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
     const original = ops.map((o) => o.op)
     const approve = [...new Set(input.approve ?? all)].sort((a, b) => a - b)
     if (approve.length === 0)
-      throw invalid('Approve at least one operation.', 'To approve none, return the proposal.')
+      throw invalid('Aprueba al menos una operación.', 'Para no aprobar ninguna, devuelve la propuesta.')
     for (const i of [...approve, ...(input.baseReviewed ?? [])]) {
       if (!all.includes(i))
-        throw invalid(`The proposal has no operation ${i}.`, `Its operations are 0 to ${all.length - 1}.`)
+        throw invalid(
+          `La propuesta no tiene la operación ${i}.`,
+          `Sus operaciones van de 0 a ${all.length - 1}.`,
+        )
     }
     // A curator's correction replaces the operation, checked like any operation.
     const corrected = new Set<number>()
@@ -324,7 +330,7 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
     for (const [k, raw] of Object.entries(input.corrections ?? {})) {
       const i = Number(k)
       if (!all.includes(i))
-        throw invalid(`The proposal has no operation ${k}.`, 'Correct an existing operation.')
+        throw invalid(`La propuesta no tiene la operación ${k}.`, 'Corrige una operación que exista.')
       const was = ops[i] as ProposalOp
       // The fields the person edited, laid over the stored operation and checked like any operation; an
       // edit's base revision is the one the person saw, and the base check below runs for it too.
@@ -332,7 +338,7 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
       if (!merged) continue
       const op = readOp(merged, i, problems)
       if (op && (op.op !== was.op.op || op.address !== was.op.address)) {
-        problems.push({ op: i, message: 'A correction keeps the kind of operation and its page.' })
+        problems.push({ op: i, message: 'Una corrección conserva el tipo de operación y su página.' })
       } else if (op) {
         was.op = op
         corrected.add(i)
@@ -340,8 +346,8 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
     }
     if (problems.length > 0) {
       const err = invalid(
-        'A correction has problems; nothing was applied.',
-        'Fix each one listed in "problems".',
+        'Una corrección tiene problemas; no se aplicó nada.',
+        'Corrige cada uno de los listados en "problems".',
       )
       err.problems = problems
       throw err
@@ -349,8 +355,8 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
     const rest = all.filter((i) => !approve.includes(i))
     if (rest.length > 0 && !comment) {
       throw invalid(
-        'Approving part of a proposal returns the rest, and that needs a comment.',
-        'Write in "comment" why the rest goes back.',
+        'Aprobar una parte de la propuesta devuelve el resto, y eso necesita un comentario.',
+        'Escribe en "comment" por qué el resto vuelve.',
       )
     }
     const plain = ops.map((o) => o.op)
@@ -363,8 +369,8 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
       const err = new AppError(
         400,
         'missing_dependencies',
-        `Some operations cannot be approved without others: ${missing.map((m) => `${m.op} needs ${m.needs.join(', ')}`).join('; ')}.`,
-        'Approve them together, or leave them all out.',
+        `Algunas operaciones no se pueden aprobar sin otras: ${missing.map((m) => `${m.op} necesita ${m.needs.join(', ')}`).join('; ')}.`,
+        'Apruébalas juntas, o deja las dos fuera.',
       )
       err.problems = missing
       throw err
@@ -381,8 +387,8 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
       if (p && Number(p.revision) !== o.baseRevision) {
         const err = conflict(
           'stale_base',
-          `Operation ${i}: "${o.address}" changed since revision ${o.baseRevision} (it is at ${p.revision}).`,
-          'Correct the operation, mark it "base reviewed" if the change does not matter, or return it.',
+          `Operación ${i}: "${o.address}" cambió desde la revisión ${o.baseRevision} (está en la ${p.revision}).`,
+          'Corrige la operación, márcala como "base revisada" si el cambio no importa, o devuélvela.',
         )
         err.problems = [{ op: i, base: o.baseRevision, current: Number(p.revision) }]
         throw err
@@ -402,7 +408,7 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
         await applyOps(c, db, brainId, items, {
           kind: 'proposal',
           proposalId: String(row.id),
-          summary: `${rest.length > 0 ? 'Partly approved' : 'Approved'}${byKey ? ` by ${byKey.owner} with the key ${byKey.key}` : ''}: ${String(row.title)}`,
+          summary: `${rest.length > 0 ? 'Aprobada en parte' : 'Aprobada'}${byKey ? ` por ${byKey.owner} con la clave ${byKey.key}` : ''}: ${String(row.title)}`,
           ...(byKey ? { keyName: byKey.key } : {}),
           // An approved maintenance proposal is a cleanup (spec v0.6 «Limpieza diaria»).
           maintenance: Boolean(row.maintenance),
@@ -414,8 +420,7 @@ export async function approveProposal(ctx: Ctx, id: string, input: ApproveInput)
       // so the curator retries, instead of recording it on the proposal.
       const code = (err as { code?: string }).code
       if (code === '40P01' || code === '40001') throw err
-      const e =
-        err instanceof ApplyError ? err : new ApplyError(undefined, 'the change could not be applied.')
+      const e = err instanceof ApplyError ? err : new ApplyError(undefined, 'no se pudo aplicar el cambio.')
       await db.query('UPDATE proposals SET last_error = $2 WHERE id = $1', [row.id, e.message])
       failure = e
       return null

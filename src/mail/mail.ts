@@ -116,26 +116,26 @@ export function mailError(err: unknown): string {
   // The code first: it says what happened; the words can name anything (a host called "auth.example.com").
   const code = String((err as { code?: unknown })?.code ?? '')
   const BY_CODE: Record<string, string> = {
-    EAUTH: 'auth failed',
-    ECONNREFUSED: 'connection refused',
-    EDNS: 'server not found',
-    ENOTFOUND: 'server not found',
-    EAI_AGAIN: 'server not found',
-    ETIMEDOUT: 'timeout',
-    ETIMEOUT: 'timeout',
+    EAUTH: 'fallo de autenticación',
+    ECONNREFUSED: 'conexión rechazada',
+    EDNS: 'servidor no encontrado',
+    ENOTFOUND: 'servidor no encontrado',
+    EAI_AGAIN: 'servidor no encontrado',
+    ETIMEDOUT: 'tiempo de espera agotado',
+    ETIMEOUT: 'tiempo de espera agotado',
     ETLS: 'TLS',
-    EENVELOPE: 'rejected',
-    EMESSAGE: 'rejected',
+    EENVELOPE: 'rechazado',
+    EMESSAGE: 'rechazado',
   }
   if (BY_CODE[code]) return BY_CODE[code]
   const text = err instanceof Error ? err.message : String(err)
-  if (/ECONNREFUSED|connection refused/i.test(text)) return 'connection refused'
-  if (/ENOTFOUND|EAI_AGAIN/.test(text)) return 'server not found'
-  if (/timed? ?out|greeting never/i.test(text)) return 'timeout'
+  if (/ECONNREFUSED|connection refused/i.test(text)) return 'conexión rechazada'
+  if (/ENOTFOUND|EAI_AGAIN/.test(text)) return 'servidor no encontrado'
+  if (/timed? ?out|greeting never/i.test(text)) return 'tiempo de espera agotado'
   if (/certificate|\bTLS\b|\bSSL\b|handshake/i.test(text)) return 'TLS'
-  if (/\b535\b|authentication failed|invalid login/i.test(text)) return 'auth failed'
-  if (/\b5\d\d\b/.test(text)) return 'rejected'
-  return 'failed'
+  if (/\b535\b|authentication failed|invalid login/i.test(text)) return 'fallo de autenticación'
+  if (/\b5\d\d\b/.test(text)) return 'rechazado'
+  return 'fallo'
 }
 
 // Sends one message, or says why it did not. Never throws.
@@ -156,8 +156,8 @@ export async function send(
       error.slice(0, 500),
     ])
   if (!s) {
-    await log('skipped', 'mail is not set up')
-    return { sent: false, error: 'Mail is not set up.' }
+    await log('skipped', 'el correo no está configurado')
+    return { sent: false, error: 'El correo no está configurado.' }
   }
   try {
     const t = outbox?.transport ? outbox.transport(s) : smtp(s, outbox?.secret)

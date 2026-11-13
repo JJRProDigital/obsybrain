@@ -94,7 +94,7 @@ export async function startContext(
   const { brain, role } = await inBrain(ctx, { slug })
   const asked = o.max ?? CONTEXT.default
   const max = Math.min(CONTEXT.max, Math.max(CONTEXT.min, asked))
-  if ((o.task ?? '').length > 2000) throw invalid('The task is longer than 2000 characters.', 'Summarise it.')
+  if ((o.task ?? '').length > 2000) throw invalid('La tarea tiene más de 2000 caracteres.', 'Resúmela.')
   const agent = (
     o.agent ??
     (ctx.who.credential.kind === 'short' ? ctx.who.credential.agent : null) ??

@@ -54,7 +54,7 @@ describe('brains over HTTP', { skip: skipPg }, () => {
   it('creating needs the permission', async () => {
     const r = await w.call(ana.key, 'POST', '/v1/brains', { slug: 'anas' })
     assert.equal(r.status, 403)
-    assert.match(r.body.error?.howToProceed ?? '', /administration/)
+    assert.match(r.body.error?.howToProceed ?? '', /administración/)
   })
 
   it('CA19: a brain I am not in answers exactly like one that does not exist', async () => {
@@ -100,7 +100,7 @@ describe('brains over HTTP', { skip: skipPg }, () => {
     assert.equal((await w.call(ro, 'GET', '/v1/brains/company')).status, 200)
     const r = await w.call(ro, 'POST', '/v1/brains/company/archive')
     assert.equal(r.status, 403)
-    assert.match(r.body.error?.message ?? '', /read-only/)
+    assert.match(r.body.error?.message ?? '', /solo lectura/)
   })
 
   it('only the administration deletes, typing the name', async () => {
@@ -135,7 +135,7 @@ describe('brains over HTTP', { skip: skipPg }, () => {
       firstCurator: 'nobody@example.com',
     })
     assert.equal(unknown.status, 400)
-    assert.match(unknown.body.error?.howToProceed ?? '', /may not invite/)
+    assert.match(unknown.body.error?.howToProceed ?? '', /no puede invitar/)
     const okr = await w.call(factory.key, 'POST', '/v1/brains', {
       slug: 'proj-a',
       firstCurator: (await w.db.one<{ email: string }>('SELECT email FROM accounts WHERE id = $1', [eric.id]))
@@ -186,7 +186,7 @@ describe('brains over HTTP', { skip: skipPg }, () => {
 
   it('a service account is never curator, even if its membership row says so', async () => {
     const svc = await w.service('Bot')
-    await assert.rejects(() => w.member('race', svc.id, 'curator'), /never a curator/)
+    await assert.rejects(() => w.member('race', svc.id, 'curator'), /nunca es curadora/)
     await w.db.query(
       "INSERT INTO memberships (brain_id, account_id, role, created_at) SELECT id, $1, 'curator', now() FROM brains WHERE slug = 'race'",
       [svc.id],

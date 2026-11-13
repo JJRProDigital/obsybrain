@@ -84,7 +84,7 @@ test('an invitation by email is accepted and opens a session', async ({ page, br
   // The link works once; opened again while signed in, it says so and leads to her brains.
   await p.goto(link)
   await expect(p.getByRole('heading', { level: 1, name: 'This invitation is already used' })).toBeVisible()
-  await expect(p.getByRole('alert')).toContainText('This invitation link is not valid')
+  await expect(p.getByRole('alert')).toContainText('Este enlace de invitación no es válido')
   await expect(p.getByRole('main').getByRole('link', { name: 'Go to your brains' })).toBeVisible()
   await marta.close()
 })

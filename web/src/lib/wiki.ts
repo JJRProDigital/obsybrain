@@ -272,16 +272,19 @@ export function mergeList<T>(base: T[], mine: T[], theirs: T[], key: (x: T) => s
 export function changeLabel(r: { change?: string; status: string; restoredFrom?: number | null }): string {
   switch (r.change) {
     case 'status':
-      return `status → ${r.status}`
+      return `estado → ${r.status}`
     case 'restored':
-      return r.restoredFrom ? `restored revision ${r.restoredFrom}` : 'restored'
+      return r.restoredFrom ? `restaurada la revisión ${r.restoredFrom}` : 'restaurada'
     case 'created':
+      return 'creada'
     case 'edited':
+      return 'editada'
     case 'linked':
+      return 'vinculada'
     case 'moved':
-      return r.change
+      return 'movida'
     default:
-      return 'edited'
+      return 'editada'
   }
 }
 

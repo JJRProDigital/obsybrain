@@ -130,31 +130,31 @@ describe('relations in words', () => {
   it('says the relation from this entry’s side, and what waits', () => {
     assert.equal(
       relationWords({ kind: 'contradicts', direction: 'out', status: 'active', other }),
-      'Contradicts',
+      'Contradice',
     )
     assert.equal(
       relationWords({ kind: 'contradicts', direction: 'in', status: 'active', other }),
-      'Contradicted by',
+      'Contradecida por',
     )
     assert.equal(
       relationWords({ kind: 'supersedes', direction: 'out', status: 'active', other }),
-      'Supersedes',
+      'Reemplaza',
     )
     assert.equal(
       relationWords({ kind: 'supersedes', direction: 'in', status: 'active', other }),
-      'Superseded by',
+      'Reemplazada por',
     )
     assert.equal(
       relationWords({ kind: 'not_related', direction: 'in', status: 'active', other }),
-      'Not related to',
+      'Sin relación con',
     )
     assert.equal(
       relationWords({ kind: 'supersedes', direction: 'in', status: 'pending_person', other }),
-      'Superseded by (an agent asked; waits for a person)',
+      'Reemplazada por (un agente lo pidió; espera a una persona)',
     )
     assert.equal(
       relationWords({ kind: 'supersedes', direction: 'out', status: 'rejected', other }),
-      'Supersedes (turned down)',
+      'Reemplaza (rechazado)',
     )
   })
 
@@ -169,23 +169,26 @@ describe('relations in words', () => {
 describe('sessions', () => {
   it('a session without a purpose says what it is', () => {
     assert.equal(sessionLabel({ purpose: 'Intros', day: null }), 'Intros')
-    assert.equal(sessionLabel({ purpose: '', day: null }), 'Session with no purpose given')
+    assert.equal(sessionLabel({ purpose: '', day: null }), 'Sesión sin propósito dado')
   })
 
   // The final review of B6: one name for the session a key gets by writing without opening one.
   it('work without a session is «Unnamed work · <client>»; in the web, «Web edits · <person>»', () => {
     assert.equal(
       sessionLabel({ purpose: 'implicit', day: '2026-10-29', client: 'claude-code/2.1.3', author: eric }),
-      'Unnamed work · Claude Code',
+      'Trabajo sin nombre · Claude Code',
     )
-    assert.equal(sessionLabel({ purpose: '', day: '2026-10-29', client: null }), 'Unnamed work · an agent')
+    assert.equal(
+      sessionLabel({ purpose: '', day: '2026-10-29', client: null }),
+      'Trabajo sin nombre · un agente',
+    )
     assert.equal(
       sessionLabel({ purpose: '', day: '2026-10-29', client: 'web', author: eric }),
-      'Web edits · Eric',
+      'Ediciones web · Eric',
     )
     assert.equal(
       sessionLabel({ purpose: '', day: '2026-10-29', client: 'web', who: 'Ana' }),
-      'Web edits · Ana',
+      'Ediciones web · Ana',
     )
   })
 
@@ -241,7 +244,11 @@ describe('review of PR20', () => {
 
   it('the session of a day has the same name whatever form its day comes in', () => {
     for (const day of ['2026-10-29', '2026-10-29T00:00:00.000Z', 'nonsense'])
-      assert.equal(sessionLabel({ purpose: 'implicit', day, client: 'codex' }), 'Unnamed work · Codex', day)
+      assert.equal(
+        sessionLabel({ purpose: 'implicit', day, client: 'codex' }),
+        'Trabajo sin nombre · Codex',
+        day,
+      )
   })
 
   it('superseding an entry or dismissing a correction: its author or a curator, as the server decides', () => {
@@ -324,8 +331,8 @@ describe('the words of a purged entry', () => {
     const { T } = await import('../../web/src/text.ts')
     const w = T.journal.statePurged
     assert.doesNotMatch(w, /gone for good|for ever|forever/i)
-    assert.match(w, /versions/)
-    assert.match(w, /search/)
-    assert.match(w, /quoted elsewhere/)
+    assert.match(w, /versiones/)
+    assert.match(w, /búsqueda/)
+    assert.match(w, /citadas en otros lados/)
   })
 })

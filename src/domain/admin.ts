@@ -55,7 +55,7 @@ export async function listAccounts(ctx: Ctx) {
 
 // Imported authors (spec B7, review of PR32): names on what was imported, never people who sign in. The
 // administration sees them apart, with the brains they wrote in and when they came in, and can erase a name.
-export const FORMER_AUTHOR = 'Former author'
+export const FORMER_AUTHOR = 'Autor anterior'
 export async function listAuthors(ctx: Ctx) {
   adminOnly(ctx)
   const rows = await ctx.db.query(
@@ -85,7 +85,7 @@ export async function anonymiseAuthor(ctx: Ctx, id: string) {
       id,
       FORMER_AUTHOR,
     ])
-    if (!a) throw notFound('author')
+    if (!a) throw notFound('autor')
     await ok({ ...ctx, db }, 'author.anonymise', null, id)
     return { id, name: FORMER_AUTHOR }
   })
@@ -107,8 +107,8 @@ async function otherAdmins(db: Ctx['db'], id: string): Promise<number> {
 const lastAdmin = () =>
   conflict(
     'last_admin',
-    'This is the last administrator of the installation.',
-    'Make another person an administrator first.',
+    'Este es el último administrador de la instalación.',
+    'Nombra administradora a otra persona primero.',
   )
 
 export async function updateAccount(
@@ -119,20 +119,20 @@ export async function updateAccount(
   adminOnly(ctx)
   for (const k of ['isAdmin', 'canCreateBrains', 'canInvite'] as const) {
     if (input[k] !== undefined && typeof input[k] !== 'boolean') {
-      throw invalid(`"${k}" is true or false.`, `Fix "${k}".`)
+      throw invalid(`"${k}" es verdadero o falso.`, `Corrige "${k}".`)
     }
   }
   return ctx.db.tx(async (db) => {
     await adminTurn(db)
     const a = await db.one<Row>("SELECT * FROM accounts WHERE id = $1 AND kind <> 'author' FOR UPDATE", [id])
-    if (!a) throw notFound('account')
+    if (!a) throw notFound('cuenta')
     if (a.kind === 'service' && input.isAdmin === true) {
-      throw invalid('A service account cannot be an administrator.', 'Choose a person.')
+      throw invalid('Una cuenta de servicio no puede ser administradora.', 'Elige a una persona.')
     }
     if (a.kind === 'person' && input.canInvite !== undefined) {
       throw invalid(
-        '"canInvite" is for service accounts (naming a first curator by email).',
-        'For people, the administration invites; curators can be allowed in the settings.',
+        '"canInvite" es para cuentas de servicio (nombra una primera persona curadora por correo).',
+        'Para personas, invita la administración; a quien cura se lo puede habilitar en los ajustes.',
       )
     }
     if (a.is_admin && input.isAdmin === false && (await otherAdmins(db, id)) === 0) throw lastAdmin()
@@ -161,11 +161,11 @@ export async function updateAccount(
 
 // Removing a person or a service account closes its sessions and revokes its tokens, connections and
 // keys at once (and the short keys its main keys minted). What it wrote stays, signed with its name and
-// «former member». Brains it was the last curator of are named, so the administration names another.
+// «ex miembro». Brains it was the last curator of are named, so the administration names another.
 export async function removeAccount(ctx: Ctx, id: string) {
   adminOnly(ctx)
   if (id === ctx.who.accountId) {
-    throw invalid('You cannot remove your own account.', 'Ask another administrator.')
+    throw invalid('No puedes dar de baja tu propia cuenta.', 'Pídeselo a otro administrador.')
   }
   return ctx.db.tx(async (db) => {
     await adminTurn(db)
@@ -177,7 +177,7 @@ export async function removeAccount(ctx: Ctx, id: string) {
       [id],
     )
     const a = await db.one<Row>("SELECT * FROM accounts WHERE id = $1 AND kind <> 'author' FOR UPDATE", [id])
-    if (!a) throw notFound('account')
+    if (!a) throw notFound('cuenta')
     if (a.status === 'removed') return { removed: true, keysRevoked: 0, brainsWithoutCurator: [] }
     if (a.is_admin && (await otherAdmins(db, id)) === 0) throw lastAdmin()
     const now = ctx.clock()
@@ -216,7 +216,7 @@ export async function restoreAccount(ctx: Ctx, id: string) {
     "UPDATE accounts SET status = 'active', removed_at = NULL WHERE id = $1 AND kind <> 'author' RETURNING id",
     [id],
   )
-  if (!r) throw notFound('account')
+  if (!r) throw notFound('cuenta')
   await ok(ctx, 'account.restore', null, id)
   return { restored: true }
 }
@@ -266,8 +266,8 @@ export async function joinBrain(ctx: Ctx, slug: string) {
     await notify(ctx.db, ctx.clock, ctx.mail, await curatorsOf(ctx.db, b.id), {
       kind: 'admin.joined',
       brainId: b.id,
-      subject: `The administration joined "${slug}"`,
-      text: `${ctx.who.name} (administration) joined "${slug}" as a reader.`,
+      subject: `La administración entró en "${slug}"`,
+      text: `${ctx.who.name} (administración) entró en "${slug}" como lector.`,
     })
   }
   return { joined, role: (await memberRole(ctx.db, b.id, ctx.who.accountId)) as Role }
@@ -309,8 +309,8 @@ export function baseOf<K extends string>(
     Object.keys(v).some((k) => !(fields as readonly string[]).includes(k))
   ) {
     throw invalid(
-      `"base" holds what each field was when you read it: ${fields.join(', ')}.`,
-      'Send the values you read, or leave "base" out.',
+      `"base" contiene lo que valía cada campo cuando lo leíste: ${fields.join(', ')}.`,
+      'Envía los valores que leíste, u omite "base".',
     )
   }
   return v as Partial<Record<K, unknown>>
@@ -319,8 +319,8 @@ export function baseOf<K extends string>(
 const settingsChanged = (moved: string[], current: unknown) => {
   const e = conflict(
     'settings_changed',
-    `Someone changed ${moved.join(', ')} since you read ${moved.length === 1 ? 'it' : 'them'}.`,
-    'Read the current values in "current", then save your change again on top of them.',
+    `Alguien cambió ${moved.join(', ')} desde que ${moved.length === 1 ? 'lo' : 'los'} leíste.`,
+    'Lee los valores actuales en "current" y vuelve a guardar tu cambio sobre ellos.',
   )
   e.current = current
   return e
@@ -342,7 +342,7 @@ export async function updateSettings(
   adminOnly(ctx)
   const base = baseOf(input.base, INSTALLATION_FIELDS)
   if (input.curatorsInvite !== undefined && typeof input.curatorsInvite !== 'boolean') {
-    throw invalid('"curatorsInvite" is true or false.', 'Fix "curatorsInvite".')
+    throw invalid('"curatorsInvite" es verdadero o falso.', 'Corrige "curatorsInvite".')
   }
   const limit = input.rateLimit
   if (
@@ -353,15 +353,15 @@ export async function updateSettings(
       limit > MAX_RATE_LIMIT)
   ) {
     throw invalid(
-      `"rateLimit" is the requests per minute of each key: a whole number from ${MIN_RATE_LIMIT} to ${MAX_RATE_LIMIT}.`,
-      `Fix "rateLimit" (the default is ${DEFAULT_RATE_LIMIT}).`,
+      `"rateLimit" son las peticiones por minuto de cada clave: un número entero de ${MIN_RATE_LIMIT} a ${MAX_RATE_LIMIT}.`,
+      `Corrige "rateLimit" (el valor por defecto es ${DEFAULT_RATE_LIMIT}).`,
     )
   }
   let name: string | undefined
   if (input.name !== undefined) {
     name = typeof input.name === 'string' ? input.name.trim() : ''
     if (!name || name.length > 80)
-      throw invalid('The installation name has 1 to 80 characters.', 'Shorten it.')
+      throw invalid('El nombre de la instalación tiene de 1 a 80 caracteres.', 'Acórtalo.')
   }
   const factoryUrl = input.factoryUrl === undefined ? undefined : factoryUrlOf(input.factoryUrl)
   return ctx.db.tx(async (db) => {
@@ -405,7 +405,7 @@ export async function createService(
   const name = typeof input.name === 'string' ? input.name : ''
   const brains = Array.isArray(input.brains) ? input.brains : input.brains == null ? [] : null
   if (!brains || brains.length > 100)
-    throw invalid('"brains" is a list of {"slug", "role"}.', 'Fix the list.')
+    throw invalid('"brains" es una lista de {"slug", "role"}.', 'Corrige la lista.')
   const made = await ctx.db.tx(async (db) => {
     const id = await createAccount(db, ctx.clock, {
       kind: 'service',
@@ -419,8 +419,8 @@ export async function createService(
       const role = (g as { role?: unknown })?.role
       if (typeof slug !== 'string' || (role !== 'contributor' && role !== 'reader')) {
         throw invalid(
-          'A service account joins a brain as contributor or reader, never curator.',
-          'Give each brain a "slug" and a "role" of contributor or reader.',
+          'Una cuenta de servicio entra en un brain como colaboradora o lectora, nunca como curadora.',
+          'Dale a cada brain un "slug" y un "role" de colaborador o lector.',
         )
       }
       const b = await db.one<{ id: string }>('SELECT id FROM brains WHERE slug = $1', [slug])
@@ -438,8 +438,8 @@ export async function createService(
     await notify(ctx.db, ctx.clock, ctx.mail, await curatorsOf(ctx.db, a.brainId), {
       kind: 'service.added',
       brainId: a.brainId,
-      subject: `A service account joined "${a.slug}"`,
-      text: `The administration (${ctx.who.name}) added the service account "${made.name}" to "${a.slug}" as ${a.role}.`,
+      subject: `Una cuenta de servicio entró en "${a.slug}"`,
+      text: `La administración (${ctx.who.name}) añadió la cuenta de servicio "${made.name}" a "${a.slug}" como ${a.role}.`,
     })
   }
   return { id: made.id, key: made.key }
@@ -449,13 +449,14 @@ export async function createService(
 export async function newMainKey(ctx: Ctx, serviceId: string, name: unknown): Promise<Minted> {
   adminOnly(ctx)
   const n = typeof name === 'string' && name.trim() ? name.trim() : 'main'
-  if (n.length > 80) throw invalid('A key name has at most 80 characters.', 'Shorten it.')
+  if (n.length > 80) throw invalid('El nombre de una clave tiene como máximo 80 caracteres.', 'Acórtalo.')
   return ctx.db.tx(async (db) => {
     const a = await db.one<Row>("SELECT * FROM accounts WHERE id = $1 AND kind = 'service' FOR UPDATE", [
       serviceId,
     ])
-    if (!a) throw notFound('service account')
-    if (a.status !== 'active') throw invalid('This service account is deactivated.', 'Reactivate it first.')
+    if (!a) throw notFound('cuenta de servicio')
+    if (a.status !== 'active')
+      throw invalid('Esta cuenta de servicio está dada de baja.', 'Reactívala primero.')
     const open = await db.one<{ n: number }>(
       "SELECT count(*)::int AS n FROM credentials WHERE account_id = $1 AND kind = 'main' AND revoked_at IS NULL",
       [serviceId],
@@ -463,8 +464,8 @@ export async function newMainKey(ctx: Ctx, serviceId: string, name: unknown): Pr
     if ((open?.n ?? 0) >= MAIN_KEYS_AT_ONCE) {
       throw conflict(
         'too_many_main_keys',
-        `A service account has at most ${MAIN_KEYS_AT_ONCE} main keys at once.`,
-        'Revoke the old key once the program uses the new one, then make another.',
+        `Una cuenta de servicio tiene como máximo ${MAIN_KEYS_AT_ONCE} claves principales a la vez.`,
+        'Revoca la clave vieja cuando el programa use la nueva y crea otra.',
       )
     }
     const key = await mintMainKey(db, ctx.clock, { accountId: serviceId, name: n })
@@ -477,7 +478,7 @@ export async function newMainKey(ctx: Ctx, serviceId: string, name: unknown): Pr
 export async function accountKeys(ctx: Ctx, accountId: string) {
   adminOnly(ctx)
   const a = await ctx.db.one("SELECT id FROM accounts WHERE id = $1 AND kind <> 'author'", [accountId])
-  if (!a) throw notFound('account')
+  if (!a) throw notFound('cuenta')
   const rows = await ctx.db.query(
     `SELECT c.*, (SELECT count(*)::int FROM credentials s WHERE s.parent_id = c.id AND s.revoked_at IS NULL AND s.expires_at > $2) AS live_short,
             (SELECT coalesce(array_agg(x.ref ORDER BY x.ref), '{}') FROM (
@@ -615,29 +616,29 @@ export async function setMail(
   const base = baseOf(input.base, MAIL_FIELDS)
   const host = typeof input.host === 'string' ? input.host.trim() : ''
   if (!host || host.length > 253 || /[\s/]/.test(host)) {
-    throw invalid('"host" is the name of the mail server.', 'Such as smtp.example.com.')
+    throw invalid('"host" es el nombre del servidor de correo.', 'Por ejemplo smtp.example.com.')
   }
   const port = input.port ?? 587
   if (typeof port !== 'number' || !Number.isInteger(port) || port < 1 || port > 65535) {
-    throw invalid('"port" is a number from 1 to 65535.', 'Usually 587, or 465 with "secure".')
+    throw invalid('"port" es un número de 1 a 65535.', 'Normalmente 587, o 465 con "secure".')
   }
   if (input.secure !== undefined && typeof input.secure !== 'boolean') {
-    throw invalid('"secure" is true or false.', 'True for port 465.')
+    throw invalid('"secure" es verdadero o falso.', 'Verdadero para el puerto 465.')
   }
   const user = input.user == null || input.user === '' ? null : input.user
   if (user !== null && (typeof user !== 'string' || user.length > 320)) {
-    throw invalid('"user" is the account name on the mail server.', 'Fix "user".')
+    throw invalid('"user" es el nombre de cuenta en el servidor de correo.', 'Corrige "user".')
   }
   const fromAddress = emailOf(input.fromAddress)
   if (!fromAddress)
-    throw invalid('"fromAddress" is the email mail is sent from.', 'Such as brain@example.com.')
+    throw invalid('"fromAddress" es el correo desde el que se envía.', 'Por ejemplo brain@example.com.')
   const fromName = typeof input.fromName === 'string' ? input.fromName.trim().slice(0, 80) : ''
   if (
     input.password !== undefined &&
     input.password !== null &&
     (typeof input.password !== 'string' || input.password.length > 500)
   ) {
-    throw invalid('"password" is text.', 'Fix "password".')
+    throw invalid('"password" es texto.', 'Corrige "password".')
   }
   // Sealed before the transaction: a missing installation secret refuses before anything is read.
   const typed = typeof input.password === 'string' && input.password !== '' ? input.password : null
@@ -661,8 +662,8 @@ export async function setMail(
       (before.host !== host || before.port !== port || (before.user ?? null) !== (user as string | null))
     ) {
       throw invalid(
-        'The mail password belongs to the server, port and user it was set for.',
-        'Type the password again for the new server (or remove it, if the new one needs none).',
+        'La contraseña del correo pertenece al servidor, puerto y usuario para los que se guardó.',
+        'Escribe la contraseña de nuevo para el servidor nuevo (o quítala, si el nuevo no necesita ninguna).',
       )
     }
 
@@ -698,15 +699,20 @@ export async function deleteMail(ctx: Ctx) {
 export async function testMail(ctx: Ctx, to?: unknown) {
   adminOnly(ctx)
   const addr = to === undefined ? ctx.who.email : emailOf(to)
-  if (!addr || !EMAIL.test(addr)) throw invalid('"to" is an email.', 'Leave it out to use yours.')
+  if (!addr || !EMAIL.test(addr)) throw invalid('"to" es un correo electrónico.', 'Omite para usar el tuyo.')
   const name = (await installation(ctx.db)).name || 'obsybrain'
   const r = await send(ctx.db, ctx.clock, ctx.mail, 'test', {
     to: addr,
-    subject: `Test mail from ${name}`,
-    text: `This is a test mail from ${name}. Mail works.`,
+    subject: `Correo de prueba de ${name}`,
+    text: `Este es un correo de prueba de ${name}. El correo funciona.`,
   })
-  if (!r.sent && r.error === 'Mail is not set up.') {
-    throw new AppError(409, 'mail_not_set_up', 'Mail is not set up.', 'Save the mail settings first.')
+  if (!r.sent && r.error === 'El correo no está configurado.') {
+    throw new AppError(
+      409,
+      'mail_not_set_up',
+      'El correo no está configurado.',
+      'Guarda primero los ajustes de correo.',
+    )
   }
   return r
 }

@@ -28,20 +28,20 @@ async function signedInAdmin(page: Page, baseURL: string): Promise<void> {
   const h1 = page.getByRole('heading', { level: 1 })
   await expect(h1).toHaveText(/Set up obsybrain|Sign in|Your brains/)
   const where = await h1.textContent()
-  if (where === 'Set up obsybrain') {
-    await page.getByLabel('Name of this installation').fill('obsybrain')
-    await page.getByLabel('Address people open').fill(baseURL)
-    await page.getByLabel('Your name').fill(ADMIN.name)
-    await page.getByLabel('Your email').fill(ADMIN.email)
-    await page.getByLabel('Password', { exact: true }).fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
+  if (where === 'Configurar obsybrain') {
+    await page.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await page.getByLabel('Dirección que abre la gente').fill(baseURL)
+    await page.getByLabel('Tu nombre').fill(ADMIN.name)
+    await page.getByLabel('Tu email').fill(ADMIN.email)
+    await page.getByLabel('Contraseña', { exact: true }).fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await keepTheKey(page)
-  } else if (where === 'Sign in') {
+  } else if (where === 'Iniciar sesión') {
     await page.getByLabel('Email').fill(ADMIN.email)
-    await page.getByLabel('Password').fill(ADMIN.password)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Contraseña').fill(ADMIN.password)
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click()
   }
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
 }
 
 // A real PNG, so the browser draws it.
@@ -112,18 +112,18 @@ test('CA18: a new logo and name show in the header for anyone, and in the invita
   const logo = png(48, 24)
   await admin.goto('/admin/branding')
   await admin
-    .getByLabel('Choose a logo')
+    .getByLabel('Elegir un logo')
     .setInputFiles({ name: 'acme.png', mimeType: 'image/png', buffer: logo })
-  await admin.getByRole('button', { name: 'Upload this logo' }).click()
-  await expect(admin.getByRole('status').filter({ hasText: 'Logo uploaded' })).toBeFocused()
-  await admin.getByLabel('Name of this installation').fill('Acme Brain')
-  await admin.getByRole('button', { name: 'Save the name' }).click()
-  await expect(admin.getByRole('status').filter({ hasText: 'Saved.' })).toBeVisible()
+  await admin.getByRole('button', { name: 'Subir este logo' }).click()
+  await expect(admin.getByRole('status').filter({ hasText: 'Logo subido.' })).toBeFocused()
+  await admin.getByLabel('Nombre de esta instalación').fill('Acme Brain')
+  await admin.getByRole('button', { name: 'Guardar el nombre' }).click()
+  await expect(admin.getByRole('status').filter({ hasText: 'Guardado.' })).toBeVisible()
   await expect(admin.locator('header .brand .name')).toHaveText('Acme Brain')
   // Anyone who arrives, signed out: the sign-in page's header.
   const someone = await browser.newPage()
   await someone.goto('/')
-  await expect(someone.getByRole('heading', { level: 1, name: 'Sign in' })).toBeVisible()
+  await expect(someone.getByRole('heading', { level: 1, name: 'Iniciar sesión' })).toBeVisible()
   await expect(someone.locator('header .brand')).toContainText('Acme Brain')
   const img = someone.locator('header .brand img')
   await expect(img).toHaveAttribute('src', /^\/v1\/branding\/logo\?v=[0-9a-f]{12}$/)
@@ -175,16 +175,16 @@ test('CA9: a session a Factory run opens links to that run in Activity, in a new
   })
   expect(opened.status(), await opened.text()).toBe(201)
   await admin.goto(`/b/${slug}/activity`)
-  const row = admin.getByRole('region', { name: 'Active sessions now' }).getByRole('listitem').filter({
+  const row = admin.getByRole('region', { name: 'Sesiones activas ahora' }).getByRole('listitem').filter({
     hasText: 'Write the launch notes',
   })
   await expect(row).toContainText('r_0a1b2c3d')
   await expect(row.getByRole('link', { name: /r_0a1b2c3d/ })).toHaveCount(0)
   // The administration sets where Factory is.
   await admin.goto('/admin/system')
-  await admin.getByLabel('Address of RSC Factory').fill('https://factory.e2e.test')
-  await admin.getByRole('button', { name: 'Save the address' }).click()
-  await expect(admin.getByRole('status').filter({ hasText: 'Saved.' })).toBeFocused()
+  await admin.getByLabel('Dirección de RSC Factory').fill('https://factory.e2e.test')
+  await admin.getByRole('button', { name: 'Guardar la dirección' }).click()
+  await expect(admin.getByRole('status').filter({ hasText: 'Guardado.' })).toBeFocused()
   // Factory itself is not running here: its page is answered by the test, and the address checked.
   await admin
     .context()
@@ -193,7 +193,7 @@ test('CA9: a session a Factory run opens links to that run in Activity, in a new
     )
   await admin.goto(`/b/${slug}/activity`)
   const link = admin
-    .getByRole('region', { name: 'Active sessions now' })
+    .getByRole('region', { name: 'Sesiones activas ahora' })
     .getByRole('listitem')
     .filter({ hasText: 'Write the launch notes' })
     .getByRole('link', { name: /r_0a1b2c3d/ })
@@ -216,9 +216,9 @@ test('the audit: the download holds exactly the lines of the filtered view, ever
   }
   await admin.request.put('/v1/admin/settings', { headers: WEB, data: { rateLimit: 600 } })
   await admin.goto('/admin/audit')
-  await admin.getByLabel('Action').fill('settings.update')
-  await admin.getByLabel('Who').selectOption({ label: 'Eric' })
-  const rows = admin.getByRole('table', { name: 'Audit lines' }).locator('tbody tr')
+  await admin.getByLabel('Acción').fill('settings.update')
+  await admin.getByLabel('Quién').selectOption({ label: 'Eric' })
+  const rows = admin.getByRole('table', { name: 'Líneas de auditoría' }).locator('tbody tr')
   // The view before the filters is a page of 100 too: the loop starts only once the filtered page is on screen (its
   // first line), never on the old view (B7 debt, fixed in PR35: the loop once paged the old view and stopped at 100).
   const audit = (r: { url(): string }, more: boolean) =>
@@ -227,12 +227,12 @@ test('the audit: the download holds exactly the lines of the filtered view, ever
     r.url().includes('before=') === more
   const [filtered] = await Promise.all([
     admin.waitForResponse((r) => audit(r, false)),
-    admin.getByRole('button', { name: 'Apply filters' }).click(),
+    admin.getByRole('button', { name: 'Aplicar filtros' }).click(),
   ])
   const first = ((await filtered.json()) as { items: Array<{ id: string }> }).items[0]?.id
   await expect(rows.first()).toHaveAttribute('id', `audit-${first}`)
   await expect(rows).toHaveCount(100)
-  const more = admin.getByRole('button', { name: 'Show 100 more' })
+  const more = admin.getByRole('button', { name: 'Mostrar 100 más' })
   // More than a page: the button is there before the loop asks.
   await expect(more).toBeVisible()
   while (await more.isVisible()) {
@@ -243,7 +243,7 @@ test('the audit: the download holds exactly the lines of the filtered view, ever
   const onScreen = await rows.evaluateAll((trs) => trs.map((tr) => tr.id.replace(/^audit-/, '')))
   expect(onScreen.length).toBeGreaterThan(110)
   const href = (await admin
-    .getByRole('link', { name: 'Download these lines (CSV)' })
+    .getByRole('link', { name: 'Descargar estas líneas (CSV)' })
     .getAttribute('href')) as string
   const csv = await (await admin.request.get(href)).text()
   // The file is that view: a second download, after the first was itself recorded, is the same file.
@@ -258,34 +258,40 @@ test('the audit: the download holds exactly the lines of the filtered view, ever
 
 test('email: settings saved in the web, the password never shown; a test mail captured; a failure with its reason', async () => {
   await admin.goto('/admin/email')
-  await admin.getByLabel('Mail server').fill('smtp.e2e.test')
-  await admin.getByRole('group', { name: 'Password' }).getByRole('radio', { name: 'Use a new one' }).check()
-  await admin.getByLabel('New password').fill('e2e-mail-secret-4321')
-  await admin.getByRole('button', { name: 'Save mail settings' }).click()
-  await expect(admin.getByRole('status').filter({ hasText: 'Mail settings saved.' })).toBeFocused()
-  await expect(admin.getByRole('group', { name: 'Password' })).toContainText('Keep the current one (set)')
+  await admin.getByLabel('Servidor de correo').fill('smtp.e2e.test')
+  await admin
+    .getByRole('group', { name: 'Contraseña' })
+    .getByRole('radio', { name: 'Usar una nueva' })
+    .check()
+  await admin.getByLabel('Contraseña nueva').fill('e2e-mail-secret-4321')
+  await admin.getByRole('button', { name: 'Guardar los ajustes de correo' }).click()
+  await expect(admin.getByRole('status').filter({ hasText: 'Ajustes de correo guardados.' })).toBeFocused()
+  await expect(admin.getByRole('group', { name: 'Contraseña' })).toContainText(
+    'Conservar la actual (configurada)',
+  )
   await expect(admin.locator('body')).not.toContainText('4321')
   const read = await (await admin.request.get('/v1/admin/mail')).text()
   expect(read).not.toContain('e2e-mail-secret')
   await admin.reload()
   await expect(admin.locator('body')).not.toContainText('e2e-mail-secret')
   // The test mail, captured.
-  await admin.getByRole('button', { name: 'Send test email' }).click()
+  await admin.getByRole('button', { name: 'Enviar email de prueba' }).click()
   await expect(admin.getByRole('status').filter({ hasText: `Sent to ${ADMIN.email}` })).toBeFocused()
   const m = await mailTo(admin, ADMIN.email, /^Test mail from /)
   expect(m.text).toContain('Mail works.')
   // A server that cannot be reached: the test says why, and the failure is listed.
-  await admin.getByLabel('Mail server').fill('down.e2e.test')
+  await admin.getByLabel('Servidor de correo').fill('down.e2e.test')
   // Another server: its password is typed again.
-  await admin.getByRole('group', { name: 'Password' }).getByRole('radio', { name: 'Use a new one' }).check()
-  await admin.getByLabel('New password').fill('down-server-password')
-  await admin.getByRole('button', { name: 'Save mail settings' }).click()
-  await expect(admin.getByRole('status').filter({ hasText: 'Mail settings saved.' })).toBeVisible()
-  await admin.getByRole('button', { name: 'Send test email' }).click()
-  await expect(admin.getByRole('alert').filter({ hasText: 'It did not go' })).toContainText(
-    'server not found',
-  )
+  await admin
+    .getByRole('group', { name: 'Contraseña' })
+    .getByRole('radio', { name: 'Usar una nueva' })
+    .check()
+  await admin.getByLabel('Contraseña nueva').fill('down-server-password')
+  await admin.getByRole('button', { name: 'Guardar los ajustes de correo' }).click()
+  await expect(admin.getByRole('status').filter({ hasText: 'Ajustes de correo guardados.' })).toBeVisible()
+  await admin.getByRole('button', { name: 'Enviar email de prueba' }).click()
+  await expect(admin.getByRole('alert').filter({ hasText: 'No salió' })).toContainText('server not found')
   await expect(
-    admin.getByRole('region', { name: 'Recent send failures' }).getByRole('listitem').first(),
+    admin.getByRole('region', { name: 'Fallos de envío recientes' }).getByRole('listitem').first(),
   ).toContainText('server not found')
 })

@@ -67,7 +67,7 @@ describe('bounded answers', { skip: skipPg }, () => {
     const cut = r.body.cut as { at: number; chars: number; message: string; howToProceed: string }
     assert.equal(cut.at, MAX_REPLY_CHARS)
     assert.ok(cut.chars > MAX_REPLY_CHARS)
-    assert.match(cut.message, /cut at 256000 characters/)
+    assert.match(cut.message, /se cortó en 256000 caracteres/)
     assert.match(cut.howToProceed, /limit|filter|next page/)
     assert.equal(typeof r.body.partial, 'string')
     assert.ok((r.body.partial as string).startsWith('{"items":["éé'))
@@ -128,7 +128,7 @@ describe('bounded answers', { skip: skipPg }, () => {
       }
       assert.equal(rpc.id, id)
       assert.equal(rpc.result.isError, false)
-      assert.match(rpc.result.content[0]?.text ?? '', /\[cut at 256000 characters\. Ask for less/)
+      assert.match(rpc.result.content[0]?.text ?? '', /\[cut at 256000 characters\. Pide menos/)
     }
     // An id longer than that is refused, before any work.
     const long = await w.raw('POST', '/mcp', {

@@ -83,8 +83,8 @@ ${PAGE_STYLE}</style></head><body><main><div class="card">${body}</div><p class=
 
 const errorPage = (message: string, status = 400) =>
   page(
-    'Cannot connect',
-    `<h1>This app cannot connect</h1><p class="error">${esc(message)}</p><p class="muted">Nothing was shared. Close this page and check the app's settings.</p>`,
+    'No se pudo conectar',
+    `<h1>Esta app no puede conectarse</h1><p class="error">${esc(message)}</p><p class="muted">No se compartió nada. Cierra esta página y revisa los ajustes de la app.</p>`,
     status,
   )
 
@@ -96,8 +96,8 @@ async function maintenancePage(r: PublicReq, q: Record<string, string>): Promise
   const seconds = retryAfter(m, r.clock())
   const again = `/oauth/authorize?${new URLSearchParams(q).toString()}`
   return page(
-    'Updating',
-    `<h1>obsybrain is updating</h1><p>obsybrain is updating. Try again in ${seconds} seconds.</p><p><a href="${esc(again)}">Try again</a></p><p class="muted">Nothing was changed.</p>`,
+    'Actualizando',
+    `<h1>obsybrain se está actualizando</h1><p>obsybrain se está actualizando. Vuelve a intentarlo en ${seconds} segundos.</p><p><a href="${esc(again)}">Reintentar</a></p><p class="muted">No cambió nada.</p>`,
     503,
     { 'retry-after': String(seconds) },
   )
@@ -107,7 +107,7 @@ async function maintenancePage(r: PublicReq, q: Record<string, string>): Promise
 function queryOf(q: URLSearchParams): Record<string, string> {
   const out: Record<string, string> = {}
   for (const [k, v] of q) {
-    if (Object.hasOwn(out, k)) throw new OAuthError(400, 'invalid_request', `"${k}" is given more than once.`)
+    if (Object.hasOwn(out, k)) throw new OAuthError(400, 'invalid_request', `"${k}" se pasó más de una vez.`)
     out[k] = v
   }
   return out
@@ -158,16 +158,16 @@ function loginPage(
   const nonce = randomBytes(16).toString('base64url')
   const params = new URLSearchParams(q).toString()
   return page(
-    'Sign in',
-    `<h1>Sign in to connect</h1><p><strong>${esc(clientName)}</strong> wants to connect to your brains. Sign in first.</p>
+    'Iniciar sesión',
+    `<h1>Inicia sesión para conectar</h1><p><strong>${esc(clientName)}</strong> quiere conectarse a tus brains. Inicia sesión primero.</p>
 ${message ? `<p class="error" role="alert">${esc(message)}</p>` : ''}
 <form method="post" action="/oauth/login">
 <input type="hidden" name="nonce" value="${nonce}"><input type="hidden" name="csrf" value="${sign(r, `login:${nonce}`)}">
 <input type="hidden" name="continue" value="${esc(params)}">
-<label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required autofocus>
-<label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required>
-<label for="code">Code from your authenticator app <span class="muted">(only if you set one up)</span></label><input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code">
-<div class="row"><button class="primary" type="submit">Sign in</button></div></form>`,
+<label for="email">Correo</label><input id="email" name="email" type="email" autocomplete="username" required autofocus>
+<label for="password">Contraseña</label><input id="password" name="password" type="password" autocomplete="current-password" required>
+<label for="code">Código de tu app de autenticación <span class="muted">(solo si configuraste uno)</span></label><input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code">
+<div class="row"><button class="primary" type="submit">Iniciar sesión</button></div></form>`,
     status,
     {
       'set-cookie': `${FORM_COOKIE}=${nonce}; Path=/oauth; HttpOnly; SameSite=Lax; Max-Age=900${r.conn.encrypted ? '; Secure' : ''}`,
@@ -198,21 +198,21 @@ async function consentPage(
             `<label class="opt"><input type="checkbox" name="brain_${esc(b.id)}" value="on"${start.brainIds.has(b.id) ? ' checked' : ''}> <span><strong>${esc(b.name)}</strong> <span class="muted">${esc(b.slug)} · you are ${esc(b.role)}</span></span></label>`,
         )
         .join('')
-    : '<p class="muted">You are not a member of any brain yet.</p>'
+    : '<p class="muted">Todavía no eres miembro de ningún brain.</p>'
   return page(
-    'Connect an app',
-    `<h1>Connect “${esc(a.client.name)}”?</h1>
-<div class="warn">This name is declared by the app, not verified. After you approve, you go back to <span class="domain">${esc(shown)}</span>. Approve only if you started this from that app.</div>
+    'Conectar una app',
+    `<h1>¿Conectar “${esc(a.client.name)}”?</h1>
+<div class="warn">Este nombre lo declara la app, sin verificar. Después de aprobar, vuelves a <span class="domain">${esc(shown)}</span>. Aprueba solo si empezaste esto desde esa app.</div>
 ${message ? `<p class="error" role="alert">${esc(message)}</p>` : ''}
-<p>It asks to read your brains${a.scope?.includes('write') ? ' and to write to them' : ''}. It never does more than your role in each brain allows.</p>
+<p>Pide leer tus brains${a.scope?.includes('write') ? ' y escribir en ellos' : ''}. Nunca hace más de lo que tu rol en cada brain permite.</p>
 <form method="post" action="/oauth/authorize">${hidden(q)}
 <input type="hidden" name="csrf" value="${sign(r, consentKey(who, a))}">
-<fieldset><legend>Brains it can reach</legend>${list}</fieldset>
-<fieldset><legend>Permission</legend>
-<label class="opt"><input type="radio" name="perm" value="read"${start.perm === 'read' ? ' checked' : ''}> Read</label>
-<label class="opt"><input type="radio" name="perm" value="write"${start.perm === 'write' ? ' checked' : ''}> Read and write (the journal, and proposals to the wiki)</label></fieldset>
-<p class="muted">Signed in as ${esc(who.name)}. You can end this connection any time in your profile, under “Connected apps”.</p>
-<div class="row"><button type="submit" name="decision" value="deny">Deny</button><button class="primary" type="submit" name="decision" value="approve"${brains.length ? '' : ' disabled'}>Approve</button></div></form>`,
+<fieldset><legend>Brains que puede alcanzar</legend>${list}</fieldset>
+<fieldset><legend>Permiso</legend>
+<label class="opt"><input type="radio" name="perm" value="read"${start.perm === 'read' ? ' checked' : ''}> Lectura</label>
+<label class="opt"><input type="radio" name="perm" value="write"${start.perm === 'write' ? ' checked' : ''}> Lectura y escritura (el diario, y propuestas a la wiki)</label></fieldset>
+<p class="muted">Conectado como ${esc(who.name)}. Puedes terminar esta conexión cuando quieras en tu perfil, en “Apps conectadas”.</p>
+<div class="row"><button type="submit" name="decision" value="deny">Denegar</button><button class="primary" type="submit" name="decision" value="approve"${brains.length ? '' : ' disabled'}>Aprobar</button></div></form>`,
   )
 }
 
@@ -318,7 +318,7 @@ export const oauthRoutes: Route[] = [
         formNonce !== text('nonce') ||
         !sameText(text('csrf'), sign(r, `login:${formNonce}`))
       ) {
-        return loginPage(r, q, step.a.client.name, 'This form expired. Sign in again.', 403)
+        return loginPage(r, q, step.a.client.name, 'Este formulario expiró. Inicia sesión de nuevo.', 403)
       }
       try {
         const s = await signIn(r.db, r.clock, r.conn, r.secret, {
@@ -362,16 +362,19 @@ export const oauthRoutes: Route[] = [
       }
       if (step.reply) return step.reply
       const who = await personOf(r)
-      if (!who) return errorPage('Your session ended. Start the connection again from the app.', 401)
+      if (!who) return errorPage('Tu sesión terminó. Empieza la conexión de nuevo desde la app.', 401)
       const a = step.a
       // The approval must come from this page, in this session: another site cannot make it.
       if (typeof b.csrf !== 'string' || !sameText(b.csrf, sign(r, consentKey(who, a)))) {
-        return errorPage('This approval did not come from the consent page. Start again from the app.', 403)
+        return errorPage(
+          'Esta aprobación no vino de la página de consentimiento. Empieza de nuevo desde la app.',
+          403,
+        )
       }
       if (b.decision !== 'approve') {
         return back(a.redirectUri, {
           error: 'access_denied',
-          error_description: 'The person denied it.',
+          error_description: 'La persona lo denegó.',
           state: a.state,
           iss: step.iss,
         })
@@ -397,7 +400,7 @@ export const oauthRoutes: Route[] = [
         return json(200, await exchangeCode(r.db, r.clock, b), { pragma: 'no-cache' })
       if (b.grant_type === 'refresh_token')
         return json(200, await refreshGrant(r.db, r.clock, b), { pragma: 'no-cache' })
-      throw new OAuthError(400, 'unsupported_grant_type', 'Use authorization_code or refresh_token.')
+      throw new OAuthError(400, 'unsupported_grant_type', 'Usa authorization_code o refresh_token.')
     } catch (err) {
       return oauthError(err)
     }

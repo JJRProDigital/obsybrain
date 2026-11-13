@@ -27,17 +27,17 @@ describe('backups in words', () => {
       'failed',
     ])
       assert.ok(failureText(c).length > 10, c)
-    assert.match(failureText('disk_full'), /disk .*full/i)
-    assert.match(failureText('something new'), /failed/i)
+    assert.match(failureText('disk_full'), /disco .*lleno/i)
+    assert.match(failureText('something new'), /falló/i)
     for (const c of ['fsync_failed', 'status_not_saved', 'disk_full', 'no_permission'])
       assert.ok(warningText(c).length > 10, c)
   })
 
   it('reasons and sizes', () => {
-    assert.equal(reasonLabel('scheduled'), 'Daily')
-    assert.equal(reasonLabel('manual'), 'By hand')
-    assert.equal(reasonLabel('pre-update'), 'Before an update')
-    assert.equal(reasonLabel('pre-restore'), 'Before a restore')
+    assert.equal(reasonLabel('scheduled'), 'Diaria')
+    assert.equal(reasonLabel('manual'), 'A mano')
+    assert.equal(reasonLabel('pre-update'), 'Antes de una actualización')
+    assert.equal(reasonLabel('pre-restore'), 'Antes de una restauración')
     assert.equal(sizeLabel(512), '512 bytes')
     assert.equal(sizeLabel(2048), '2.0 KB')
     assert.equal(sizeLabel(52_000_000), '49.6 MB')
@@ -57,16 +57,19 @@ describe('backups in words', () => {
   it('a copy that needs an older key, or while a copy is made, cannot be restored here: and says why', () => {
     const item = { needsOldKey: false }
     assert.equal(restoreBlocked(item, { running: false, online: true }), null)
-    assert.match(String(restoreBlocked({ needsOldKey: true }, { running: false, online: true })), /older key/)
-    assert.match(String(restoreBlocked(item, { running: true, online: true })), /copy is being made/)
-    assert.match(String(restoreBlocked(item, { running: false, online: false })), /offline/i)
+    assert.match(
+      String(restoreBlocked({ needsOldKey: true }, { running: false, online: true })),
+      /clave más vieja/,
+    )
+    assert.match(String(restoreBlocked(item, { running: true, online: true })), /Se está haciendo una copia/)
+    assert.match(String(restoreBlocked(item, { running: false, online: false })), /sin conexión/i)
   })
 
   it('the name typed before a restore must be the installation’s, exactly', () => {
     assert.equal(confirmProblem('Acme brain', 'Acme brain'), null)
     assert.match(String(confirmProblem('', 'Acme brain')), /Acme brain/)
-    assert.match(String(confirmProblem('acme brain', 'Acme brain')), /exactly/)
-    assert.match(String(confirmProblem(' Acme brain', 'Acme brain')), /exactly/)
+    assert.match(String(confirmProblem('acme brain', 'Acme brain')), /exactamente/)
+    assert.match(String(confirmProblem(' Acme brain', 'Acme brain')), /exactamente/)
   })
 
   it('the key file holds the key alone (obsybrain restore --key-file reads it as it is); its name says whose and which', () => {

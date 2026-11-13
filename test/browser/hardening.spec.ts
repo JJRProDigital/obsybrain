@@ -103,15 +103,15 @@ test('Back after «Leave focus» goes into the focus again', async ({ page, cont
     .getByRole('button', { name: /^Focus: 1 hop, / })
     .first()
     .click()
-  await expect(page.getByRole('button', { name: 'Leave focus' })).toBeVisible()
-  await page.getByRole('button', { name: 'Leave focus' }).click()
-  await expect(page.getByRole('button', { name: 'Leave focus' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Salir del foco' })).toBeVisible()
+  await page.getByRole('button', { name: 'Salir del foco' }).click()
+  await expect(page.getByRole('button', { name: 'Salir del foco' })).toHaveCount(0)
   await page.goBack()
   await expect(page).toHaveURL(/focus=/)
-  await expect(page.getByRole('button', { name: 'Leave focus' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Salir del foco' })).toBeVisible()
   await page.goBack()
   await expect(page).not.toHaveURL(/focus=/)
-  await expect(page.getByRole('table', { name: /Pages of the wiki/ })).toBeVisible()
+  await expect(page.getByRole('table', { name: /Páginas del wiki/ })).toBeVisible()
 })
 
 // Pending from PR22: the tag filter asked the server on every key, so «q4» typed showed «q» first (no
@@ -123,14 +123,14 @@ test('the tag filter waits for a pause in typing: one request for «q4», none f
 }) => {
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
   await page.goto(`${GRAPH}?view=list`)
-  await expect(page.getByRole('table', { name: /Pages of the wiki/ })).toBeVisible()
+  await expect(page.getByRole('table', { name: /Páginas del wiki/ })).toBeVisible()
   const tags: string[] = []
   page.on('request', (r) => {
     const t = new URL(r.url()).searchParams.get('tag')
     if (t !== null) tags.push(t)
   })
   await page.locator('.graph-filters summary').click()
-  await page.getByLabel('Tag', { exact: true }).pressSequentially('q4', { delay: 60 })
+  await page.getByLabel('Etiqueta', { exact: true }).pressSequentially('q4', { delay: 60 })
   await expect(page).toHaveURL(/tag=q4/)
   await expect.poll(() => tags.includes('q4')).toBe(true)
   expect(
@@ -138,8 +138,8 @@ test('the tag filter waits for a pause in typing: one request for «q4», none f
     'no request for the half-typed tag',
   ).toEqual([])
   // Clearing the filters empties the box too.
-  await page.getByRole('button', { name: 'Clear filters' }).first().click()
-  await expect(page.getByLabel('Tag', { exact: true })).toHaveValue('')
+  await page.getByRole('button', { name: 'Quitar los filtros' }).first().click()
+  await expect(page.getByLabel('Etiqueta', { exact: true })).toHaveValue('')
   await expect(page).not.toHaveURL(/tag=/)
 })
 
@@ -153,20 +153,20 @@ test('a correction in a brain with no page yet starts on «Nothing in particular
 }) => {
   await scenario(context, baseURL as string, 'alone', {}, { mail: false })
   await page.goto('/')
-  await page.getByRole('button', { name: 'Create brain' }).first().click()
-  await page.getByLabel('Name').fill('Onboarding')
-  await page.getByRole('dialog').getByRole('button', { name: 'Create brain' }).click()
-  await expect(page.getByRole('region', { name: 'First steps' })).toBeVisible()
+  await page.getByRole('button', { name: 'Crear brain' }).first().click()
+  await page.getByLabel('Nombre').fill('Onboarding')
+  await page.getByRole('dialog').getByRole('button', { name: 'Crear brain' }).click()
+  await expect(page.getByRole('region', { name: 'Primeros pasos' })).toBeVisible()
   await page.goto('/b/onboarding/journal/correct')
-  await expect(page.getByRole('radio', { name: 'Nothing in particular' })).toBeChecked()
-  await page.getByLabel('Title', { exact: true }).fill('Long intros lose viewers')
-  await page.getByLabel('The correction').fill('Keep intros under ten seconds.')
-  await page.getByRole('button', { name: 'Add correction' }).click()
+  await expect(page.getByRole('radio', { name: 'Nada en particular' })).toBeChecked()
+  await page.getByLabel('Título', { exact: true }).fill('Long intros lose viewers')
+  await page.getByLabel('La corrección').fill('Keep intros under ten seconds.')
+  await page.getByRole('button', { name: 'Añadir corrección' }).click()
   await expect(page).toHaveURL(/\/journal\/entries\//)
 })
 
 // The final review of B6: the web's own edits are not «sessions active now» (they show in the feed); a
-// session a key got by writing without opening one is «Unnamed work · <client>» everywhere.
+// session a key got by writing without opening one is «Trabajo sin nombre · <client>» everywhere.
 test('Activity lists agents’ sessions only; the web’s edits are not among them', async ({
   page,
   context,
@@ -176,17 +176,17 @@ test('Activity lists agents’ sessions only; the web’s edits are not among th
   await page.goto('/b/growth/activity')
   const sessions = page.locator('.act-sessions')
   await expect(sessions.getByRole('link', { name: 'Narrate the outro of video 42' })).toBeVisible()
-  await expect(sessions).not.toContainText('Web edits')
+  await expect(sessions).not.toContainText('Ediciones web')
   await expect(sessions).not.toContainText('Work without a session')
   await page.goto('/b/growth/journal')
   await expect(
-    page.getByRole('list', { name: 'Sessions' }).getByRole('link', { name: 'Web edits · Eric' }),
+    page.getByRole('list', { name: 'Sesiones' }).getByRole('link', { name: 'Ediciones web · Eric' }),
   ).toBeVisible()
   await page.goto('/b/growth')
   await expect(
     page
       .getByRole('region', { name: "Today's sessions" })
-      .getByRole('link', { name: 'Unnamed work · an API client' }),
+      .getByRole('link', { name: 'Trabajo sin nombre · un cliente de API' }),
   ).toBeVisible()
 })
 
@@ -227,9 +227,9 @@ test('«N proposals to review» on a brain card opens that brain’s inbox', asy
 test('Settings and Admin name whom to ask', async ({ page, context, baseURL }) => {
   await scenario(context, baseURL as string, 'member')
   await page.goto('/admin/people')
-  await expect(page.getByRole('alert')).toContainText('Ask an administrator (Eric)')
+  await expect(page.getByRole('alert')).toContainText('Pídeselo a un administrador (Eric).')
   await page.goto('/b/support/settings')
-  await expect(page.getByRole('alert')).toContainText(/Ask a curator of Support \(.+\) for the curator role/)
+  await expect(page.getByRole('alert')).toContainText(/Pide el rol curator a quien cure el brain \(Support\)/)
 })
 
 // The final review of B6: a tab of the administration puts the keyboard on its own section, and the first
@@ -241,18 +241,18 @@ test('an administration tab lands on its section heading; its first field is one
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/admin/people')
-  await expect(page.getByRole('heading', { name: 'People in this installation' })).toBeVisible()
-  const tabs = page.getByRole('navigation', { name: 'Administration' })
+  await expect(page.getByRole('heading', { name: 'Personas en esta instalación' })).toBeVisible()
+  const tabs = page.getByRole('navigation', { name: 'Administración' })
   await tabs.getByRole('link', { name: 'Invitations' }).click()
-  await expect(page.getByRole('heading', { level: 2, name: 'Invite people' })).toBeFocused()
+  await expect(page.getByRole('heading', { level: 2, name: 'Invitar personas' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(page.getByLabel('Emails')).toBeFocused()
-  await tabs.getByRole('link', { name: 'Service accounts' }).click()
-  await expect(page.getByRole('heading', { level: 2, name: 'New service account' })).toBeFocused()
+  await tabs.getByRole('link', { name: 'Cuentas de servicio' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Cuenta de servicio nueva' })).toBeFocused()
   await page.keyboard.press('Tab')
-  await expect(page.getByLabel('Name', { exact: true })).toBeFocused()
+  await expect(page.getByLabel('Nombre', { exact: true })).toBeFocused()
   await tabs.getByRole('link', { name: 'People' }).click()
-  await expect(page.getByRole('heading', { level: 2, name: 'People in this installation' })).toBeFocused()
+  await expect(page.getByRole('heading', { level: 2, name: 'Personas en esta instalación' })).toBeFocused()
 })
 
 // The final review of B6: a token never says more than its owner may do (B4). Ana reads Support only.
@@ -269,11 +269,11 @@ test('a reader cannot pick «Read and write» for a token over brains she only r
   })
   const read = roles.find((b) => b.role === 'reader')
   test.skip(!read, 'the member reads no brain in this fixture')
-  await page.getByRole('button', { name: 'Create a token' }).first().click()
-  await page.getByRole('radio', { name: 'Only these brains' }).check()
+  await page.getByRole('button', { name: 'Crear un token' }).first().click()
+  await page.getByRole('radio', { name: 'Solo estos brains' }).check()
   await page.getByRole('checkbox', { name: read?.name ?? '' }).check()
-  await expect(page.getByRole('radio', { name: 'Read and write' })).toBeDisabled()
-  await expect(page.getByRole('radio', { name: 'Read only' })).toBeChecked()
+  await expect(page.getByRole('radio', { name: 'Lectura y escritura' })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: 'Solo lectura' })).toBeChecked()
   await expect(page.getByText('you are a reader in these brains')).toBeVisible()
 })
 
@@ -285,10 +285,10 @@ test('«Connect your agent» shows its live check once, after the steps', async 
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  await expect(page.getByRole('region', { name: 'Live check' })).toHaveCount(1)
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toHaveCount(1)
   await expect(page.locator('[data-check-mini]')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Create a token' }).click()
-  await expect(page.getByRole('button', { name: 'Copy the token' })).toBeVisible()
+  await page.getByRole('button', { name: 'Crear un token' }).click()
+  await expect(page.getByRole('button', { name: 'Copiar el token' })).toBeVisible()
   await expect(page.locator('[data-check-mini]')).toHaveCount(0)
   const after = await page.evaluate(() => {
     const panel = document.querySelector('[role="tabpanel"]') as Element
@@ -303,24 +303,24 @@ test('after an edit conflict, the header shows the newer revision', async ({ pag
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/b/growth/pages/audience/retention?view=edit')
   const meta = page.locator('.page-meta')
-  await expect(meta).toContainText('Revision 3')
-  await page.getByLabel('Body', { exact: true }).fill('Mine.')
+  await expect(meta).toContainText('Revisión 3')
+  await page.getByLabel('Cuerpo', { exact: true }).fill('Mine.')
   await fetch(`${baseURL}/__fixture/scenarios/${s.id}/wiki-edit`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ brain: 'growth', address: 'audience/retention', body: 'Theirs.' }),
+    body: JSON.stringify({ brain: 'growth', address: 'audience/retention', body: 'El suyo.' }),
   })
-  await page.getByRole('button', { name: 'Save changes' }).click()
+  await page.getByRole('button', { name: 'Guardar los cambios' }).click()
   await expect(page.getByRole('region', { name: 'Eva saved revision 4 while you edited' })).toBeVisible()
-  await expect(meta).toContainText('Revision 4')
+  await expect(meta).toContainText('Revisión 4')
 })
 
 // The final review of B6: each card's «Edit» has its own name.
 test('the «Edit» of each proposed change is named by its change', async ({ page, context, baseURL }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/b/growth/proposals/prp_growth1')
-  await expect(page.getByRole('button', { name: 'Edit change 1', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Edit change 2', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Editar el cambio 1', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Editar el cambio 2', exact: true })).toBeVisible()
 })
 
 // The final review of B6: in the `[[` list, the first ArrowDown chooses the first page (it was chosen at
@@ -328,9 +328,9 @@ test('the «Edit» of each proposed change is named by its change', async ({ pag
 test('in the `[[` list the first ArrowDown stays on the first page', async ({ page, context, baseURL }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/b/growth/pages/audience/retention?view=edit')
-  const body = page.getByLabel('Body', { exact: true })
+  const body = page.getByLabel('Cuerpo', { exact: true })
   await body.fill('See [[aud')
-  const list = page.getByRole('listbox', { name: 'Pages to link' })
+  const list = page.getByRole('listbox', { name: 'Páginas para enlazar' })
   await expect(list.getByRole('option').first()).toHaveAttribute('aria-selected', 'true')
   await body.press('ArrowDown')
   await expect(list.getByRole('option').first()).toHaveAttribute('aria-selected', 'true')
@@ -348,13 +348,15 @@ test('a session of web edits has one name: the journal, the entry page and the c
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/b/growth/journal')
   await expect(
-    page.getByRole('list', { name: 'Sessions' }).getByRole('link', { name: 'Web edits · Eric' }),
+    page.getByRole('list', { name: 'Sesiones' }).getByRole('link', { name: 'Ediciones web · Eric' }),
   ).toBeVisible()
   await page.goto('/b/growth/journal/entries/ent_fx_corr')
-  await expect(page.getByRole('main').getByRole('link', { name: 'Web edits · Eric' }).first()).toBeVisible()
-  await expect(page.getByRole('main')).not.toContainText('Unnamed work · an agent')
+  await expect(
+    page.getByRole('main').getByRole('link', { name: 'Ediciones web · Eric' }).first(),
+  ).toBeVisible()
+  await expect(page.getByRole('main')).not.toContainText('Trabajo sin nombre · an agent')
   await page.goto('/b/growth/journal/conflicts')
-  await expect(page.getByRole('main')).not.toContainText('Unnamed work · an agent')
+  await expect(page.getByRole('main')).not.toContainText('Trabajo sin nombre · an agent')
 })
 
 // Review of PR26 (second pass): a proposal names its source entries from its review; looking at it opens
@@ -407,11 +409,11 @@ test('the token form gives «Read and write» back when a brain she writes in jo
   const read = roles.find((b) => b.role === 'reader')
   const write = roles.find((b) => b.role !== 'reader')
   test.skip(!read || !write, 'the member needs a brain she reads and one she writes in')
-  await page.getByRole('button', { name: 'Create a token' }).first().click()
-  const both = page.getByRole('radio', { name: 'Read and write' })
-  const only = page.getByRole('radio', { name: 'Read only' })
+  await page.getByRole('button', { name: 'Crear un token' }).first().click()
+  const both = page.getByRole('radio', { name: 'Lectura y escritura' })
+  const only = page.getByRole('radio', { name: 'Solo lectura' })
   await expect(both).toBeChecked()
-  await page.getByRole('radio', { name: 'Only these brains' }).check()
+  await page.getByRole('radio', { name: 'Solo estos brains' }).check()
   await page.getByRole('checkbox', { name: read?.name ?? '' }).check()
   await expect(only).toBeChecked()
   await page.getByRole('checkbox', { name: write?.name ?? '' }).check()

@@ -65,7 +65,7 @@ const text = (v: unknown, max: number) =>
   typeof v === 'string' ? v.replace(CONTROLS, '').slice(0, max) : null
 
 const COMMAND = 'obsybrain.sh update'
-const terminal = `On the server, run: ${COMMAND}`
+const terminal = `En el servidor, ejecuta: ${COMMAND}`
 
 export function updates(
   o: UpdateConfig & { clock: Clock; factoryUrl: string | null; companion: boolean },
@@ -136,8 +136,8 @@ export function updates(
     new AppError(
       409,
       'update_running',
-      'An update is already running.',
-      'Wait for it to finish; this page shows how it goes.',
+      'Ya se está ejecutando una actualización.',
+      'Espera a que termine; esta página muestra cómo va.',
     )
 
   // A mark is made new (`wx`): one already there, a link included, is not written through and means an update is on
@@ -158,8 +158,8 @@ export function updates(
     new AppError(
       503,
       'update_not_started',
-      'The request could not be left for the updater.',
-      `${terminal}. Or check that the folder update/request can be written by the service.`,
+      'La petición no pudo dejarse para el actualizador.',
+      `${terminal}. O revisa que la carpeta update/request pueda escribirla el servicio.`,
     )
 
   return {
@@ -174,18 +174,18 @@ export function updates(
         return new AppError(
           409,
           'companion',
-          'obsybrain was installed by rsc-factory: update it from there.',
+          'obsybrain fue instalado por rsc-factory: actualízalo desde allí.',
           s.factoryUrl
-            ? `Open rsc-factory at ${s.factoryUrl} and update from Admin › Updates.`
-            : 'Open rsc-factory and update from Admin › Updates.',
+            ? `Abre rsc-factory en ${s.factoryUrl} y actualiza desde Admin › Actualizaciones.`
+            : 'Abre rsc-factory y actualiza desde Admin › Actualizaciones.',
         )
       }
       if (s.mode === 'off') {
         return new AppError(
           409,
           'updates_off',
-          'Updating from the web is off on this installation.',
-          `${terminal}. To turn the button on: obsybrain.sh web-updates enable`,
+          'Actualizar desde la web está apagado en esta instalación.',
+          `${terminal}. Para encender el botón: obsybrain.sh web-updates enable`,
         )
       }
       if (s.requested || s.running) return running()
@@ -194,18 +194,18 @@ export function updates(
         return new AppError(
           409,
           'rollback_failed',
-          `The last update${to ? ` to ${to}` : ''} failed, and obsybrain could not go back by itself: the data may not be as it was.`,
+          `La última actualización${to ? ` a ${to}` : ''} falló, y obsybrain no pudo volver por sí solo: los datos pueden no estar como estaban.`,
           restore
-            ? `Do not update again. On the server, restore the copy made before it (everyone signs in again afterwards): ${restore}`
-            : 'Do not update again. On the server, run obsybrain.sh status: it says what to restore (everyone signs in again afterwards).',
+            ? `No actualices de nuevo. En el servidor, restaura la copia hecha antes (todos tendrán que iniciar sesión de nuevo): ${restore}`
+            : 'No actualices de nuevo. En el servidor, ejecuta obsybrain.sh status: dice qué copia restaurar (todos tendrán que iniciar sesión de nuevo).',
         )
       }
       if (!view.newer || !view.latest) {
         return new AppError(
           409,
           'nothing_to_update',
-          'There is no newer version to update to.',
-          'Nothing to do.',
+          'No hay ninguna versión más nueva a la que actualizar.',
+          'Nada que hacer.',
         )
       }
       const failed = s.attempts.find((a) => a.version === view.latest)
@@ -216,34 +216,34 @@ export function updates(
         return new AppError(
           409,
           'update_failed',
-          `The update to ${view.latest} failed.`,
+          `La actualización a ${view.latest} falló.`,
           spent
-            ? `${terminal}. It failed too many times from the web.`
-            : `Use «Try again» on this page, or update on the server: ${COMMAND}`,
+            ? `${terminal}. Falló demasiadas veces desde la web.`
+            : `Usa «Reintentar» en esta página, o actualiza en el servidor: ${COMMAND}`,
         )
       }
       if (!failed) {
         return new AppError(
           409,
           'nothing_to_retry',
-          `The update to ${view.latest} has not failed.`,
-          'Use «Update» instead.',
+          `La actualización a ${view.latest} no falló.`,
+          'Usa «Actualizar» en su lugar.',
         )
       }
       if (failed.retries >= MAX_RETRIES || failed.retryFrom === null) {
         return new AppError(
           409,
           'retry_limit',
-          `The update to ${view.latest} failed ${MAX_RETRIES + 1} times from the web.`,
-          `${terminal}. It reports what went wrong.`,
+          `La actualización a ${view.latest} falló ${MAX_RETRIES + 1} veces desde la web.`,
+          `${terminal}. Allí se informa qué salió mal.`,
         )
       }
       if (o.clock().getTime() < Date.parse(failed.retryFrom)) {
         return new AppError(
           409,
           'retry_later',
-          'It is too soon to try again.',
-          `Try again after ${failed.retryFrom}, or update on the server: ${COMMAND}`,
+          'Es demasiado pronto para reintentar.',
+          `Vuelve a intentarlo después de las ${failed.retryFrom}, o actualiza en el servidor: ${COMMAND}`,
         )
       }
       return null

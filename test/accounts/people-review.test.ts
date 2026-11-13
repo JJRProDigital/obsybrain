@@ -212,7 +212,7 @@ describe('people: review', { skip: skipPg }, () => {
     w.mailFails = false
     await remindExpiringTokens(w.db, w.clock, capture)
     const email = String((await w.db.one('SELECT email FROM accounts WHERE id = $1', [kim.id]))?.email)
-    assert.match((await w.mailTo(email, /"soon" ends soon/)).subject, /soon/)
+    assert.match((await w.mailTo(email, /"soon" vence pronto/)).subject, /vence pronto/)
     w.advance(-25 * 86_400_000)
   })
 

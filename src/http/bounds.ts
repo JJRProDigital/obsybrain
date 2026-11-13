@@ -4,7 +4,7 @@
 export const MAX_REPLY_CHARS = 256_000
 
 export const CUT_HOW =
-  'Ask for less: a smaller "limit" or "max", a filter, or the next page ("cursor", "offset" or "after").'
+  'Pide menos: un "limit" o "max" más chico, un filtro, o la página siguiente ("cursor", "offset" o "after").'
 
 // The first `max` characters of a text, never half a character (a high surrogate at the cut goes too).
 export function head(text: string, max: number): string {
@@ -19,7 +19,7 @@ export function boundJson(text: string): { text: string; cut: boolean } {
   const cut = {
     at: MAX_REPLY_CHARS,
     chars: text.length,
-    message: `This answer was cut at ${MAX_REPLY_CHARS} characters; it had ${text.length}.`,
+    message: `Esta respuesta se cortó en ${MAX_REPLY_CHARS} caracteres; tenía ${text.length}.`,
     howToProceed: CUT_HOW,
   }
   let keep = MAX_REPLY_CHARS - JSON.stringify({ cut, partial: '' }).length

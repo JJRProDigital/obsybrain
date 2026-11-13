@@ -39,33 +39,33 @@ describe('a token in the list', () => {
   it('says which brains it reaches', () => {
     assert.equal(
       brainsLabel({ allBrains: true, brains: null }),
-      'All your brains, and the ones you join later',
+      'Todos tus brains, y los que te unas más adelante',
     )
     assert.equal(brainsLabel({ allBrains: false, brains: ['growth'] }), 'growth')
     assert.equal(brainsLabel({ allBrains: false, brains: ['growth', 'support'] }), 'growth, support')
   })
   it('says what it may do in words', () => {
-    assert.equal(permLabel('read'), 'Read')
-    assert.equal(permLabel('write'), 'Read and write')
+    assert.equal(permLabel('read'), 'Solo lectura')
+    assert.equal(permLabel('write'), 'Lectura y escritura')
   })
   it('says when it was last used and by what, never a raw user agent', () => {
-    assert.equal(lastUseLabel(token(), NOW), 'Never used')
+    assert.equal(lastUseLabel(token(), NOW), 'Nunca usado')
     assert.equal(
       lastUseLabel(token({ lastUsedAt: '2026-11-01T11:58:00.000Z', lastClient: 'claude-code/2.1.3' }), NOW),
-      'Used 2 min ago by Claude Code',
+      'Usado hace 2 min por Claude Code',
     )
     assert.equal(
       lastUseLabel(token({ lastUsedAt: '2026-10-31T09:00:00.000Z', lastClient: 'node' }), NOW),
-      'Used yesterday by an API client',
+      'Usado ayer por un cliente de API',
     )
-    assert.equal(lastUseLabel(token({ lastUsedAt: '2026-11-01T11:59:50.000Z' }), NOW), 'Used just now')
+    assert.equal(lastUseLabel(token({ lastUsedAt: '2026-11-01T11:59:50.000Z' }), NOW), 'Usado justo ahora')
     // The bridge says who it is; never «an API client».
     assert.equal(
       lastUseLabel(
         token({ lastUsedAt: '2026-11-01T11:59:50.000Z', lastClient: 'obsybrain-bridge/0.1.0' }),
         NOW,
       ),
-      'Used just now by the obsybrain bridge',
+      'Usado justo ahora por el bridge de obsybrain',
     )
   })
 })
@@ -83,13 +83,13 @@ describe('a new token, from the form', () => {
     })
   })
   it('says what to fix before anything is sent: a name, a length, at least one brain', () => {
-    assert.deepEqual(tokenRequest({ ...base, name: '  ' }).problems, { name: 'Enter a name.' })
+    assert.deepEqual(tokenRequest({ ...base, name: '  ' }).problems, { name: 'Introduce un nombre.' })
     assert.equal(tokenRequest({ ...base, name: '  ' }).body, null)
     assert.deepEqual(tokenRequest({ ...base, name: 'x'.repeat(81) }).problems, {
-      name: 'Shorten the name to 80 characters or fewer.',
+      name: 'Acorta el nombre a 80 caracteres o menos.',
     })
     assert.deepEqual(tokenRequest({ ...base, scope: 'some', brains: [] }).problems, {
-      brains: 'Choose at least one brain, or all of them.',
+      brains: 'Elige al menos un brain, o todos.',
     })
     assert.equal(tokenRequest({ ...base, name: ' Laptop ' }).body?.name, 'Laptop')
   })
@@ -386,12 +386,12 @@ describe('after a new password', () => {
         [{ expired: false }, { expired: true }, { expired: false }],
         [{ ended: false }, { ended: true }],
       ),
-      'Password changed. Your other sessions are signed out. Your 2 tokens and 1 connected app still work.',
+      'Contraseña cambiada. Tus otras sesiones cerraron sesión. Tus 2 tokens y 1 app conectada siguen funcionando.',
     )
   })
 
   it('still says the password changed when the lists could not be read again', () => {
-    const plain = 'Password changed. Your other sessions are signed out.'
+    const plain = 'Contraseña cambiada. Tus otras sesiones cerraron sesión.'
     assert.equal(passwordChanged(undefined, [{ ended: false }]), plain)
     assert.equal(passwordChanged([{ expired: false }], undefined), plain)
   })

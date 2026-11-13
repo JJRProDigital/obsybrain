@@ -173,8 +173,8 @@ describe('the order in which events are delivered', { skip: skipPg }, () => {
   it('a Last-Event-ID ahead of this installation says so, then follows from now', async () => {
     const s = await subscribe(factory.key, 'ahead', '999999999')
     const gap = await s.waitFor((e) => e.event === 'gap')
-    assert.match(gap.data.message ?? '', /ahead/)
-    assert.match(gap.data.message ?? '', /lists/)
+    assert.match(gap.data.message ?? '', /por delante/)
+    assert.match(gap.data.message ?? '', /listas/)
     // Review of PR23: the gap names the newest id, so a client holding a later one resets to it (a restored
     // database numbers again from below) instead of dropping what follows as already seen.
     const newest = (gap.data as { lastEventId?: string }).lastEventId ?? ''

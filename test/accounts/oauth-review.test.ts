@@ -161,7 +161,7 @@ describe('connections: review', { skip: skipPg }, () => {
     )
     assert.equal(page.status, 200)
     assert.ok(!/<span class="domain">claude\.ai<\/span>/.test(page.text))
-    assert.match(page.text, /an app on this device \(x-evil:\)/)
+    assert.match(page.text, /una app en este dispositivo \(x-evil:\)/)
   })
 
   it('a client document is fetched again after an hour: a withdrawn return address stops working', async () => {
@@ -202,7 +202,7 @@ describe('connections: review', { skip: skipPg }, () => {
       `rscb_session=${session}`,
     )
     assert.equal(r.status, 200, r.text)
-    assert.match(r.text, /Connect “A B C”/)
+    assert.match(r.text, /¿Conectar “A B C”/)
     served['/nuluri.json'] = {
       client_id: `${docBase}/nuluri.json`,
       redirect_uris: ['http://127.0.0.1/c\u0000b'],
@@ -276,7 +276,7 @@ describe('connections: review', { skip: skipPg }, () => {
     const client = await register(redirect)
     const { done } = await approve(client, redirect, 'w'.repeat(43), [])
     assert.equal(done.status, 200)
-    assert.match(done.text, /class="error"[^>]*>Choose at least one brain/)
+    assert.match(done.text, /class="error"[^>]*>Elige al menos un brain/)
   })
 
   it('the consent token is for one request: it does not approve another client', async () => {
@@ -473,7 +473,7 @@ describe('connections: review', { skip: skipPg }, () => {
       `/oauth/authorize?${query(client, redirect, 'v'.repeat(43))}`,
       `rscb_session=${session}`,
     )
-    assert.match(page.text, /<span class="domain">an app on this device \(claude\.ai:\)<\/span>/)
+    assert.match(page.text, /<span class="domain">una app en este dispositivo \(claude\.ai:\)<\/span>/)
   })
 })
 

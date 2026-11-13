@@ -164,7 +164,7 @@ describe('writing to the wiki directly (v0.6)', { skip: skipPg }, () => {
     assert.equal(r.status, 403, r.text)
     assert.equal(r.body.error?.code, 'wiki_write_not_allowed')
     assert.match(r.body.error?.howToProceed ?? '', /brain_propose/)
-    assert.match(r.body.error?.howToProceed ?? '', /permission to write to the wiki/)
+    assert.match(r.body.error?.howToProceed ?? '', /permiso de escribir en la wiki/)
     assert.equal(await page('tried'), undefined)
     const m = await mcp(plain, 'brain_write', { brain: 'yt', title: 'Try', ops: [create('tried')] })
     assert.match(m.error ?? '', /^wiki_write_not_allowed/)

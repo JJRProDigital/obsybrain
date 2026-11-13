@@ -31,12 +31,12 @@ async function on(
   const seconds = o.seconds ?? MAINTENANCE_MAX_SECONDS
   if (!Number.isInteger(seconds) || seconds < MAINTENANCE_MIN_SECONDS || seconds > MAINTENANCE_MAX_SECONDS) {
     throw invalid(
-      `A maintenance lasts ${MAINTENANCE_MIN_SECONDS} to ${MAINTENANCE_MAX_SECONDS} seconds.`,
-      `Pass --seconds between ${MAINTENANCE_MIN_SECONDS} and ${MAINTENANCE_MAX_SECONDS}.`,
+      `Un mantenimiento dura de ${MAINTENANCE_MIN_SECONDS} a ${MAINTENANCE_MAX_SECONDS} segundos.`,
+      `Pasa --seconds entre ${MAINTENANCE_MIN_SECONDS} y ${MAINTENANCE_MAX_SECONDS}.`,
     )
   }
   if (!REASONS.includes(o.reason)) {
-    throw invalid(`The reason is one of ${REASONS.join(', ')}.`, 'Pass --reason update, restore or manual.')
+    throw invalid(`La razón es una de ${REASONS.join(', ')}.`, 'Pasa --reason update, restore o manual.')
   }
   const until = new Date(now.getTime() + seconds * 1000)
   await db.query('UPDATE installation SET maintenance_until = $1, maintenance_reason = $2 WHERE id = 1', [

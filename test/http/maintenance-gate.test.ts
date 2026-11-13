@@ -81,7 +81,7 @@ describe('what the gate counts as a write', () => {
     assert.equal(retryAfter(m(5), now), 5)
     assert.equal(retryAfter(m(4), now), 5)
     assert.equal(retryAfter({ ...m(0), until: new Date(now.getTime() + 30_500) }, now), 31)
-    assert.equal(MAINTENANCE_MESSAGE(42), 'obsybrain is under maintenance, retry after 42 seconds')
+    assert.equal(MAINTENANCE_MESSAGE(42), 'obsybrain está en mantenimiento, reintenta en 42 segundos')
   })
 })
 
@@ -304,7 +304,7 @@ describe('the maintenance gate', { skip: skipPg }, () => {
         const e = r.body.error as { code: number; message: string; data: Record<string, unknown> }
         assert.equal(e.data.code, 'under_maintenance', t.name)
         assert.equal(e.data.retryAfter, 120, t.name)
-        assert.match(e.message, /under maintenance/, t.name)
+        assert.match(e.message, /en mantenimiento/, t.name)
       } else {
         assert.equal(r.status, 200, `${t.name}: ${JSON.stringify(r.body)}`)
         assert.doesNotMatch(JSON.stringify(r.body), /under_maintenance/, t.name)

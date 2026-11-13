@@ -25,8 +25,8 @@ const copiesOf = (r: Req) => {
     throw new AppError(
       409,
       'backups_not_set_up',
-      'This installation has no folder for its copies.',
-      'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart obsybrain.',
+      'Esta instalación no tiene carpeta para sus copias.',
+      'Configura OBSY_BRAIN_BACKUPS con una carpeta para las copias (lo hace el instalador) y reinicia obsybrain.',
     )
   }
   return r.copies
@@ -38,8 +38,8 @@ const setupKeyGone = () =>
   new AppError(
     404,
     'not_found',
-    'The installation key is shown once, right after the first-time setup, to whoever ran it.',
-    'Download it again in Admin › Backups & system, typing your password.',
+    'La clave de la instalación se muestra una vez, justo después de la configuración inicial, a quien la hizo.',
+    'Descárgala de nuevo en Admin › Copias y sistema, escribiendo tu contraseña.',
   )
 
 export const backupRoutes: Route[] = [
@@ -111,7 +111,7 @@ export const backupRoutes: Route[] = [
     adminOnly(ctx)
     const copies = copiesOf(r)
     const b = obj(r.body)
-    await reauth(ctx, r.conn, r.secret, b, 'Restoring a copy')
+    await reauth(ctx, r.conn, r.secret, b, 'Restaurar una copia')
     const done = await copies.restore(r.params.id as string, { confirm: b.confirm, by: r.who.accountId })
     // The process follows what came back: the settings of meaning search, and the live feed numbered anew. Every
     // key ended with the restore (this session too), so open streams close at their next check.
@@ -129,14 +129,14 @@ export const backupRoutes: Route[] = [
   route('POST /v1/admin/installation-key', async (r) => {
     const ctx = ctxOf(r)
     adminOnly(ctx)
-    await reauth(ctx, r.conn, r.secret, obj(r.body), 'Downloading the installation key')
+    await reauth(ctx, r.conn, r.secret, obj(r.body), 'Descargar la clave de la instalación')
     if (!r.secret) throw noVault()
     await audit(r.db, { at: r.clock(), ...by(r), action: 'installation_key.download', outcome: 'ok' })
     return { body: { key: r.secret, keyId: keyId(r.secret) }, headers: { 'cache-control': 'no-store' } }
   }),
   // A POST, so it passes the check of the web's own header: a page elsewhere cannot ask for it (review of PR #31).
   route('POST /v1/setup/key', async (r) => {
-    inWeb(ctxOf(r), 'The installation key')
+    inWeb(ctxOf(r), 'Gestionar la clave de la instalación')
     const secret = r.secret
     if (!secret) throw noVault()
     const now = r.clock()

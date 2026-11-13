@@ -62,8 +62,8 @@ const notSetUp = () =>
   new AppError(
     409,
     'backups_not_set_up',
-    'This installation has no folder for its copies.',
-    'Set OBSY_BRAIN_BACKUPS to a folder for the copies (the installer does) and restart obsybrain.',
+    'Esta instalación no tiene carpeta para sus copias.',
+    'Configura OBSY_BRAIN_BACKUPS con una carpeta para las copias (lo hace el instalador) y reinicia obsybrain.',
   )
 
 // A copy's id is its file name without `.rscb`; nothing else is ever a path here.
@@ -225,6 +225,6 @@ export const notFound = () =>
   new AppError(
     404,
     'not_found',
-    'There is no such copy here.',
-    'Pick a copy from the list in Backups & system.',
+    'No hay ninguna copia así aquí.',
+    'Elige una copia de la lista en Copias y sistema.',
   )

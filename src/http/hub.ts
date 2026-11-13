@@ -136,16 +136,16 @@ export function eventHub(db: Db, t: EventTimings, log: Log): EventHub {
         throw new AppError(
           429,
           'too_many_streams',
-          `This key already holds ${t.perKey} open event streams.`,
-          'Close one you no longer read; one stream per brain is enough.',
+          `Esta clave ya tiene ${t.perKey} flujos de eventos abiertos.`,
+          'Cierra uno que ya no leas; con un flujo por brain basta.',
         )
       }
       if (openTotal >= t.total) {
         throw new AppError(
           503,
           'busy',
-          'The installation holds as many event streams as it serves.',
-          'Try again in a minute, or follow with the lists for now.',
+          'La instalación tiene abiertos tantos flujos de eventos como puede servir.',
+          'Vuelve a intentarlo en un minuto, o sigue por las listas por ahora.',
         )
       }
       open.set(keyId, (open.get(keyId) ?? 0) + 1)

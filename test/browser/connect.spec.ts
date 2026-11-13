@@ -15,22 +15,24 @@ test('one tab per agent, with the standard connection, the reminder and how to c
 }) => {
   await scenario(context, baseURL as string, 'member')
   await page.goto('/connect')
-  await expect(page.getByRole('heading', { level: 1, name: 'Connect your agent' })).toBeVisible()
-  const tabs = page.getByRole('tablist', { name: 'Your agent' })
+  await expect(page.getByRole('heading', { level: 1, name: 'Conecta tu agente' })).toBeVisible()
+  const tabs = page.getByRole('tablist', { name: 'Tu agente' })
   await expect(tabs.getByRole('tab')).toHaveText([
     'Claude Code',
     'Codex',
     'OpenCode',
     'Cursor',
-    'Other agents',
+    'Otros agentes',
   ])
   await expect(tabs.getByRole('tab', { name: 'Claude Code' })).toHaveAttribute('aria-selected', 'true')
   const panel = page.getByRole('tabpanel', { name: 'Claude Code' })
-  await expect(panel.getByRole('region', { name: 'Standard connection' })).toContainText(
+  await expect(panel.getByRole('region', { name: 'Conexión estándar' })).toContainText(
     'claude mcp add --transport http obsybrain https://brain.example.test/mcp',
   )
   await expect(panel.getByRole('region', { name: 'Reminder (optional)' })).toContainText('SessionStart')
-  await expect(panel.getByRole('region', { name: 'How to check it works' })).toContainText('Ask your agent')
+  await expect(panel.getByRole('region', { name: 'Cómo comprobar que funciona' })).toContainText(
+    'Ask your agent',
+  )
   // Arrow keys move between the tabs, as tabs do.
   await tabs.getByRole('tab', { name: 'Claude Code' }).focus()
   await page.keyboard.press('ArrowRight')
@@ -38,8 +40,8 @@ test('one tab per agent, with the standard connection, the reminder and how to c
   await expect(tabs.getByRole('tab', { name: 'Codex' })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('tabpanel', { name: 'Codex' })).toContainText('codex mcp add obsybrain')
   await page.keyboard.press('End')
-  await expect(tabs.getByRole('tab', { name: 'Other agents' })).toBeFocused()
-  await expect(page.getByRole('tabpanel', { name: 'Other agents' })).toContainText(
+  await expect(tabs.getByRole('tab', { name: 'Otros agentes' })).toBeFocused()
+  await expect(page.getByRole('tabpanel', { name: 'Otros agentes' })).toContainText(
     'https://brain.example.test/mcp',
   )
   await page.keyboard.press('Home')
@@ -53,15 +55,15 @@ test('the live check waits, then turns green on the first request of the token m
 }) => {
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  const check = page.getByRole('region', { name: 'Live check' })
-  await expect(check).toContainText('Waiting for your agent…')
+  const check = page.getByRole('region', { name: 'Comprobación en vivo' })
+  await expect(check).toContainText('Esperando a tu agente…')
   const withToken = page
     .getByRole('tabpanel', { name: 'Claude Code' })
-    .getByRole('region', { name: 'Token connection' })
-  await withToken.getByRole('button', { name: 'Create a token' }).click()
-  const once = withToken.getByRole('region', { name: 'Your new token' })
+    .getByRole('region', { name: 'Conexión por token' })
+  await withToken.getByRole('button', { name: 'Crear un token' }).click()
+  const once = withToken.getByRole('region', { name: 'Tu token nuevo' })
   await expect(once).toContainText('only this once')
-  await expect(once.getByRole('button', { name: 'Copy the token' })).toBeFocused()
+  await expect(once.getByRole('button', { name: 'Copiar el token' })).toBeFocused()
   const secret = String(await once.locator('pre code').first().textContent()).trim()
   expect(secret).toMatch(/^rscb_/)
   // The commands never carry it: it is pasted at a hidden prompt, into this agent's own file.
@@ -69,15 +71,15 @@ test('the live check waits, then turns green on the first request of the token m
   await expect(once).toContainText('OBSY_BRAIN_TOKEN_CLAUDE_CODE')
   await expect(once).not.toContainText(`export OBSY_BRAIN_TOKEN_CLAUDE_CODE="${secret}"`)
   await expect(once).toContainText('.mcp.json')
-  await expect(check).toContainText('Waiting for your agent…')
+  await expect(check).toContainText('Esperando a tu agente…')
   // The agent makes its first request.
   await agent(baseURL as string, s.id, { via: 'token', client: 'claude-code/2.1.3' })
-  await expect(check).toContainText('Connected', { timeout: 6_000 })
-  await expect(check).toContainText('Claude Code reached obsybrain')
+  await expect(check).toContainText('Conectado', { timeout: 6_000 })
+  await expect(check).toContainText('Claude Code alcanzó obsybrain')
   await expect(check.locator('[data-check="connected"]')).toBeVisible()
-  await withToken.getByRole('button', { name: 'Done, hide the token' }).click()
+  await withToken.getByRole('button', { name: 'Listo, ocultar el token' }).click()
   await expect(page.locator('body')).not.toContainText(secret)
-  await expect(withToken.getByText('The token is hidden now.')).toBeFocused()
+  await expect(withToken.getByText('El token ya está oculto.')).toBeFocused()
   const kept = await page.evaluate(
     () =>
       JSON.stringify({ ...sessionStorage }) +
@@ -99,18 +101,18 @@ test('the standard connection turns the check green when a new connected app app
 }) => {
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  const check = page.getByRole('region', { name: 'Live check' })
-  await expect(check).toContainText('Waiting for your agent…')
+  const check = page.getByRole('region', { name: 'Comprobación en vivo' })
+  await expect(check).toContainText('Esperando a tu agente…')
   // The app that was already connected (Cursor) does not count; wait for the first answer to know it.
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
   // The code exchange alone is not the agent reaching obsybrain: still waiting.
   await agent(baseURL as string, s.id, { via: 'app', client: 'Claude Code', requested: false })
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
-  await expect(check).toContainText('Waiting for your agent…')
+  await expect(check).toContainText('Esperando a tu agente…')
   await agent(baseURL as string, s.id, { via: 'app-request' })
-  await expect(check).toContainText('Connected', { timeout: 6_000 })
-  await expect(check).toContainText('Claude Code reached obsybrain')
+  await expect(check).toContainText('Conectado', { timeout: 6_000 })
+  await expect(check).toContainText('Claude Code alcanzó obsybrain')
 })
 
 test('each agent has its own token and check: green for Claude Code, then Codex waits for its own', async ({
@@ -120,35 +122,35 @@ test('each agent has its own token and check: green for Claude Code, then Codex 
 }) => {
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  const check = page.getByRole('region', { name: 'Live check' })
-  await page.getByRole('button', { name: 'Create a token' }).click()
+  const check = page.getByRole('region', { name: 'Comprobación en vivo' })
+  await page.getByRole('button', { name: 'Crear un token' }).click()
   const first = String(
-    await page.getByRole('region', { name: 'Your new token' }).locator('pre code').first().textContent(),
+    await page.getByRole('region', { name: 'Tu token nuevo' }).locator('pre code').first().textContent(),
   )
   await agent(baseURL as string, s.id, { via: 'token' })
-  await expect(check).toContainText('Connected', { timeout: 6_000 })
+  await expect(check).toContainText('Conectado', { timeout: 6_000 })
   await page.getByRole('tab', { name: 'Codex' }).click()
   const codex = page.getByRole('tabpanel', { name: 'Codex' })
   // Codex never shows the token made for Claude Code.
   await expect(codex).not.toContainText(first.trim())
-  await expect(codex.getByRole('region', { name: 'Your new token' })).toHaveCount(0)
-  await codex.getByRole('button', { name: 'Create a token' }).click()
-  await expect(codex.getByRole('region', { name: 'Your new token' })).toBeVisible()
-  await expect(check).toContainText('Waiting for your agent…')
+  await expect(codex.getByRole('region', { name: 'Tu token nuevo' })).toHaveCount(0)
+  await codex.getByRole('button', { name: 'Crear un token' }).click()
+  await expect(codex.getByRole('region', { name: 'Tu token nuevo' })).toBeVisible()
+  await expect(check).toContainText('Esperando a tu agente…')
   await expect(codex).toContainText('OBSY_BRAIN_TOKEN_CODEX')
   // Back on Claude Code, its green is still there.
   await page.getByRole('tab', { name: 'Claude Code' }).click()
-  await expect(check).toContainText('Connected')
+  await expect(check).toContainText('Conectado')
   // A new token there starts its check again: it waits for that token.
   await page
     .getByRole('tabpanel', { name: 'Claude Code' })
-    .getByRole('button', { name: 'Done, hide the token' })
+    .getByRole('button', { name: 'Listo, ocultar el token' })
     .click()
   await page
     .getByRole('tabpanel', { name: 'Claude Code' })
-    .getByRole('button', { name: 'Create a token' })
+    .getByRole('button', { name: 'Crear un token' })
     .click()
-  await expect(check).toContainText('Waiting for your agent…')
+  await expect(check).toContainText('Esperando a tu agente…')
 })
 
 test('the check never asks while the tab is hidden, stops once green, and stops when the page is left', async ({
@@ -162,7 +164,9 @@ test('the check never asks while the tab is hidden, stops once green, and stops 
     if (r.url().endsWith('/v1/me/apps')) asks += 1
   })
   await page.goto('/connect')
-  await expect(page.getByRole('region', { name: 'Live check' })).toContainText('Waiting for your agent…')
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText(
+    'Esperando a tu agente…',
+  )
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
   // Hidden: no asking.
   await page.evaluate(() => {
@@ -177,9 +181,9 @@ test('the check never asks while the tab is hidden, stops once green, and stops 
   })
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'), { timeout: 5_000 })
   // Green: no more asking.
-  await page.getByRole('button', { name: 'Create a token' }).click()
+  await page.getByRole('button', { name: 'Crear un token' }).click()
   await agent(baseURL as string, s.id, { via: 'token' })
-  await expect(page.getByRole('region', { name: 'Live check' })).toContainText('Connected', {
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText('Conectado', {
     timeout: 6_000,
   })
   await page.waitForTimeout(500)
@@ -190,7 +194,7 @@ test('the check never asks while the tab is hidden, stops once green, and stops 
   await page.getByRole('tab', { name: 'Codex' }).click()
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
   await page.getByRole('link', { name: 'obsybrain , home' }).click()
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
   await page.waitForTimeout(500)
   const left = asks
   await page.waitForTimeout(4_500)
@@ -205,18 +209,18 @@ test('after a minute it offers tips; after 10 minutes it stops and offers «Chec
   await scenario(context, baseURL as string, 'signed-in')
   await page.clock.install()
   await page.goto('/connect')
-  const check = page.getByRole('region', { name: 'Live check' })
-  await expect(check).toContainText('Waiting for your agent…')
-  await expect(check).not.toContainText('Still waiting?')
+  const check = page.getByRole('region', { name: 'Comprobación en vivo' })
+  await expect(check).toContainText('Esperando a tu agente…')
+  await expect(check).not.toContainText('¿Sigue esperando?')
   await page.clock.fastForward('01:05')
-  await expect(check).toContainText('Still waiting?')
+  await expect(check).toContainText('¿Sigue esperando?')
   await expect(check).toContainText('run /mcp')
   await expect(check).toContainText('echo $' + '{#OBSY_BRAIN_TOKEN_CLAUDE_CODE}')
   await page.clock.fastForward('09:00')
-  await expect(check).toContainText('Stopped checking after 10 minutes.')
-  await check.getByRole('button', { name: 'Check again' }).click()
-  await expect(check).toContainText('Waiting for your agent…')
-  await expect(check).not.toContainText('Still waiting?')
+  await expect(check).toContainText('Se dejó de comprobar tras 10 minutos.')
+  await check.getByRole('button', { name: 'Comprobar de nuevo' }).click()
+  await expect(check).toContainText('Esperando a tu agente…')
+  await expect(check).not.toContainText('¿Sigue esperando?')
 })
 
 test('a token shown is forgotten when the page goes to the back/forward cache', async ({
@@ -226,12 +230,12 @@ test('a token shown is forgotten when the page goes to the back/forward cache', 
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  await page.getByRole('button', { name: 'Create a token' }).click()
+  await page.getByRole('button', { name: 'Crear un token' }).click()
   const secret = String(
-    await page.getByRole('region', { name: 'Your new token' }).locator('pre code').first().textContent(),
+    await page.getByRole('region', { name: 'Tu token nuevo' }).locator('pre code').first().textContent(),
   ).trim()
   await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true })))
-  await expect(page.getByRole('region', { name: 'Your new token' })).toHaveCount(0)
+  await expect(page.getByRole('region', { name: 'Tu token nuevo' })).toHaveCount(0)
   expect(await page.evaluate(() => document.documentElement.outerHTML)).not.toContain(secret)
 })
 
@@ -239,7 +243,10 @@ test('each copy button says what it copies', async ({ page, context, baseURL }) 
   await scenario(context, baseURL as string, 'member')
   await page.goto('/connect')
   await expect(
-    page.getByRole('button', { name: 'Copy: Add obsybrain for all your projects and sign in', exact: true }),
+    page.getByRole('button', {
+      name: 'Copiar: Add obsybrain for all your projects and sign in',
+      exact: true,
+    }),
   ).toBeVisible()
 })
 
@@ -250,11 +257,11 @@ test('a program without a known name reads as a sentence: «An API client reache
 }) => {
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  await page.getByRole('button', { name: 'Create a token' }).click()
-  await expect(page.getByRole('region', { name: 'Your new token' })).toBeVisible()
+  await page.getByRole('button', { name: 'Crear un token' }).click()
+  await expect(page.getByRole('region', { name: 'Tu token nuevo' })).toBeVisible()
   await agent(baseURL as string, s.id, { via: 'token', client: 'node' })
-  await expect(page.getByRole('region', { name: 'Live check' })).toContainText(
-    'An API client reached obsybrain',
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText(
+    'Un cliente de API alcanzó obsybrain',
     {
       timeout: 6_000,
     },
@@ -271,7 +278,7 @@ test('opened for a brain, the token reaches only that brain and the page says so
   await page.goto('/connect?brain=growth')
   await expect(page.getByRole('main')).toContainText('Growth')
   const req = page.waitForRequest((r) => r.url().endsWith('/v1/me/tokens') && r.method() === 'POST')
-  await page.getByRole('button', { name: 'Create a token' }).click()
+  await page.getByRole('button', { name: 'Crear un token' }).click()
   expect((await req).postDataJSON()).toMatchObject({ brains: ['growth'], perm: 'write', days: 90 })
 })
 
@@ -282,25 +289,29 @@ test('offline: the check pauses and says so; creating a token says why it cannot
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  await expect(page.getByRole('region', { name: 'Live check' })).toContainText('Waiting for your agent…')
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText(
+    'Esperando a tu agente…',
+  )
   await context.setOffline(true)
-  await expect(page.getByRole('region', { name: 'Live check' })).toContainText('Offline')
-  await expect(page.getByRole('button', { name: 'Create a token' })).toHaveAttribute('aria-disabled', 'true')
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText('Offline')
+  await expect(page.getByRole('button', { name: 'Crear un token' })).toHaveAttribute('aria-disabled', 'true')
   await context.setOffline(false)
-  await expect(page.getByRole('region', { name: 'Live check' })).toContainText('Waiting for your agent…')
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText(
+    'Esperando a tu agente…',
+  )
 })
 
 test('at 320 px nothing scrolls sideways outside the code blocks', async ({ page, context, baseURL }) => {
   await page.setViewportSize({ width: 320, height: 640 })
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/connect')
-  await expect(page.getByRole('button', { name: 'Create a token' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Crear un token' })).toBeVisible()
   // Before the token too: the longest button is there then.
   await noSideScroll(page)
-  await page.getByRole('button', { name: 'Create a token' }).click()
-  await expect(page.getByRole('region', { name: 'Your new token' })).toBeVisible()
+  await page.getByRole('button', { name: 'Crear un token' }).click()
+  await expect(page.getByRole('region', { name: 'Tu token nuevo' })).toBeVisible()
   await noSideScroll(page)
-  await page.getByRole('tab', { name: 'Other agents' }).click()
+  await page.getByRole('tab', { name: 'Otros agentes' }).click()
   await noSideScroll(page)
 })
 
@@ -327,8 +338,8 @@ for (const theme of ['dark', 'light'] as const) {
       expect(bad.map((v) => `${where}: ${v.id}: ${v.nodes.map((n) => n.target).join(' ')}`)).toEqual([])
     }
     await audit('page')
-    await page.getByRole('button', { name: 'Create a token' }).click()
-    await expect(page.getByRole('region', { name: 'Your new token' })).toBeVisible()
+    await page.getByRole('button', { name: 'Crear un token' }).click()
+    await expect(page.getByRole('region', { name: 'Tu token nuevo' })).toBeVisible()
     await audit('token', '.once')
   })
 }
@@ -345,7 +356,7 @@ test('the consent hint is left only when the standard command is copied, never o
     (await context.cookies(`${baseURL}/oauth/authorize`)).find((c) => c.name === 'rscb_connect')
   expect(await hint()).toBeUndefined()
   await page
-    .getByRole('region', { name: 'Standard connection' })
+    .getByRole('region', { name: 'Conexión estándar' })
     .getByRole('button', { name: /^Copy: Add obsybrain/ })
     .click()
   expect((await hint())?.value).toBe('growth')
@@ -362,12 +373,12 @@ test('a browser clock 10 minutes ahead: an app asking after the check began turn
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.clock.setSystemTime(Date.now() + 10 * 60_000)
   await page.goto('/connect')
-  await page.getByRole('tablist', { name: 'Your agent' }).getByRole('tab', { name: 'Cursor' }).click()
-  const check = page.getByRole('region', { name: 'Live check' })
-  await expect(check).toContainText('Waiting for your agent…')
+  await page.getByRole('tablist', { name: 'Tu agente' }).getByRole('tab', { name: 'Cursor' }).click()
+  const check = page.getByRole('region', { name: 'Comprobación en vivo' })
+  await expect(check).toContainText('Esperando a tu agente…')
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
-  await expect(check).toContainText('Waiting for your agent…')
+  await expect(check).toContainText('Esperando a tu agente…')
   await agent(baseURL as string, s.id, { via: 'app-request', id: 'app_cursor' })
-  await expect(check).toContainText('Connected', { timeout: 6_000 })
+  await expect(check).toContainText('Conectado', { timeout: 6_000 })
 })

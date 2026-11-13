@@ -77,19 +77,17 @@ export async function inBrain(
 export async function allow(ctx: Ctx, action: Action, facts: Facts, brainId?: string): Promise<void> {
   const d = can(actorOf(ctx.who), action, facts)
   if (d.ok) return
-  // "Ask a curator" says who they are (spec B4: every denial says whom to ask).
+  // "Ask a curator" says who they are (spec B4: every denial says whom to ask): any denial whose
+  // how-to mentions "quien cure el brain" gets the brain's curators' names beside it.
   let how = d.howToProceed
-  if (brainId && how.startsWith('Ask a curator of the brain')) {
+  if (brainId && how.includes('quien cure el brain')) {
     const names = await ctx.db.query(
       `SELECT a.name FROM memberships m JOIN accounts a ON a.id = m.account_id
         WHERE m.brain_id = $1 AND m.role = 'curator' AND a.status = 'active' ORDER BY lower(a.name) LIMIT 3`,
       [brainId],
     )
     if (names.length) {
-      how = how.replace(
-        'Ask a curator of the brain',
-        `Ask a curator of the brain (${names.map((n) => n.name).join(', ')})`,
-      )
+      how = how.replace('quien cure el brain', `quien cure el brain (${names.map((n) => n.name).join(', ')})`)
     }
   }
   // During maintenance nothing is written (spec B7 C12): the refusal goes to the log instead, so it is not lost

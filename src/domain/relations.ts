@@ -51,11 +51,12 @@ export async function relate(
   r: { from: string; to: string; kind: string; reason?: string },
 ): Promise<Relation> {
   if (!(RELATION_KINDS as readonly string[]).includes(r.kind)) {
-    throw invalid(`Unknown relation "${r.kind}".`, `Use one of: ${RELATION_KINDS.join(', ')}.`)
+    throw invalid(`Relación desconocida "${r.kind}".`, `Usa una de: ${RELATION_KINDS.join(', ')}.`)
   }
-  if (r.from === r.to) throw invalid('An entry cannot relate to itself.', 'Name two different entries.')
+  if (r.from === r.to)
+    throw invalid('Una entrada no puede relacionarse consigo misma.', 'Nombra dos entradas distintas.')
   const reason = redact((r.reason ?? '').trim()).text
-  if (reason.length > 500) throw invalid('The reason is longer than 500 characters.', 'Shorten it.')
+  if (reason.length > 500) throw invalid('La razón tiene más de 500 caracteres.', 'Acórtala.')
   return ctx.db.tx(async (db) => {
     const c = { ...ctx, db }
     const { brain, role } = await inBrain(c, { slug }, 'share')
@@ -64,7 +65,7 @@ export async function relate(
       "SELECT * FROM entries WHERE id = ANY($1) AND brain_id = $2 AND state = 'active' FOR UPDATE",
       [[r.from, r.to], brain.id],
     )
-    if (rows.length !== 2) throw notFound('entry')
+    if (rows.length !== 2) throw notFound('entrada')
     const from = rows.find((x) => x.id === r.from) as Row
     const to = rows.find((x) => x.id === r.to) as Row
     const touchesCorrection =
@@ -137,8 +138,8 @@ export async function relate(
       if (loop) {
         throw conflict(
           'relation_cycle',
-          'That would make entries supersede each other in a loop.',
-          'Pick the one that wins.',
+          'Eso haría que las entradas se reemplacen entre sí en un bucle.',
+          'Elige la que gana.',
         )
       }
       await db.query('UPDATE entries SET superseded_by = $2, updated_at = $3 WHERE id = $1', [

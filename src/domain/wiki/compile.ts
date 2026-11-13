@@ -44,7 +44,10 @@ export async function compilePack(
   await allow(ctx, 'wiki.propose', { role, brainStatus: brain.status }, brain.id)
   const maxChars = o.maxChars ?? PACK.default
   if (!Number.isSafeInteger(maxChars) || maxChars < PACK.min || maxChars > PACK.max) {
-    throw invalid(`"maxChars" goes from ${PACK.min} to ${PACK.max}.`, `Ask for ${PACK.default}, the default.`)
+    throw invalid(
+      `"maxChars" va de ${PACK.min} a ${PACK.max}.`,
+      `Pide ${PACK.default}, el valor por defecto.`,
+    )
   }
   const rows = await ctx.db.query(
     `SELECT * FROM entries WHERE brain_id = $1 AND state = 'active' AND NOT compiled AND type NOT IN ('summary', 'correction')

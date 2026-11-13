@@ -3,13 +3,13 @@
 import { AppError } from '../core/errors.ts'
 import type { Ctx } from './context.ts'
 
-export function inWeb(ctx: Ctx, what = 'This'): void {
+export function inWeb(ctx: Ctx, what = 'Esto'): void {
   if (ctx.who.credential.kind !== 'web') {
     throw new AppError(
       403,
       'web_only',
-      `${what} is done in the obsybrain web, signed in as a person.`,
-      'Open the obsybrain web. Keys of agents and programs cannot manage people or keys.',
+      `${what} se hace en la web de obsybrain, con la sesión de una persona.`,
+      'Abre la web de obsybrain. Las claves de agentes y programas no gestionan personas ni claves.',
     )
   }
 }
@@ -20,8 +20,8 @@ export function adminOnly(ctx: Ctx): void {
     throw new AppError(
       403,
       'forbidden',
-      'Only the administration of this installation does this.',
-      'Ask an administrator.',
+      'Solo la administración de esta instalación hace esto.',
+      'Pídeselo a un administrador.',
     )
   }
 }

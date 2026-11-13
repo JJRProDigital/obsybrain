@@ -19,13 +19,13 @@ async function tab(page: Page, hidden: boolean) {
 
 async function newBrain(page: Page) {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Create brain' }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Create a brain' })
-  await dialog.getByLabel('Name').fill('Onboarding')
-  await dialog.getByRole('button', { name: 'Create brain' }).click()
+  await page.getByRole('button', { name: 'Crear brain' }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'Crear un brain' })
+  await dialog.getByLabel('Nombre').fill('Onboarding')
+  await dialog.getByRole('button', { name: 'Crear brain' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Onboarding' })).toBeVisible()
-  const items = page.getByRole('region', { name: 'First steps' }).getByRole('listitem')
-  await expect(items.nth(0)).toContainText('To do')
+  const items = page.getByRole('region', { name: 'Primeros pasos' }).getByRole('listitem')
+  await expect(items.nth(0)).toContainText('Por hacer')
   return items
 }
 
@@ -41,20 +41,20 @@ test('L1: a tab hidden before the first event catches up when shown again', asyn
   await s.emit('onboarding')
   await page.waitForTimeout(300)
   await tab(page, false)
-  await expect(items.nth(0)).toContainText('Done', { timeout: 3_000 })
-  await expect(items.nth(1)).toContainText('Done')
+  await expect(items.nth(0)).toContainText('Hecho', { timeout: 3_000 })
+  await expect(items.nth(1)).toContainText('Hecho')
 })
 
 test('L2: a brain opened again shows what happened while away', async ({ page, context, baseURL }) => {
   const s = await scenario(context, baseURL as string, 'alone')
   await newBrain(page)
-  await page.getByRole('link', { name: 'All brains', exact: true }).click()
-  await expect(page.getByRole('heading', { level: 1, name: 'Your brains' })).toBeVisible()
+  await page.getByRole('link', { name: 'Todos los brains', exact: true }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
   await s.emit('onboarding')
   await page.getByRole('link', { name: 'Onboarding' }).click()
-  const items = page.getByRole('region', { name: 'First steps' }).getByRole('listitem')
-  await expect(items.nth(0)).toContainText('Done', { timeout: 3_000 })
-  await expect(page.getByRole('region', { name: 'In numbers' })).toContainText('1 entry')
+  const items = page.getByRole('region', { name: 'Primeros pasos' }).getByRole('listitem')
+  await expect(items.nth(0)).toContainText('Hecho', { timeout: 3_000 })
+  await expect(page.getByRole('region', { name: 'En números' })).toContainText('1 entrada')
 })
 
 test('L4: home asks for the brains again every 30 seconds and when the tab comes back', async ({
@@ -66,10 +66,10 @@ test('L4: home asks for the brains again every 30 seconds and when the tab comes
   const s = await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/')
   const card = page.getByRole('listitem').filter({ has: page.getByRole('link', { name: 'Legal archive' }) })
-  await expect(card).toContainText('Nothing to review')
+  await expect(card).toContainText('Nada para revisar')
   await s.emit('legal-archive', 'proposal.submitted')
   await page.waitForTimeout(200)
-  await expect(card).toContainText('Nothing to review')
+  await expect(card).toContainText('Nada para revisar')
   await page.clock.fastForward(30_000)
   await expect(card).toContainText('1 proposal', { timeout: 3_000 })
   await s.emit('legal-archive', 'proposal.submitted')
@@ -102,10 +102,10 @@ test('L5: step 1 marks itself after an agent only asked for context, which sends
   // The agent's first call is for context: no event reaches the open overview.
   await s.emit('onboarding', 'context')
   await page.waitForTimeout(200)
-  await expect(items.nth(0)).toContainText('To do')
+  await expect(items.nth(0)).toContainText('Por hacer')
   // While step 1 waits, the overview is asked again every 5 seconds.
   await page.clock.fastForward(5_000)
-  await expect(items.nth(0)).toContainText('Done', { timeout: 3_000 })
+  await expect(items.nth(0)).toContainText('Hecho', { timeout: 3_000 })
   // Once done, it is not asked again. A request already on its way when the step turned may still land:
   // let it, then count.
   await page.waitForTimeout(500)
@@ -130,5 +130,5 @@ test('L6: a hidden tab does not ask for the overview while step 1 waits', async 
   await s.emit('onboarding', 'context')
   await page.clock.fastForward(15_000)
   await page.waitForTimeout(200)
-  await expect(items.nth(0)).toContainText('To do')
+  await expect(items.nth(0)).toContainText('Por hacer')
 })

@@ -44,8 +44,8 @@ export async function mayWriteWiki(ctx: Ctx, brain: Brain, role: Parameters<type
   throw new AppError(
     403,
     'wiki_write_not_allowed',
-    `This key may not write to the wiki of "${brain.slug}" directly.`,
-    `Propose the change instead (brain_propose, or POST /v1/brains/${brain.slug}/proposals) for a curator to approve; or ask a curator of the brain to give this key the permission to write to the wiki.`,
+    `Esta clave no puede escribir directamente en la wiki de "${brain.slug}".`,
+    `Propón el cambio en su lugar (brain_propose, o POST /v1/brains/${brain.slug}/proposals) para que quien cure lo apruebe; o pídele a quien cure el brain que le dé a esta clave el permiso de escribir en la wiki.`,
   )
 }
 
@@ -81,8 +81,8 @@ export async function listWriters(ctx: Ctx, slug: string): Promise<Writer[]> {
   const { brain, role } = await inBrain(ctx, { slug })
   if (role !== 'curator')
     throw denied(
-      'Only a curator of the brain sees which keys write to its wiki.',
-      'Ask a curator of the brain.',
+      'Solo quien cura el brain ve qué claves escriben en su wiki.',
+      'Pídeselo a quien cure el brain.',
     )
   const rows = await ctx.db.query(
     `SELECT w.key_id, w.granted_at, g.name AS granted_by,
@@ -125,17 +125,20 @@ async function keyFor(db: Db, brainId: string, keyId: string, now: Date): Promis
       )
   const k = c ?? g
   const ended = (at: unknown) => at instanceof Date && at.getTime() <= now.getTime()
-  if (!k || k.revoked_at != null || ended(c ? c.expires_at : g?.expires_max)) throw notFound('key')
+  if (!k || k.revoked_at != null || ended(c ? c.expires_at : g?.expires_max)) throw notFound('clave')
   const reaches =
     c?.kind === 'main' || Boolean(k.all_brains) || ((k.brain_ids as string[]) ?? []).includes(brainId)
   if (!reaches)
-    throw invalid('This key does not reach this brain.', 'Give the permission to a key made for this brain.')
+    throw invalid('Esta clave no alcanza este brain.', 'Dale el permiso a una clave hecha para este brain.')
   if (k.perm !== 'write')
-    throw invalid('This key is read-only.', 'Give the permission to a key with read + write permission.')
+    throw invalid(
+      'Esta clave es de solo lectura.',
+      'Dale el permiso a una clave con permiso de lectura y escritura.',
+    )
   if (!atLeast(await memberRole(db, brainId, String(k.account_id)), 'contributor')) {
     throw invalid(
-      'The owner of this key does not write in this brain.',
-      'Make them a contributor of the brain first, or give the permission to another key.',
+      'Quien posee esta clave no escribe en este brain.',
+      'Hazla contribuidora del brain primero, o dale el permiso a otra clave.',
     )
   }
   return { kind: c ? String(c.kind) : 'app' }
@@ -145,8 +148,8 @@ const webOnlyGrant = (ctx: Ctx) => {
   // A person decides it, never an agent holding a curator's key (P5: «una persona dio»).
   if (ctx.who.credential.kind !== 'web')
     throw denied(
-      'The permission to write to the wiki is given by a curator in the web, not by a key.',
-      'Open the brain in the web, as a curator, and give it there.',
+      'El permiso de escribir en la wiki lo da una persona curadora en la web, no una clave.',
+      'Abre el brain en la web, como curador, y dáselo allí.',
     )
 }
 
@@ -173,14 +176,14 @@ export async function revokeWriter(ctx: Ctx, slug: string, keyId: string): Promi
     const { brain, role } = await inBrain(c, { slug }, 'share')
     // Taking it back only lessens what a key can do: any curator, from the web or a key of theirs.
     if (role !== 'curator')
-      throw denied('Only a curator of the brain takes the permission back.', 'Ask a curator of the brain.')
+      throw denied('Solo una persona curadora del brain quita el permiso.', 'Pídeselo a quien cure el brain.')
     if (ctx.who.credential.perm === 'read')
-      throw denied('This key is read-only.', 'Use a key with read + write permission.')
+      throw denied('Esta clave es de solo lectura.', 'Usa una clave con permiso de lectura y escritura.')
     const gone = await db.one(
       'DELETE FROM wiki_writers WHERE brain_id = $1 AND key_id = $2 RETURNING key_id',
       [brain.id, keyId],
     )
-    if (!gone) throw notFound('writer')
+    if (!gone) throw notFound('escritor')
     await ok(c, 'wiki.writer.revoke', brain.id, keyId)
   })
 }
@@ -196,8 +199,8 @@ export async function grantOnCreate(
 ): Promise<void> {
   if (slugs.length > 0 && reach.perm !== 'write')
     throw invalid(
-      'A read-only token cannot write to a wiki.',
-      'Make it read + write, or leave out "wikiWrite".',
+      'Un token de solo lectura no puede escribir en una wiki.',
+      'Hazlo de lectura y escritura, u omite "wikiWrite".',
     )
   for (const slug of slugs) {
     const b = await db.one<{ id: string; status: string }>('SELECT id, status FROM brains WHERE slug = $1', [
@@ -207,13 +210,13 @@ export async function grantOnCreate(
     if (!b || !role) throw brainNotFound()
     if (role !== 'curator')
       throw denied(
-        `Only a curator of "${slug}" lets a key write to its wiki.`,
-        'Leave that brain out of "wikiWrite".',
+        `Solo quien cura "${slug}" deja que una clave escriba en su wiki.`,
+        'Deja ese brain fuera de "wikiWrite".',
       )
     if (!reach.allBrains && !reach.brainIds.includes(b.id))
       throw invalid(
-        `The token does not reach "${slug}".`,
-        'Add the brain to the token, or leave it out of "wikiWrite".',
+        `El token no alcanza "${slug}".`,
+        'Añade el brain al token, o déjalo fuera de "wikiWrite".',
       )
     await db.query(
       `INSERT INTO wiki_writers (brain_id, key_id, granted_by, granted_at) VALUES ($1, $2, $3, $4)

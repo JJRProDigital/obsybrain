@@ -77,7 +77,7 @@ describe('brain settings and the administration (PR25a)', { skip: skipPg }, () =
       assert.deepEqual([late.status, late.body.error?.code], [409, 'settings_changed'])
       const current = (late.body.error as Json).current as Json
       assert.equal(current.usageNote, 'Name the ticket.')
-      assert.match(String(late.body.error?.howToProceed), /again/i)
+      assert.match(String(late.body.error?.howToProceed), /guarda tu cambio/i)
       const now = await read()
       assert.deepEqual([now.usageNote, now.staleDays], ['Name the ticket.', 45])
     })
@@ -188,7 +188,7 @@ describe('brain settings and the administration (PR25a)', { skip: skipPg }, () =
         role: 'curator',
       })
       assert.deepEqual([r.status, r.body.error?.code], [409, 'already_member'])
-      assert.match(String(r.body.error?.message), /Rita is already a reader/)
+      assert.match(String(r.body.error?.message), /Rita ya es reader/)
       const self = await w.callWeb(curaWeb, 'POST', '/v1/brains/set/members', {
         account: cura.id,
         role: 'reader',
@@ -221,7 +221,7 @@ describe('brain settings and the administration (PR25a)', { skip: skipPg }, () =
       assert.equal((await w.callWeb(adminWeb, 'POST', `/v1/invitations/${id}/resend`)).status, 200)
       const soon = await w.callWeb(adminWeb, 'POST', `/v1/invitations/${id}/resend`)
       assert.deepEqual([soon.status, soon.body.error?.code], [429, 'too_soon'])
-      assert.match(String(soon.body.error?.message), /minute/)
+      assert.match(String(soon.body.error?.message), /minuto/)
       assert.ok(!soon.text.includes('#token='))
       w.advance(61_000)
       assert.equal((await w.callWeb(adminWeb, 'POST', `/v1/invitations/${id}/resend`)).status, 200)
@@ -246,7 +246,7 @@ describe('brain settings and the administration (PR25a)', { skip: skipPg }, () =
         repo: 'github.com/acme/shelf',
       })
       assert.equal(link.status, 403, link.text)
-      assert.match(String(link.body.error?.message), /archived/)
+      assert.match(String(link.body.error?.message), /archivado/)
       const add = await w.callWeb(curaWeb, 'POST', '/v1/brains/shelf/members', {
         account: rita.id,
         role: 'reader',
@@ -258,7 +258,10 @@ describe('brain settings and the administration (PR25a)', { skip: skipPg }, () =
       for (const repo of ['./app', '../app', 'org/repo']) {
         const r = await w.callWeb(curaWeb, 'POST', '/v1/brains/set/repos', { repo })
         assert.deepEqual([r.status, r.body.error?.code], [400, 'invalid_request'], repo)
-        assert.match(String(r.body.error?.howToProceed), /full address, e\.g\. github\.com\/org\/repo/)
+        assert.match(
+          String(r.body.error?.howToProceed),
+          /dirección completa, p\. ej\. github\.com\/org\/repo/,
+        )
       }
       const git = await w.callWeb(curaWeb, 'POST', '/v1/brains/set/repos', {
         repo: 'git://Host.example:9418/A/b.git/',
@@ -270,12 +273,12 @@ describe('brain settings and the administration (PR25a)', { skip: skipPg }, () =
       const svc = await w.service('Sleeper')
       await w.callWeb(adminWeb, 'POST', `/v1/admin/accounts/${svc.id}/remove`)
       const r = await w.callWeb(adminWeb, 'POST', `/v1/admin/services/${svc.id}/keys`, {})
-      assert.match(String(r.body.error?.message), /deactivated/)
+      assert.match(String(r.body.error?.message), /dada de baja/)
       const add = await w.callWeb(curaWeb, 'POST', '/v1/brains/set/members', {
         account: svc.id,
         role: 'reader',
       })
-      assert.match(String(add.body.error?.message), /deactivated/)
+      assert.match(String(add.body.error?.message), /desactivada/)
     })
   })
 

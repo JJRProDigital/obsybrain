@@ -221,18 +221,18 @@ export async function cleanupDue(ctx: Ctx, brain: Brain, role: Role): Promise<Cl
     problems,
     counts,
     health,
-    suggestion: `The wiki of "${brain.slug}" has ${problems} problem${problems === 1 ? '' : 's'} (${listed}) and ${
-      maintenance.lastAt ? 'no cleanup in the last 24 hours' : 'has never been cleaned'
-    }. Before your task, or after it, clean what you can: link orphan pages where they belong, fix or remove broken links, settle contradictions, update stale pages from the journal, split long pages, merge pages about the same thing. Send it as one change marked as maintenance: brain_propose (or brain_write, if your key may write) with "maintenance": true.`,
+    suggestion: `La wiki de "${brain.slug}" tiene ${problems} problema${problems === 1 ? '' : 's'} (${listed}) y ${
+      maintenance.lastAt ? 'sin limpieza en las últimas 24 horas' : 'nunca se limpió'
+    }. Antes de tu tarea, o después, limpia lo que puedas: enlaza las páginas huérfanas donde corresponda, arregla o quita los enlaces rotos, resuelve las contradicciones, actualiza las páginas desactualizadas desde el diario, divide las páginas largas, fusiona las páginas que hablan de lo mismo. Envíalo como un solo cambio marcado como mantenimiento: brain_propose (o brain_write, si tu clave puede escribir) con "maintenance": true.`,
   }
 }
 
 const LABEL: Record<ListName, string> = {
-  orphans: 'orphan pages',
-  broken: 'broken links',
-  conflicts: 'open contradictions',
-  stale: 'stale pages',
-  unavailableSources: 'sources no longer available',
-  long: 'long pages',
-  similarTitles: 'pairs of titles almost the same',
+  orphans: 'páginas huérfanas',
+  broken: 'enlaces rotos',
+  conflicts: 'contradicciones abiertas',
+  stale: 'páginas desactualizadas',
+  unavailableSources: 'fuentes ya no disponibles',
+  long: 'páginas largas',
+  similarTitles: 'pares de títulos casi iguales',
 }

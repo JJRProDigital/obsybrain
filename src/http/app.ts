@@ -178,8 +178,8 @@ const tooLarge = (max: number) => {
   const e = new AppError(
     413,
     'body_too_large',
-    `The request body is larger than ${Math.round(max / 1_048_576)} MB.`,
-    'Send a smaller request.',
+    `El cuerpo de la petición pesa más de ${Math.round(max / 1_048_576)} MB.`,
+    'Envía una petición más chica.',
   )
   // The rest of the body is not read: the connection ends with the answer, so it is never reused mid-body.
   e.headers = { connection: 'close' }
@@ -219,7 +219,7 @@ async function readBody(req: IncomingMessage, max = MAX_BODY): Promise<unknown> 
     const form: Record<string, string> = {}
     for (const [k, v] of new URLSearchParams(Buffer.concat(chunks).toString('utf8'))) {
       if (Object.hasOwn(form, k))
-        throw invalid(`"${k}" is given more than once.`, 'Send each parameter once.')
+        throw invalid(`"${k}" se pasó más de una vez.`, 'Envía cada parámetro una sola vez.')
       form[k] = v
     }
     parsed = form
@@ -227,11 +227,11 @@ async function readBody(req: IncomingMessage, max = MAX_BODY): Promise<unknown> 
     try {
       parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'))
     } catch {
-      throw invalid('The request body is not valid JSON.', 'Send a JSON object.')
+      throw invalid('El cuerpo de la petición no es JSON válido.', 'Envía un objeto JSON.')
     }
   }
   const bad = badText(parsed)
-  if (bad) throw invalid(bad, 'Fix it and retry.')
+  if (bad) throw invalid(bad, 'Corrígelo y reintenta.')
   return parsed
 }
 
@@ -240,8 +240,8 @@ const archiveTooLarge = (max: number) => {
   const e = new AppError(
     413,
     'archive_too_large',
-    `The zip is larger than ${Math.round(max / 1_048_576)} MB.`,
-    'Import a smaller zip, or ask an administrator to import the folder from the command line.',
+    `El zip pesa más de ${Math.round(max / 1_048_576)} MB.`,
+    'Importa un zip más chico, o pide a un administrador que importe la carpeta desde la línea de comandos.',
   )
   e.headers = { connection: 'close' }
   return e
@@ -251,8 +251,8 @@ const uploadTimeout = () => {
   const e = new AppError(
     408,
     'upload_timeout',
-    'The upload stopped or took too long, so obsybrain stopped waiting for it. Nothing was changed.',
-    'Check your connection and upload the zip again.',
+    'La subida se detuvo o tardó demasiado, así que obsybrain dejó de esperarla. No cambió nada.',
+    'Revisa tu conexión y sube el zip de nuevo.',
   )
   e.headers = { connection: 'close' }
   return e
@@ -322,13 +322,13 @@ function badText(root: unknown): string | null {
   const stack: [unknown, number][] = [[root, 0]]
   while (stack.length > 0) {
     const [v, depth] = stack.pop() as [unknown, number]
-    if (depth > MAX_DEPTH) return `The request is nested more than ${MAX_DEPTH} levels deep.`
+    if (depth > MAX_DEPTH) return `La petición está anidada más de ${MAX_DEPTH} niveles.`
     const texts =
       typeof v === 'string' ? [v] : v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v) : []
     for (const t of texts) {
       if (t.includes('\u0000'))
-        return 'The request contains a NUL character (\\u0000), which cannot be stored.'
-      if (!t.isWellFormed()) return 'The request contains broken text (a lone UTF-16 surrogate).'
+        return 'La petición contiene un carácter NUL (\\u0000), que no se puede guardar.'
+      if (!t.isWellFormed()) return 'La petición contiene texto roto (un sustituto UTF-16 suelto).'
     }
     if (Array.isArray(v)) for (const x of v) stack.push([x, depth + 1])
     else if (v && typeof v === 'object') for (const x of Object.values(v)) stack.push([x, depth + 1])
@@ -593,24 +593,29 @@ export function createHandler(deps: AppDeps) {
       try {
         found = match(routes, method, url.pathname)
       } catch {
-        throw invalid('The address is not valid.', 'Check the path.')
+        throw invalid('La dirección no es válida.', 'Revisa la ruta.')
       }
       if (found === null) {
         throw new AppError(
           404,
           'no_such_route',
-          `Nothing at ${method} ${url.pathname}.`,
-          'Check the method and path.',
+          `Nada en ${method} ${url.pathname}.`,
+          'Revisa el método y la ruta.',
         )
       }
       if (found === 'method') {
-        throw new AppError(405, 'method_not_allowed', `${method} is not allowed here.`, 'Check the method.')
+        throw new AppError(
+          405,
+          'method_not_allowed',
+          `${method} no está permitido aquí.`,
+          'Revisa el método.',
+        )
       }
       template = found.route.path
       // The query string holds text that reaches the database too.
       for (const [k, v] of url.searchParams) {
         const bad = badText(k) ?? badText(v)
-        if (bad) throw invalid(bad.replace('The request', 'The query string'), 'Remove those characters.')
+        if (bad) throw invalid(bad.replace('La petición', 'La query string'), 'Quita esos caracteres.')
       }
       // Until the first-time setup is done, everything leads to it (spec B4 CA1).
       if (!ready && !found.route.beforeSetup) {
@@ -619,8 +624,8 @@ export function createHandler(deps: AppDeps) {
           throw new AppError(
             503,
             'setup_required',
-            'This installation is not set up yet.',
-            'Open the obsybrain web address to run the first-time setup.',
+            'Esta instalación todavía no está configurada.',
+            'Abre la dirección web de obsybrain para hacer la configuración inicial.',
           )
         }
       }
@@ -675,8 +680,8 @@ export function createHandler(deps: AppDeps) {
         throw new AppError(
           403,
           'csrf',
-          'This request from the web lacks its "X-Requested-With" header.',
-          'Use the obsybrain web to do this.',
+          'Esta petición de la web no lleva su encabezado "X-Requested-With".',
+          'Usa la web de obsybrain para hacer esto.',
         )
       }
       const who = await resolveKey(deps.db, key ?? cookie, deps.clock(), key ? 'bearer' : 'cookie', conn)
@@ -753,8 +758,8 @@ export function createHandler(deps: AppDeps) {
       send(res, 500, {
         error: {
           code: 'internal',
-          message: `Something went wrong on the server (reference ${id}).`,
-          howToProceed: 'Try again; if it keeps failing, give the reference to an administrator.',
+          message: `Algo salió mal en el servidor (referencia ${id}).`,
+          howToProceed: 'Vuelve a intentarlo; si sigue fallando, dale la referencia a un administrador.',
         },
       })
     }

@@ -190,18 +190,21 @@ async function targetsOf(ctx: Ctx, slugs: string[] | undefined): Promise<Target[
 
 export async function search(ctx: Ctx, r: SearchRequest): Promise<SearchResult> {
   if (r.q.length > MAX_QUERY) {
-    throw invalid(`A search has at most ${MAX_QUERY} characters.`, 'Search with the key words only.')
+    throw invalid(
+      `Una búsqueda tiene como máximo ${MAX_QUERY} caracteres.`,
+      'Busca solo con las palabras clave.',
+    )
   }
   // Prefixes are topics or addresses; "style" and "style/" both mean "style" and everything under it.
   const prefix = r.prefix?.replace(/\/+$/, '')
   if (prefix !== undefined && !ADDRESS.test(prefix)) {
     throw invalid(
-      '"prefix" must be a topic or an address, like "style/intros".',
-      'Use lowercase words joined by "/".',
+      '"prefix" debe ser un tema o una dirección, como "style/intros".',
+      'Usa palabras en minúsculas unidas por "/".',
     )
   }
   const bad = r.types?.find((t) => !SEARCH_TYPES.includes(t))
-  if (bad) throw invalid(`Unknown type "${bad}".`, `Use any of: ${SEARCH_TYPES.join(', ')}.`)
+  if (bad) throw invalid(`Tipo desconocido "${bad}".`, `Usa cualquiera de: ${SEARCH_TYPES.join(', ')}.`)
   const include = new Set(r.include ?? [])
   const limit = r.limit ?? 10
   const offset = r.offset ?? 0
@@ -294,7 +297,9 @@ function noteFor(r: SearchRequest, include: Set<Include>): string {
     include.size > 0 ||
     [r.prefix, r.from, r.to, r.before, r.author, r.client, r.session, r.ref].some((v) => v !== undefined) ||
     (r.in !== undefined && r.in !== 'both')
-  return filtered ? 'No results. Try without filters, or in all your brains.' : 'No results. Try other words.'
+  return filtered
+    ? 'Sin resultados. Prueba sin filtros, o en todos tus brains.'
+    : 'Sin resultados. Prueba con otras palabras.'
 }
 
 function pageStatuses(include: Set<Include>): PageStatus[] {
@@ -759,7 +764,8 @@ export async function pageNeighbours(
   o: { hops: 1 | 2; direction: 'out' | 'in' | 'both'; kinds?: string[] },
 ): Promise<{ page: { id: string; address: string }; items: Hit[] }> {
   const bad = o.kinds?.find((k) => !(LINK_KINDS as readonly string[]).includes(k))
-  if (bad) throw invalid(`Unknown link kind "${bad}".`, `Use any of: ${LINK_KINDS.join(', ')}.`)
+  if (bad)
+    throw invalid(`Tipo de enlace desconocido "${bad}".`, `Usa cualquiera de: ${LINK_KINDS.join(', ')}.`)
   const { brain } = await inBrain(ctx, { slug })
   const row = await ctx.db.one<Row>(
     `SELECT p.id, p.address FROM page_addresses a JOIN pages p ON p.id = a.page_id

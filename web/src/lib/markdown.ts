@@ -28,10 +28,10 @@ export const pageHref = (slug: string, address: string) =>
   `/b/${encodeURIComponent(slug)}/pages/${address.split('/').map(encodeURIComponent).join('/')}`
 
 const NOTE: Record<Exclude<MentionState, 'ok'>, string> = {
-  broken: 'no page yet',
-  stale: 'stale',
-  retired: 'retired',
-  superseded: 'superseded',
+  broken: 'todavía sin página',
+  stale: 'desactualizada',
+  retired: 'retirada',
+  superseded: 'reemplazada',
 }
 
 type Env = { slug: string; states: Map<string, MentionState>; titles: Map<string, string> }

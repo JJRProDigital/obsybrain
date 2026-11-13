@@ -232,37 +232,37 @@ function failure(cat: FailureCategory, err: unknown): AppError {
     return new AppError(
       507,
       'disk_full',
-      'The copy did not fit: the disk of the copies is full. No copy was kept.',
-      'Free space in the folder of the copies (OBSY_BRAIN_BACKUPS), or keep fewer (OBSY_BRAIN_BACKUP_KEEP), then make a copy again.',
+      'La copia no cupo: el disco de las copias está lleno. No se guardó ninguna copia.',
+      'Libera espacio en la carpeta de las copias (OBSY_BRAIN_BACKUPS), o guarda menos (OBSY_BRAIN_BACKUP_KEEP), y vuelve a hacer una copia.',
     )
   if (cat === 'no_permission')
     return new AppError(
       500,
       'backup_failed',
-      'obsybrain cannot write in the folder of the copies.',
-      'Let the user that runs obsybrain write in OBSY_BRAIN_BACKUPS, then make a copy again.',
+      'obsybrain no puede escribir en la carpeta de las copias.',
+      'Deja que el usuario con el que corre obsybrain escriba en OBSY_BRAIN_BACKUPS y vuelve a hacer una copia.',
     )
   return new AppError(
     500,
     'backup_failed',
-    'The copy failed. No copy was kept.',
-    'Make a copy again; if it fails again, look at the log of the service for the code of the failure.',
+    'La copia falló. No se guardó ninguna copia.',
+    'Vuelve a hacer una copia; si vuelve a fallar, mira en el registro del servicio el código del fallo.',
   )
 }
 
 const BUSY_WORDS: Record<string, string> = {
-  scheduled: ' (the daily one)',
-  manual: ' (one made by hand)',
-  'pre-update': ' (the one before an update)',
-  'pre-restore': ' (the one before a restore)',
-  restore: ': a restore is running',
+  scheduled: ' (la diaria)',
+  manual: ' (una hecha a mano)',
+  'pre-update': ' (la de antes de una actualización)',
+  'pre-restore': ' (la de antes de una restauración)',
+  restore: ': se está restaurando una copia',
 }
 export const backupRunning = (what?: string) =>
   new AppError(
     409,
     'backup_running',
-    `A copy is being made right now${what ? (BUSY_WORDS[what] ?? '') : ''}.`,
-    'Try again when it ends (obsybrain backups list shows it when it is done).',
+    `Se está haciendo una copia ahora mismo${what ? (BUSY_WORDS[what] ?? '') : ''}.`,
+    'Vuelve a intentarlo cuando termine (obsybrain backups list la muestra cuando está lista).',
   )
 
 // A copy before an update or a restore: maintenance must be on, and every write that began before it must have ended
@@ -272,8 +272,8 @@ async function settle(db: Db, clock: Clock, settleMs: number, why: 'update' | 'r
     throw new AppError(
       409,
       'not_in_maintenance',
-      `A copy before ${why === 'update' ? 'an update' : 'a restore'} is made while writes are refused, and maintenance is off.`,
-      `Run obsybrain maintenance on --reason ${why} first.`,
+      `Una copia antes de ${why === 'update' ? 'una actualización' : 'una restauración'} se hace mientras se rechazan las escrituras, y el mantenimiento está apagado.`,
+      `Ejecuta primero obsybrain maintenance on --reason ${why}.`,
     )
   }
   await new Promise((r) => setTimeout(r, settleMs))
@@ -293,8 +293,8 @@ async function settle(db: Db, clock: Clock, settleMs: number, why: 'update' | 'r
       throw new AppError(
         409,
         'writes_in_progress',
-        'Writes that began before maintenance are still running after a minute.',
-        'Try the update again in a few minutes.',
+        'Escrituras que empezaron antes del mantenimiento siguen corriendo un minuto después.',
+        'Vuelve a intentar la actualización en unos minutos.',
       )
     }
     await new Promise((r) => setTimeout(r, 100))
@@ -487,8 +487,8 @@ async function create(
           throw new AppError(
             409,
             'schema_mismatch',
-            `The database is not at the schema of this release (${VERSION}).`,
-            'Run obsybrain migrate with this release, or make the copy with the release that migrated the database.',
+            `La base de datos no está en el esquema de esta versión (${VERSION}).`,
+            'Ejecuta obsybrain migrate con esta versión, o haz la copia con la versión que migró la base de datos.',
           )
         }
         // Under the lock no other copy of this database is writing: what a copy that died (over an hour ago) left
@@ -510,8 +510,8 @@ async function create(
           throw new AppError(
             409,
             'backup_exists',
-            'A copy with this name exists already.',
-            'Try again in a second.',
+            'Ya existe una copia con este nombre.',
+            'Vuelve a intentarlo en un segundo.',
           )
         const inst = await tx.one<{ id: number; name: string }>(
           'SELECT id, name FROM installation WHERE id = 1',

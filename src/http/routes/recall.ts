@@ -38,7 +38,7 @@ function list(v: string | null): string[] | undefined {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-  if (items.length > 50) throw invalid('A list has at most 50 values.', 'Ask for fewer.')
+  if (items.length > 50) throw invalid('Una lista tiene como máximo 50 valores.', 'Pide menos.')
   return items.length > 0 ? items : undefined
 }
 
@@ -85,8 +85,7 @@ export const recallRoutes: Route[] = [
   })),
   route('GET /v1/entries/:id/around', async (r) => {
     const n = r.query.get('n') ? Number(r.query.get('n')) : 5
-    if (!Number.isInteger(n) || n < 1 || n > 50)
-      throw invalid('"n" must be between 1 and 50.', 'Ask for fewer.')
+    if (!Number.isInteger(n) || n < 1 || n > 50) throw invalid('"n" debe estar entre 1 y 50.', 'Pide menos.')
     return { body: await around(ctxOf(r), r.params.id as string, n) }
   }),
   route('POST /v1/brains/:slug/relations', async (r) => {
@@ -104,7 +103,7 @@ export const recallRoutes: Route[] = [
     const limit = r.query.get('limit')
     const offset = r.query.get('offset') ? Number(r.query.get('offset')) : 0
     if (!Number.isInteger(offset) || offset < 0)
-      throw invalid('"offset" is the "next" value of the previous page.', 'Use it unchanged.')
+      throw invalid('"offset" es el valor "next" de la página anterior.', 'Úsalo sin cambiarlo.')
     return {
       body: await conflicts(
         ctxOf(r),
@@ -126,17 +125,18 @@ export const recallRoutes: Route[] = [
   route('GET /v1/search', async (r) => {
     const include = list(r.query.get('include'))
     const bad = include?.find((i) => !(INCLUDES as readonly string[]).includes(i))
-    if (bad) throw invalid(`Unknown "include" value "${bad}".`, `Use any of: ${INCLUDES.join(', ')}.`)
+    if (bad)
+      throw invalid(`Valor "include" desconocido "${bad}".`, `Usa cualquiera de: ${INCLUDES.join(', ')}.`)
     const scope = q(r.query.get('in'))
     if (scope !== undefined && !['entries', 'pages', 'both'].includes(scope))
-      throw invalid('"in" must be entries, pages or both.', 'Leave it out to search both.')
+      throw invalid('"in" debe ser entries, pages o both.', 'Omite para buscar en ambos.')
     const brains = q(r.query.get('brains'))
     const offset = r.query.get('offset') ? Number(r.query.get('offset')) : 0
     if (!Number.isInteger(offset) || offset < 0 || offset > MAX_OFFSET)
-      throw invalid('"offset" must be 0 to 10 000.', 'Use the "next" value, or narrow the search.')
+      throw invalid('"offset" debe ser de 0 a 10 000.', 'Usa el valor "next", o acota la búsqueda.')
     const limit = r.query.get('limit') ? Number(r.query.get('limit')) : 10
     if (!Number.isInteger(limit) || limit < 1 || limit > 50)
-      throw invalid('"limit" must be between 1 and 50.', 'Ask for fewer.')
+      throw invalid('"limit" debe estar entre 1 y 50.', 'Pide menos.')
     // "type" (one) is kept from B1; "types" takes several.
     const types = list(r.query.get('types')) ?? list(r.query.get('type'))
     return {
@@ -167,7 +167,7 @@ export const recallRoutes: Route[] = [
     const after = r.query.get('after')
     const n = after === null || after === '' ? undefined : Number(after)
     if (n !== undefined && (!Number.isSafeInteger(n) || n < 0))
-      throw invalid('"after" is the "next" value of the previous page.', 'Use it unchanged.')
+      throw invalid('"after" es el valor "next" de la página anterior.', 'Úsalo sin cambiarlo.')
     return {
       body: await readTrail(
         ctxOf(r),
@@ -184,12 +184,12 @@ export const recallRoutes: Route[] = [
   }),
   route('GET /v1/brains/:slug/neighbours', async (r) => {
     const address = q(r.query.get('address'))
-    if (!address) throw invalid('"address" is required.', 'Name the page, like "style/intros".')
+    if (!address) throw invalid('"address" es obligatorio.', 'Nombra la página, como "style/intros".')
     const hops = r.query.get('hops') ? Number(r.query.get('hops')) : 1
-    if (hops !== 1 && hops !== 2) throw invalid('"hops" must be 1 or 2.', 'Ask for 1 or 2.')
+    if (hops !== 1 && hops !== 2) throw invalid('"hops" debe ser 1 o 2.', 'Pide 1 o 2.')
     const direction = q(r.query.get('direction')) ?? 'both'
     if (!['out', 'in', 'both'].includes(direction))
-      throw invalid('"direction" must be out, in or both.', 'Leave it out for both.')
+      throw invalid('"direction" debe ser out, in o both.', 'Omite para ambos.')
     return {
       body: await pageNeighbours(
         ctxOf(r),
@@ -206,7 +206,10 @@ export const recallRoutes: Route[] = [
   route('GET /v1/brains/:slug/context', async (r) => {
     const max = r.query.get('max') ? Number(r.query.get('max')) : CONTEXT.default
     if (!Number.isSafeInteger(max))
-      throw invalid('"max" must be a whole number of characters.', `Use ${CONTEXT.min} to ${CONTEXT.max}.`)
+      throw invalid(
+        '"max" debe ser un número entero de caracteres.',
+        `Usa de ${CONTEXT.min} a ${CONTEXT.max}.`,
+      )
     return {
       body: await startContext(
         ctxOf(r),

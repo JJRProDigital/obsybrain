@@ -198,13 +198,13 @@ describe('the administration', () => {
     )
   })
   it('names each role in each brain, or says there is none', () => {
-    assert.equal(rolesLabel([]), 'No brains yet')
+    assert.equal(rolesLabel([]), 'Aún no pertenece a ningún brain')
     assert.equal(
       rolesLabel([
         { slug: 'growth', name: 'Growth', role: 'curator' },
         { slug: 'support', name: 'Support', role: 'reader' },
       ]),
-      'Growth (curator) · Support (reader)',
+      'Growth (curador) · Support (lector)',
     )
   })
   it('service accounts only, active first', () => {
@@ -219,11 +219,11 @@ describe('the administration', () => {
     )
   })
   it('says how many short keys are live and from which references', () => {
-    assert.equal(refsLabel(0, []), 'No short keys live')
-    assert.equal(refsLabel(1, ['run r_1']), '1 short key live: run r_1')
-    assert.equal(refsLabel(3, ['run r_1', 'run r_2']), '3 short keys live: run r_1, run r_2')
+    assert.equal(refsLabel(0, []), 'No hay claves cortas activas')
+    assert.equal(refsLabel(1, ['run r_1']), '1 clave corta activa: run r_1')
+    assert.equal(refsLabel(3, ['run r_1', 'run r_2']), '3 claves cortas activas: run r_1, run r_2')
     const many = Array.from({ length: 20 }, (_, i) => `r_${i}`)
-    assert.match(refsLabel(40, many), /^40 short keys live: r_0, r_1, r_2, r_3, r_4 and 15 more$/)
+    assert.match(refsLabel(40, many), /^40 claves cortas activas: r_0, r_1, r_2, r_3, r_4 y 15 más$/)
   })
 })
 

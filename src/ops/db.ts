@@ -55,8 +55,8 @@ function plainName(what: 'database' | 'role', v: string): void {
     throw fail(
       400,
       'invalid_name',
-      `The ${what} name is not a plain lowercase name.`,
-      'Use 1 to 63 lowercase letters, digits and underscores, starting with a letter (obsybrain).',
+      `El nombre del ${what === 'database' ? 'la base de datos' : 'rol'} no es un nombre simple en minúsculas.`,
+      'Usa de 1 a 63 letras minúsculas, dígitos y guiones bajos, empezando por una letra (obsybrain).',
     )
   }
 }
@@ -119,8 +119,8 @@ export function tooOldError(r: TooOld): AppError {
   const e = fail(
     422,
     'too_old',
-    `This PostgreSQL is version ${r.version}; obsybrain needs ${r.min} or newer.`,
-    `Upgrade the server to PostgreSQL ${r.min} or newer, or install with the bundled PostgreSQL (--db bundled).`,
+    `Este PostgreSQL es la versión ${r.version}; obsybrain necesita ${r.min} o más nueva.`,
+    `Actualiza el servidor a PostgreSQL ${r.min} o más nuevo, o instala con el PostgreSQL incluido (--db bundled).`,
   )
   e.extra = { min: r.min, version: r.version }
   return e
@@ -169,7 +169,7 @@ function parseUrl(url: string): { url: URL; host: string } {
     return { url: u, host: u.host }
   } catch {
     const m = /^(postgres(?:ql)?:\/\/[^/@]*@)\//.exec(url)
-    if (!m) throw fail(400, 'invalid_url', 'That is not a PostgreSQL connection URL.', 'Use postgres://…')
+    if (!m) throw fail(400, 'invalid_url', 'Eso no es una URL de conexión a PostgreSQL.', 'Usa postgres://…')
     return { url: new URL(`${m[1]}socket.invalid/${url.slice(m[0].length)}`), host: '' }
   }
 }
@@ -273,12 +273,12 @@ async function provision(
     throw fail(
       400,
       'invalid_name',
-      'The database to keep apart is not a database name.',
-      'Pass its name as it is.',
+      'La base de datos a mantener aparte no es un nombre de base de datos.',
+      'Pasa su nombre tal como es.',
     )
   }
   if (password.length < 16)
-    throw fail(400, 'invalid_password', 'The password is too short.', 'Use 16 characters or more.')
+    throw fail(400, 'invalid_password', 'La contraseña es demasiado corta.', 'Usa 16 caracteres o más.')
   const c = await connect(adminUrl)
   try {
     const found = await checkOn(c, sim)
@@ -287,8 +287,8 @@ async function provision(
       throw fail(
         422,
         'cannot_create_database',
-        'This login cannot create a database and a role on this PostgreSQL.',
-        'Use a login that can (CREATEDB and CREATEROLE), or create them yourself and pass an existing database (--db-url-file).',
+        'Este inicio de sesión no puede crear una base de datos ni un rol en este PostgreSQL.',
+        'Usa uno que pueda (CREATEDB y CREATEROLE), o créalos tú y pasa una base de datos existente (--db-url-file).',
       )
     }
     const taken = (
@@ -302,8 +302,8 @@ async function provision(
       throw fail(
         409,
         'already_exists',
-        `The ${taken.db ? `database ${database}` : `role ${role}`} already exists on this PostgreSQL.`,
-        'Pick other names, or pass that database as an existing one (--db-url-file).',
+        `${taken.db ? `La base de datos ${database}` : `El rol ${role}`} ya existe en este PostgreSQL.`,
+        'Elige otros nombres, o pasa esa base de datos como existente (--db-url-file).',
       )
     }
     const warnings: string[] = []
@@ -320,8 +320,8 @@ async function provision(
         throw fail(
           404,
           'not_found',
-          `There is no database ${isolateFrom} on this PostgreSQL.`,
-          'Check its name.',
+          `No existe la base de datos ${isolateFrom} en este PostgreSQL.`,
+          'Revisa su nombre.',
         )
       }
       // Revoking what one may not revoke is only a warning in PostgreSQL: it is checked before anything is made.
@@ -329,16 +329,16 @@ async function provision(
         throw fail(
           422,
           'cannot_isolate',
-          `This login cannot change who may connect to ${isolateFrom}.`,
-          `Use a superuser, or a login that is a member of ${o.owner}, its owner.`,
+          `Este inicio de sesión no puede cambiar quién puede conectarse a ${isolateFrom}.`,
+          `Usa un superusuario, o un inicio de sesión que sea miembro de ${o.owner}, su dueño.`,
         )
       }
       other = { owner: o.owner, ownerSuper: o.owner_super }
       if (o.owner_super) {
         warnings.push(
-          `${isolateFrom} belongs to ${o.owner}, a superuser: a superuser can connect to any database, obsybrain's ` +
-            `too. obsybrain cannot reach ${isolateFrom}, but the separation holds one way only until that program uses ` +
-            'a login that is no superuser.',
+          `${isolateFrom} pertenece a ${o.owner}, un superusuario: un superusuario puede conectarse a cualquier base de datos, ` +
+            `también a la de obsybrain. obsybrain no puede alcanzar ${isolateFrom}, pero la separación vale en un solo sentido ` +
+            'hasta que ese programa use un inicio de sesión que no sea superusuario.',
         )
       }
     }
@@ -418,8 +418,8 @@ async function provision(
         throw fail(
           500,
           'cannot_isolate',
-          'The databases could not be kept apart: a connection across is still allowed.',
-          'Check the privileges given on both databases, then try again.',
+          'Las bases de datos no pudieron mantenerse aparte: todavía se permite una conexión entre ellas.',
+          'Revisa los privilegios dados en ambas bases de datos y vuelve a intentarlo.',
         )
       }
     } catch (err) {
@@ -430,8 +430,8 @@ async function provision(
       const e = fail(
         500,
         'left_behind',
-        `${err instanceof Error ? err.message : String(err)} Removing what was made failed too: ${left.join(' and ')} ${left.length > 1 ? 'are' : 'is'} still there.`,
-        `Put ${left.length > 1 ? 'them' : 'it'} right as a superuser (DROP DATABASE ${database}; DROP ROLE ${role}; the privileges on ${isolateFrom ?? 'the other database'} as they were), then try again.`,
+        `${err instanceof Error ? err.message : String(err)} Quitar lo creado también falló: ${left.join(' y ')} ${left.length > 1 ? 'siguen' : 'sigue'} allí.`,
+        `Arréglalo ${left.length > 1 ? 'todo' : ''} como superusuario (DROP DATABASE ${database}; DROP ROLE ${role}; los privilegios sobre ${isolateFrom ?? 'la otra base de datos'} como estaban) y vuelve a intentarlo.`,
       )
       e.cause = err
       throw e
@@ -479,19 +479,18 @@ async function drop(
       fail(
         409,
         'not_ours',
-        `${what}. Nothing was removed.`,
-        'Check the database and role names of this installation: drop removes only what obsybrain db provision made.',
+        `${what}. No se quitó nada.`,
+        'Revisa los nombres de la base de datos y el rol de esta instalación: drop solo quita lo que hizo obsybrain db provision.',
       )
     if (dbFound && s.owner !== input.role)
-      throw notOurs(`The database ${input.database} belongs to ${s.owner}, not to ${input.role}`)
+      throw notOurs(`La base de datos ${input.database} pertenece a ${s.owner}, no a ${input.role}`)
     if (dbFound && s.db_mark !== MARK)
-      throw notOurs(`The database ${input.database} was not made by obsybrain`)
+      throw notOurs(`La base de datos ${input.database} no la hizo obsybrain`)
     if (s.role_found && (s.role_super || input.role === s.me))
-      throw notOurs(`The role ${input.role} is a superuser or the login in use`)
-    if (s.role_found && s.role_mark !== MARK)
-      throw notOurs(`The role ${input.role} was not made by obsybrain`)
+      throw notOurs(`El rol ${input.role} es un superusuario o el inicio de sesión en uso`)
+    if (s.role_found && s.role_mark !== MARK) throw notOurs(`El rol ${input.role} no lo hizo obsybrain`)
     if (input.database === s.here)
-      throw notOurs(`The database ${input.database} is the one this login is connected to`)
+      throw notOurs(`La base de datos ${input.database} es a la que está conectado este inicio de sesión`)
     if (!dbFound && !s.role_found) return { database: false, role: false }
     const left = await removeBoth(
       c,

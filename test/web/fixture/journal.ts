@@ -29,21 +29,21 @@ const needRole = (min: string, role: string | null) =>
   err(
     403,
     'forbidden',
-    `This needs the ${min} role in the brain; you are ${role ?? 'not a member'}.`,
-    `Ask a curator of the brain (Eric) for the ${min} role.`,
+    `Esto necesita el rol ${min} en el brain; ${role ? `tú eres ${role}` : 'tú no eres miembro'}.`,
+    `Pide el rol ${min} a quien cure el brain (Eric).`,
   )
 const NOT_YOURS = err(
   403,
   'forbidden',
   'Only the author of an entry or a curator of the brain can change it.',
-  'Ask a curator of the brain (Eric), or write a new entry.',
+  'Pídeselo a quien cure el brain (Eric), o escribe una entrada nueva.',
 )
 
 const NOT_TO_DECIDE = err(
   403,
   'forbidden',
   'Only the author of an entry or a curator of the brain can supersede it, or dismiss it when it is a correction.',
-  'Ask a curator of the brain (Eric), or mark that the two entries contradict each other.',
+  'Pídeselo a quien cure el brain (Eric), o marca que las dos entradas se contradicen.',
 )
 
 const ERIC: Named = { id: 'acc_eric', name: 'Eric' }
@@ -596,8 +596,8 @@ export function entriesOf(j: Journal, q: Q): Answer {
       body: {
         error: {
           code: 'invalid_request',
-          message: '"about" is the address of a page, like "style/intros".',
-          howToProceed: 'Use the address as the wiki shows it.',
+          message: '"about" es la dirección de una página, como "style/intros".',
+          howToProceed: 'Usa la dirección tal como la muestra la wiki.',
         },
       },
     }
@@ -856,7 +856,12 @@ export function conflictsOf(j: Journal, q: Q): Answer {
 
 export function forgottenOf(j: Journal, w: Who, q: Q): Answer {
   if (!atLeast(w.role, 'curator'))
-    return err(403, 'forbidden', 'Only curators see forgotten entries.', 'Ask a curator of the brain.')
+    return err(
+      403,
+      'forbidden',
+      'Solo los curadores ven las entradas olvidadas.',
+      'Pídeselo a quien cure el brain.',
+    )
   const list = j.entries.filter((e) => e.state === 'forgotten')
   const page = paged(list, q)
   if (isAnswer(page)) return page

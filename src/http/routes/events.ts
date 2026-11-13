@@ -58,15 +58,15 @@ function lastIdOf(r: Req): number | undefined {
   const v = String(given)
   if (!/^\d{1,15}$/.test(v)) {
     throw invalid(
-      'Last-Event-ID is the id of the last event received, a whole number.',
-      'Send back the "id" of the last event you got, or leave it out to follow from now.',
+      'Last-Event-ID es el id del último evento recibido, un número entero.',
+      'Devuelve el "id" del último evento que recibiste, u omítelo para seguir desde ahora.',
     )
   }
   return Number(v)
 }
 
 const CLOSED: Record<string, string> = {
-  role_changed: 'Your role in this brain changed, or you left it.',
+  role_changed: 'Tu rol en este brain cambió, o lo dejaste.',
 }
 
 async function follow(
@@ -131,7 +131,7 @@ async function follow(
             at: r.clock().toISOString(),
             // The newest id there is: a client that holds a later one goes back to this one.
             lastEventId: String(sub.from),
-            message: `The last event id you sent (${after}) is ahead of the newest event of this installation (${sub.from}); it may have been restored from a copy. Catch up with the lists (for example the pending proposals and recent sessions), then follow from here.`,
+            message: `El último id de evento que enviaste (${after}) está por delante del evento más nuevo de esta instalación (${sub.from}); puede que se restaurara desde una copia. Ponte al día con las listas (por ejemplo las propuestas pendientes y las sesiones recientes) y sigue desde aquí.`,
           },
         }),
       )
@@ -146,7 +146,7 @@ async function follow(
               brain: brain.slug,
               at: r.clock().toISOString(),
               since: since.toISOString(),
-              message: `You missed events from more than ${REPLAY_HOURS} hours ago, which are not kept for resuming. Catch up with the lists (for example the pending proposals and recent sessions), then follow from here.`,
+              message: `Perdiste eventos de hace más de ${REPLAY_HOURS} horas, que no se guardan para reanudar. Ponte al día con las listas (por ejemplo las propuestas pendientes y las sesiones recientes) y sigue desde aquí.`,
             },
           }),
         )
@@ -186,7 +186,7 @@ async function follow(
           if ((await roleIn(r.db, now, brain.id)) !== role) close('role_changed', CLOSED.role_changed)
         } catch (err) {
           if (err instanceof AppError) close(err.code, `${err.message} ${err.howToProceed}`)
-          else close('internal', 'The stream stopped on an error; reconnect with the last event id.')
+          else close('internal', 'El flujo se detuvo por un error; reconecta con el último id de evento.')
         } finally {
           checking = false
         }

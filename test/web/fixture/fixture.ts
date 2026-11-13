@@ -299,8 +299,8 @@ const companionPending = (s: Scen): Answer => {
     body: {
       error: {
         code: 'companion_pending',
-        message: 'Finish the setup in rsc-factory.',
-        howToProceed: `obsybrain was installed with rsc-factory: open rsc-factory at ${factoryUrl} and finish its first-time setup. obsybrain is set up with the same administration.`,
+        message: 'Termina la configuración en rsc-factory.',
+        howToProceed: `obsybrain se instaló con rsc-factory: abre rsc-factory en ${factoryUrl} y termina su configuración inicial. obsybrain queda configurado con la misma administración.`,
         factoryUrl,
       },
     },
@@ -322,7 +322,7 @@ const NO_BRAIN = err(
   404,
   'brain_not_found',
   'No brain with that name is available to you.',
-  'Check the name with GET /v1/brains, or ask a curator of that brain to add you.',
+  'Comprueba el nombre con GET /v1/brains, o pide a quien cure ese brain que te añada.',
 )
 const INTERNAL = err(
   500,
@@ -1241,11 +1241,11 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
             last4: secret.slice(-4),
             expiresAt: '2027-01-27T10:00:00.000Z',
           },
-          message: 'Copy it now: obsybrain shows it only this once.',
+          message: 'Cópialo ahora: obsybrain lo muestra solo esta vez.',
           ...(slugs
             ? {}
             : {
-                note: 'This token reaches every brain you are a member of, including brains you join later.',
+                note: 'Este token alcanza todos los brains de los que eres miembro, incluidos los que te sumes después.',
               }),
         },
       }
@@ -1292,8 +1292,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           403,
           'forbidden',
-          'This needs the curator role in the brain.',
-          'Ask a curator of the brain.',
+          'Esto necesita el rol curator en el brain.',
+          'Pídeselo a quien cure el brain.',
         )
       const t = s.tokens.find((x) => x.id === params.keyId)
       if (!t) return err(404, 'not_found', 'No key with that id.', 'Check the key.')
@@ -1365,7 +1365,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           400,
           'invalid_request',
           'Only curators get notices of new proposals.',
-          'Ask a curator of the brain.',
+          'Pídeselo a quien cure el brain.',
         )
       s.notify.set(`${who.id}:${b.slug}`, body.notifyProposals)
       return { status: 200, body: { notifyProposals: body.notifyProposals } }
@@ -1563,8 +1563,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           403,
           'forbidden',
-          `This needs the curator role in the brain; you are ${b.role}.`,
-          'Ask a curator of the brain (Eric) for the curator role.',
+          `Esto necesita el rol curator en el brain; tú eres ${b.role}.`,
+          'Pide el rol curator a quien cure el brain (Eric).',
         )
       const stamp = NOW()
         .replace(/[-:]/g, '')
@@ -1591,8 +1591,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           403,
           'forbidden',
-          `This needs the curator role in the brain; you are ${b.role}.`,
-          'Ask a curator of the brain (Eric) for the curator role.',
+          `Esto necesita el rol curator en el brain; tú eres ${b.role}.`,
+          'Pide el rol curator a quien cure el brain (Eric).',
         )
       if (b.status === 'archived')
         return err(
@@ -1672,8 +1672,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           403,
           'forbidden',
-          `This needs the curator role in the brain; you are ${b.role}.`,
-          'Ask a curator of the brain (Eric) for the curator role.',
+          `Esto necesita el rol curator en el brain; tú eres ${b.role}.`,
+          'Pide el rol curator a quien cure el brain (Eric).',
         )
       if (b.status === 'archived') return ARCHIVED
       const x = settingsOf(c.s, b.slug)
@@ -1892,7 +1892,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           400,
           'invalid_request',
           `Only curators of "${b.slug}" link repositories to it.`,
-          'Ask a curator of the brain.',
+          'Pídeselo a quien cure el brain.',
         )
       if (b.status === 'archived')
         return err(
@@ -1926,7 +1926,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           400,
           'invalid_request',
           `Only curators of "${b.slug}" link repositories to it.`,
-          'Ask a curator of the brain.',
+          'Pídeselo a quien cure el brain.',
         )
       const key = repoKey(c.body.repo)
       const list = c.s.repos.get(b.slug) ?? []
@@ -2156,7 +2156,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         body: {
           account: { id },
           key: { id: keyId, secret },
-          message: 'Copy the key now: obsybrain shows it only this once.',
+          message: 'Copia la clave ahora: obsybrain la muestra solo esta vez.',
         },
       }
     },
@@ -2199,7 +2199,10 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
       })
       return {
         status: 201,
-        body: { key: { id: keyId, secret }, message: 'Copy the key now: obsybrain shows it only this once.' },
+        body: {
+          key: { id: keyId, secret },
+          message: 'Copia la clave ahora: obsybrain la muestra solo esta vez.',
+        },
       }
     },
   },
@@ -2947,7 +2950,7 @@ function manages(c: Ctx): { brain: Brain } | Answer {
     403,
     'forbidden',
     `Only curators of "${b.slug}" change its members; you are ${b.role}.`,
-    'Ask a curator of the brain.',
+    'Pídeselo a quien cure el brain.',
   )
 }
 
@@ -3023,8 +3026,8 @@ function archiving(c: Ctx, archived: boolean): Answer {
     return err(
       403,
       'forbidden',
-      `This needs the curator role in the brain; you are ${b.role}.`,
-      'Ask a curator of the brain (Eric) for the curator role.',
+      `Esto necesita el rol curator en el brain; tú eres ${b.role}.`,
+      'Pide el rol curator a quien cure el brain (Eric).',
     )
   const row = c.s.brains.find((x) => x.slug === b.slug) as Brain
   row.status = archived ? 'archived' : 'active'
@@ -3668,7 +3671,7 @@ export async function startFixture(
             403,
             'forbidden',
             'Your role does not allow this.',
-            'Ask a curator of this brain for a role that does.',
+            'Pide a quien cure este brain un rol que sí pueda.',
           ),
         )
       }

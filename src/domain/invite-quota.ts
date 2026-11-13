@@ -31,10 +31,10 @@ export async function checkQuota(c: Ctx, needed: number, perHour: number): Promi
   const e = new AppError(
     429,
     'invite_quota',
-    `This service account may have obsybrain mail at most ${perHour} invitations an hour.`,
+    `Esta cuenta de servicio puede hacer que obsybrain envíe como máximo ${perHour} invitaciones por hora.`,
     wait === null
-      ? `Invite at most ${perHour} people without an account in an hour.`
-      : `Try again in ${Math.ceil(wait / 60)} minutes; people who already have an account can be added now.`,
+      ? `Invita como máximo a ${perHour} personas sin cuenta por hora.`
+      : `Vuelve a intentarlo en ${Math.ceil(wait / 60)} minutos; a las personas que ya tienen cuenta se las puede añadir ahora.`,
   )
   if (wait !== null) {
     e.extra = { retryAfter: wait }

@@ -328,7 +328,7 @@ describe('connections with the standard sign-in', { skip: skipPg }, () => {
       `/oauth/authorize?${authzQuery(`${docBase}/bad-client`, 'http://evil.example/cb', s256('x'.repeat(43)))}`,
     )
     assert.equal(page.status, 400)
-    assert.match(page.text, /cannot connect/)
+    assert.match(page.text, /No se pudo conectar/)
     const codes = await w.db.one<{ n: number }>(
       "SELECT count(*)::int AS n FROM oauth_codes WHERE client_id LIKE '%bad-client'",
     )
@@ -399,7 +399,7 @@ describe('connections with the standard sign-in', { skip: skipPg }, () => {
         `${strict.base}/oauth/authorize?${authzQuery(`${docBase}/claude.json`, 'http://127.0.0.1/callback', s256('y'.repeat(43)))}`,
       )
       assert.equal(res.status, 400)
-      assert.match(await res.text(), /only https|does not reach/i)
+      assert.match(await res.text(), /solo se obtienen direcciones https|no alcanza/i)
     } finally {
       await strict.close()
     }

@@ -694,7 +694,7 @@ describe('restore on PostgreSQL', { skip: skipPg }, () => {
       }),
       (err: unknown) => {
         isCode('corrupt_copy')(err)
-        assert.match((err as AppError).message, /point to rows it does not hold/)
+        assert.match((err as AppError).message, /apuntan a filas que no contiene/)
         return true
       },
     )

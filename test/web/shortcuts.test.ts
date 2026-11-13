@@ -33,7 +33,7 @@ describe('keyboard shortcuts', () => {
     assert.equal(m.handle(key('p')), 'go-people')
     const people = SHORTCUTS.find((s) => s.id === 'go-people')
     assert.equal(people?.invite, true)
-    assert.match(String(people?.control), /People/)
+    assert.match(String(people?.control), /Personas/)
   })
 
   it('"g" then a letter goes to a section, within a second and a half', () => {
@@ -115,7 +115,7 @@ describe('keyboard shortcuts', () => {
     for (const id of ['approve', 'return', 'go-proposals']) assert.ok(ids.includes(id as never), id)
     for (const s of SHORTCUTS.filter((x) => x.id === 'approve' || x.id === 'return')) {
       assert.ok(s.inBrain)
-      assert.match(s.control, /button/)
+      assert.match(s.control, /botón/)
     }
   })
 })

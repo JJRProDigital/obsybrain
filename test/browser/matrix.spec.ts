@@ -157,14 +157,14 @@ for (const r of ROWS) {
     }) => {
       const s = await open(page, context, baseURL as string, r, { [key]: 'error' })
       const alert = page.locator('[role="alert"][data-state="error"]').first()
-      await expect(alert).toContainText('This did not load')
+      await expect(alert).toContainText('Esto no cargó')
       await expect(alert).toContainText('reference fx')
       // Every part that failed says so: no skeleton waits forever beside the error.
       await page.waitForTimeout(300)
       await expect(page.locator('[data-state="loading"]')).toHaveCount(0)
       await nothingCut(page, `${r.name} error`)
       await s.state(key, 'normal')
-      await alert.getByRole('button', { name: 'Try again' }).click()
+      await alert.getByRole('button', { name: 'Probar otra vez' }).click()
       await expect(r.ready(page)).toBeVisible()
     })
 
@@ -172,11 +172,11 @@ for (const r of ROWS) {
       test('no access: why and whom to ask, never a blank page', async ({ page, context, baseURL }) => {
         await open(page, context, baseURL as string, r, { [key]: 'forbidden' })
         const alert = page.locator('[role="alert"][data-state="forbidden"]').first()
-        await expect(alert).toContainText('You cannot open this')
+        await expect(alert).toContainText('No puedes abrir esto')
         await expect(alert).toContainText(/ask|curator|administrator/i)
-        await expect(alert.getByRole('button', { name: 'Try again' })).toHaveCount(0)
+        await expect(alert.getByRole('button', { name: 'Probar otra vez' })).toHaveCount(0)
         // The web's words, with a way out: never an API route.
-        await expect(alert.getByRole('link', { name: 'Go to your brains' })).toBeVisible()
+        await expect(alert.getByRole('link', { name: 'Ir a tus brains' })).toBeVisible()
         await expect(alert).not.toContainText(/\/v1|GET \/|\bAPI\b/)
         await nothingCut(page, `${r.name} no access`)
       })

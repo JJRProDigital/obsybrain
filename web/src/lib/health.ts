@@ -101,7 +101,7 @@ export function healthItems(slug: string, h: Health): Record<SectionId, HealthIt
       ),
     ),
     long: h.long.map((x) =>
-      one(x.address, [page(slug, x.address, x.title)], t.longText(x.chars.toLocaleString('en-US'))),
+      one(x.address, [page(slug, x.address, x.title)], t.longText(x.chars.toLocaleString('es'))),
     ),
     similarTitles: h.similarTitles.map((x) => ({
       ...one(`${x.a}~${x.b}`, [page(slug, x.a, x.aTitle), page(slug, x.b, x.bTitle)], t.similarText),
@@ -140,15 +140,15 @@ function hints(section: SectionId, h: Health): string[] {
 export function askAgent(slug: string, section: SectionId | 'all', h: Health): string {
   const t = T.health
   // A brain's name in the instruction is its slug, an address-like word; anything else is left out.
-  const brain = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) ? slug : 'this brain'
+  const brain = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) ? slug : 'este brain'
   const ids = section === 'all' ? HEALTH_SECTIONS.map((s) => s.id) : [section]
   const lines = ids.flatMap((id) => hints(id, h))
   const n = section === 'all' ? totalProblems(h) : h[section].length
   let what: string
   if (section === 'all') what = t.allProblems(n)
   else {
-    const [one, many] = t.askWhat[section] ?? ['the problem', 'problems']
-    what = n === 1 ? one : `the ${n} ${many}`
+    const [one, many] = t.askWhat[section] ?? ['el problema', 'los problemas']
+    what = n === 1 ? one : `los ${n} ${many.replace(/^los /, '')}`
   }
   return [t.askText(brain, what), ...lines.map((l) => `- ${l}`), t.askData].join('\n')
 }

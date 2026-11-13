@@ -82,9 +82,9 @@ describe('vault: a whole tag, four parts', () => {
 describe('mail errors: the code first, then the words', () => {
   it('a host with "auth" in its name that cannot be found is not an authentication failure', () => {
     const e = Object.assign(new Error('getaddrinfo ENOTFOUND auth.mail.example.com'), { code: 'EDNS' })
-    assert.equal(mailError(e), 'server not found')
+    assert.equal(mailError(e), 'servidor no encontrado')
     const t = Object.assign(new Error('timeout while authenticating'), { code: 'ETIMEDOUT' })
-    assert.equal(mailError(t), 'timeout')
+    assert.equal(mailError(t), 'tiempo de espera agotado')
   })
 })
 

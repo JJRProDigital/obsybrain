@@ -316,7 +316,7 @@ function Restore({
     try {
       const out = await api.call<Changed>('wikiChange', {
         path: { slug },
-        body: { op: 'revert', address, toRevision: n, reason: `Restored revision ${n} from the web.` },
+        body: { op: 'revert', address, toRevision: n, reason: `Restaurada la revisión ${n} desde la web.` },
       })
       wikiChanged(slug)
       onDone(w.restored(n, out.revised.at(-1)?.revision ?? n))

@@ -35,17 +35,17 @@ test.describe('Admin › Backups & system: the copies', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/system')
-    const part = page.getByRole('region', { name: 'Backups' })
-    await expect(part).toContainText('Last good copy')
-    await expect(part).toContainText('Every day at 03:00 (Europe/Madrid), keeping the newest 14')
+    const part = page.getByRole('region', { name: 'Copias' })
+    await expect(part).toContainText('Última copia buena')
+    await expect(part).toContainText('Todos los días a las 03:00 (Europe/Madrid), conservando las 14')
     await expect(part).toContainText('38.2 GB')
     const rows = part.locator('.copies > li')
     await expect(rows).toHaveCount(3)
     await expect(rows.nth(0)).toContainText('Daily')
     await expect(rows.nth(0)).toContainText('key fx12ab34cd56')
     await expect(rows.nth(2)).toContainText('By hand')
-    await expect(rows.nth(2)).toContainText('Needs the older key')
-    const old = rows.nth(2).getByRole('button', { name: /Restore the copy of/ })
+    await expect(rows.nth(2)).toContainText('Necesita la clave más vieja')
+    const old = rows.nth(2).getByRole('button', { name: /Restaurar la copia de/ })
     await expect(old).toHaveAttribute('aria-disabled', 'true')
     await expect(rows.nth(2)).toContainText('restore it on the machine with that key')
     await audit(page, 'backups')
@@ -58,12 +58,12 @@ test.describe('Admin › Backups & system: the copies', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/system')
-    const part = page.getByRole('region', { name: 'Backups' })
-    const make = part.getByRole('button', { name: 'Make a copy now' })
+    const part = page.getByRole('region', { name: 'Copias' })
+    const make = part.getByRole('button', { name: 'Hacer una copia ahora' })
     await make.focus()
     await page.keyboard.press('Enter')
-    await expect(part.getByRole('button', { name: 'Making a copy…' })).toBeVisible()
-    await expect(part.getByRole('status').filter({ hasText: 'Copy made:' })).toBeFocused()
+    await expect(part.getByRole('button', { name: 'Haciendo una copia…' })).toBeVisible()
+    await expect(part.getByRole('status').filter({ hasText: 'Copia hecha:' })).toBeFocused()
     await expect(part.locator('.copies > li')).toHaveCount(4)
     await expect(part.locator('.copies > li').first()).toContainText('By hand')
   })
@@ -76,30 +76,30 @@ test.describe('Admin › Backups & system: the copies', () => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await behind(baseURL as string, s.id, { backupFailure: 'disk_full', nextCopy: 'disk_full' })
     await page.goto('/admin/people')
-    const band = page.getByRole('alert').filter({ hasText: 'The last copy failed' })
+    const band = page.getByRole('alert').filter({ hasText: 'La última copia falló' })
     await expect(band).toContainText('the disk of the copies is full')
-    await expect(band.getByRole('link', { name: 'See Backups & system' })).toBeVisible()
+    await expect(band.getByRole('link', { name: 'Ver Copias y sistema' })).toBeVisible()
     await page.goto('/admin/email')
     await expect(band).toBeVisible()
     await audit(page, 'band')
     await page.goto('/admin/system')
     // Another copy by hand fails again: the band stays.
-    await page.getByRole('button', { name: 'Make a copy now' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'The copy did not finish' })).toBeFocused()
+    await page.getByRole('button', { name: 'Hacer una copia ahora' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'La copia no terminó' })).toBeFocused()
     await expect(band).toBeVisible()
     // A good copy: the band is gone.
-    await page.getByRole('button', { name: 'Make a copy now' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Copy made:' })).toBeFocused()
+    await page.getByRole('button', { name: 'Hacer una copia ahora' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Copia hecha:' })).toBeFocused()
     await page.goto('/admin/people')
-    await expect(page.getByRole('heading', { level: 1, name: 'Administration' })).toBeVisible()
-    await expect(page.getByText('The last copy failed')).toHaveCount(0)
+    await expect(page.getByRole('heading', { level: 1, name: 'Administración' })).toBeVisible()
+    await expect(page.getByText('La última copia falló')).toHaveCount(0)
   })
 
   test('a copy kept with a warning says so with its date', async ({ page, context, baseURL }) => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await behind(baseURL as string, s.id, { backupWarning: 'status_not_saved' })
     await page.goto('/admin/system')
-    await expect(page.getByRole('note').filter({ hasText: 'Copy kept with a warning' })).toContainText(
+    await expect(page.getByRole('note').filter({ hasText: 'Copia conservada con un aviso' })).toContainText(
       'its status could not be saved',
     )
   })
@@ -110,7 +110,7 @@ test.describe('Admin › Backups & system: the copies', () => {
     const link = page
       .locator('.copies > li')
       .first()
-      .getByRole('link', { name: /Download the copy of/ })
+      .getByRole('link', { name: /Descargar la copia de/ })
     const href = String(await link.getAttribute('href'))
     expect(href).toMatch(/^\/v1\/admin\/backups\/obsybrain-\d{8}T\d{6}Z-scheduled\/download$/)
     const res = await page.request.get(href)
@@ -124,30 +124,30 @@ test.describe('Admin › Backups & system: the copies', () => {
   }) => {
     const s = await scenario(context, baseURL as string, 'signed-in', { 'admin-backups': 'loading' })
     await page.goto('/admin/system')
-    const part = page.getByRole('region', { name: 'Backups' })
+    const part = page.getByRole('region', { name: 'Copias' })
     await expect(part.locator('[data-state="loading"]')).toBeVisible()
     await s.state('admin-backups', 'error')
     await page.reload()
-    await expect(part.getByRole('button', { name: 'Try again' })).toBeVisible()
+    await expect(part.getByRole('button', { name: 'Probar otra vez' })).toBeVisible()
     await s.state('admin-backups', 'normal')
-    await part.getByRole('button', { name: 'Try again' }).click()
+    await part.getByRole('button', { name: 'Probar otra vez' }).click()
     await expect(part.locator('.copies > li')).toHaveCount(3)
 
     const e = await scenario(context, baseURL as string, 'signed-in', { 'admin-backups': 'empty' })
     await page.goto('/admin/system')
-    await expect(part).toContainText('No copies yet.')
-    await expect(part).toContainText('The daily copy runs at 03:00; or make one now.')
-    await expect(part).toContainText('None yet')
+    await expect(part).toContainText('Aún sin copias.')
+    await expect(part).toContainText('La copia diaria corre a las 03:00; o haz una ahora.')
+    await expect(part).toContainText('Ninguna todavía')
     await behind(baseURL as string, e.id, { backupsOff: true })
     await page.reload()
-    await expect(part).toContainText('No folder for copies is set')
+    await expect(part).toContainText('No hay carpeta para las copias configurada')
     await expect(part).toContainText('OBSY_BRAIN_BACKUPS')
-    await expect(part.getByRole('button', { name: 'Make a copy now' })).toHaveCount(0)
+    await expect(part.getByRole('button', { name: 'Hacer una copia ahora' })).toHaveCount(0)
 
     await scenario(context, baseURL as string, 'signed-in', { 'admin-backups': 'much-data' })
     await page.goto('/admin/system')
     await expect(part.locator('.copies > li')).toHaveCount(10)
-    await part.getByRole('button', { name: 'Show all 40 copies' }).click()
+    await part.getByRole('button', { name: 'Mostrar todas las 40 copias' }).click()
     await expect(part.locator('.copies > li')).toHaveCount(40)
   })
 
@@ -157,7 +157,7 @@ test.describe('Admin › Backups & system: the copies', () => {
     await expect(page.locator('.copies > li')).toHaveCount(3)
     await context.setOffline(true)
     await page.evaluate(() => window.dispatchEvent(new Event('offline')))
-    await expect(page.getByRole('button', { name: 'Make a copy now' })).toHaveAttribute(
+    await expect(page.getByRole('button', { name: 'Hacer una copia ahora' })).toHaveAttribute(
       'aria-disabled',
       'true',
     )
@@ -165,7 +165,7 @@ test.describe('Admin › Backups & system: the copies', () => {
       page
         .locator('.copies > li')
         .first()
-        .getByRole('button', { name: /Restore the copy of/ }),
+        .getByRole('button', { name: /Restaurar la copia de/ }),
     ).toHaveAttribute('aria-disabled', 'true')
     await context.setOffline(false)
   })
@@ -173,7 +173,7 @@ test.describe('Admin › Backups & system: the copies', () => {
   test('only the administration: a member sees why, and no copy', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'member')
     await page.goto('/admin/system')
-    await expect(page.getByText('Only the administration of this installation opens this.')).toBeVisible()
+    await expect(page.getByText('Solo la administración de esta instalación abre esto.')).toBeVisible()
     await expect(page.locator('.copies')).toHaveCount(0)
   })
 
@@ -194,9 +194,9 @@ test.describe('Admin › Backups & system: the copies', () => {
     await page
       .locator('.copies > li')
       .first()
-      .getByRole('button', { name: /Restore the copy of/ })
+      .getByRole('button', { name: /Restaurar la copia de/ })
       .click()
-    await expect(page.getByLabel('Name of this installation')).toBeVisible()
+    await expect(page.getByLabel('Nombre de esta instalación')).toBeVisible()
     await noSideScroll(page)
     await audit(page, 'restore dialog at 320')
   })
@@ -213,12 +213,12 @@ test.describe('Admin › Backups & system: restoring', () => {
     await page
       .locator('.copies > li')
       .first()
-      .getByRole('button', { name: /Restore the copy of/ })
+      .getByRole('button', { name: /Restaurar la copia de/ })
       .click()
     const dialog = page.getByRole('dialog')
-    await expect(dialog).toContainText('Everything here is replaced by this copy')
-    await expect(dialog).toContainText('What was written after it is lost: the last write here was')
-    await expect(dialog).toContainText('First, obsybrain makes a copy of what is here now')
+    await expect(dialog).toContainText('Todo lo que hay aquí se reemplaza por esta copia')
+    await expect(dialog).toContainText('Lo que se escribió después se pierde: la última escritura aquí fue')
+    await expect(dialog).toContainText('Primero, obsybrain hace una copia de lo que hay ahora')
     await expect(dialog).toContainText('everyone signs in again')
     await audit(page, 'restore')
     // Nothing goes until the name and the password are there.
@@ -226,32 +226,32 @@ test.describe('Admin › Backups & system: restoring', () => {
     page.on('request', (r) => {
       if (r.method() === 'POST' && /\/restore$/.test(r.url())) sent++
     })
-    await dialog.getByRole('button', { name: 'Restore this copy' }).click()
-    await expect(dialog.getByLabel('Name of this installation')).toBeFocused()
-    await expect(dialog).toContainText('Type the name of this installation: obsybrain')
+    await dialog.getByRole('button', { name: 'Restaurar esta copia' }).click()
+    await expect(dialog.getByLabel('Nombre de esta instalación')).toBeFocused()
+    await expect(dialog).toContainText('Escribe el nombre de esta instalación: obsybrain')
     expect(sent).toBe(0)
     // A name not exactly the installation's.
-    await dialog.getByLabel('Name of this installation').fill('RSC-brain')
-    await dialog.getByLabel('Your password').fill(PASSWORD)
-    await dialog.getByRole('button', { name: 'Restore this copy' }).click()
-    await expect(dialog).toContainText('Type the name exactly as it is: obsybrain')
+    await dialog.getByLabel('Nombre de esta instalación').fill('RSC-brain')
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
+    await dialog.getByRole('button', { name: 'Restaurar esta copia' }).click()
+    await expect(dialog).toContainText('Escribe el nombre exactamente como es: obsybrain')
     expect(sent).toBe(0)
     // A wrong password: said on the field, nothing restored, still signed in.
-    await dialog.getByLabel('Name of this installation').fill('obsybrain')
-    await dialog.getByLabel('Your password').fill('not the password')
-    await dialog.getByRole('button', { name: 'Restore this copy' }).click()
+    await dialog.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await dialog.getByLabel('Tu contraseña').fill('not the password')
+    await dialog.getByRole('button', { name: 'Restaurar esta copia' }).click()
     await expect(dialog).toContainText('The password is not right.')
-    await expect(dialog.getByLabel('Your password')).toBeFocused()
-    await expect(dialog.getByLabel('Your password')).toHaveValue('')
+    await expect(dialog.getByLabel('Tu contraseña')).toBeFocused()
+    await expect(dialog.getByLabel('Tu contraseña')).toHaveValue('')
     await expect(page).toHaveURL(/\/admin\/system$/)
     // Right: restored, then to sign in, with the words.
-    await dialog.getByLabel('Your password').fill(PASSWORD)
-    await dialog.getByRole('button', { name: 'Restore this copy' }).click()
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
+    await dialog.getByRole('button', { name: 'Restaurar esta copia' }).click()
     await expect(page).toHaveURL(/\/sign-in$/)
     await expect(
-      page.getByRole('status').filter({ hasText: 'Restored. Everyone signs in again' }),
+      page.getByRole('status').filter({ hasText: 'Restaurado. Todo el mundo vuelve a iniciar sesión' }),
     ).toBeVisible()
-    await expect(page.getByText('Your session ended')).toHaveCount(0)
+    await expect(page.getByText('Tu sesión terminó')).toHaveCount(0)
     expect((await page.request.get('/v1/me')).status()).toBe(401)
   })
 
@@ -272,7 +272,7 @@ test.describe('Admin › Backups & system: restoring', () => {
         json: {
           error: {
             code: 'backup_running',
-            message: 'A copy is being made right now (the daily one).',
+            message: 'Se está haciendo una copia ahora (la diaria).',
             howToProceed: 'Try again when it ends.',
           },
         },
@@ -282,12 +282,12 @@ test.describe('Admin › Backups & system: restoring', () => {
     const open = page
       .locator('.copies > li')
       .first()
-      .getByRole('button', { name: /Restore the copy of/ })
+      .getByRole('button', { name: /Restaurar la copia de/ })
     await open.click()
     const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Name of this installation').fill('obsybrain')
-    await dialog.getByLabel('Your password').fill(PASSWORD)
-    await dialog.getByRole('button', { name: 'Restore this copy' }).click()
+    await dialog.getByLabel('Nombre de esta instalación').fill('obsybrain')
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
+    await dialog.getByRole('button', { name: 'Restaurar esta copia' }).click()
     await expect(dialog.getByRole('button', { name: /Restoring/ })).toBeVisible()
     // Twice: the browser lets a second Esc close a dialog whose first was refused (close watchers).
     await page.keyboard.press('Escape')
@@ -295,16 +295,16 @@ test.describe('Admin › Backups & system: restoring', () => {
     await page.keyboard.press('Escape')
     await expect(dialog).toBeVisible()
     await expect(dialog.getByRole('button', { name: /Restoring/ })).toBeVisible()
-    await expect(dialog.getByRole('button', { name: 'Close' })).toHaveAttribute('aria-disabled', 'true')
-    await dialog.getByRole('button', { name: 'Close' }).click({ force: true })
+    await expect(dialog.getByRole('button', { name: 'Cerrar' })).toHaveAttribute('aria-disabled', 'true')
+    await dialog.getByRole('button', { name: 'Cerrar' }).click({ force: true })
     await page.mouse.click(5, 5)
     await expect(dialog).toBeVisible()
     release()
-    await expect(dialog).toContainText('A copy is being made right now (the daily one).')
+    await expect(dialog).toContainText('Se está haciendo una copia ahora (la diaria).')
     await page.keyboard.press('Escape')
     await expect(dialog).toHaveCount(0)
     await open.click()
-    await expect(page.getByRole('dialog').getByLabel('Name of this installation')).toBeVisible()
+    await expect(page.getByRole('dialog').getByLabel('Nombre de esta instalación')).toBeVisible()
   })
 
   test('Esc keeps things as they are; the keyboard goes back to the button that opened it', async ({
@@ -317,10 +317,10 @@ test.describe('Admin › Backups & system: restoring', () => {
     const open = page
       .locator('.copies > li')
       .first()
-      .getByRole('button', { name: /Restore the copy of/ })
+      .getByRole('button', { name: /Restaurar la copia de/ })
     await open.focus()
     await page.keyboard.press('Enter')
-    await expect(page.getByLabel('Name of this installation')).toBeVisible()
+    await expect(page.getByLabel('Nombre de esta instalación')).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).toHaveCount(0)
     await expect(open).toBeFocused()
@@ -335,33 +335,33 @@ test.describe('Admin › Backups & system: the installation key', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/system')
-    const part = page.getByRole('region', { name: 'Installation key' })
+    const part = page.getByRole('region', { name: 'Clave de instalación' })
     await expect(part).toContainText('fx12ab34cd56')
     await expect(page.locator('body')).not.toContainText(KEY)
-    await part.getByRole('button', { name: 'Show the installation key…' }).click()
+    await part.getByRole('button', { name: 'Mostrar la clave de instalación…' }).click()
     const dialog = page.getByRole('dialog')
-    await expect(dialog.getByLabel('Your password')).toBeFocused()
-    await dialog.getByRole('button', { name: 'Show the key' }).click()
-    await expect(dialog).toContainText('Type your password.')
-    await dialog.getByLabel('Your password').fill('wrong one')
-    await dialog.getByRole('button', { name: 'Show the key' }).click()
+    await expect(dialog.getByLabel('Tu contraseña')).toBeFocused()
+    await dialog.getByRole('button', { name: 'Mostrar la clave' }).click()
+    await expect(dialog).toContainText('Escribe tu contraseña.')
+    await dialog.getByLabel('Tu contraseña').fill('wrong one')
+    await dialog.getByRole('button', { name: 'Mostrar la clave' }).click()
     await expect(dialog).toContainText('The password is not right.')
     await expect(page).toHaveURL(/\/admin\/system$/)
     await expect(page.locator('body')).not.toContainText(KEY)
-    await dialog.getByLabel('Your password').fill(PASSWORD)
-    await dialog.getByRole('button', { name: 'Show the key' }).click()
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
+    await dialog.getByRole('button', { name: 'Mostrar la clave' }).click()
     await expect(dialog).toContainText(KEY)
-    await expect(dialog.getByRole('button', { name: 'Copy the key' })).toBeFocused()
+    await expect(dialog.getByRole('button', { name: 'Copiar la clave' })).toBeFocused()
     const download = page.waitForEvent('download')
-    await dialog.getByRole('link', { name: 'Download the key (.txt)' }).click()
+    await dialog.getByRole('link', { name: 'Descargar la clave (.txt)' }).click()
     const file = await download
     expect(file.suggestedFilename()).toBe('obsybrain-key-obsybrain-fx12ab34cd56.txt')
     const path = await file.path()
     const { readFile } = await import('node:fs/promises')
     expect((await readFile(path, 'utf8')).trim()).toBe(KEY)
     await audit(page, 'key shown')
-    await dialog.getByRole('button', { name: 'Done, hide the key' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'The key is hidden' })).toBeFocused()
+    await dialog.getByRole('button', { name: 'Listo, ocultar la clave' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'La clave está oculta' })).toBeFocused()
     await expect(page.locator('body')).not.toContainText(KEY)
   })
 
@@ -372,15 +372,15 @@ test.describe('Admin › Backups & system: the installation key', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/system')
-    await page.getByRole('button', { name: 'Show the installation key…' }).click()
-    await page.getByRole('dialog').getByLabel('Your password').fill(PASSWORD)
-    await page.getByRole('dialog').getByRole('button', { name: 'Show the key' }).click()
+    await page.getByRole('button', { name: 'Mostrar la clave de instalación…' }).click()
+    await page.getByRole('dialog').getByLabel('Tu contraseña').fill(PASSWORD)
+    await page.getByRole('dialog').getByRole('button', { name: 'Mostrar la clave' }).click()
     await expect(page.getByRole('dialog')).toContainText(KEY)
     await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true })))
     await expect(page.locator('body')).not.toContainText(KEY)
     // Opened again, it asks the password again: nothing was kept.
-    await page.getByRole('button', { name: 'Show the installation key…' }).click()
-    await expect(page.getByRole('dialog').getByLabel('Your password')).toBeVisible()
+    await page.getByRole('button', { name: 'Mostrar la clave de instalación…' }).click()
+    await expect(page.getByRole('dialog').getByLabel('Tu contraseña')).toBeVisible()
     await expect(page.locator('body')).not.toContainText(KEY)
   })
 
@@ -393,11 +393,11 @@ test.describe('Admin › Backups & system: the installation key', () => {
       await route.fulfill({ response: res, json: body })
     })
     await page.goto('/admin/system')
-    await page.getByRole('button', { name: 'Show the installation key…' }).click()
+    await page.getByRole('button', { name: 'Mostrar la clave de instalación…' }).click()
     const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Your password').fill(PASSWORD)
-    await dialog.getByRole('button', { name: 'Show the key' }).click()
-    await expect(dialog.getByLabel('Code from your authenticator app')).toBeFocused()
+    await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
+    await dialog.getByRole('button', { name: 'Mostrar la clave' }).click()
+    await expect(dialog.getByLabel('Código de tu app de autenticación')).toBeFocused()
   })
 })
 
@@ -409,14 +409,16 @@ test.describe('Admin › Backups & system: the version', () => {
   }) => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/system')
-    const service = page.getByRole('region', { name: 'Service' })
-    await expect(service).toContainText('Version v0.1.0 is running. Not checked for a new version yet.')
+    const service = page.getByRole('region', { name: 'Servicio' })
+    await expect(service).toContainText(
+      'Corre la versión v0.1.0. Aún no se comprobó si hay una versión nueva.',
+    )
     await behind(baseURL as string, s.id, {
       release: { latest: 'v0.2.0', notes: '- Faster search.', checkedAt: new Date().toISOString() },
     })
     await page.reload()
-    await expect(service).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
-    await service.getByText('What changes in v0.2.0').click()
+    await expect(service).toContainText('Corre la versión v0.1.0. La versión v0.2.0 está disponible.')
+    await service.getByText('Qué cambia en v0.2.0').click()
     await expect(service).toContainText('- Faster search.')
     await expect(service).toContainText('obsybrain.sh update')
   })
@@ -431,14 +433,14 @@ test.describe('Admin › Backups & system: the version', () => {
       release: { latest: 'v0.1.0', notes: '', checkedAt: new Date().toISOString() },
     })
     await page.goto('/admin/system')
-    const service = page.getByRole('region', { name: 'Service' })
-    await expect(service).toContainText('Version v0.1.0 is running. This is the newest.')
+    const service = page.getByRole('region', { name: 'Servicio' })
+    await expect(service).toContainText('Corre la versión v0.1.0. Esta es la más nueva.')
     await behind(baseURL as string, s.id, {
       release: { latest: 'v0.0.9', notes: '', checkedAt: new Date().toISOString() },
     })
     await page.reload()
     await expect(service).toContainText('ahead of the newest published version (v0.0.9)')
-    await expect(service).not.toContainText('This is the newest')
+    await expect(service).not.toContainText('Esta es la más nueva')
   })
 
   test('a private repository: Could not check, with the command; never up to date, even if it knew the answer before', async ({
@@ -452,9 +454,9 @@ test.describe('Admin › Backups & system: the version', () => {
       release: { latest: null, notes: null, checkedAt: null, error: 'no_access', lastAttemptAt: at },
     })
     await page.goto('/admin/system')
-    const service = page.getByRole('region', { name: 'Service' })
-    await expect(service).toContainText('Could not check for a new version')
-    await expect(service).toContainText('Version v0.1.0 is running.')
+    const service = page.getByRole('region', { name: 'Servicio' })
+    await expect(service).toContainText('No se pudo comprobar si hay una versión nueva')
+    await expect(service).toContainText('Corre la versión v0.1.0.')
     await expect(service.locator('code', { hasText: 'obsybrain.sh update --check' })).toBeVisible()
     // The last answer was days ago, the last try minutes ago: «Tried» says the try.
     const days = new Date(Date.now() - 3 * 86_400_000).toISOString()
@@ -463,8 +465,8 @@ test.describe('Admin › Backups & system: the version', () => {
       release: { latest: 'v0.1.0', notes: '', checkedAt: days, error: 'network', lastAttemptAt: minutes },
     })
     await page.reload()
-    await expect(service).toContainText('Could not check for a new version')
-    await expect(service).not.toContainText('This is the newest')
+    await expect(service).toContainText('No se pudo comprobar si hay una versión nueva')
+    await expect(service).not.toContainText('Esta es la más nueva')
     await expect(service).toContainText('Tried 5 min ago.')
     await expect(service).not.toContainText(/\b3 days ago/)
   })
@@ -480,10 +482,10 @@ test.describe('Admin › Backups & system: the version', () => {
       release: { latest: 'v0.2.0', notes: '- Two.', checkedAt: at, error: 'network', lastAttemptAt: at },
     })
     await page.goto('/admin/system')
-    const service = page.getByRole('region', { name: 'Service' })
-    await expect(service).toContainText('Version v0.1.0 is running. Version v0.2.0 is available.')
-    await expect(service).not.toContainText('Could not check')
-    await expect(service).toContainText('Checked')
+    const service = page.getByRole('region', { name: 'Servicio' })
+    await expect(service).toContainText('Corre la versión v0.1.0. La versión v0.2.0 está disponible.')
+    await expect(service).not.toContainText('No se pudo comprobar')
+    await expect(service).toContainText('Comprobado')
   })
 
   test('no version published says that, not a failure', async ({ page, context, baseURL }) => {
@@ -493,9 +495,9 @@ test.describe('Admin › Backups & system: the version', () => {
       release: { latest: null, notes: null, checkedAt: at, error: 'none', lastAttemptAt: at },
     })
     await page.goto('/admin/system')
-    const service = page.getByRole('region', { name: 'Service' })
-    await expect(service).toContainText('Cannot update: no published version yet')
-    await expect(service).not.toContainText('Could not check')
+    const service = page.getByRole('region', { name: 'Servicio' })
+    await expect(service).toContainText('No se puede actualizar: todavía no hay versión publicada')
+    await expect(service).not.toContainText('No se pudo comprobar')
   })
 })
 
@@ -507,20 +509,22 @@ test.describe('first-time setup: the step «Installation key»', () => {
   }) => {
     await scenario(context, baseURL as string, 'fresh')
     await page.goto('/setup')
-    await page.getByLabel('Name of this installation').fill('Acme')
-    await page.getByLabel('Your name').fill('Ada')
-    await page.getByLabel('Your email').fill('ada@example.test')
-    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Keep the installation key' })).toBeFocused()
+    await page.getByLabel('Nombre de esta instalación').fill('Acme')
+    await page.getByLabel('Tu nombre').fill('Ada')
+    await page.getByLabel('Tu email').fill('ada@example.test')
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Guarda la clave de instalación' }),
+    ).toBeFocused()
     await expect(page.locator('pre')).toContainText(KEY)
-    await expect(page.getByText('Key id: fx12ab34cd56')).toBeVisible()
+    await expect(page.getByText('Id de la clave: fx12ab34cd56')).toBeVisible()
     await audit(page, 'key step')
     const download = page.waitForEvent('download')
-    await page.getByRole('link', { name: 'Download the key (.txt)' }).click()
+    await page.getByRole('link', { name: 'Descargar la clave (.txt)' }).click()
     expect((await download).suggestedFilename()).toBe('obsybrain-key-acme-fx12ab34cd56.txt')
     // Not before it is saved.
-    const go = page.getByRole('button', { name: 'Continue to obsybrain' })
+    const go = page.getByRole('button', { name: 'Continuar a obsybrain' })
     await expect(go).toHaveAttribute('aria-disabled', 'true')
     await go.click({ force: true })
     await expect(
@@ -545,16 +549,16 @@ test.describe('first-time setup: the step «Installation key»', () => {
   }) => {
     await scenario(context, baseURL as string, 'fresh')
     await page.goto('/setup')
-    await page.getByLabel('Name of this installation').fill('Acme')
-    await page.getByLabel('Your name').fill('Ada')
-    await page.getByLabel('Your email').fill('ada@example.test')
-    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
+    await page.getByLabel('Nombre de esta instalación').fill('Acme')
+    await page.getByLabel('Tu nombre').fill('Ada')
+    await page.getByLabel('Tu email').fill('ada@example.test')
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await expect(page.locator('pre')).toContainText(KEY)
     await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true })))
     await expect(page.locator('body')).not.toContainText(KEY)
-    await expect(page.getByRole('heading', { level: 1, name: 'The key was already shown' })).toBeVisible()
-    await expect(page.getByText('Administration › Backups & system')).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'La clave ya se mostró' })).toBeVisible()
+    await expect(page.getByText('Administración › Copias y sistema')).toBeVisible()
   })
 
   test('the key cannot be read (a failure): try again, or go on and download it later', async ({
@@ -570,20 +574,22 @@ test.describe('first-time setup: the step «Installation key»', () => {
           error: {
             code: 'internal',
             message: 'Something went wrong on the server.',
-            howToProceed: 'Try again.',
+            howToProceed: 'Probar otra vez.',
           },
         },
       }),
     )
     await page.goto('/setup')
-    await page.getByLabel('Name of this installation').fill('Acme')
-    await page.getByLabel('Your name').fill('Ada')
-    await page.getByLabel('Your email').fill('ada@example.test')
-    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Set up and sign in' }).click()
-    await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible()
-    await expect(page.getByText('You can download the key later in Admin › Backups & system')).toBeVisible()
-    await page.getByRole('button', { name: 'Continue to obsybrain' }).click()
+    await page.getByLabel('Nombre de esta instalación').fill('Acme')
+    await page.getByLabel('Tu nombre').fill('Ada')
+    await page.getByLabel('Tu email').fill('ada@example.test')
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
+    await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
+    await expect(page.getByRole('button', { name: 'Probar otra vez' })).toBeVisible()
+    await expect(
+      page.getByText('Puedes descargar la clave más tarde en Administración › Copias y sistema'),
+    ).toBeVisible()
+    await page.getByRole('button', { name: 'Continuar a obsybrain' }).click()
     await expect(page).toHaveURL(/\/$/)
   })
 
@@ -591,10 +597,10 @@ test.describe('first-time setup: the step «Installation key»', () => {
     await scenario(context, baseURL as string, 'fresh')
     await page.setViewportSize({ width: 320, height: 700 })
     await page.goto('/setup')
-    await page.getByLabel('Name of this installation').fill('Acme')
-    await page.getByLabel('Your name').fill('Ada')
-    await page.getByLabel('Your email').fill('ada@example.test')
-    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+    await page.getByLabel('Nombre de esta instalación').fill('Acme')
+    await page.getByLabel('Tu nombre').fill('Ada')
+    await page.getByLabel('Tu email').fill('ada@example.test')
+    await page.getByLabel('Contraseña', { exact: true }).fill(PASSWORD)
     await page.keyboard.press('Enter')
     await expect(page.locator('pre')).toContainText(KEY)
     await noSideScroll(page)

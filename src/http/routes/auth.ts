@@ -34,8 +34,8 @@ export function fromWeb(r: PublicReq): void {
     throw new AppError(
       403,
       'csrf',
-      'This request lacks the header of the obsybrain web.',
-      'Use the obsybrain web to do this.',
+      'Esta petición no lleva el encabezado de la web de obsybrain.',
+      'Usa la web de obsybrain para hacer esto.',
     )
   }
 }
@@ -90,13 +90,13 @@ export const authRoutes: Route[] = [
     await requestReset(r.db, r.clock, r.conn, obj(r.body).email, async (to, link) => {
       await send(r.db, r.clock, r.mail, 'reset', {
         to,
-        subject: 'Reset your obsybrain password',
+        subject: 'Restablece tu contraseña de obsybrain',
         text: [
-          'Someone asked to reset the password of your obsybrain account.',
-          'Open this link to choose a new one. It works once, for 1 hour:',
+          'Alguien pidió restablecer la contraseña de tu cuenta de obsybrain.',
+          'Abre este enlace para elegir una nueva. Funciona una sola vez y durante 1 hora:',
           link,
           '',
-          'If it was not you, ignore this mail: your password stays as it is.',
+          'Si no fuiste tú, ignora este correo: tu contraseña sigue como estaba.',
         ].join('\n'),
       })
     })
@@ -104,7 +104,7 @@ export const authRoutes: Route[] = [
       status: 202,
       body: {
         message:
-          'If that email has an account, a reset link is on its way. No mail? Ask an administrator for a link.',
+          'Si ese correo tiene una cuenta, un enlace de restablecimiento está en camino. ¿No llega nada? Pídele un enlace a un administrador.',
       },
     }
   }),

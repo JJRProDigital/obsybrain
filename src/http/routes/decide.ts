@@ -22,7 +22,7 @@ function indices(b: Obj, key: string): number[] | undefined {
   const v = b[key]
   if (v === undefined || v === null) return undefined
   if (!Array.isArray(v) || v.some((x) => typeof x !== 'number' || !Number.isSafeInteger(x) || x < 0)) {
-    throw invalid(`"${key}" is a list of operation numbers.`, `Send "${key}" as [0, 2, …].`)
+    throw invalid(`"${key}" es una lista de números de operación.`, `Envía "${key}" como [0, 2, …].`)
   }
   return v as number[]
 }
@@ -38,7 +38,10 @@ export const decideRoutes: Route[] = [
       corrections !== undefined &&
       (typeof corrections !== 'object' || corrections === null || Array.isArray(corrections))
     ) {
-      throw invalid('"corrections" maps an operation number to its corrected operation.', 'Send {"2": {…}}.')
+      throw invalid(
+        '"corrections" asocia un número de operación con su operación corregida.',
+        'Envía {"2": {…}}.',
+      )
     }
     return {
       body: await approveProposal(
@@ -99,7 +102,7 @@ export const decideRoutes: Route[] = [
     const b = obj(r.body)
     const guide = b.guide
     if (guide !== undefined && guide !== null && typeof guide !== 'string') {
-      throw invalid('"guide" is text, or null for the default.', 'Fix "guide".')
+      throw invalid('"guide" es texto, o null para la guía por defecto.', 'Corrige "guide".')
     }
     const base = baseOf(b.base)
     return {
@@ -130,7 +133,7 @@ export const decideRoutes: Route[] = [
       many !== undefined &&
       (!Array.isArray(many) || many.some((n) => typeof n !== 'number' || !Number.isSafeInteger(n) || n < 1))
     ) {
-      throw invalid('"revisions" is a list of revision numbers.', 'Send "revisions": [4, 5].')
+      throw invalid('"revisions" es una lista de números de revisión.', 'Envía "revisions": [4, 5].')
     }
     const list = [...(one === undefined ? [] : [one]), ...((many as number[] | undefined) ?? [])]
     return {
@@ -154,8 +157,8 @@ function baseOf(v: unknown): Partial<Record<SettingsField, unknown>> | undefined
   if (v === undefined || v === null) return undefined
   const bad = () =>
     invalid(
-      `"base" holds what each field was when you read it, such as {"staleDays": 90}: ${SETTINGS_FIELDS.join(', ')}.`,
-      'Fix "base", or leave it out to save regardless.',
+      `"base" contiene lo que valía cada campo cuando lo leíste, como {"staleDays": 90}: ${SETTINGS_FIELDS.join(', ')}.`,
+      'Corrige "base", u omítelo para guardar sin importar.',
     )
   if (typeof v !== 'object' || Array.isArray(v)) throw bad()
   const out: Partial<Record<SettingsField, unknown>> = {}

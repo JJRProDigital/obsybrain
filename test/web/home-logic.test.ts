@@ -65,14 +65,14 @@ describe('when something last happened', () => {
   const now = new Date('2026-10-30T12:00:00Z')
   it('says it in words a person reads at a glance', () => {
     assert.equal(ago(null, now), null)
-    assert.equal(ago('2026-10-30T11:59:40Z', now), 'just now')
-    assert.equal(ago('2026-10-30T11:55:00Z', now), '5 min ago')
-    assert.equal(ago('2026-10-30T09:00:00Z', now), '3 h ago')
-    assert.equal(ago('2026-10-29T09:00:00Z', now), 'yesterday')
-    assert.equal(ago('2026-10-25T12:00:00Z', now), '5 days ago')
-    assert.equal(ago('2026-08-01T12:00:00Z', now), '1 Aug 2026')
+    assert.equal(ago('2026-10-30T11:59:40Z', now), 'justo ahora')
+    assert.equal(ago('2026-10-30T11:55:00Z', now), 'hace 5 min')
+    assert.equal(ago('2026-10-30T09:00:00Z', now), 'hace 3 h')
+    assert.equal(ago('2026-10-29T09:00:00Z', now), 'ayer')
+    assert.equal(ago('2026-10-25T12:00:00Z', now), 'hace 5 días')
+    assert.equal(ago('2026-08-01T12:00:00Z', now), '1 ago 2026')
     // A clock a little ahead on the server is still "just now".
-    assert.equal(ago('2026-10-30T12:00:20Z', now), 'just now')
+    assert.equal(ago('2026-10-30T12:00:20Z', now), 'justo ahora')
   })
 })
 
@@ -114,14 +114,14 @@ describe('the client of a session, in words', () => {
     assert.equal(clientLabel('claude-code/2.1.4 (cli)'), 'Claude Code')
     assert.equal(clientLabel('codex_cli_rs/0.40.0 (Mac OS 15.1; arm64)'), 'Codex')
     assert.equal(clientLabel('Cursor/1.7.2'), 'Cursor')
-    assert.equal(clientLabel('curl/8.7.1'), 'an API client')
-    assert.equal(clientLabel('python-requests/2.32.3'), 'an API client')
-    assert.equal(clientLabel('node'), 'an API client')
+    assert.equal(clientLabel('curl/8.7.1'), 'un cliente de API')
+    assert.equal(clientLabel('python-requests/2.32.3'), 'un cliente de API')
+    assert.equal(clientLabel('node'), 'un cliente de API')
     assert.equal(
       clientLabel('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/141.0'),
-      'a browser',
+      'un navegador',
     )
-    assert.equal(clientLabel('web'), 'the web')
+    assert.equal(clientLabel('web'), 'la web')
     assert.equal(clientLabel('Lena agent/0.3'), 'Lena agent')
     assert.equal(clientLabel(null), null)
     assert.equal(clientLabel(''), null)
@@ -135,11 +135,11 @@ describe('the words when invitation links are ready', () => {
     const { T } = await import('../../web/src/text.ts')
     assert.equal(
       T.people.linkReady(['ana@x.test']),
-      'Link for ana@x.test is ready: copy it now, it is shown only once.',
+      'El enlace para ana@x.test está listo: cópialo ahora, se muestra solo una vez.',
     )
     assert.equal(
       T.people.linkReady(['ana@x.test', 'bo@x.test']),
-      'Links for ana@x.test, bo@x.test are ready: copy them now, each is shown only once.',
+      'Los enlaces para ana@x.test, bo@x.test están listos: cópialos ahora, cada uno se muestra solo una vez.',
     )
   })
 })

@@ -213,7 +213,10 @@ describe('the administration of the installation (PR25b)', { skip: skipPg }, () 
     it('the test mail goes to the administrator; a failure is shown among the recent failures, with the reason', async () => {
       const ok = await w.callWeb(adminWeb, 'POST', '/v1/admin/mail/test', {})
       assert.deepEqual(ok.body, { sent: true, error: null })
-      assert.match((await w.mailTo('admin1@example.com', /Test mail/)).subject, /Test mail from Test/)
+      assert.match(
+        (await w.mailTo('admin1@example.com', /Correo de prueba/)).subject,
+        /Correo de prueba de Test/,
+      )
       w.mailFails = true
       try {
         const bad = await w.callWeb(adminWeb, 'POST', '/v1/admin/mail/test', {})
@@ -254,7 +257,7 @@ describe('the administration of the installation (PR25b)', { skip: skipPg }, () 
       }
       assert.equal(w.mails.length, real)
       const f = ((await mail()).body.failures as Json[])[0]
-      assert.equal(f?.error, 'auth failed')
+      assert.equal(f?.error, 'fallo de autenticación')
     })
 
     it('only the administration sees or changes mail', async () => {

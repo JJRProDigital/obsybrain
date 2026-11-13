@@ -159,7 +159,7 @@ export type PersonRow = AdminAccount & {
 
 const byStatusThenName = (a: AdminAccount, b: AdminAccount) =>
   Number(a.status !== 'active') - Number(b.status !== 'active') ||
-  a.name.localeCompare(b.name, 'en', { sensitivity: 'base' })
+  a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
 
 export function peopleRows(accounts: readonly AdminAccount[]): PersonRow[] {
   const people = accounts.filter((a) => a.kind === 'person')
@@ -174,15 +174,16 @@ export function serviceRows(accounts: readonly AdminAccount[]): AdminAccount[] {
 }
 
 export function rolesLabel(roles: AdminAccount['roles']): string {
-  if (!roles.length) return 'No brains yet'
-  return roles.map((r) => `${r.name} (${r.role})`).join(' · ')
+  if (!roles.length) return 'Aún no pertenece a ningún brain'
+  const ES: Record<string, string> = { reader: 'lector', contributor: 'colaborador', curator: 'curador' }
+  return roles.map((r) => `${r.name} (${ES[r.role] ?? r.role})`).join(' · ')
 }
 
 // How many short keys of a main key work now, and the references they carry (at most five named).
 export function refsLabel(live: number, refs: readonly string[]): string {
-  if (!live) return 'No short keys live'
-  const head = `${live} short ${live === 1 ? 'key' : 'keys'} live`
+  if (!live) return 'No hay claves cortas activas'
+  const head = `${live} clave${live === 1 ? ' corta activa' : 's cortas activas'}`
   if (!refs.length) return head
   const shown = refs.slice(0, 5).join(', ')
-  return refs.length > 5 ? `${head}: ${shown} and ${refs.length - 5} more` : `${head}: ${shown}`
+  return refs.length > 5 ? `${head}: ${shown} y ${refs.length - 5} más` : `${head}: ${shown}`
 }

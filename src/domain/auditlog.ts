@@ -24,7 +24,7 @@ function timeOf(v: string | undefined, field: string): Date | undefined {
   if (v === undefined) return undefined
   const d = new Date(v)
   if (Number.isNaN(d.getTime()) || v.length > 40)
-    throw invalid(`"${field}" is a date or time.`, 'Such as 2026-10-29 or 2026-10-29T10:00:00Z.')
+    throw invalid(`"${field}" es una fecha u hora.`, 'Por ejemplo 2026-10-29 o 2026-10-29T10:00:00Z.')
   return d
 }
 
@@ -43,14 +43,13 @@ async function query(ctx: Ctx, f: AuditFilters, brainId: string | null, limit: n
   }
   if (f.action) {
     if (f.action.length > 80)
-      throw invalid('"action" is too long.', 'Such as "invitation." or "member.role".')
+      throw invalid('"action" es demasiado larga.', 'Por ejemplo "invitation." o "member.role".')
     if (f.action.endsWith('.')) where.push(`a.action LIKE ${p(`${f.action.replace(/[%_\\]/g, '\\$&')}%`)}`)
     else where.push(`a.action = ${p(f.action)}`)
   }
   if (f.actor) where.push(`a.actor_id = ${p(f.actor.slice(0, 80))}`)
   if (f.outcome) {
-    if (f.outcome !== 'ok' && f.outcome !== 'denied')
-      throw invalid('"outcome" is ok or denied.', 'Choose one.')
+    if (f.outcome !== 'ok' && f.outcome !== 'denied') throw invalid('"outcome" es ok o denied.', 'Elige uno.')
     where.push(`a.outcome = ${p(f.outcome)}`)
   }
   const from = timeOf(f.from, 'from')
@@ -59,12 +58,12 @@ async function query(ctx: Ctx, f: AuditFilters, brainId: string | null, limit: n
   if (to) where.push(`a.at < ${p(to)}`)
   if (f.upTo) {
     if (!/^\d{1,18}$/.test(f.upTo))
-      throw invalid('"upTo" is the id of a row.', 'Use the id of the first line the view shows.')
+      throw invalid('"upTo" es el id de una fila.', 'Usa el id de la primera línea que muestra la vista.')
     where.push(`a.id <= ${p(f.upTo)}`)
   }
   if (f.before) {
     if (!/^\d{1,18}$/.test(f.before))
-      throw invalid('"before" is the id of a row.', 'Use the "next" value of the previous page.')
+      throw invalid('"before" es el id de una fila.', 'Usa el valor "next" de la página anterior.')
     where.push(`a.id < ${p(f.before)}`)
   }
   const rows = await ctx.db.query(
@@ -105,7 +104,7 @@ export async function readAudit(ctx: Ctx, f: AuditFilters) {
 
 // A curator sees the audit of their brain.
 export async function brainAudit(ctx: Ctx, slug: string, f: AuditFilters) {
-  inWeb(ctx, 'Reading the audit')
+  inWeb(ctx, 'Leer la auditoría')
   const { brain, role } = await inBrain(ctx, { slug })
   if (!atLeast(role, 'curator')) throw brainNotFound()
   const items = await query(ctx, { ...f, brain: undefined }, brain.id, AUDIT_PAGE + 1)

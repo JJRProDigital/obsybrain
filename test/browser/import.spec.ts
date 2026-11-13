@@ -21,14 +21,14 @@ async function audit(page: Page, where: string) {
   expect(bad).toEqual([])
 }
 
-const part = (page: Page) => page.getByRole('region', { name: 'Import a documentation folder' })
+const part = (page: Page) => page.getByRole('region', { name: 'Importar una carpeta de documentación' })
 
 async function newBrain(page: Page, name = 'Onboarding') {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Create brain' }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Create a brain' })
-  await dialog.getByLabel('Name').fill(name)
-  await dialog.getByRole('button', { name: 'Create brain' }).click()
+  await page.getByRole('button', { name: 'Crear brain' }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'Crear un brain' })
+  await dialog.getByLabel('Nombre').fill(name)
+  await dialog.getByRole('button', { name: 'Crear brain' }).click()
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible()
 }
 
@@ -40,53 +40,53 @@ test.describe('importing a documentation folder', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await newBrain(page)
-    const steps = page.getByRole('region', { name: 'First steps' })
+    const steps = page.getByRole('region', { name: 'Primeros pasos' })
     const third = steps.getByRole('listitem').nth(2)
     await expect(steps.getByRole('listitem')).toHaveCount(3)
     await expect(
       third.getByRole('heading', { level: 3, name: '3. Import a documentation folder' }),
     ).toBeVisible()
-    await expect(third).toContainText('To do')
-    await third.getByRole('link', { name: 'Import a folder' }).click()
+    await expect(third).toContainText('Por hacer')
+    await third.getByRole('link', { name: 'Importar una carpeta' }).click()
     await expect(page).toHaveURL(/\/b\/onboarding\/settings\/import$/)
     const p = part(page)
-    await expect(p).toContainText('Only into an empty brain')
-    await expect(page.getByRole('link', { name: 'Import', exact: true })).toHaveAttribute(
+    await expect(p).toContainText('Solo en un brain vacío')
+    await expect(page.getByRole('link', { name: 'Importar', exact: true })).toHaveAttribute(
       'aria-current',
       'page',
     )
     await audit(page, 'import ready')
-    await p.getByLabel('Zip to import').setInputFiles({
+    await p.getByLabel('Zip a importar').setInputFiles({
       name: 'docs-sample.zip',
       mimeType: 'application/zip',
       buffer: await zipOfFolder(SAMPLE),
     })
-    await p.getByRole('button', { name: 'Import the folder' }).click()
-    const report = p.getByRole('region', { name: 'What came in' })
+    await p.getByRole('button', { name: 'Importar la carpeta' }).click()
+    const report = p.getByRole('region', { name: 'Qué entró' })
     await expect(report).toBeVisible()
-    await expect(report.getByRole('heading', { name: 'What came in' })).toBeFocused()
-    await expect(report).toContainText('Imported 5 pages, 4 entries and 5 links from docs-sample.zip.')
-    await report.getByText('Left out (7)').click()
+    await expect(report.getByRole('heading', { name: 'Qué entró' })).toBeFocused()
+    await expect(report).toContainText('Importadas 5 páginas, 4 entradas y 5 enlaces de docs-sample.zip.')
+    await report.getByText('Quedó fuera (7)').click()
     await expect(report).toContainText('raw/keys/admin.totp — named like a key or a secret: never read')
-    await report.getByText('Links that lead nowhere (3)').click()
+    await report.getByText('Enlaces que no llevan a ninguna parte (3)').click()
     await expect(report).toContainText('missing-page from topics/retention')
     // A link to a file that was left out says so (review of PR32).
     await expect(report).toContainText(
       'wiki/diagram.png from topics/retention points to a file that was left out',
     )
     // A file that was not UTF-8 was read as Windows-1252, and the report says which.
-    await report.getByText('Read as Windows-1252 (1)').click()
+    await report.getByText('Leídos como Windows-1252 (1)').click()
     await expect(report).toContainText('wiki/latin.md')
-    await report.getByText('Names made into addresses (1)').click()
+    await report.getByText('Nombres convertidos en direcciones (1)').click()
     await expect(report).toContainText('wiki/topics/Audience Notes.md becomes topics/audience-notes')
-    await expect(report.getByRole('link', { name: 'Open the wiki' })).toHaveAttribute(
+    await expect(report.getByRole('link', { name: 'Abrir el wiki' })).toHaveAttribute(
       'href',
       '/b/onboarding/wiki',
     )
     await audit(page, 'import done')
     await page.goto('/b/onboarding')
-    await expect(third).toContainText('Done')
-    await expect(third).toContainText('Imported.')
+    await expect(third).toContainText('Hecho')
+    await expect(third).toContainText('Importado.')
   })
 
   test('the third step marks itself when someone else imports, without reloading', async ({
@@ -96,11 +96,11 @@ test.describe('importing a documentation folder', () => {
   }) => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await newBrain(page)
-    const third = page.getByRole('region', { name: 'First steps' }).getByRole('listitem').nth(2)
-    await expect(third).toContainText('To do')
+    const third = page.getByRole('region', { name: 'Primeros pasos' }).getByRole('listitem').nth(2)
+    await expect(third).toContainText('Por hacer')
     const url = page.url()
     await s.emit('onboarding', 'brain.imported', { target: { id: '', label: 'docs' } })
-    await expect(third).toContainText('Done', { timeout: 5_000 })
+    await expect(third).toContainText('Hecho', { timeout: 5_000 })
     expect(page.url()).toBe(url)
   })
 
@@ -113,10 +113,10 @@ test.describe('importing a documentation folder', () => {
     await newBrain(page)
     await page.goto('/b/onboarding/settings/import')
     const p = part(page)
-    const input = p.getByLabel('Zip to import')
+    const input = p.getByLabel('Zip a importar')
     // Nothing chosen: the button says what to do first.
-    await p.getByRole('button', { name: 'Import the folder' }).click()
-    await expect(p).toContainText('Choose a .zip to import first.')
+    await p.getByRole('button', { name: 'Importar la carpeta' }).click()
+    await expect(p).toContainText('Primero elige un .zip para importar.')
     await expect(input).toBeFocused()
     await input.setInputFiles({
       name: 'notes.tar.gz',
@@ -124,7 +124,7 @@ test.describe('importing a documentation folder', () => {
       buffer: Buffer.from('x'),
     })
     await expect(input).toHaveAttribute('aria-invalid', 'true')
-    await expect(p).toContainText('This is not a .zip.')
+    await expect(p).toContainText('Esto no es un .zip.')
     // A .zip that is not one: the server's words, and the person can choose another.
     await input.setInputFiles({
       name: 'broken.zip',
@@ -132,12 +132,12 @@ test.describe('importing a documentation folder', () => {
       buffer: Buffer.from('not a zip'),
     })
     await expect(input).not.toHaveAttribute('aria-invalid', 'true')
-    await p.getByRole('button', { name: 'Import the folder' }).click()
+    await p.getByRole('button', { name: 'Importar la carpeta' }).click()
     const alert = p.getByRole('alert')
-    await expect(alert).toContainText('This is not a zip obsybrain can read')
-    await expect(alert).toContainText('Make the zip again')
+    await expect(alert).toContainText('Esto no es un .zip')
+    await expect(alert).toContainText('Comprime la carpeta en un .zip de nuevo')
     await expect(alert).toBeFocused()
-    await expect(p.getByRole('region', { name: 'What came in' })).toHaveCount(0)
+    await expect(p.getByRole('region', { name: 'Qué entró' })).toHaveCount(0)
     await audit(page, 'import refused')
   })
 
@@ -151,8 +151,8 @@ test.describe('importing a documentation folder', () => {
     await page.goto('/b/slow/settings/import')
     const p = part(page)
     await expect(p).toBeVisible()
-    await expect(p.getByLabel('Zip to import')).toHaveCount(0)
-    await expect(p.getByLabel('Zip to import')).toBeVisible({ timeout: 10_000 })
+    await expect(p.getByLabel('Zip a importar')).toHaveCount(0)
+    await expect(p.getByLabel('Zip a importar')).toBeVisible({ timeout: 10_000 })
   })
 
   test('a brain with content says why it cannot import, instead of a form', async ({
@@ -163,8 +163,8 @@ test.describe('importing a documentation folder', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/settings/import')
     const p = part(page)
-    await expect(p).toContainText('This brain already has content')
-    await expect(p.getByLabel('Zip to import')).toHaveCount(0)
+    await expect(p).toContainText('Este brain ya tiene contenido')
+    await expect(p.getByLabel('Zip a importar')).toHaveCount(0)
   })
 
   test('by keyboard alone, with a long report', async ({ page, context, baseURL }) => {
@@ -173,24 +173,24 @@ test.describe('importing a documentation folder', () => {
     await page.goto('/b/onboarding/settings/import')
     await expect(page.locator('#import-title')).toBeFocused()
     const p = part(page)
-    await p.getByLabel('Zip to import').setInputFiles({
+    await p.getByLabel('Zip a importar').setInputFiles({
       name: 'docs.zip',
       mimeType: 'application/zip',
       buffer: await zipOfFolder(SAMPLE),
     })
-    await p.getByLabel('Zip to import').focus()
+    await p.getByLabel('Zip a importar').focus()
     await page.keyboard.press('Tab')
-    await expect(p.getByRole('button', { name: 'Import the folder' })).toBeFocused()
+    await expect(p.getByRole('button', { name: 'Importar la carpeta' })).toBeFocused()
     await page.keyboard.press('Enter')
-    const report = p.getByRole('region', { name: 'What came in' })
-    await expect(report.getByRole('heading', { name: 'What came in' })).toBeFocused()
+    const report = p.getByRole('region', { name: 'Qué entró' })
+    await expect(report.getByRole('heading', { name: 'Qué entró' })).toBeFocused()
     await page.keyboard.press('Tab')
-    await expect(report.getByRole('link', { name: 'Open the wiki' })).toBeFocused()
+    await expect(report.getByRole('link', { name: 'Abrir el wiki' })).toBeFocused()
     await page.keyboard.press('Tab')
     await page.keyboard.press('Tab')
     await page.keyboard.press('Enter')
-    await expect(report).toContainText('Left out (1,234)')
-    await expect(report).toContainText('And 734 more, not listed here.')
+    await expect(report).toContainText('Quedó fuera (1.234)')
+    await expect(report).toContainText('Y 734 más, sin listar aquí.')
   })
 
   test('offline, the button says why it waits; at 320 px it fits and passes the audit', async ({
@@ -202,7 +202,7 @@ test.describe('importing a documentation folder', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await newBrain(page)
     await page.goto('/b/onboarding/settings/import')
-    const button = part(page).getByRole('button', { name: 'Import the folder' })
+    const button = part(page).getByRole('button', { name: 'Importar la carpeta' })
     await expect(button).toBeEnabled()
     await noSideScroll(page)
     await audit(page, 'import 320')
