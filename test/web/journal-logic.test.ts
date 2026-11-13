@@ -27,7 +27,7 @@ describe('byline', () => {
   it('names the agent and the person it writes for, as the spec says it', () => {
     assert.equal(
       byline({ author: eric, onBehalf: null, client: 'Claude Code', ref: null }),
-      'Claude Code of Eric',
+      'Claude Code de Eric',
     )
     assert.equal(
       byline({
@@ -47,7 +47,7 @@ describe('byline', () => {
         client: 'narrator',
         ref: 'run r_1',
       }),
-      'narrator of RSC Factory (run r_1)',
+      'narrator de RSC Factory (run r_1)',
     )
   })
 })

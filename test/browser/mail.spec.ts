@@ -14,8 +14,8 @@ async function firstBrain(page: Page) {
 
 for (const mail of [true, false]) {
   test.describe(`mail ${mail ? 'on' : 'off'}`, () => {
-    const says = mail ? /email/ : /a link .*to send/
-    const never = mail ? /a link .*to send/ : /email/
+    const says = mail ? /email/ : /enlace por cada una/
+    const never = mail ? /Recibes un enlace/ : /email/
 
     test('home: «Get started» step 2 and the invite panel', async ({ page, context, baseURL }) => {
       await scenario(context, baseURL as string, 'alone', {}, { mail })

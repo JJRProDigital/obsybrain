@@ -118,7 +118,7 @@ test('CA8: the canvas controls at its edges; the filters open over the picture w
   expect(communities.bottom).toBeLessThan(canvas.bottom)
   // The filters: a panel over the picture.
   await page.locator('.graph-filters summary').click()
-  await expect(page.getByLabel('Words', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('Palabras', { exact: true })).toBeVisible()
   expect(await box(page, 'canvas.graph-canvas')).toEqual(canvas)
   const panel = await box(page, '.graph-filters search')
   expect(panel.top).toBeGreaterThan(views.top)
@@ -199,7 +199,7 @@ test('CA9: the canvas by keyboard: Tab to it, arrows walk the pages, Enter opens
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto(GRAPH)
   await settled(page)
-  const canvas = page.getByRole('application', { name: /^Graph of \d+ items$/ })
+  const canvas = page.getByRole('application', { name: /^Grafo de \d+ elementos$/ })
   // The zoom tools come just before it: Tab from the last one reaches the canvas.
   await page.getByRole('button', { name: 'Alejar', exact: true }).focus()
   await page.keyboard.press('Tab')

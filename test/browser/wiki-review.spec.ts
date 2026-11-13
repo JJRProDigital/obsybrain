@@ -31,7 +31,7 @@ test.describe('drafts of an edit', () => {
     await page.goto(EDIT)
     await page.getByLabel('Título', { exact: true }).fill('Retention, private draft')
     expect(await drafts(page)).toHaveLength(1)
-    await page.getByRole('button', { name: /Account/ }).click()
+    await page.getByRole('button', { name: /Cuenta/ }).click()
     await page.getByRole('button', { name: 'Cerrar sesión' }).click()
     await expect(page).toHaveURL(/\/sign-in$/)
     expect(await drafts(page)).toEqual([])
@@ -72,7 +72,7 @@ test.describe('sources in the editor', () => {
       sources.getByRole('listitem').filter({ hasText: 'https://example.test/notes' }),
     ).toBeVisible()
     await expect(page).toHaveURL(/\?view=edit$/)
-    await expect(said(page, /Saved as revision/)).toHaveCount(0)
+    await expect(said(page, /Guardado como la revisión/)).toHaveCount(0)
     await sources.getByLabel('Entrada del diario').fill('ent_fx_hooks')
     await sources.getByLabel('Entrada del diario').press('Enter')
     await expect(sources.getByRole('listitem').filter({ hasText: 'The hook goes first' })).toBeVisible()
@@ -89,13 +89,13 @@ test.describe('sources in the editor', () => {
     const sources = page.getByRole('group', { name: 'Fuentes' })
     // The sources the page has are named by their titles, not their ids.
     await expect(sources.getByRole('listitem').filter({ hasText: 'Short intros keep viewers' })).toBeVisible()
-    await sources.getByRole('button', { name: 'Eliminar a The hook goes first' }).click()
+    await sources.getByRole('button', { name: 'Quitar The hook goes first' }).click()
     const field = sources.getByLabel('Entrada del diario')
     await field.fill('greeting')
     const list = page.getByRole('listbox', { name: 'Entradas del diario' })
     const option = list.getByRole('option', { name: /The hook goes first/ })
     await expect(option).toBeVisible()
-    await expect(option).toContainText('Oct')
+    await expect(option).toContainText('oct')
     await expect(option).toHaveAttribute('aria-selected', 'true')
     await field.press('Enter')
     await expect(sources.getByRole('listitem').filter({ hasText: 'The hook goes first' })).toBeVisible()
@@ -116,7 +116,9 @@ test.describe('one Save for the whole page (M1)', () => {
     await body(page).fill('Kept short.')
     await body(page).press('ControlOrMeta+Enter')
     await expect(page).toHaveURL(new RegExp(`${RETENTION}$`))
-    await expect(said(page, 'Saved as revision 5. The page is stale now.')).toBeVisible()
+    await expect(
+      said(page, 'Guardado como la revisión 5. La página está desactualizada ahora.'),
+    ).toBeVisible()
     await expect(page.locator('.page-meta')).toContainText('Desactualizada')
     await expect(page.locator('.prose')).toContainText('Kept short.')
   })
@@ -127,7 +129,7 @@ test.describe('one Save for the whole page (M1)', () => {
     const status = page.getByLabel('Estado', { exact: true })
     await status.selectOption('retired')
     await status.press('ControlOrMeta+Enter')
-    await expect(said(page, 'Saved as revision 4. The page is retired now.')).toBeVisible()
+    await expect(said(page, 'Guardado como la revisión 4. La página está retirada ahora.')).toBeVisible()
   })
 
   test('leaving with a status not saved: the page says so, and the edit still has it', async ({
@@ -143,7 +145,7 @@ test.describe('one Save for the whole page (M1)', () => {
     await expect(
       page.getByRole('note').filter({ hasText: 'Tus cambios en esta página todavía no se guardan.' }),
     ).toBeVisible()
-    await expect(page.locator('.page-meta')).toContainText('Current')
+    await expect(page.locator('.page-meta')).toContainText('Vigente')
     await page.getByRole('link', { name: 'Volver a la edición' }).click()
     await expect(page.getByLabel('Estado', { exact: true })).toHaveValue('stale')
   })
@@ -173,7 +175,7 @@ test.describe('one Save for the whole page (M1)', () => {
     await expect(
       said(
         page,
-        'Saved as revision 6. The page is stale now. The page lives at audience/what-keeps-viewers now',
+        'Guardado como la revisión 6. La página está desactualizada ahora. La página vive en audience/what-keeps-viewers ahora',
       ),
     ).toBeVisible()
   })
@@ -208,15 +210,15 @@ test.describe('saving over a newer revision (M4, CA10)', () => {
     await expect(said(p2, 'Guardado como la revisión 4.')).toBeVisible()
     await body(page).fill(`${start}\n\nMine: thumbnails matter.`)
     await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-    const conflict = page.getByRole('region', { name: 'Eric saved revision 4 while you edited' })
+    const conflict = page.getByRole('region', { name: 'Eric guardó la revisión 4 mientras editabas' })
     await expect(conflict).toBeVisible()
     await expect(conflict.getByRole('radio', { name: 'Conservar ambos' })).toBeChecked()
     const result = conflict.locator('[data-part="result-body"]')
-    await expect(result).toContainText('El suyo: los hooks importan.')
+    await expect(result).toContainText('Theirs: hooks matter.')
     await expect(result).toContainText('Mine: thumbnails matter.')
     await conflict.getByRole('button', { name: 'Guardar este resultado' }).click()
     await expect(said(page, 'Guardado como la revisión 5.')).toBeVisible()
-    await expect(page.locator('.prose')).toContainText('El suyo: los hooks importan.')
+    await expect(page.locator('.prose')).toContainText('Theirs: hooks matter.')
     await expect(page.locator('.prose')).toContainText('Mine: thumbnails matter.')
     await c2.close()
   })
@@ -231,7 +233,7 @@ test.describe('saving over a newer revision (M4, CA10)', () => {
     await body(page).fill('Mine, all of it.')
     await behind(baseURL as string, s.id, { body: 'Eva says: intros of 5 seconds.' })
     await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-    const conflict = page.getByRole('region', { name: 'Eva saved revision 4 while you edited' })
+    const conflict = page.getByRole('region', { name: 'Eva guardó la revisión 4 mientras editabas' })
     await expect(conflict).toContainText('Está en la revisión 4 ahora.')
     await expect(conflict.getByRole('radio', { name: 'Conservar ambos' })).toHaveCount(0)
     const save = conflict.getByRole('button', { name: 'Guardar este resultado' })
@@ -253,7 +255,7 @@ test.describe('saving over a newer revision (M4, CA10)', () => {
     await page.getByLabel('Etiquetas').fill('metric, q4, mine')
     await behind(baseURL as string, s.id, { tags: ['metric', 'q4', 'theirs'] })
     await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-    const conflict = page.getByRole('region', { name: /saved revision 4 while you edited/ })
+    const conflict = page.getByRole('region', { name: /guardó la revisión 4 mientras editabas/ })
     const theirs = conflict.getByRole('region', { name: 'Lo que cambió Eva' })
     await expect(theirs.locator('ins').filter({ hasText: 'theirs' })).toBeVisible()
     await conflict.getByRole('button', { name: 'Guardar este resultado' }).click()
@@ -291,7 +293,7 @@ test.describe('a conflict on a long body (CA6)', () => {
     await put(text())
     await behind(baseURL as string, s.id, { body: text() })
     await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-    const conflict = page.getByRole('region', { name: /saved revision 5 while you edited/ })
+    const conflict = page.getByRole('region', { name: /guardó la revisión 5 mientras editabas/ })
     await expect(conflict).toBeVisible()
     // The conflict is worked out once (a performance measure each time), well under 200 ms.
     const worked = () =>
@@ -334,7 +336,7 @@ test.describe('a save that is partly refused', () => {
     await page.getByRole('button', { name: 'Guardar los cambios' }).click()
     const alert = page.getByRole('alert')
     await expect(alert).toContainText(
-      'The move was not saved: the address "audience/intros" is taken or reserved by another page. Your other changes are saved as revision 5.',
+      'El traslado no se guardó: the address "audience/intros" is taken or reserved by another page. Tus otros cambios se guardaron como la revisión 5.',
     )
     await expect(page.getByText(/nothing was saved/i)).toHaveCount(0)
     await expect(page.getByText(/Part of it was saved/)).toHaveCount(0)
@@ -405,8 +407,8 @@ test.describe('a page', () => {
     await page.goto(RETENTION)
     const readers = page.getByRole('region', { name: 'Quién la leyó' })
     await expect(readers.getByRole('listitem')).toHaveCount(3)
-    await expect(readers.getByRole('listitem').filter({ hasText: 'Ana' })).toContainText('with Claude Code')
-    await expect(readers.getByRole('listitem').filter({ hasText: 'Ana' })).toContainText('2 times')
+    await expect(readers.getByRole('listitem').filter({ hasText: 'Ana' })).toContainText('con Claude Code')
+    await expect(readers.getByRole('listitem').filter({ hasText: 'Ana' })).toContainText('2 veces')
   })
 
   test('M5: one visit asks for the page once (one read)', async ({ page, context, baseURL }) => {
@@ -464,26 +466,26 @@ test.describe('history (M6 and the kinds of change)', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(EDIT)
     await page.getByLabel('Estado', { exact: true }).selectOption('stale')
-    await page.getByLabel('Why (shown in the log)').fill('The numbers are from October.')
+    await page.getByLabel('Por qué (se muestra en el registro)').fill('The numbers are from October.')
     await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-    await expect(said(page, /Saved as revision 4/)).toBeVisible()
+    await expect(said(page, /Guardado como la revisión 4/)).toBeVisible()
     await page.goto(`${RETENTION}?view=history`)
     const revisions = page.getByRole('region', { name: 'Revisiones' })
     const four = revisions.getByRole('listitem').filter({ hasText: 'Revisión 4' })
     await expect(four).toContainText('Revisión 4 · estado → desactualizada por Eric')
-    await expect(four).toContainText('Why: The numbers are from October.')
+    await expect(four).toContainText('Por qué: The numbers are from October.')
     await expect(revisions.getByRole('listitem').filter({ hasText: 'Revisión 1' })).toContainText(
-      'Revisión 1 · propuesta aprobada por Eric',
+      'Revisión 1 · creada por Eric',
     )
     await page.goto('/b/growth/wiki/log')
     const line = page.getByRole('list', { name: 'Cambios' }).getByRole('listitem').first()
-    await expect(line).toContainText('Direct status → stale: audience/retention')
-    await expect(line).toContainText('Why: The numbers are from October.')
+    await expect(line).toContainText('Estado directo → stale: audience/retention')
+    await expect(line).toContainText('Por qué: The numbers are from October.')
     // The status part of the difference, on its own.
     await page.goto(`${RETENTION}?view=history&compare=3,4`)
     const diff = page.getByRole('region', { name: 'Cambios de la revisión 3 a la 4' })
     const status = diff.locator('.diff-part').filter({ has: page.getByRole('heading', { name: 'Estado' }) })
-    await expect(status.locator('del')).toContainText('Current')
+    await expect(status.locator('del')).toContainText('Vigente')
     await expect(status.locator('ins')).toContainText('Desactualizada')
   })
 
@@ -613,12 +615,12 @@ test.describe('search', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/')
     await page
-      .getByRole('button', { name: /Search/ })
+      .getByRole('button', { name: /Buscar/ })
       .first()
       .click()
     const dialog = page.getByRole('dialog', { name: 'Buscar' })
-    await dialog.getByLabel('Buscar').fill('retention')
-    await dialog.getByLabel('Buscar').press('Enter')
+    await dialog.getByRole('searchbox', { name: 'Buscar' }).fill('retention')
+    await dialog.getByRole('searchbox', { name: 'Buscar' }).press('Enter')
     const snippet = dialog.locator('.snippet').first()
     await expect(snippet).toContainText('What keeps viewers')
     await expect(snippet).not.toContainText('##')
@@ -671,7 +673,7 @@ for (const width of [1440, 768, 390]) {
     await page.getByLabel('Título', { exact: true }).fill('Retention, mine')
     await behind(baseURL as string, s.id, { body: 'El suyo, todo.', tags: ['metric', 'theirs'] })
     await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-    const conflict = page.getByRole('region', { name: /saved revision 4 while you edited/ })
+    const conflict = page.getByRole('region', { name: /guardó la revisión 4 mientras editabas/ })
     await conflict.getByRole('radio', { name: 'Conservar el mío' }).check()
     await expect(conflict.locator('[data-part="result-body"]')).toBeVisible()
     await noSideScroll(page)

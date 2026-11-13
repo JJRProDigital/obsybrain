@@ -226,7 +226,7 @@ export function follow(
       const newest = typeof d.lastEventId === 'string' && /^\d+$/.test(d.lastEventId) ? d.lastEventId : null
       if (newest && last && Number(newest) < Number(last)) last = newest
       if (fromStart) return
-      gap.value = typeof d.message === 'string' && d.message ? d.message : 'Some events were missed.'
+      gap.value = typeof d.message === 'string' && d.message ? d.message : 'Se perdieron algunos eventos.'
       o.onGap?.()
     })
     s.addEventListener('closed', (m) => {
@@ -244,7 +244,7 @@ export function follow(
         overflow.value = false
         state.value = 'closed'
         closed.value =
-          typeof d.message === 'string' && d.message ? d.message : 'The live feed of this brain ended.'
+          typeof d.message === 'string' && d.message ? d.message : 'El feed en vivo de este brain terminó.'
       })
       o.onClosed?.()
     })

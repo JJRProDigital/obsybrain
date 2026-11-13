@@ -205,7 +205,7 @@ test('CA1, standard route: from the invitation email to a connected Claude Code,
   const agent = await act('press Enter', () => claudeCodeSignsIn(ctx, base))
   // The consent page starts from the brain of her invitation, with read and write: one click.
   await expect(agent.consent.getByRole('checkbox', { name: /CA1/ })).toBeChecked()
-  await expect(agent.consent.getByRole('radio', { name: /Read and write/ })).toBeChecked()
+  await expect(agent.consent.getByRole('radio', { name: /Lectura y escritura/ })).toBeChecked()
   await act('click «Approve»', () => agent.consent.getByRole('button', { name: 'Aprobar' }).click())
   const key = await agent.exchange()
   // The exchange alone is not the agent reaching obsybrain.

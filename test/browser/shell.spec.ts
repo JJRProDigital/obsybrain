@@ -73,7 +73,7 @@ test('the light theme is a choice that stays; dark is the default', async ({ pag
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/')
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-  await page.getByRole('button', { name: /Account/ }).click()
+  await page.getByRole('button', { name: /Cuenta/ }).click()
   await page.getByRole('button', { name: /Tema claro/ }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
   const ground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
@@ -101,7 +101,7 @@ for (const system of ['dark', 'light'] as const) {
     await page.waitForTimeout(200)
     await expect(html).toHaveAttribute('data-theme', 'dark')
     // The person chooses light: it stays, whatever the system says.
-    await page.getByRole('button', { name: /Account/ }).click()
+    await page.getByRole('button', { name: /Cuenta/ }).click()
     await page.getByRole('button', { name: /Tema claro/ }).click()
     await expect(html).toHaveAttribute('data-theme', 'light')
     await page.reload()
@@ -114,7 +114,7 @@ for (const system of ['dark', 'light'] as const) {
 test('the account menu signs out, and the web forgets the person', async ({ page, context, baseURL }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/')
-  await page.getByRole('button', { name: /Account/ }).click()
+  await page.getByRole('button', { name: /Cuenta/ }).click()
   await expect(page.getByText('eric@example.test')).toBeVisible()
   await page.getByRole('button', { name: 'Cerrar sesión' }).click()
   await expect(page).toHaveURL(/\/sign-in$/)
@@ -137,11 +137,11 @@ for (const how of ['the server fails', 'the browser is offline'] as const) {
     )
     await page.goto('/')
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
-    await page.getByRole('button', { name: /Account/ }).click()
+    await page.getByRole('button', { name: /Cuenta/ }).click()
     if (how === 'the browser is offline') await context.setOffline(true)
     await page.getByRole('button', { name: 'Cerrar sesión' }).click()
     await expect(page.getByRole('alert')).toContainText(
-      "Couldn't sign out. Check your connection and try again.",
+      'No se pudo cerrar la sesión. Revisa tu conexión y prueba otra vez.',
     )
     await expect(page).toHaveURL(/\/$/)
     await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible()

@@ -146,7 +146,7 @@ export function createClient(o: {
     return err
   }
   const offline = () =>
-    new ApiError(0, 'offline', 'obsybrain could not be reached.', 'Check your connection and try again.')
+    new ApiError(0, 'offline', 'No se pudo alcanzar obsybrain.', 'Revisa tu conexión y prueba otra vez.')
   return {
     async upload<T>(
       op: OpName,

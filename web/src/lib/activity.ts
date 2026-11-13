@@ -42,19 +42,19 @@ function entryChange(label: string | null): { did: string; what: string | null }
   return { did: d.edited, what: label }
 }
 
-// A change to the wiki, from its summary: a direct edit names the page without jargon; a proposal applied
-// names its summary.
+// A change to the wiki, from its summary (the labels the server writes, src/domain/wiki/direct.ts y
+// apply): a direct edit names the page without jargon; a proposal applied names its summary.
 function wikiChange(label: string | null): { did: string; what: string | null } {
   const d = T.activity.wiki
   if (!label) return { did: d.changed, what: null }
   if (label === 'purge') return { did: d.purged, what: null }
-  const direct = /^Direct (create|edit|move|retire|supersede|delete|[a-z]+): (.+)$/.exec(label)
+  const direct = /^Directo: ([a-z]+): (.+)$/.exec(label)
   if (direct) return { did: d.op[direct[1] as string] ?? d.changed, what: direct[2] ?? null }
-  const status = /^Direct status → ([a-z]+): (.+)$/.exec(label)
+  const status = /^Estado directo → ([a-z]+): (.+)$/.exec(label)
   if (status) return { did: d.status(status[1] as string), what: status[2] ?? null }
-  const back = /^Back to revision (\d+): (.+)$/.exec(label)
+  const back = /^De vuelta a la revisión (\d+): (.+)$/.exec(label)
   if (back) return { did: d.back(back[1] as string), what: back[2] ?? null }
-  return { did: d.applied, what: label.replace(/^Approved: /, '') }
+  return { did: d.applied, what: label.replace(/^Aprobada(?: en parte)?: /, '') }
 }
 
 export function describeEvent(e: LiveEvent): Said {

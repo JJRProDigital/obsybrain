@@ -114,7 +114,7 @@ test.describe('the graph under load (CPU ×4)', () => {
     await page.getByRole('button', { name: 'List' }).click()
     const caption = page.getByRole('table', { name: /Páginas del wiki/ }).getByRole('caption')
     const count = async () =>
-      Number(/of (\d+) pages?/.exec((await caption.textContent()) ?? '')?.[1] ?? Number.NaN)
+      Number(/de (\d+) páginas?/.exec((await caption.textContent()) ?? '')?.[1] ?? Number.NaN)
     await expect.poll(count, { timeout: 30_000 }).toBeGreaterThan(0)
     const drawn = await count()
     const status = page.getByLabel('Estado', { exact: true })
@@ -141,7 +141,7 @@ test.describe('the graph under load (CPU ×4)', () => {
     await page.addInitScript(WATCH_LONG_TASKS)
     await slowCpu(page)
     await page.goto(GRAPH)
-    await expect(page.getByText(/so it is drawn by groups/)).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByText(/se dibuja por grupos/)).toBeVisible({ timeout: 20_000 })
     await settled(page)
     const groups = await page.evaluate(async () => {
       const r = await fetch('/v1/brains/growth/wiki/graph')
@@ -149,7 +149,7 @@ test.describe('the graph under load (CPU ×4)', () => {
     })
     for (const prefix of groups.slice(0, 3)) {
       await page.getByRole('button', { name: 'List' }).click()
-      await page.getByRole('button', { name: `Open group ${prefix}`, exact: true }).click()
+      await page.getByRole('button', { name: `Abrir el grupo ${prefix}`, exact: true }).click()
       await page.getByRole('button', { name: 'Grafo', exact: true }).click()
       await settled(page)
       await page.getByRole('button', { name: 'Todos los grupos' }).click()
@@ -158,10 +158,10 @@ test.describe('the graph under load (CPU ×4)', () => {
     // A page of a group, in focus; then the list.
     await page.getByRole('button', { name: 'List' }).click()
     await page
-      .getByRole('button', { name: /^Focus: 1 hop, / })
+      .getByRole('button', { name: /^Foco: 1 salto, / })
       .first()
       .click()
-    await expect(page.getByRole('table', { name: /and its neighbours$/ })).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByRole('table', { name: /y sus vecinas$/ })).toBeVisible({ timeout: 20_000 })
     await page.getByRole('button', { name: 'Grafo', exact: true }).click()
     await settled(page)
     const max = await longest(page)

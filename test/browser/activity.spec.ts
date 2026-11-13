@@ -35,7 +35,7 @@ test('CA8: an agent’s write shows in under 2 s; paused, the list stays still a
   expect(Date.now() - t0).toBeLessThan(2_000)
   await expect(feed(page).first()).toContainText('Eric')
   await expect(feed(page).first()).toContainText('Claude Code')
-  await expect(feed(page).first()).toContainText('saved')
+  await expect(feed(page).first()).toContainText('guardó')
 
   await page.getByRole('button', { name: 'Pausar' }).click()
   // The badge says so while paused.
@@ -209,15 +209,15 @@ test('filters by client, kind and reference; filtered empty clears', async ({ pa
   await expect(feed(page)).toHaveCount(1)
   await expect(feed(page).first()).toContainText('By Codex')
   await page.getByLabel('Cliente').selectOption('')
-  await page.getByLabel('Kind').selectOption('proposals')
+  await page.getByLabel('Tipo').selectOption('proposals')
   await expect(feed(page)).toHaveCount(1)
   await expect(feed(page).first()).toContainText('A proposal')
-  await page.getByLabel('Kind').selectOption('')
-  await page.getByLabel('Reference').fill('r_3f9a1c2e')
+  await page.getByLabel('Tipo').selectOption('')
+  await page.getByLabel('Referencia').fill('r_3f9a1c2e')
   await expect(feed(page)).toHaveCount(1)
-  await page.getByLabel('Reference').fill('nothing-like-this')
+  await page.getByLabel('Referencia').fill('nothing-like-this')
   await expect(page.getByRole('heading', { name: 'No hay resultados para estos filtros' })).toBeVisible()
-  await page.getByRole('button', { name: 'Quitar los filtros' }).click()
+  await page.getByRole('button', { name: 'Quitar los filtros' }).first().click()
   await expect(feed(page)).toHaveCount(3)
 })
 
@@ -264,7 +264,7 @@ test('320 px and dark: nothing scrolls sideways, pause and filters reachable by 
   await noSideScroll(page)
   await page.getByRole('button', { name: 'Pausar' }).focus()
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('button', { name: /^Resume/ })).toBeFocused()
+  await expect(page.getByRole('button', { name: /Reanudar/ })).toBeFocused()
   await noSideScroll(page)
 })
 
@@ -293,12 +293,12 @@ test('«N new» counts what the filters would show; «Retry now» while reconnec
   await page.goto(A)
   await expect(page.locator('.live-state')).toHaveText('En vivo')
   await openFilters(page)
-  await page.getByLabel('Kind').selectOption('proposals')
+  await page.getByLabel('Tipo').selectOption('proposals')
   await page.getByRole('button', { name: 'Pausar' }).click()
   await s.emit('growth', 'entry.saved', { target: { id: 'e1', label: 'Not a proposal' } })
   await s.emit('growth', 'proposal.submitted', { target: { id: 'p1', label: 'A proposal' } })
-  await expect(page.getByRole('button', { name: 'Reanudar (1 nuevo)' })).toBeVisible()
-  await page.getByRole('button', { name: 'Reanudar (1 nuevo)' }).click()
+  await expect(page.getByRole('button', { name: 'Reanudar (1 nuevos)' })).toBeVisible()
+  await page.getByRole('button', { name: 'Reanudar (1 nuevos)' }).click()
   await s.streams(true)
   await expect(page.locator('.live-state')).toHaveText('Reconectando…', { timeout: 5_000 })
   await s.streams(false)
@@ -324,9 +324,9 @@ test('the reference filter finds the session reference; a Factory row names who 
     onBehalf: { id: 'acc_ana', name: 'Ana' },
     target: { id: 'e2', label: 'Narrated' },
   })
-  await expect(feed(page).first()).toContainText('for Ana')
+  await expect(feed(page).first()).toContainText('para Ana')
   await openFilters(page)
-  await page.getByLabel('Reference').fill('ticket 42')
+  await page.getByLabel('Referencia').fill('ticket 42')
   await expect(feed(page)).toHaveCount(1)
   await expect(feed(page).first()).toContainText('In ticket 42')
 })
@@ -341,10 +341,10 @@ test('repeated searches are one row with a count; forgetting reads in words', as
   await expect(page.locator('.live-state')).toHaveText('En vivo')
   for (let i = 0; i < 3; i++) await s.emit('growth', 'search', { query: 'pricing' })
   await s.emit('growth', 'entry.changed', { target: { id: 'ent_x', label: 'forgotten' } })
-  await expect(feed(page).first()).toContainText('forgot an entry')
+  await expect(feed(page).first()).toContainText('olvidó una entrada')
   await expect(feed(page).first()).not.toContainText('changed an entry')
   await expect(feed(page).filter({ hasText: 'pricing' })).toHaveCount(1)
-  await expect(feed(page).filter({ hasText: 'pricing' })).toContainText('3 times')
+  await expect(feed(page).filter({ hasText: 'pricing' })).toContainText('3 veces')
 })
 
 test('removed from the brain while watching: the list is cleared and says why', async ({
@@ -367,7 +367,7 @@ test('sessions quiet for 30 minutes are apart, with since when', async ({ page, 
   await page.goto(A)
   const quiet = page.getByRole('region', { name: 'Sesiones silenciosas' })
   await expect(quiet.getByRole('listitem').filter({ hasText: 'Fix the onboarding emails' })).toContainText(
-    /Quiet since \d\d:\d\d UTC/,
+    /Silencio desde las \d\d:\d\d UTC/,
   )
   await expect(
     page
@@ -388,7 +388,7 @@ test('a forget heard live takes the title off the rows already shown, for a memb
   await s.emit('growth', 'entry.saved', { target: { id: 'ent_secret', label: 'Secret-title-here' } })
   await expect(feed(page).filter({ hasText: 'Secret-title-here' })).toHaveCount(1)
   await s.emit('growth', 'entry.changed', { target: { id: 'ent_secret', label: 'forgotten' } })
-  await expect(feed(page).first()).toContainText('forgot an entry')
+  await expect(feed(page).first()).toContainText('olvidó una entrada')
   await expect(page.getByText('Secret-title-here')).toHaveCount(0)
   // A closed session whose summary is then forgotten loses the summary's title too.
   await s.emit('growth', 'session.closed', {
@@ -397,9 +397,9 @@ test('a forget heard live takes the title off the rows already shown, for a memb
   })
   await expect(feed(page).filter({ hasText: 'Summary-title-here' })).toHaveCount(1)
   await s.emit('growth', 'entry.changed', { target: { id: 'ent_sum', label: 'forgotten' } })
-  await expect(feed(page).first()).toContainText('forgot an entry')
+  await expect(feed(page).first()).toContainText('olvidó una entrada')
   await expect(page.getByText('Summary-title-here')).toHaveCount(0)
   // A session closed with a summary it may no longer see: said without a title.
   await s.emit('growth', 'session.closed', { target: { id: 'ses_x', label: null } as never })
-  await expect(feed(page).first()).toContainText('closed a session')
+  await expect(feed(page).first()).toContainText('cerró una sesión')
 })

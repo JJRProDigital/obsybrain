@@ -22,14 +22,14 @@ test('one tab per agent, with the standard connection, the reminder and how to c
     'Codex',
     'OpenCode',
     'Cursor',
-    'Otros agentes',
+    'Other agents',
   ])
   await expect(tabs.getByRole('tab', { name: 'Claude Code' })).toHaveAttribute('aria-selected', 'true')
   const panel = page.getByRole('tabpanel', { name: 'Claude Code' })
   await expect(panel.getByRole('region', { name: 'Conexión estándar' })).toContainText(
     'claude mcp add --transport http obsybrain https://brain.example.test/mcp',
   )
-  await expect(panel.getByRole('region', { name: 'Reminder (optional)' })).toContainText('SessionStart')
+  await expect(panel.getByRole('region', { name: 'Recordatorio (opcional)' })).toContainText('SessionStart')
   await expect(panel.getByRole('region', { name: 'Cómo comprobar que funciona' })).toContainText(
     'Ask your agent',
   )
@@ -40,8 +40,8 @@ test('one tab per agent, with the standard connection, the reminder and how to c
   await expect(tabs.getByRole('tab', { name: 'Codex' })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('tabpanel', { name: 'Codex' })).toContainText('codex mcp add obsybrain')
   await page.keyboard.press('End')
-  await expect(tabs.getByRole('tab', { name: 'Otros agentes' })).toBeFocused()
-  await expect(page.getByRole('tabpanel', { name: 'Otros agentes' })).toContainText(
+  await expect(tabs.getByRole('tab', { name: 'Other agents' })).toBeFocused()
+  await expect(page.getByRole('tabpanel', { name: 'Other agents' })).toContainText(
     'https://brain.example.test/mcp',
   )
   await page.keyboard.press('Home')
@@ -62,7 +62,7 @@ test('the live check waits, then turns green on the first request of the token m
     .getByRole('region', { name: 'Conexión por token' })
   await withToken.getByRole('button', { name: 'Crear un token' }).click()
   const once = withToken.getByRole('region', { name: 'Tu token nuevo' })
-  await expect(once).toContainText('only this once')
+  await expect(once).toContainText('solo esta vez')
   await expect(once.getByRole('button', { name: 'Copiar el token' })).toBeFocused()
   const secret = String(await once.locator('pre code').first().textContent()).trim()
   expect(secret).toMatch(/^rscb_/)
@@ -88,10 +88,7 @@ test('the live check waits, then turns green on the first request of the token m
       JSON.stringify(history.state),
   )
   expect(kept).not.toContain(secret)
-  await expect(withToken.getByRole('link', { name: 'your profile' })).toHaveAttribute(
-    'href',
-    '/profile/tokens',
-  )
+  await expect(withToken.getByRole('link', { name: 'tu perfil' })).toHaveAttribute('href', '/profile/tokens')
 })
 
 test('the standard connection turns the check green when a new connected app appears', async ({
@@ -193,7 +190,7 @@ test('the check never asks while the tab is hidden, stops once green, and stops 
   // Left: no asking from a page that is gone.
   await page.getByRole('tab', { name: 'Codex' }).click()
   await page.waitForResponse((r) => r.url().endsWith('/v1/me/apps'))
-  await page.getByRole('link', { name: 'obsybrain , home' }).click()
+  await page.getByRole('link', { name: 'obsybrain , inicio' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Tus brains' })).toBeVisible()
   await page.waitForTimeout(500)
   const left = asks
@@ -214,7 +211,7 @@ test('after a minute it offers tips; after 10 minutes it stops and offers «Chec
   await expect(check).not.toContainText('¿Sigue esperando?')
   await page.clock.fastForward('01:05')
   await expect(check).toContainText('¿Sigue esperando?')
-  await expect(check).toContainText('run /mcp')
+  await expect(check).toContainText('ejecuta /mcp')
   await expect(check).toContainText('echo $' + '{#OBSY_BRAIN_TOKEN_CLAUDE_CODE}')
   await page.clock.fastForward('09:00')
   await expect(check).toContainText('Se dejó de comprobar tras 10 minutos.')
@@ -293,7 +290,7 @@ test('offline: the check pauses and says so; creating a token says why it cannot
     'Esperando a tu agente…',
   )
   await context.setOffline(true)
-  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText('Offline')
+  await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText('Sin conexión')
   await expect(page.getByRole('button', { name: 'Crear un token' })).toHaveAttribute('aria-disabled', 'true')
   await context.setOffline(false)
   await expect(page.getByRole('region', { name: 'Comprobación en vivo' })).toContainText(
@@ -311,7 +308,7 @@ test('at 320 px nothing scrolls sideways outside the code blocks', async ({ page
   await page.getByRole('button', { name: 'Crear un token' }).click()
   await expect(page.getByRole('region', { name: 'Tu token nuevo' })).toBeVisible()
   await noSideScroll(page)
-  await page.getByRole('tab', { name: 'Otros agentes' }).click()
+  await page.getByRole('tab', { name: 'Other agents' }).click()
   await noSideScroll(page)
 })
 
@@ -357,7 +354,7 @@ test('the consent hint is left only when the standard command is copied, never o
   expect(await hint()).toBeUndefined()
   await page
     .getByRole('region', { name: 'Conexión estándar' })
-    .getByRole('button', { name: /^Copy: Add obsybrain/ })
+    .getByRole('button', { name: /^Copiar: Add obsybrain/ })
     .click()
   expect((await hint())?.value).toBe('growth')
 })

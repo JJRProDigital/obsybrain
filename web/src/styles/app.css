@@ -250,8 +250,8 @@ h1.title:focus {
 }
 
 .title {
-  font: 550 23px / 1.2 var(--mono);
-  letter-spacing: -0.035em;
+  font: 700 22px / 1.25 var(--display);
+  letter-spacing: -0.01em;
 }
 
 .lead {
@@ -370,6 +370,13 @@ input[type="date"] {
   color: var(--text);
   border: 1px solid var(--field-line);
   border-radius: var(--radius);
+  font: 14px var(--sans);
+}
+
+/* A file input has no width of its own: cap it so it never overflows its field at narrow widths. */
+input[type="file"] {
+  max-width: 100%;
+  min-width: 0;
   font: 14px var(--sans);
 }
 

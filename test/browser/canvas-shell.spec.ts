@@ -125,7 +125,7 @@ test('folded, a name shows as a tooltip on keyboard focus and on hover; Esc hide
   await expect(wiki).toBeVisible()
   const shown = async () => ((await tip.boundingBox())?.width ?? 0) > 20
   // Keyboard: Tab from the link before it.
-  await nav.getByRole('link', { name: /^Proposals/ }).focus()
+  await nav.getByRole('link', { name: /^Propuestas/ }).focus()
   await page.keyboard.press('Tab')
   await expect(wiki).toBeFocused()
   await expect.poll(shown).toBe(true)
@@ -139,7 +139,7 @@ test('folded, a name shows as a tooltip on keyboard focus and on hover; Esc hide
   await expect(wiki).toBeFocused()
   // The next item shows its own.
   await page.keyboard.press('Tab')
-  const decisions = nav.getByRole('link', { name: 'Decisions' })
+  const decisions = nav.getByRole('link', { name: 'Decisiones' })
   await expect(decisions).toBeFocused()
   await expect
     .poll(async () => ((await decisions.locator('.rail-label').boundingBox())?.width ?? 0) > 20)
@@ -172,7 +172,7 @@ test('the brain switcher opens, leads to another brain and closes by keyboard', 
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize(WIDE)
   await page.goto('/b/growth')
-  const switcher = page.getByRole('button', { name: /Growth.*switch brain/ })
+  const switcher = page.getByRole('button', { name: /Growth.*cambiar de brain/ })
   await expect(switcher).toHaveAttribute('aria-expanded', 'false')
   await switcher.focus()
   await page.keyboard.press('Enter')
@@ -189,14 +189,17 @@ test('the brain switcher opens, leads to another brain and closes by keyboard', 
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/\/b\/support$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Support' })).toBeVisible()
-  await expect(page.getByRole('button', { name: /Support.*switch brain/ })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: /Support.*cambiar de brain/ })).toHaveAttribute(
     'aria-expanded',
     'false',
   )
 })
 
-for (const state of ['folded', 'open'] as const) {
-  test(`at 1366×768, ${state}, no screen scrolls sideways and the rail's foot is in view`, async ({
+for (const [state, label] of [
+  ['folded', 'plegada'],
+  ['open', 'abierta'],
+] as const) {
+  test(`at 1366×768, ${label}, no screen scrolls sideways and the rail's foot is in view`, async ({
     page,
     context,
     baseURL,
@@ -230,7 +233,7 @@ test('at 1920×1080 the overview shows its figures in one row and its three part
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize(WIDE)
   await page.goto('/b/growth')
-  const parts = ["Today's sessions", 'Esperando revisión', 'Salud'].map((name) =>
+  const parts = ['Sesiones de hoy', 'Esperando revisión', 'Salud'].map((name) =>
     page.getByRole('region', { name, exact: true }),
   )
   for (const p of parts) await expect(p).toBeVisible()
@@ -279,7 +282,7 @@ test('on a tablet the open rail is for the moment: not remembered, closed by a m
   // Review A6: Esc in a menu of the open rail closes the menu only; the rail stays open.
   await expand.click()
   await expect.poll(() => railWidth(page)).toBeCloseTo(220, 0)
-  const switcher = page.getByRole('button', { name: /Growth.*switch brain/ })
+  const switcher = page.getByRole('button', { name: /Growth.*cambiar de brain/ })
   await switcher.click()
   await expect(switcher).toHaveAttribute('aria-expanded', 'true')
   await page.keyboard.press('Escape')

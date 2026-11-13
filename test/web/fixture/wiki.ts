@@ -213,7 +213,7 @@ export function freshWiki(): Wiki {
       actorName: r.authorName,
       kind: r.kind,
       proposalId: r.proposalId,
-      summary: r.kind === 'proposal' ? `Approved: ${r.title}` : `Direct edit: ${r.address}`,
+      summary: r.kind === 'proposal' ? `Aprobada: ${r.title}` : `Directo: edit: ${r.address}`,
       reason: r.reason,
       pages: [r.address],
     })),
@@ -226,8 +226,8 @@ export function freshWiki(): Wiki {
     actorName: 'Eric',
     kind: 'write',
     proposalId: null,
-    summary: 'Written directly by Claude Code laptop: Link the orphan pages',
-    reason: 'Daily cleanup.',
+    summary: 'Escrito directamente por Claude Code laptop: Link the orphan pages',
+    reason: 'Limpieza diaria.',
     pages: ['overview/audience'],
     keyName: 'Claude Code laptop',
     maintenance: true,
@@ -433,7 +433,7 @@ export function editBehind(
       { id: 'acc_eva', name: 'Eva' },
       { ...(body === undefined ? {} : { body }), ...more },
       'direct',
-      `Direct edit: ${address}`,
+      `Directo: edit: ${address}`,
       {
         change: 'edited',
         reason: 'Eva fixed the numbers.',
@@ -573,7 +573,7 @@ export function logOf(w: Wiki, q: Q, many: boolean): Answer {
         actorName: 'Eric',
         kind: 'proposal' as const,
         proposalId: `prp_many_${i}`,
-        summary: `Approved: change ${120 - i}`,
+        summary: `Aprobada: change ${120 - i}`,
         reason: null,
         pages: ['audience/retention'],
       }))
@@ -704,7 +704,7 @@ export function editPage(
     status: 200,
     body: changed(
       w,
-      revise(w, p, who, change, 'direct', `Direct edit: ${r.address}`, {
+      revise(w, p, who, change, 'direct', `Directo: edit: ${r.address}`, {
         change: 'edited',
         reason: typeof b.reason === 'string' ? b.reason : null,
       }),
@@ -767,7 +767,7 @@ export function changeWiki(w: Wiki, who: Who, curator: boolean, b: Record<string
             who,
             { status: String(b.status) },
             'direct',
-            `Direct status → ${String(b.status)}: ${r.address}`,
+            `Estado directo → ${String(b.status)}: ${r.address}`,
             { change: 'status', reason: typeof b.reason === 'string' ? b.reason : null },
           ),
         ),
@@ -806,7 +806,7 @@ export function changeWiki(w: Wiki, who: Who, curator: boolean, b: Record<string
             who,
             { title, summary, body, tags, sources, links, type, status },
             'revert',
-            `Back to revision ${back.revision}: ${r.address}`,
+            `De vuelta a la revisión ${back.revision}: ${r.address}`,
             {
               change: 'restored',
               reason: typeof b.reason === 'string' ? b.reason : null,

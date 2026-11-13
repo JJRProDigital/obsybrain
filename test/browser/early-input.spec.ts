@@ -66,7 +66,7 @@ test('wiki log: a page typed the moment its filter appears is kept, coming from 
   await early(page, '#log-page', { text: 'style/intros', event: 'input' })
   // From the wiki, in the web: the brain is known already, so the log's form is there at its first render.
   await page.goto('/b/growth/wiki')
-  await page.getByRole('link', { name: 'Log', exact: true }).first().click()
+  await page.getByRole('link', { name: 'Registro', exact: true }).first().click()
   await expect.poll(() => given(page)).toBe('style/intros')
   await page.waitForTimeout(400)
   await expect(page.locator('#log-page')).toHaveValue('style/intros')

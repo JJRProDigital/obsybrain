@@ -22,7 +22,7 @@ test.describe('U1: home with no brains', () => {
     await expect(page.getByRole('heading', { name: 'Para empezar' })).toBeVisible()
     // A way forward that works today: connect an agent to this installation, with the address to copy.
     await expect(page.getByText(`${baseURL}/mcp`)).toBeVisible()
-    await expect(page.getByRole('button', { name: /Copy/ }).first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /Copiar/ }).first()).toBeVisible()
     await expect(page.getByRole('link', { name: /README/ })).toHaveAttribute('href', /github\.com/)
   })
 
@@ -147,11 +147,11 @@ test.describe('U4: the setup form', () => {
     const name = page.getByLabel('Nombre de esta instalación')
     await expect(name).toBeFocused()
     await expect(name).toHaveAttribute('aria-invalid', 'true')
-    await expect(name).toHaveAccessibleDescription(/Enter a name for this installation\./)
-    await expect(page.getByLabel('Tu nombre')).toHaveAccessibleDescription(/Enter your name\./)
-    await expect(page.getByLabel('Tu email')).toHaveAccessibleDescription(/Enter your email\./)
+    await expect(name).toHaveAccessibleDescription(/Introduce un nombre para esta instalación\./)
+    await expect(page.getByLabel('Tu nombre')).toHaveAccessibleDescription(/Introduce tu nombre/)
+    await expect(page.getByLabel('Tu email')).toHaveAccessibleDescription(/Introduce tu email\./)
     await expect(page.getByLabel('Contraseña', { exact: true })).toHaveAccessibleDescription(
-      /Enter a password\./,
+      /Introduce una contraseña\./,
     )
     // No banner pushes the form down.
     await expect(page.getByRole('alert')).toHaveCount(0)
@@ -163,10 +163,10 @@ test.describe('U4: the setup form', () => {
     await page.getByRole('button', { name: 'Configurar e iniciar sesión' }).click()
     await expect(page.getByLabel('Tu email')).toBeFocused()
     await expect(page.getByLabel('Tu email')).toHaveAccessibleDescription(
-      /Enter an email like name@example\.com\./,
+      /Introduce un email como nombre@example\.com\./,
     )
     await expect(page.getByLabel('Contraseña', { exact: true })).toHaveAccessibleDescription(
-      /at least 12 characters/,
+      /al menos 12 caracteres/,
     )
     await expect(name).not.toHaveAttribute('aria-invalid', 'true')
     expect(sent).toBe(0)
@@ -206,14 +206,14 @@ test.describe('U5: the small things', () => {
     await page.getByLabel('Contraseña', { exact: true }).fill('wrong one here')
     await page.getByLabel('Contraseña', { exact: true }).press('Enter')
     const kind = page.getByRole('alert').locator('.kind')
-    await expect(kind).toHaveText('Problem')
+    await expect(kind).toHaveText('Problema')
     await expect(kind).toHaveCSS('text-transform', 'none')
   })
 
   test('signing out says so on the sign-in page', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/')
-    await page.getByRole('button', { name: /Account/ }).click()
+    await page.getByRole('button', { name: /Cuenta/ }).click()
     await page.getByRole('button', { name: 'Cerrar sesión' }).click()
     await expect(page).toHaveURL(/\/sign-in$/)
     await expect(page.getByRole('status').filter({ hasText: 'Sesión cerrada.' })).toBeVisible()
@@ -257,7 +257,7 @@ test.describe('U5: the small things', () => {
     await page.keyboard.press('Control+k')
     const search = page.getByRole('dialog', { name: 'Buscar' })
     await expect(search).toContainText('Todavía no hay nada que buscar')
-    await expect(search.getByLabel('Buscar')).toHaveCount(0)
+    await expect(search.getByRole('searchbox', { name: 'Buscar' })).toHaveCount(0)
   })
 
   test('the setup page logo is not a link to sign in', async ({ page, context, baseURL }) => {
@@ -274,7 +274,7 @@ test.describe('U5: on a touch-only device', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/')
     await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
-    await page.getByRole('button', { name: /Account/ }).click()
+    await page.getByRole('button', { name: /Cuenta/ }).click()
     await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Atajos de teclado/ })).toBeHidden()
     await page.keyboard.press('Escape')

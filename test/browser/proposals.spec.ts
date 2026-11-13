@@ -37,7 +37,7 @@ async function behind(
 // The keyboard leaves any field (a heading opened by a link is not focusable on a first load).
 const away = (page: Page) => page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
 
-const card = (page: Page, n: number) => page.getByRole('article', { name: new RegExp(`^Change ${n}:`) })
+const card = (page: Page, n: number) => page.getByRole('article', { name: new RegExp(`^Cambio ${n}:`) })
 
 test.describe('the list', () => {
   test('the side bar, the top bar and the overview lead to it; pending first, the old ones marked', async ({
@@ -48,25 +48,25 @@ test.describe('the list', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/')
     // The counter of the top bar is back, and leads to the inbox of the one brain waiting for me.
-    const counter = page.getByRole('banner').getByRole('link', { name: '3 proposals to review' })
+    const counter = page.getByRole('banner').getByRole('link', { name: '3 propuestas para revisar' })
     await expect(counter).toBeVisible()
     await counter.click()
     await expect(page).toHaveURL(new RegExp(`${INBOX}$`))
     await expect(page.getByRole('heading', { level: 1, name: 'Propuestas' })).toBeFocused()
-    await expect(page).toHaveTitle(/^Proposals · /)
+    await expect(page).toHaveTitle(/^Propuestas · /)
     await expect(
       page
         .getByRole('navigation', { name: 'Secciones de este brain' })
-        .getByRole('link', { name: /Proposals/ }),
+        .getByRole('link', { name: /Propuestas/ }),
     ).toHaveAttribute('aria-current', 'page')
     const items = page.getByRole('list', { name: 'Propuestas pendientes' }).getByRole('listitem')
     await expect(items).toHaveCount(3)
     // Oldest first: what has waited longest is reviewed first.
     await expect(items.first()).toContainText('New page: hooks that work')
     const old = items.filter({ hasText: 'New page: hooks that work' })
-    await expect(old).toContainText('old')
+    await expect(old).toContainText('antigua')
     await expect(old).toContainText('RSC Factory')
-    await expect(items.filter({ hasText: 'Intros: keep them under 10 seconds' })).toContainText('3 changes')
+    await expect(items.filter({ hasText: 'Intros: keep them under 10 seconds' })).toContainText('3 cambios')
     await audit(page, 'inbox')
     // The other statuses, each a tab with its count, kept in the address.
     const tabs = page.getByRole('navigation', { name: 'Propuestas por estado' })
@@ -75,10 +75,10 @@ test.describe('the list', () => {
     const part = page.getByRole('list', { name: 'Propuestas aprobadas en parte' }).getByRole('listitem')
     await expect(part).toHaveCount(1)
     await expect(part).toContainText('Aprobada en parte por Eric')
-    await tabs.getByRole('link', { name: /Replaced/ }).click()
-    await expect(page.getByRole('list', { name: 'Replaced proposals' })).toContainText('New page: hooks')
+    await tabs.getByRole('link', { name: /Reemplazada/ }).click()
+    await expect(page.getByRole('list', { name: 'Propuestas reemplazadas' })).toContainText('New page: hooks')
     await page.goto('/b/growth')
-    await page.getByRole('link', { name: /3 waiting for review/ }).click()
+    await page.getByRole('link', { name: /3 propuestas para revisar/ }).click()
     await expect(page).toHaveURL(new RegExp(`${INBOX}$`))
   })
 
@@ -138,11 +138,11 @@ test.describe('a proposal', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(`${INBOX}/prp_growth2`)
     await expect(page.getByRole('heading', { level: 1, name: 'Merge the two retention pages' })).toBeVisible()
-    await expect(page.getByText('Codex of Eric')).toBeVisible()
+    await expect(page.getByText('Codex de Eric')).toBeVisible()
     const group = page.getByRole('group', { name: 'Estos van juntos' })
     await expect(group).toContainText('El cambio 2 necesita el cambio 1.')
     await expect(group.getByRole('article')).toHaveCount(2)
-    await expect(card(page, 3)).toContainText('Move people/ana to people/ana-ruiz')
+    await expect(card(page, 3)).toContainText('Mover people/ana a people/ana-ruiz')
     // Choosing change 2 brings change 1 (it needs it), and says so.
     await page.getByRole('checkbox', { name: 'Aprobar el cambio 2' }).check()
     await expect(page.getByRole('checkbox', { name: 'Aprobar el cambio 1' })).toBeChecked()
@@ -156,10 +156,10 @@ test.describe('a proposal', () => {
     const stale = card(page, 1)
     await expect(stale).toContainText('Escrito sobre una versión más vieja')
     await expect(
-      stale.getByRole('heading', { name: /Changed since it was written \(revision 2 → 3\)/ }),
+      stale.getByRole('heading', { name: /Cambiado desde que se escribió \(revisión 2 → 3\)/ }),
     ).toBeVisible()
     await expect(
-      stale.getByRole('heading', { name: /What the proposal changes \(from revision 2\)/ }),
+      stale.getByRole('heading', { name: /Lo que cambia la propuesta \(desde la revisión 2\)/ }),
     ).toBeVisible()
     const all = page.getByRole('button', { name: 'Aprobar todo' })
     await expect(all).toHaveAttribute('aria-disabled', 'true')
@@ -169,7 +169,7 @@ test.describe('a proposal', () => {
     // What the page will be: the colleague's newer lines that approving drops show as removed.
     const will = stale.getByRole('region', { name: 'Cómo quedará la página después de aprobar' })
     await expect(will.locator('del').filter({ hasText: 'Cut the greeting.' })).toBeVisible()
-    const replace = stale.getByRole('button', { name: 'I’ve checked — replace the newer changes' })
+    const replace = stale.getByRole('button', { name: 'Lo revisé — reemplazar los cambios más nuevos' })
     await replace.click()
     await expect(replace).toHaveAttribute('aria-pressed', 'true')
     await expect(all).not.toHaveAttribute('aria-disabled', 'true')
@@ -200,7 +200,7 @@ test.describe('a proposal', () => {
     await noSideScroll(page)
     await page.getByRole('checkbox', { name: 'Aprobar el cambio 1' }).check()
     await page.getByRole('checkbox', { name: 'Aprobar el cambio 2' }).check()
-    await expect(page.getByText('2 of 3 chosen')).toBeVisible()
+    await expect(page.getByText('2 de 3 elegidos')).toBeVisible()
     const some = page.getByRole('button', { name: 'Aprobar los elegidos y devolver el resto' })
     await expect(some).toHaveAttribute('aria-disabled', 'true')
     await expect(page.getByText('Escribe en el comentario por qué vuelve el resto.')).toBeVisible()
@@ -216,8 +216,8 @@ test.describe('a proposal', () => {
     await expect(done).toBeVisible()
     await expect(done.getByRole('link', { name: 'audience/intros' })).toBeVisible()
     await expect(done.getByRole('link', { name: 'audience/hooks' })).toBeVisible()
-    await expect(page.getByText('partly approved', { exact: true }).first()).toBeVisible()
-    await expect(card(page, 3)).toContainText('returned')
+    await expect(page.getByText('aprobada en parte', { exact: true }).first()).toBeVisible()
+    await expect(card(page, 3)).toContainText('devuelto')
     await noSideScroll(page)
   })
 
@@ -311,16 +311,16 @@ test.describe('a proposal', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto(`${INBOX}/prp_growth3`)
     const stale = card(page, 1)
-    await stale.getByRole('button', { name: /^Edit change \d+$/ }).click()
+    await stale.getByRole('button', { name: /^Editar el cambio \d+$/ }).click()
     const text = stale.getByLabel('Text')
     await expect(text).toBeFocused()
     await text.fill('The hook goes first. Short intros keep viewers.')
     await stale.getByRole('button', { name: 'Usar mi versión' }).click()
-    await expect(stale).toContainText('edited by you, not sent yet')
-    await expect(stale.getByRole('button', { name: /^Edit change \d+$/ })).toBeFocused()
+    await expect(stale).toContainText('editado por ti, aún sin enviar')
+    await expect(stale.getByRole('button', { name: /^Editar el cambio \d+$/ })).toBeFocused()
     // A reload keeps it (the draft is the person's, for this proposal).
     await page.reload()
-    await expect(card(page, 1)).toContainText('edited by you, not sent yet')
+    await expect(card(page, 1)).toContainText('editado por ti, aún sin enviar')
     const sent = page.waitForRequest((r) => r.url().endsWith('/approve'))
     await page.getByRole('button', { name: 'Aprobar todo' }).click()
     const body = (await sent).postDataJSON() as { corrections: Record<string, unknown> }
@@ -395,11 +395,14 @@ test.describe('others meanwhile', () => {
     await page.goto(`${INBOX}/prp_growth2`)
     await page.getByLabel('Comentario para el agente').fill('My words for the agent.')
     await behind(baseURL as string, s.id, 'decided', { id: 'prp_growth2', by: 'Eva', status: 'returned' })
-    await page.getByRole('button', { name: /^Approve all/ }).click()
+    await page.getByRole('button', { name: /^Aprobar todo/ }).click()
     await expect(page.getByText('Tu comentario no se envió: «My words for the agent.»')).toBeVisible()
-    await expect(page.getByText(/Returned by Eva on \d{1,2} \w{3} \d{4}/)).toBeVisible()
+    await expect(page.getByText(/Devuelta por Eva el \d{1,2} \w{3} \d{4}/)).toBeVisible()
     await expect(page.getByText(/T\d\d:\d\d/)).toHaveCount(0)
-    await expect(page.getByRole('link', { name: 'brain log' })).toHaveAttribute('href', '/b/growth/wiki/log')
+    await expect(page.getByRole('link', { name: 'registro del brain' })).toHaveAttribute(
+      'href',
+      '/b/growth/wiki/log',
+    )
     await expect(page.getByRole('button', { name: 'Aprobar todo' })).toHaveCount(0)
   })
 })
@@ -458,7 +461,7 @@ test.describe('the review of PR21', () => {
     await expect(stale).toContainText('Escrito sobre una versión más vieja')
     await expect(stale).toBeFocused()
     await expect(
-      stale.getByRole('button', { name: 'I’ve checked — replace the newer changes' }),
+      stale.getByRole('button', { name: 'Lo revisé — reemplazar los cambios más nuevos' }),
     ).toBeVisible()
   })
 
@@ -466,7 +469,7 @@ test.describe('the review of PR21', () => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await page.goto(`${INBOX}/prp_growth1`)
     const first = card(page, 2)
-    await first.getByRole('button', { name: /^Edit change \d+$/ }).click()
+    await first.getByRole('button', { name: /^Editar el cambio \d+$/ }).click()
     await first.getByLabel('Título').fill('Hooks that hold')
     await first.getByRole('button', { name: 'Usar mi versión' }).click()
     await behind(baseURL as string, s.id, 'changed', { id: 'prp_growth1' })
@@ -474,7 +477,7 @@ test.describe('the review of PR21', () => {
     await expect(
       page.getByText('Tu edición se escribió sobre una versión más vieja — revísala.'),
     ).toBeVisible()
-    await expect(card(page, 2)).toContainText('edited by you, not sent yet')
+    await expect(card(page, 2)).toContainText('editado por ti, aún sin enviar')
   })
 
   test('a blocked button takes the keyboard to what it needs; a new page reads as plain text', async ({
@@ -509,10 +512,14 @@ test.describe('the review of PR21', () => {
       Object.defineProperty(window, 'EventSource', { value: undefined })
     })
     await page.goto(`${INBOX}/prp_growth2`)
-    await expect(page.getByRole('banner').getByRole('link', { name: /3 proposals to review/ })).toBeVisible()
+    await expect(
+      page.getByRole('banner').getByRole('link', { name: /3 propuestas para revisar/ }),
+    ).toBeVisible()
     await page.getByRole('button', { name: 'Aprobar todo' }).click()
     await expect(page.getByRole('status').filter({ hasText: 'Aprobada.' })).toBeVisible()
-    await expect(page.getByRole('banner').getByRole('link', { name: /2 proposals to review/ })).toBeVisible()
+    await expect(
+      page.getByRole('banner').getByRole('link', { name: /2 propuestas para revisar/ }),
+    ).toBeVisible()
     await page.getByRole('link', { name: '← Todas las propuestas' }).click()
     await expect(page.getByRole('list', { name: 'Propuestas pendientes' }).getByRole('listitem')).toHaveCount(
       2,
@@ -604,10 +611,10 @@ test.describe('the second pass of the PR21 review', () => {
     const s = await scenario(context, baseURL as string, 'signed-in')
     await page.goto(`${INBOX}/prp_growth1`)
     const c2 = card(page, 2)
-    await c2.getByRole('button', { name: /^Edit change \d+$/ }).click()
+    await c2.getByRole('button', { name: /^Editar el cambio \d+$/ }).click()
     await c2.getByLabel('Título').fill('Hooks that hold')
     await c2.getByRole('button', { name: 'Usar mi versión' }).click()
-    await expect(c2).toContainText('edited by you, not sent yet')
+    await expect(c2).toContainText('editado por ti, aún sin enviar')
     await page.waitForTimeout(300)
     await fetch(`${baseURL}/__fixture/scenarios/${s.id}/purge`, {
       method: 'POST',

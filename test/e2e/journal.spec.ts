@@ -193,7 +193,7 @@ test('CA12: a person adds a correction to the page «Intros»; an agent on a tas
   await signedInAdmin(page, baseURL as string)
   await page.goto(`/b/${SLUG}/pages/style/intros`)
   await page.getByRole('link', { name: 'Añadir una corrección' }).click()
-  await expect(page.getByText('Picked: Intros')).toBeVisible()
+  await expect(page.getByText('Elegida: Intros')).toBeVisible()
   await page.getByLabel('Título').fill('No greeting before the hook')
   await page.getByLabel('La corrección').fill('Cut the greeting; a third of viewers leave before the hook.')
   await page.getByLabel('Solo para un agente (opcional)').fill('narrator')

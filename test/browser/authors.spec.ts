@@ -25,7 +25,7 @@ test.describe('imported authors in the administration', () => {
     await expect(
       page.getByRole('status').filter({ hasText: 'ahora firma como Autor anterior' }),
     ).toBeVisible()
-    await expect(part.getByRole('listitem')).toHaveText(/^Former author/)
+    await expect(part.getByRole('listitem')).toHaveText(/^Autor anterior/)
     await expect(part.getByRole('listitem')).not.toContainText('Old Colleague')
     await expect(part.getByRole('button', { name: /^Anonymise/ })).toHaveCount(0)
     await page.setViewportSize({ width: 320, height: 800 })

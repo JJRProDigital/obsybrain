@@ -219,7 +219,7 @@ test('a click on a page opens it in words big enough to read; it and its neighbo
     .toMatch(new RegExp(`^${new Set(item.near).size + 1},[1-9]\\d*,`))
   // A link of the panel moves the pick.
   await panel
-    .getByRole('button', { name: /^Inspect / })
+    .getByRole('button', { name: /^Inspeccionar / })
     .first()
     .click()
   await expect(panel.locator('.inspector-address')).not.toHaveText(item.key.slice(2))
@@ -285,9 +285,9 @@ test('the Communities panel lists the clusters the picture is coloured by, bigge
   )
   await expect(panel.getByRole('checkbox', { name: 'Seleccionar todas' })).not.toBeChecked()
   // Hover does not find a hidden page.
-  await expect(page.getByRole('application', { name: /^Graph of \d+ items$/ })).toHaveAttribute(
+  await expect(page.getByRole('application', { name: /^Grafo de \d+ elementos$/ })).toHaveAttribute(
     'aria-label',
-    `Graph of ${after.filter((it) => it.shown).length} items`,
+    `Grafo de ${after.filter((it) => it.shown).length} elementos`,
   )
   // Select all brings every one back; unticking it hides them all.
   await panel.getByRole('checkbox', { name: 'Seleccionar todas' }).check()
@@ -464,9 +464,9 @@ test('the canvas is a panel with its strip; the communities fold from their head
   await expect(strip.locator('.panel-num')).toHaveText('01')
   await expect(strip.getByRole('heading', { level: 1 })).toHaveText('Grafo')
   await expect(strip).toContainText('Growth')
-  await expect(strip).toContainText('what your agents know')
+  await expect(strip).toContainText('lo que saben tus agentes')
   const shown = Number(await page.locator('canvas.graph-canvas').getAttribute('data-items'))
-  await expect(strip.locator('.panel-meta')).toHaveText(new RegExp(`^${shown} pages · [\\d,]+ links$`))
+  await expect(strip.locator('.panel-meta')).toHaveText(new RegExp(`^${shown} páginas · [\\d,]+ enlaces$`))
   const s = (await strip.boundingBox()) as { x: number; y: number; width: number; height: number }
   const c = (await page.locator('canvas.graph-canvas').boundingBox()) as {
     x: number

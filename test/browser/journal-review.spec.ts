@@ -35,7 +35,7 @@ test('previews keep underscores and dots inside words', async ({ page, context, 
 test('the overview leads to what it counts', async ({ page, context, baseURL }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/b/growth')
-  const today = page.getByRole('region', { name: "Today's sessions" })
+  const today = page.getByRole('region', { name: 'Sesiones de hoy' })
   await expect(today.getByRole('link', { name: 'Review the intros of October' })).toHaveAttribute(
     'href',
     `${J}/sessions/ses_growth001`,
@@ -46,20 +46,20 @@ test('the overview leads to what it counts', async ({ page, context, baseURL }) 
     `${J}/sessions/ses_growth003`,
   )
   const numbers = page.getByRole('region', { name: 'En números' })
-  await expect(numbers.getByRole('link', { name: /not in the wiki yet/ })).toHaveAttribute(
+  await expect(numbers.getByRole('link', { name: /aún sin pasar al wiki/ })).toHaveAttribute(
     'href',
     `${J}?uncompiled=1`,
   )
   // What waits for review leads to the proposals inbox (it exists since PR21).
-  await expect(numbers.getByRole('link', { name: /waiting for review/ })).toHaveAttribute(
+  await expect(numbers.getByRole('link', { name: /esperando revisión/ })).toHaveAttribute(
     'href',
     '/b/growth/proposals',
   )
-  await numbers.getByRole('link', { name: /conflicts?$/ }).click()
+  await numbers.getByRole('link', { name: /conflictos?$/ }).click()
   await expect(page).toHaveURL(new RegExp(`${J}/conflicts$`))
   await expect(page.getByRole('heading', { level: 1, name: 'Conflictos' })).toBeVisible()
   await page.goBack()
-  await numbers.getByRole('link', { name: /not in the wiki yet/ }).click()
+  await numbers.getByRole('link', { name: /aún sin pasar al wiki/ }).click()
   await expect(page).toHaveURL(new RegExp(`${J}\\?uncompiled=1$`))
   await expect(page.getByLabel('Solo con entradas aún sin pasar al wiki')).toBeChecked()
 })
@@ -99,7 +99,9 @@ test('a session shows each entry’s state in words, and how many were forgotten
   await expect(page.getByRole('status').filter({ hasText: 'Fechas guardadas.' })).toBeVisible()
   await page.getByRole('button', { name: 'Relacionar con otra entrada…' }).click()
   const d = page.getByRole('dialog', { name: 'Relacionar con otra entrada' })
-  await d.getByLabel('is replaced by the other one', { exact: false }).check()
+  await d
+    .getByLabel('es reemplazada por la otra (esta sale del contexto de los agentes)', { exact: false })
+    .check()
   await d.getByLabel('La otra entrada').fill('thirty')
   await d.getByRole('option', { name: /Thirty-second intros/ }).click()
   await d.getByRole('button', { name: 'Guardar la relación' }).click()
@@ -115,7 +117,7 @@ test('a session shows each entry’s state in words, and how many were forgotten
   await expect(lines.filter({ hasText: 'Session summary' })).not.toContainText('Con conflicto')
   // Ana's session lost one entry: the session says so, and a curator can open them.
   await page.goto(`${J}/sessions/ses_fx_2`)
-  await page.getByRole('link', { name: '1 forgotten — see Forgotten' }).click()
+  await page.getByRole('link', { name: '1 olvidada — ver Olvidadas' }).click()
   await expect(page).toHaveURL(new RegExp(`${J}/forgotten$`))
 })
 
@@ -126,7 +128,7 @@ test('a contributor learns the count of forgotten entries without a link she can
 }) => {
   await scenario(context, baseURL as string, 'member')
   await page.goto(`${J}/sessions/ses_fx_2`)
-  await expect(page.locator('#session-entries').locator('..')).toContainText('1 forgotten')
+  await expect(page.locator('#session-entries').locator('..')).toContainText('1 olvidada')
   await expect(page.getByRole('link', { name: /see Forgotten/ })).toHaveCount(0)
 })
 
@@ -138,7 +140,7 @@ test('a wiki page lists the corrections about it', async ({ page, context, baseU
     'href',
     `${J}/entries/ent_fx_corr`,
   )
-  await expect(wrong).toContainText('for narrator')
+  await expect(wrong).toContainText('para narrator')
   await expect(wrong.getByRole('link', { name: 'Añadir una corrección' })).toBeVisible()
 })
 
@@ -172,9 +174,9 @@ test.describe('decisions only for who may take them', () => {
     await expect(cards).toHaveCount(2)
     const contra = cards.filter({ hasText: 'Thirty-second intros work best' })
     // A heading per conflict; each side with who wrote it and its session.
-    await expect(contra.getByRole('heading')).toContainText('contradict')
-    await expect(contra).toContainText('Codex of Ana')
-    await expect(contra).toContainText('Claude Code of Eric')
+    await expect(contra.getByRole('heading')).toContainText('se contradicen')
+    await expect(contra).toContainText('Codex de Ana')
+    await expect(contra).toContainText('Claude Code de Eric')
     await expect(contra.getByRole('link', { name: 'Fix the onboarding emails' })).toBeVisible()
     // Eric's entry is not hers to supersede: she may keep his (hers loses) or say they are not related.
     await expect(
@@ -193,7 +195,9 @@ test.describe('decisions only for who may take them', () => {
     await page.getByRole('button', { name: 'Relacionar con otra entrada…' }).click()
     const d = page.getByRole('dialog', { name: 'Relacionar con otra entrada' })
     await expect(d.getByRole('radio').first()).toBeFocused()
-    await expect(d.getByLabel('is replaced by the other one', { exact: false })).toBeDisabled()
+    await expect(
+      d.getByLabel('es reemplazada por la otra (esta sale del contexto de los agentes)', { exact: false }),
+    ).toBeDisabled()
     await expect(d).toContainText('Solo su autor o un curador puede reemplazar una entrada')
   })
 
@@ -221,7 +225,7 @@ test.describe('decisions only for who may take them', () => {
     await expect(asked).toContainText('Un agente preguntó')
     await asked.getByRole('button', { name: 'Conservar esta: Hooks in five seconds' }).click()
     const d = page.getByRole('dialog', { name: '¿Decidir este conflicto?' })
-    await expect(d).toContainText('“Hooks in five seconds” stays.')
+    await expect(d).toContainText('«Hooks in five seconds» queda.')
     await d.getByRole('button', { name: 'Decidir' }).click()
     await expect(page.getByRole('status').filter({ hasText: 'Decidido.' })).toBeVisible()
     await expect(page.locator('.conflict-item').filter({ hasText: 'Hooks in five seconds' })).toHaveCount(0)
@@ -233,7 +237,7 @@ test.describe('decisions only for who may take them', () => {
     const contra = page.locator('.conflict-item').filter({ hasText: 'Thirty-second intros work best' })
     await contra.getByRole('button', { name: 'Conservar esta: Thirty-second intros work best' }).click()
     const d = page.getByRole('dialog', { name: '¿Decidir este conflicto?' })
-    await expect(d).toContainText('“Thirty-second intros work best” stays.')
+    await expect(d).toContainText('«Thirty-second intros work best» queda.')
     await d.getByRole('button', { name: 'Decidir' }).click()
     await expect(page.getByRole('status').filter({ hasText: 'Decidido.' })).toBeVisible()
     await expect(page.locator('.conflict-item')).toHaveCount(1)
@@ -258,7 +262,7 @@ test('the entry names its session by its purpose, and offers one «Add a correct
   // The session's header: when it opened, its entries apart from its summary, «Closed» said once.
   await page.goto(`${J}/sessions/ses_fx_3`)
   await expect(page.locator('.facts')).toContainText('Abierta')
-  await expect(page.getByText(/Closed without (a )?summary/)).toHaveCount(1)
+  await expect(page.getByText(/Cerrada sin resumen/)).toHaveCount(1)
 })
 
 test('Sessions keeps its filters when coming back from a session', async ({ page, context, baseURL }) => {

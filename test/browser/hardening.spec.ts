@@ -100,7 +100,7 @@ test('Back after «Leave focus» goes into the focus again', async ({ page, cont
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
   await page.goto(`${GRAPH}?view=list`)
   await page
-    .getByRole('button', { name: /^Focus: 1 hop, / })
+    .getByRole('button', { name: /^Foco: 1 salto, / })
     .first()
     .click()
   await expect(page.getByRole('button', { name: 'Salir del foco' })).toBeVisible()
@@ -138,7 +138,7 @@ test('the tag filter waits for a pause in typing: one request for «q4», none f
     'no request for the half-typed tag',
   ).toEqual([])
   // Clearing the filters empties the box too.
-  await page.getByRole('button', { name: 'Quitar los filtros' }).first().click()
+  await page.getByRole('button', { name: 'Quitar los filtros' }).first().first().click()
   await expect(page.getByLabel('Etiqueta', { exact: true })).toHaveValue('')
   await expect(page).not.toHaveURL(/tag=/)
 })
@@ -185,7 +185,7 @@ test('Activity lists agents’ sessions only; the web’s edits are not among th
   await page.goto('/b/growth')
   await expect(
     page
-      .getByRole('region', { name: "Today's sessions" })
+      .getByRole('region', { name: 'Sesiones de hoy' })
       .getByRole('link', { name: 'Trabajo sin nombre · un cliente de API' }),
   ).toBeVisible()
 })
@@ -218,7 +218,7 @@ test('«N proposals to review» on a brain card opens that brain’s inbox', asy
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto('/')
-  await page.locator('.cards').getByRole('link', { name: '3 proposals to review' }).click()
+  await page.locator('.cards').getByRole('link', { name: '3 propuestas para revisar' }).click()
   await expect(page).toHaveURL(/\/b\/growth\/proposals$/)
 })
 
@@ -229,7 +229,9 @@ test('Settings and Admin name whom to ask', async ({ page, context, baseURL }) =
   await page.goto('/admin/people')
   await expect(page.getByRole('alert')).toContainText('Pídeselo a un administrador (Eric).')
   await page.goto('/b/support/settings')
-  await expect(page.getByRole('alert')).toContainText(/Pide el rol curator a quien cure el brain \(Support\)/)
+  await expect(page.getByRole('alert')).toContainText(
+    /Pide el rol de curador a un curador de Support \(Eric\)/,
+  )
 })
 
 // The final review of B6: a tab of the administration puts the keyboard on its own section, and the first
@@ -243,7 +245,7 @@ test('an administration tab lands on its section heading; its first field is one
   await page.goto('/admin/people')
   await expect(page.getByRole('heading', { name: 'Personas en esta instalación' })).toBeVisible()
   const tabs = page.getByRole('navigation', { name: 'Administración' })
-  await tabs.getByRole('link', { name: 'Invitations' }).click()
+  await tabs.getByRole('link', { name: 'Invitaciones' }).click()
   await expect(page.getByRole('heading', { level: 2, name: 'Invitar personas' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(page.getByLabel('Emails')).toBeFocused()
@@ -251,7 +253,7 @@ test('an administration tab lands on its section heading; its first field is one
   await expect(page.getByRole('heading', { level: 2, name: 'Cuenta de servicio nueva' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(page.getByLabel('Nombre', { exact: true })).toBeFocused()
-  await tabs.getByRole('link', { name: 'People' }).click()
+  await tabs.getByRole('link', { name: 'Personas' }).click()
   await expect(page.getByRole('heading', { level: 2, name: 'Personas en esta instalación' })).toBeFocused()
 })
 
@@ -274,7 +276,7 @@ test('a reader cannot pick «Read and write» for a token over brains she only r
   await page.getByRole('checkbox', { name: read?.name ?? '' }).check()
   await expect(page.getByRole('radio', { name: 'Lectura y escritura' })).toBeDisabled()
   await expect(page.getByRole('radio', { name: 'Solo lectura' })).toBeChecked()
-  await expect(page.getByText('you are a reader in these brains')).toBeVisible()
+  await expect(page.getByText('eres lector en estos brains')).toBeVisible()
 })
 
 // The final review of B6: the live check is shown once, after the steps that connect the agent.
@@ -311,7 +313,7 @@ test('after an edit conflict, the header shows the newer revision', async ({ pag
     body: JSON.stringify({ brain: 'growth', address: 'audience/retention', body: 'El suyo.' }),
   })
   await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-  await expect(page.getByRole('region', { name: 'Eva saved revision 4 while you edited' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Eva guardó la revisión 4 mientras editabas' })).toBeVisible()
   await expect(meta).toContainText('Revisión 4')
 })
 

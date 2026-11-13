@@ -19,7 +19,7 @@ export function byline(e: {
   if (e.client === 'web') return `${e.author.name}, in the web`
   // The client as Activity and «Who read this» say it (one name everywhere).
   const client = clientLabel(e.client)
-  if (client) return `${client} of ${e.author.name}${ref}`
+  if (client) return `${client} de ${e.author.name}${ref}`
   return `${e.author.name}${ref}`
 }
 

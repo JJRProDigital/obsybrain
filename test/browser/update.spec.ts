@@ -64,7 +64,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     await page.keyboard.press('Enter')
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('Actualizar a v0.2.0')
-    await expect(dialog).toContainText('goes back to the version you have now')
+    await expect(dialog).toContainText('vuelve a la versión que tienes ahora')
     await expect(dialog.getByLabel('Tu contraseña')).toBeFocused()
     await audit(page, 'update dialog')
     // Nothing typed.
@@ -86,7 +86,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     const said = page.getByRole('status').filter({ hasText: 'Actualización pedida.' })
     await expect(said).toBeFocused()
     // The page follows: the request waits for the updater, then it runs, then the result.
-    await expect(service(page)).toContainText('waits for the updater')
+    await expect(service(page)).toContainText('espera a que el updater la arranque')
     await expect(page.getByRole('button', { name: /^Update to/ })).toHaveCount(0)
     await behind(baseURL as string, s.id, {
       update: { requested: false, running: { to: 'v0.2.0', startedAt: '2026-10-29T10:00:00.000Z' } },
@@ -138,7 +138,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     const dialog = page.getByRole('dialog')
     await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
     await page.keyboard.press('Enter')
-    await expect(dialog.getByRole('alert')).toContainText('Ya corre una actualización.')
+    await expect(dialog.getByRole('alert')).toContainText('Ya se está ejecutando una actualización.')
   })
 
   test('a failure: when, why, and Try again; it asks the password again too', async ({
@@ -183,7 +183,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     await expect(service(page).getByRole('button', { name: 'Probar otra vez' })).toHaveCount(0)
     await behind(baseURL as string, s.id, { update: { attempts: [failure(3, null)] } })
     await page.reload()
-    await expect(service(page)).toContainText('only the server can try again')
+    await expect(service(page)).toContainText('solo el servidor puede intentarlo')
     await expect(service(page)).toContainText('obsybrain.sh update')
     await expect(service(page).getByRole('button', { name: 'Probar otra vez' })).toHaveCount(0)
   })
@@ -201,13 +201,13 @@ test.describe('Admin › Backups & system: updating from the web', () => {
         refused: {
           version: 'v0.2.0',
           at: '2026-10-29T09:58:00.000Z',
-          reason: 'Cannot update: there is not enough free disk (needs 2 GB, 1 GB free).',
+          reason: 'No se puede actualizar: there is not enough free disk (needs 2 GB, 1 GB free).',
         },
       },
     })
     await page.goto('/admin/system')
     await expect(service(page)).toContainText(
-      'Cannot update: there is not enough free disk (needs 2 GB, 1 GB free).',
+      'No se puede actualizar: there is not enough free disk (needs 2 GB, 1 GB free).',
     )
     await expect(service(page)).toContainText('obsybrain.sh update')
     await expect(service(page).getByRole('button', { name: 'Actualizar a v0.2.0' })).toBeVisible()
@@ -234,7 +234,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       },
     })
     await page.goto('/admin/system')
-    await expect(service(page)).toContainText('could not go back by itself')
+    await expect(service(page)).toContainText('no pudo volver atrás por su cuenta')
     await expect(service(page)).toContainText('restore --file obsybrain-1-pre-update.rscb')
     await expect(service(page).getByRole('button', { name: /^Update to|Try again/ })).toHaveCount(0)
     await audit(page, 'rollback failed')
@@ -266,8 +266,8 @@ test.describe('Admin › Backups & system: updating from the web', () => {
       },
     })
     await page.reload()
-    await expect(service(page)).toContainText('could not go back by itself')
-    await expect(service(page)).toContainText('could not be read')
+    await expect(service(page)).toContainText('no pudo volver atrás por su cuenta')
+    await expect(service(page)).toContainText('no se pudieron leer')
     await expect(service(page).getByRole('button', { name: /^Update to|Try again/ })).toHaveCount(0)
     await audit(page, 'unreadable way back')
   })
@@ -284,7 +284,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     })
     await page.goto('/admin/system')
     await expect(service(page)).toContainText('Corre la versión v0.1.0. La versión v0.2.0 está disponible.')
-    await expect(service(page)).toContainText('obsybrain was installed by rsc-factory: update it from there.')
+    await expect(service(page)).toContainText('obsybrain lo instaló rsc-factory: actualízalo desde allí.')
     await expect(service(page).getByRole('link', { name: 'Abrir rsc-factory' })).toHaveAttribute(
       'href',
       'https://factory.example.test',

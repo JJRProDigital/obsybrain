@@ -86,7 +86,7 @@ test.describe('Admin › Backups & system: the last update (CA7)', () => {
     await page.reload()
     const failed = part.locator('[data-state="update-failed"]')
     await expect(failed).toContainText('La actualización de 0.2.0 a 0.3.0 falló')
-    await expect(failed).toContainText('went back to 0.2.0')
+    await expect(failed).toContainText('volvió a 0.2.0')
     await failed.getByText('Lo que dijo el servicio').click()
     await expect(failed.locator('pre')).toContainText('division by zero')
     const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()

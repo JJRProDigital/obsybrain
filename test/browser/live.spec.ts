@@ -71,11 +71,11 @@ test('L4: home asks for the brains again every 30 seconds and when the tab comes
   await page.waitForTimeout(200)
   await expect(card).toContainText('Nada para revisar')
   await page.clock.fastForward(30_000)
-  await expect(card).toContainText('1 proposal', { timeout: 3_000 })
+  await expect(card).toContainText('1 propuesta esperando a un curador', { timeout: 3_000 })
   await s.emit('legal-archive', 'proposal.submitted')
   await tab(page, true)
   await tab(page, false)
-  await expect(card).toContainText('2 proposals', { timeout: 3_000 })
+  await expect(card).toContainText('2 propuestas esperando a un curador', { timeout: 3_000 })
 })
 
 test('P6: the counter of the top bar leads to the inbox, also on a phone', async ({
@@ -86,7 +86,7 @@ test('P6: the counter of the top bar leads to the inbox, also on a phone', async
   await scenario(context, baseURL as string, 'signed-in')
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')
-  const counter = page.getByRole('banner').getByRole('link', { name: /3 proposals to review/ })
+  const counter = page.getByRole('banner').getByRole('link', { name: /3 propuestas para revisar/ })
   await expect(counter).toBeVisible()
   await expect(counter).toHaveAttribute('href', '/b/growth/proposals')
 })

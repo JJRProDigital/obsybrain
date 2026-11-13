@@ -36,7 +36,7 @@ test('each shortcut and its visible control do the same', async ({ page, context
   await page.keyboard.press('?')
   await expect(page.getByRole('dialog', { name: 'Atajos de teclado' })).toBeVisible()
   await page.keyboard.press('Escape')
-  await page.getByRole('button', { name: /Account/ }).click()
+  await page.getByRole('button', { name: /Cuenta/ }).click()
   await page.getByRole('button', { name: /Atajos de teclado/ }).click()
   await expect(page.getByRole('dialog', { name: 'Atajos de teclado' })).toBeVisible()
   await page.keyboard.press('Escape')
@@ -45,7 +45,7 @@ test('each shortcut and its visible control do the same', async ({ page, context
   await page.locator('html[data-keys="on"]').waitFor({ state: 'attached' })
   await page.keyboard.press('Control+k')
   await expect(page.getByRole('dialog', { name: 'Buscar' })).toBeVisible()
-  await expect(page.getByLabel('Buscar')).toBeFocused()
+  await expect(page.getByRole('searchbox', { name: 'Buscar' })).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog', { name: 'Buscar' })).toBeHidden()
   // ⌘K: Playwright's Chromium on macOS keeps the real key press for the browser, so there the page gets
@@ -61,14 +61,14 @@ test('each shortcut and its visible control do the same', async ({ page, context
   await expect(page.getByRole('dialog', { name: 'Buscar' })).toBeHidden()
   await page
     .locator('header')
-    .getByRole('button', { name: /Search/ })
+    .getByRole('button', { name: /Buscar/ })
     .click()
   await expect(page.getByRole('dialog', { name: 'Buscar' })).toBeVisible()
-  await page.getByLabel('Buscar').fill('retention')
+  await page.getByRole('searchbox', { name: 'Buscar' }).fill('retention')
   await page.keyboard.press('Enter')
-  await expect(page.getByText(/\d+ results/)).toBeVisible()
+  await expect(page.getByText(/\d+ resultados/)).toBeVisible()
   // Esc goes back even with text in the field.
-  await page.getByLabel('Buscar').press('Escape')
+  await page.getByRole('searchbox', { name: 'Buscar' }).press('Escape')
   await expect(page.getByRole('dialog', { name: 'Buscar' })).toBeHidden()
 
   // go-home: "g h" and the brand at the top left.
@@ -77,7 +77,10 @@ test('each shortcut and its visible control do the same', async ({ page, context
   await expect(page).toHaveURL(/\/$/)
   await page.goto('/b/growth')
   await expect(page.getByRole('heading', { name: 'Growth' })).toBeVisible()
-  await page.locator('header').getByRole('link', { name: /home/ }).click()
+  await page
+    .locator('header')
+    .getByRole('link', { name: /inicio/ })
+    .click()
   await expect(page).toHaveURL(/\/$/)
 
   // go-overview: "g o" and "Resumen" in the side bar, each from another page of the brain, so the
@@ -132,7 +135,7 @@ test('each shortcut and its visible control do the same', async ({ page, context
   await page.goto('/b/growth')
   await page
     .getByRole('navigation', { name: 'Secciones de este brain' })
-    .getByRole('link', { name: /^Proposals/ })
+    .getByRole('link', { name: /^Propuestas/ })
     .click()
   await expect(page).toHaveURL(/\/b\/growth\/proposals$/)
 })
@@ -143,9 +146,9 @@ test('a letter typed in a field is text, not a shortcut', async ({ page, context
   await expect(page.getByRole('link', { name: 'Growth' })).toBeVisible()
   await page.locator('html[data-keys="on"]').waitFor({ state: 'attached' })
   await page.keyboard.press('Control+k')
-  await expect(page.getByLabel('Buscar')).toBeFocused()
+  await expect(page.getByRole('searchbox', { name: 'Buscar' })).toBeFocused()
   await page.keyboard.type('g h ?')
-  await expect(page.getByLabel('Buscar')).toHaveValue('g h ?')
+  await expect(page.getByRole('searchbox', { name: 'Buscar' })).toHaveValue('g h ?')
   await expect(page.getByRole('dialog', { name: 'Atajos de teclado' })).toHaveCount(0)
 })
 
@@ -158,7 +161,7 @@ for (const preset of ['signed-in', 'member'] as const) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 844 })
       await page.goto('/')
-      await page.getByRole('button', { name: /Account/ }).click()
+      await page.getByRole('button', { name: /Cuenta/ }).click()
       await expect(page.getByRole('button', { name: /Atajos de teclado/ })).toBeVisible()
       await page.keyboard.press('Escape')
     }
@@ -170,7 +173,7 @@ test.describe('on a touch-only phone', () => {
   test('the account menu does not offer «Keyboard shortcuts»', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'member')
     await page.goto('/')
-    await page.getByRole('button', { name: /Account/ }).click()
+    await page.getByRole('button', { name: /Cuenta/ }).click()
     await expect(page.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Atajos de teclado/ })).toBeHidden()
   })
@@ -189,7 +192,7 @@ test('"g p" and the «People» link both go to People; a person who may not invi
   await page.keyboard.press('p')
   await expect(page).toHaveURL(/\/people$/)
   await page.goto('/')
-  await page.getByRole('banner').getByRole('link', { name: 'People' }).click()
+  await page.getByRole('banner').getByRole('link', { name: 'Personas' }).click()
   await expect(page).toHaveURL(/\/people$/)
   await context.clearCookies()
   await scenario(context, baseURL as string, 'member')
@@ -200,7 +203,7 @@ test('"g p" and the «People» link both go to People; a person who may not invi
   await page.keyboard.press('p')
   await page.waitForTimeout(200)
   await expect(page).not.toHaveURL(/\/people$/)
-  await expect(page.getByRole('banner').getByRole('link', { name: 'People' })).toHaveCount(0)
+  await expect(page.getByRole('banner').getByRole('link', { name: 'Personas' })).toHaveCount(0)
   await page.keyboard.press('?')
   await expect(
     page.getByRole('dialog', { name: 'Atajos de teclado' }).locator('[data-shortcut="go-people"]'),

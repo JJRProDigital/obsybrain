@@ -13,10 +13,10 @@ test.describe('invite', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/')
-    await page.getByRole('button', { name: /Account/ }).click()
-    await page.locator('#account-menu').getByRole('link', { name: 'People' }).click()
+    await page.getByRole('button', { name: /Cuenta/ }).click()
+    await page.locator('#account-menu').getByRole('link', { name: 'Personas' }).click()
     await expect(page).toHaveURL(/\/people$/)
-    await expect(page.getByRole('heading', { level: 1, name: 'People' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Personas' })).toBeVisible()
     const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('zoe@example.test, yan@example.test')
     await form.getByRole('checkbox', { name: 'Growth' }).check()
@@ -27,10 +27,12 @@ test.describe('invite', () => {
     )
     // The link went by mail: it is not shown.
     await expect(page.getByText('/invite#token=')).toHaveCount(0)
-    const list = page.getByRole('region', { name: 'Invitations' })
-    await expect(list.getByRole('listitem').filter({ hasText: 'zoe@example.test' })).toContainText('pending')
+    const list = page.getByRole('region', { name: 'Invitaciones' })
     await expect(list.getByRole('listitem').filter({ hasText: 'zoe@example.test' })).toContainText(
-      'Growth as contributor',
+      'pendiente',
+    )
+    await expect(list.getByRole('listitem').filter({ hasText: 'zoe@example.test' })).toContainText(
+      'Growth como colaborador',
     )
   })
 
@@ -68,7 +70,7 @@ test.describe('invite', () => {
     const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('zoe@example.test, not-an-email')
     await form.getByRole('button', { name: 'Enviar invitaciones' }).click()
-    await expect(form.getByText('"not-an-email" is not an email')).toBeVisible()
+    await expect(form.getByText('"not-an-email" no es un email')).toBeVisible()
     await expect(form.getByLabel('Emails')).toBeFocused()
     await expect(form.getByLabel('Emails')).toHaveValue('zoe@example.test, not-an-email')
   })
@@ -83,8 +85,8 @@ test.describe('invite', () => {
     const form = page.getByRole('form', { name: 'Invitar personas' })
     await form.getByLabel('Emails').fill('ana@example.test')
     await form.getByRole('button', { name: 'Enviar invitaciones' }).click()
-    await expect(form.getByRole('alert')).toContainText('ana@example.test already has an account.')
-    await expect(form.getByRole('alert')).toContainText('Mejor añade a esa persona al brain como miembro.')
+    await expect(form.getByRole('alert')).toContainText('ana@example.test ya tiene una cuenta.')
+    await expect(form.getByRole('alert')).toContainText('Añade a esa persona al brain como miembro.')
     await expect(form.getByLabel('Emails')).toHaveValue('ana@example.test')
   })
 })
@@ -93,7 +95,7 @@ test.describe('pending invitations', () => {
   test('a new link, shown once without mail; withdrawing one says so', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in', {}, { mail: false })
     await page.goto('/people')
-    const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
+    const bo = page.getByRole('region', { name: 'Invitaciones' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
     await bo.getByRole('button', { name: 'Enlace nuevo' }).click()
@@ -104,7 +106,7 @@ test.describe('pending invitations', () => {
     const confirm = page.getByRole('dialog', { name: '¿Retirar la invitación?' })
     await expect(confirm).toContainText('bo@example.test')
     await confirm.getByRole('button', { name: 'Retirar la invitación' }).click()
-    await expect(bo).toContainText('withdrawn')
+    await expect(bo).toContainText('retirada')
     await expect(bo.getByRole('button', { name: 'Retirar' })).toHaveCount(0)
   })
 })
@@ -130,9 +132,9 @@ test.describe('reset links', () => {
         hasText: 'ana@example.test',
       })
     await ana.getByRole('button', { name: 'Crear un enlace de restablecimiento' }).click()
-    const shown = ana.getByRole('region', { name: /Reset link for Ana/ })
+    const shown = ana.getByRole('region', { name: /Enlace de restablecimiento para Ana/ })
     await expect(shown).toContainText('/reset#token=')
-    await expect(shown).toContainText('works once, for 1 hour')
+    await expect(shown).toContainText('Funciona una sola vez, durante 1 hora.')
     await shown.getByRole('button', { name: 'Listo, lo copié' }).click()
     await expect(page.getByText('/reset#token=')).toHaveCount(0)
   })
@@ -146,8 +148,8 @@ test.describe('who may', () => {
   }) => {
     await scenario(context, baseURL as string, 'member')
     await page.goto('/')
-    await page.getByRole('button', { name: /Account/ }).click()
-    await expect(page.getByRole('link', { name: 'People' })).toHaveCount(0)
+    await page.getByRole('button', { name: /Cuenta/ }).click()
+    await expect(page.getByRole('link', { name: 'Personas' })).toHaveCount(0)
     await page.goto('/people')
     await expect(page.getByRole('alert')).toContainText('Solo la administración invita a personas nuevas')
     await expect(page.getByRole('alert')).toContainText('Pídeselo a la administración')
@@ -186,7 +188,7 @@ test.describe('links in view (P1, P2, P3)', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', {}, { mail: false })
     await page.goto('/people')
-    const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
+    const bo = page.getByRole('region', { name: 'Invitaciones' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
     await bo.getByRole('button', { name: 'Enlace nuevo para bo@example.test' }).click()
@@ -236,7 +238,7 @@ test.describe('links in view (P1, P2, P3)', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', {}, { mail: false })
     await page.goto('/people')
-    const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
+    const bo = page.getByRole('region', { name: 'Invitaciones' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
     await bo.getByRole('button', { name: 'Enlace nuevo para bo@example.test' }).click()
@@ -250,7 +252,7 @@ test.describe('links in view (P1, P2, P3)', () => {
       .getByRole('dialog', { name: '¿Retirar la invitación?' })
       .getByRole('button', { name: 'Retirar la invitación' })
       .click()
-    await expect(bo).toContainText('withdrawn')
+    await expect(bo).toContainText('retirada')
     await expect(page.getByText('/invite#token=')).toHaveCount(0)
     // Nothing still announces a link that is gone.
     await expect(page.getByRole('status').filter({ hasText: 'is ready' })).toHaveCount(0)
@@ -267,7 +269,7 @@ test.describe('links in view (P1, P2, P3)', () => {
     await form.getByLabel('Emails').fill('zoe@example.test')
     await form.getByRole('button', { name: 'Crear enlace de invitación' }).click()
     await expect(page.getByRole('region', { name: 'Enlaces para enviar' })).toBeVisible()
-    const zoe = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
+    const zoe = page.getByRole('region', { name: 'Invitaciones' }).getByRole('listitem').filter({
       hasText: 'zoe@example.test',
     })
     await zoe.getByRole('button', { name: 'Enlace nuevo para zoe@example.test' }).click()
@@ -279,11 +281,11 @@ test.describe('links in view (P1, P2, P3)', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/people')
     const row = (email: string) =>
-      page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({ hasText: email })
-    await expect(row('bo@example.test')).toContainText('works until')
+      page.getByRole('region', { name: 'Invitaciones' }).getByRole('listitem').filter({ hasText: email })
+    await expect(row('bo@example.test')).toContainText('funciona hasta')
     for (const email of ['cy@example.test', 'ana@example.test'])
-      await expect(row(email)).not.toContainText('works until')
-    await expect(row('cy@example.test')).toContainText('expired on')
+      await expect(row(email)).not.toContainText('funciona hasta')
+    await expect(row('cy@example.test')).toContainText('venció el')
   })
 
   test('P3: withdrawing says so and keeps the keyboard on the list; the dialog has one «Keep it»', async ({
@@ -293,15 +295,15 @@ test.describe('links in view (P1, P2, P3)', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/people')
-    const bo = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
+    const bo = page.getByRole('region', { name: 'Invitaciones' }).getByRole('listitem').filter({
       hasText: 'bo@example.test',
     })
     await bo.getByRole('button', { name: 'Retirar la invitación de bo@example.test' }).click()
     const dialog = page.getByRole('dialog', { name: '¿Retirar la invitación?' })
-    await expect(dialog.getByRole('button', { name: 'Conservarlo' })).toHaveCount(1)
+    await expect(dialog.getByRole('button', { name: 'Conservarla' })).toHaveCount(1)
     await dialog.getByRole('button', { name: 'Retirar la invitación' }).click()
     await expect(page.getByRole('status').filter({ hasText: 'Invitación retirada.' })).toBeVisible()
-    await expect(page.getByRole('heading', { level: 2, name: 'Invitations' })).toBeFocused()
+    await expect(page.getByRole('heading', { level: 2, name: 'Invitaciones' })).toBeFocused()
   })
 
   // PR26 (spec B6 «Mucho dato»): accepted invitations stay, so a long history comes by pages from the
@@ -318,7 +320,7 @@ test.describe('links in view (P1, P2, P3)', () => {
       if (u.pathname === '/v1/invitations' && r.method() === 'GET') asked.push(u)
     })
     await page.goto('/people')
-    const rows = page.getByRole('region', { name: 'Invitations' }).locator('li[data-invitation]')
+    const rows = page.getByRole('region', { name: 'Invitaciones' }).locator('li[data-invitation]')
     await expect(rows).toHaveCount(20)
     expect(asked.at(-1)?.searchParams.get('limit')).toBe('20')
     await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
@@ -345,14 +347,14 @@ test.describe('links in view (P1, P2, P3)', () => {
       if (u.pathname === '/v1/invitations' && r.method() === 'GET') asked.push(u)
     })
     await page.goto('/admin/invitations')
-    const rows = page.getByRole('region', { name: 'Invitations' }).locator('li[data-invitation]')
+    const rows = page.getByRole('region', { name: 'Invitaciones' }).locator('li[data-invitation]')
     await expect(rows).toHaveCount(20)
     await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
     await expect(rows.nth(20)).toBeFocused()
     await page.getByLabel('Mostrar').selectOption('used')
     await expect.poll(() => asked.at(-1)?.searchParams.get('status')).toBe('used')
     await expect(rows).toHaveCount(20)
-    await expect(rows.filter({ hasNotText: 'accepted' })).toHaveCount(0)
+    await expect(rows.filter({ hasNotText: 'aceptada' })).toHaveCount(0)
     await page.getByRole('button', { name: 'Mostrar más invitaciones' }).click()
     await expect(rows).toHaveCount(40)
     await expect(rows.nth(20)).toBeFocused()

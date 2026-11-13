@@ -24,7 +24,7 @@ test('the list shows what the graph draws: retired pages only with the Retired s
   await page.goto(`${GRAPH}?view=list`)
   const table = page.getByRole('table', { name: /Páginas del wiki/ })
   const badge = page.locator('.graph-place-row .tag')
-  await expect(table.getByRole('caption')).toContainText(/of 2\d\d pages/)
+  await expect(table.getByRole('caption')).toContainText(/de 2\d\d páginas/)
   const caption = (await table.getByRole('caption').textContent()) ?? ''
   // The header and the table say the same number.
   expect(caption).toContain((await badge.textContent()) ?? 'none')
@@ -46,7 +46,7 @@ test('focus in the list keeps the filters: a tag leaves out the neighbours witho
 }) => {
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto(`${GRAPH}?view=list&focus=audience%2Fretention&hops=2`)
-  const table = page.getByRole('table', { name: 'Retention and its neighbours' })
+  const table = page.getByRole('table', { name: 'Retention y sus vecinas' })
   await expect(table.locator('tbody tr').nth(1)).toBeVisible()
   const all = await table.locator('tbody tr').count()
   await openFilters(page)
@@ -66,11 +66,11 @@ test('the keyboard lands somewhere after Focus, Leave focus, All groups and Clea
 }) => {
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 5000 })
   await page.goto(`${GRAPH}?view=list`)
-  const open = page.getByRole('button', { name: /^Open group / }).first()
+  const open = page.getByRole('button', { name: /^Abrir el grupo / }).first()
   await open.focus()
   await page.keyboard.press('Enter')
   await expect(page.locator('#graph-place')).toBeFocused()
-  const focusButton = page.getByRole('button', { name: /^Focus: 1 hop, / }).first()
+  const focusButton = page.getByRole('button', { name: /^Foco: 1 salto, / }).first()
   const target = await focusButton.getAttribute('data-focus-for')
   await focusButton.focus()
   await page.keyboard.press('Enter')
@@ -84,7 +84,7 @@ test('the keyboard lands somewhere after Focus, Leave focus, All groups and Clea
   await expect(page.locator('#graph-place')).toHaveText('Todos los grupos')
   await openFilters(page)
   await page.getByLabel('Tipo', { exact: true }).selectOption('decision')
-  await page.getByRole('button', { name: 'Quitar los filtros' }).focus()
+  await page.getByRole('button', { name: 'Quitar los filtros' }).first().focus()
   await page.keyboard.press('Enter')
   await expect(page.locator('#graph-q')).toBeFocused()
 })
@@ -97,7 +97,7 @@ test('Back after opening a group goes back to all the groups, not out of the bra
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 5000 })
   await page.goto(`${GRAPH}?view=list`)
   await page
-    .getByRole('button', { name: /^Open group / })
+    .getByRole('button', { name: /^Abrir el grupo / })
     .first()
     .click()
   await expect(page).toHaveURL(/group=/)
@@ -115,7 +115,7 @@ test('by groups, a filter changes the count of the header and of each group', as
   await page.goto(`${GRAPH}?view=list`)
   const badge = page.locator('.graph-place-row .tag')
   const groups = page.getByRole('table', { name: 'Grupos del wiki' })
-  await expect(badge).toContainText('in 12 groups')
+  await expect(badge).toContainText('en 12 grupos')
   const before = await badge.textContent()
   const firstCount = await groups.locator('tbody tr td.num').first().textContent()
   await openFilters(page)
@@ -125,13 +125,13 @@ test('by groups, a filter changes the count of the header and of each group', as
   // An opened group counts its pages only, never the boxes of other groups around it.
   await page.getByLabel('Tipo', { exact: true }).selectOption('')
   await page
-    .getByRole('button', { name: /^Open group / })
+    .getByRole('button', { name: /^Abrir el grupo / })
     .first()
     .click()
   await page.getByRole('button', { name: 'Grafo', exact: true }).click()
   await settled(page)
   const text = (await badge.textContent()) ?? ''
-  expect(text).toMatch(/^[\d,]+ pages$/)
+  expect(text).toMatch(/^[\d.]+ páginas$/)
 })
 
 test('Escape closes the inspector opened from the list at once, and Enter does not open a hidden page', async ({
@@ -152,7 +152,7 @@ test('Escape closes the inspector opened from the list at once, and Enter does n
   const canvas = page.locator('canvas.graph-canvas')
   await canvas.focus()
   await openFilters(page)
-  await page.getByLabel('Words', { exact: true }).fill('retention')
+  await page.getByLabel('Palabras', { exact: true }).fill('retention')
   await settled(page)
   await canvas.focus()
   await page.keyboard.press('Enter')
@@ -168,11 +168,11 @@ test('375 px: the filters fold away and the inspector comes into view', async ({
   await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
   await page.setViewportSize({ width: 375, height: 740 })
   await page.goto(`${GRAPH}?view=list`)
-  await expect(page.getByLabel('Words', { exact: true })).toBeHidden()
-  await page.getByText(/^Filters/).click()
-  await expect(page.getByLabel('Words', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('Palabras', { exact: true })).toBeHidden()
+  await page.getByText(/^Filtros/).click()
+  await expect(page.getByLabel('Palabras', { exact: true })).toBeVisible()
   await page
-    .getByRole('button', { name: /^Inspect / })
+    .getByRole('button', { name: /^Inspeccionar / })
     .first()
     .click()
   await expect(inspectorOf(page).getByRole('link', { name: 'Abrir página' })).toBeInViewport()
@@ -186,7 +186,7 @@ test('an empty wiki: the list says there are no pages yet, with no filters to tr
   await scenario(context, baseURL as string, 'signed-in', { graph: 'empty', pages: 'empty' })
   await page.goto(`${GRAPH}?view=list`)
   await expect(page.getByRole('heading', { name: 'Aún sin páginas' })).toBeVisible()
-  await expect(page.getByLabel('Words', { exact: true })).toHaveCount(0)
+  await expect(page.getByLabel('Palabras', { exact: true })).toHaveCount(0)
   await expect(page.getByText('No hay resultados para estos filtros.')).toHaveCount(0)
 })
 

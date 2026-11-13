@@ -151,7 +151,7 @@ test('CA4: two sources; one opens beside the page without leaving it; a broken l
   await expect(open).toBeFocused()
   await expect(page).toHaveURL(new RegExp(`${PAGE}$`))
   const broken = page.locator('.prose').getByRole('link', { name: /drafts\/hooks/ })
-  await expect(broken).toContainText('(no page yet)')
+  await expect(broken).toContainText('(todavía sin página)')
   await broken.click()
   await expect(page.getByRole('heading', { level: 1, name: 'No hay página en drafts/hooks' })).toBeVisible()
 })
@@ -167,7 +167,7 @@ test('history: revisions 1 to 3 compared word by word; a curator restores revisi
   await expect(diff.locator('ins').filter({ hasText: 'greeting' })).not.toHaveCount(0)
   const list = page.getByRole('region', { name: 'Revisiones' })
   await expect(list.getByRole('listitem')).toHaveCount(3)
-  await expect(list.getByRole('listitem').nth(0)).toContainText('Revisión 3 · edición a mano por Eric')
+  await expect(list.getByRole('listitem').nth(0)).toContainText('Revisión 3 · editada por Eric')
   await list.getByRole('button', { name: 'Restaurar la revisión 1' }).click()
   await page
     .getByRole('dialog', { name: '¿Restaurar la revisión 1?' })
@@ -216,7 +216,7 @@ test('CA10: two curators edit the same page; the second keeps their text and see
   baseURL,
 }) => {
   await signedInAdmin(page, baseURL as string)
-  const eva = await person(browser, page, 'Eva', 'curator')
+  const eva = await person(browser, page, 'Eva', 'curador')
   const e = await eva.newPage()
   // Both open the editor on the same revision.
   await page.goto(`${PAGE}?view=edit`)
@@ -229,7 +229,7 @@ test('CA10: two curators edit the same page; the second keeps their text and see
   await expect(e.getByRole('status').filter({ hasText: 'Guardado como la revisión 5.' })).toBeVisible()
   await body(page).fill('Eric: the hook goes first, then the intro.')
   await page.getByRole('button', { name: 'Guardar los cambios' }).click()
-  const conflict = page.getByRole('region', { name: 'Eva saved revision 5 while you edited' })
+  const conflict = page.getByRole('region', { name: 'Eva guardó la revisión 5 mientras editabas' })
   await expect(conflict).toContainText('Está en la revisión 5 ahora. Nada tuyo se guardó')
   await expect(
     conflict.getByRole('region', { name: 'Lo que cambió Eva' }).locator('ins').filter({ hasText: 'Eva' }),
@@ -311,7 +311,7 @@ test('one Save: a source found by its words with Enter, a status with ⌘ Enter;
   await expect(sources.getByRole('listitem').filter({ hasText: 'The hook goes first' })).toBeVisible()
   await expect(page).toHaveURL(/\?view=edit$/)
   await page.getByLabel('Estado', { exact: true }).selectOption('stale')
-  await page.getByLabel('Why (shown in the log)').fill('Needs the October numbers.')
+  await page.getByLabel('Por qué (se muestra en el registro)').fill('Needs the October numbers.')
   await page.getByLabel('Cuerpo', { exact: true }).press('ControlOrMeta+Enter')
   await expect(
     page
@@ -341,7 +341,7 @@ test('one Save: a source found by its words with Enter, a status with ⌘ Enter;
 
 test('M4: two curators each add a paragraph; keeping both keeps both', async ({ page, browser, baseURL }) => {
   await signedInAdmin(page, baseURL as string)
-  const ana = await person(browser, page, 'Ana', 'curator')
+  const ana = await person(browser, page, 'Ana', 'curador')
   const a = await ana.newPage()
   const body = (p: Page) => p.getByLabel('Cuerpo', { exact: true })
   await page.goto(`${PAGE}?view=edit`)

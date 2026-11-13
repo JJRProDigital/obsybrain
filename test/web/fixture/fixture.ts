@@ -309,8 +309,8 @@ const companionPending = (s: Scen): Answer => {
 const NOT_THE_CODE = err(
   400,
   'invalid_request',
-  'The code is not right.',
-  'Type the 6 digits your app shows now.',
+  'El código no es correcto.',
+  'Escribe los 6 dígitos que tu app muestra ahora.',
 )
 const UNAUTHORIZED = err(
   401,
@@ -783,8 +783,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           ...err(
             429,
             'too_many_attempts',
-            'Too many failed attempts in a row. Try again in 60 seconds (at 10:01:00 UTC).',
-            'Wait, then try again; or reset your password.',
+            'Demasiados intentos fallidos seguidos. Vuelve a intentarlo en 60 segundos (a las 10:01:00 UTC).',
+            'Espera y vuelve a intentarlo; o restablece tu contraseña.',
           ),
           headers: { 'retry-after': '60' },
         }
@@ -812,8 +812,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           return err(
             401,
             'bad_code',
-            'The code is not right, or was already used.',
-            'Wait for the next code and try again.',
+            'El código no es correcto o ya se usó.',
+            'Espera el siguiente código y vuelve a intentarlo.',
           )
         }
       }
@@ -851,7 +851,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         : err(
             400,
             'link_invalid',
-            'This reset link is not valid: it expired, was already used, or is wrong.',
+            'Este enlace de restablecimiento no es válido: expiró, ya se usó o es erróneo.',
             'Ask for a new one.',
           ),
   },
@@ -862,7 +862,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           400,
           'link_invalid',
-          'This reset link is not valid: it expired, was already used, or is wrong.',
+          'Este enlace de restablecimiento no es válido: expiró, ya se usó o es erróneo.',
           'Ask for a new one.',
         )
       s.resetUsed = true
@@ -876,8 +876,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           400,
           'invitation_invalid',
-          'This invitation link is not valid: it expired, was already used, or was withdrawn.',
-          'Ask an administrator to send a new one.',
+          'Este enlace de invitación no es válido: expiró, ya se usó o se retiró.',
+          'Pide a un administrador que envíe uno nuevo.',
         )
       return {
         status: 200,
@@ -903,8 +903,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           400,
           'invitation_invalid',
-          'This invitation link is not valid: it expired, was already used, or was withdrawn.',
-          'Ask an administrator to send a new one.',
+          'Este enlace de invitación no es válido: expiró, ya se usó o se retiró.',
+          'Pide a un administrador que envíe uno nuevo.',
         )
       const name = typeof body.name === 'string' ? body.name.trim() : ''
       if (!name || name.length > 80)
@@ -1022,7 +1022,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           'Use something like "youtube-channel".',
         )
       if ([...s.brains, ...MANY].some((b) => b.slug === slug))
-        return err(409, 'brain_exists', `A brain named "${slug}" already exists.`, 'Choose another name.')
+        return err(409, 'brain_exists', `Ya existe un brain llamado "${slug}".`, 'Elige otro nombre.')
       const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim() : slug
       const purpose = typeof body.purpose === 'string' ? body.purpose.trim() : ''
       const made = { ...brain(slug, name, purpose, 'curator'), createdByYou: true }
@@ -1137,15 +1137,15 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
           return err(
             400,
             'invalid_request',
-            `"${String(v).slice(0, 80)}" is not an email.`,
-            'Give plain emails such as ana@example.com.',
+            `"${String(v).slice(0, 80)}" no es un email.`,
+            'Da emails simples como ana@example.com.',
           )
         if (s.accounts.some((a) => a.email === email))
           return err(
             409,
             'email_taken',
-            `${email} already has an account.`,
-            'Add that person to the brain as a member instead.',
+            `${email} ya tiene una cuenta.`,
+            'Añade a esa persona al brain como miembro.',
           )
         const id = `inv_${randomBytes(4).toString('hex')}`
         const inv: Invitation = {
@@ -1389,7 +1389,7 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
               400,
               'invalid_request',
               'This account has a second factor: send the code of the authenticator app in "code" too.',
-              'Type the 6 digits your app shows now.',
+              'Escribe los 6 dígitos que tu app muestra ahora.',
             )
       if (body.current !== who.password)
         return err(
@@ -1446,8 +1446,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           400,
           'invalid_request',
-          'The code is not right.',
-          'Type the 6 digits your current app shows now.',
+          'El código no es correcto.',
+          'Escribe los 6 dígitos que tu app actual muestra ahora.',
         )
       who.totp = false
       return { status: 200, body: { enabled: false } }
@@ -1774,8 +1774,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           400,
           'invalid_request',
-          'There is no account with that id or email.',
-          'Only people who already have an account can be added; the administration invites new ones.',
+          'No hay ninguna cuenta con ese id o correo.',
+          'Solo se puede añadir a quien ya tenga cuenta; las nuevas las invita la administración.',
         )
       if (person?.removed || service?.removed)
         return err(
@@ -1834,8 +1834,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           400,
           'invalid_request',
-          'There is no account with that id or email.',
-          'Only people who already have an account can be added; the administration invites new ones.',
+          'No hay ninguna cuenta con ese id o correo.',
+          'Solo se puede añadir a quien ya tenga cuenta; las nuevas las invita la administración.',
         )
       if (had.kind === 'service' && role === 'curator')
         return err(
@@ -1955,8 +1955,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           403,
           'forbidden',
-          'Only the administration can delete a brain.',
-          'Ask the administration of this installation.',
+          'Solo la administración elimina un brain.',
+          'Pídeselo a la administración de esta instalación.',
         )
       const i = c.s.brains.findIndex((x) => x.slug === c.params.slug)
       if (i < 0) return NO_BRAIN
@@ -1964,8 +1964,8 @@ const OPS: Record<string, { screen?: Screen; run: (c: Ctx) => Answer }> = {
         return err(
           400,
           'invalid_request',
-          'To delete a brain, type its name to confirm.',
-          `Send {"confirm": "${c.params.slug}"}.`,
+          'Para eliminar un brain, escribe su nombre para confirmar.',
+          `Envía {"confirm": "${c.params.slug}"}.`,
         )
       c.s.brains.splice(i, 1)
       return { status: 200, body: { deleted: c.params.slug } }
@@ -3670,7 +3670,7 @@ export async function startFixture(
           err(
             403,
             'forbidden',
-            'Your role does not allow this.',
+            'Tu rol no permite esto.',
             'Pide a quien cure este brain un rol que sí pueda.',
           ),
         )

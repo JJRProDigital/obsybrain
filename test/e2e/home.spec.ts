@@ -82,10 +82,10 @@ test('CA19: a new brain shows three first steps; an agent writing marks steps 1 
   await expect(steps.nth(0)).toContainText('Hecho', { timeout: 5_000 })
   await expect(steps.nth(1)).toContainText('Hecho')
   // With an entry, the brain is no longer empty: the third step says an import can no longer be taken.
-  await expect(steps.nth(2)).toContainText('only into an empty brain')
+  await expect(steps.nth(2)).toContainText('Solo en un brain vacío')
   expect(page.url()).toBe(url)
   await expect(page.getByRole('region', { name: 'En números' })).toContainText('1 entrada')
-  await expect(page.getByRole('region', { name: "Today's sessions" }).getByRole('listitem')).toHaveCount(1)
+  await expect(page.getByRole('region', { name: 'Sesiones de hoy' }).getByRole('listitem')).toHaveCount(1)
 })
 
 // A new brain and a token for an agent that writes in it (a program, not the web).
@@ -107,10 +107,10 @@ async function brainWithAgent(page: Page, name: string): Promise<{ slug: string;
 
 async function hideTab(page: Page, hidden: boolean) {
   await page.evaluate((h) => {
-    Object.defineProperty(document, 'hidden', { configurable: true, get: () => h })
+    Object.defineProperty(document, 'ya está oculto', { configurable: true, get: () => h })
     Object.defineProperty(document, 'visibilityState', {
       configurable: true,
-      get: () => (h ? 'hidden' : 'visible'),
+      get: () => (h ? 'ya está oculto' : 'visible'),
     })
     document.dispatchEvent(new Event('visibilitychange'))
   }, hidden)
@@ -163,7 +163,7 @@ test('home: the card of the new brain carries its numbers and my role', async ({
   await signedInAdmin(page, baseURL as string)
   const card = page.getByRole('listitem').filter({ has: page.getByRole('link', { name: 'Lifecycle' }) })
   await expect(card).toContainText('1 entrada')
-  await expect(card).toContainText('curator')
+  await expect(card).toContainText('curador')
   await expect(card).toContainText('Última actividad')
 })
 
@@ -174,7 +174,7 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
 }) => {
   await signedInAdmin(page, baseURL as string)
   // Inside the web, without reloading: People is shown again later from what it loaded now.
-  await page.getByRole('banner').getByRole('link', { name: 'People' }).click()
+  await page.getByRole('banner').getByRole('link', { name: 'Personas' }).click()
   const form = page.getByRole('form', { name: 'Invitar personas' })
   await form.getByLabel('Emails').fill('lena@example.test')
   await form.getByRole('checkbox', { name: 'Lifecycle' }).check()
@@ -183,10 +183,10 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
   await expect(page.getByRole('status').filter({ hasText: 'Invitación enviada' })).toContainText(
     'lena@example.test',
   )
-  const lena = page.getByRole('region', { name: 'Invitations' }).getByRole('listitem').filter({
+  const lena = page.getByRole('region', { name: 'Invitaciones' }).getByRole('listitem').filter({
     hasText: 'lena@example.test',
   })
-  await expect(lena).toContainText('pending')
+  await expect(lena).toContainText('pendiente')
   await expect(lena).toContainText('Lifecycle as contributor')
 
   const link = await mailLink(page.request, 'lena@example.test')
@@ -198,15 +198,18 @@ test('the first invitation from the web goes by email; the invitee joins; the pa
   await p.getByRole('button', { name: 'Crear mi cuenta' }).click()
   await expect(p.getByRole('link', { name: 'Lifecycle' })).toBeVisible()
   // A contributor may not invite: no People page in her menu.
-  await p.getByRole('button', { name: /Account/ }).click()
-  await expect(p.getByRole('link', { name: 'People' })).toHaveCount(0)
+  await p.getByRole('button', { name: /Cuenta/ }).click()
+  await expect(p.getByRole('link', { name: 'Personas' })).toHaveCount(0)
   await ctx.close()
 
   // Back to home and to People inside the web (no reload): both show that Lena joined.
-  await page.getByRole('banner').getByRole('link', { name: /home/ }).click()
+  await page
+    .getByRole('banner')
+    .getByRole('link', { name: /inicio/ })
+    .click()
   await expect(page.getByRole('link', { name: 'Lifecycle' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Invitar personas' })).toHaveCount(0)
-  await page.getByRole('banner').getByRole('link', { name: 'People' }).click()
+  await page.getByRole('banner').getByRole('link', { name: 'Personas' }).click()
   await expect(lena).toContainText('accepted')
 })
 

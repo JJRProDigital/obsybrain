@@ -31,7 +31,7 @@ test.describe('exporting a brain', () => {
     await page.goto('/b/growth/settings/archive')
     const p = part(page)
     await expect(p).toBeVisible()
-    await expect(p.getByRole('radio', { name: /Readable/ })).toBeChecked()
+    await expect(p.getByRole('radio', { name: /Legible/ })).toBeChecked()
     await expect(p.getByRole('checkbox', { name: 'Incluir las entradas olvidadas' })).not.toBeChecked()
     await audit(page, 'export ready')
     const [file] = await Promise.all([
@@ -43,7 +43,7 @@ test.describe('exporting a brain', () => {
     expect(saved.get('README.md')).toContain('format: readable')
     expect(saved.get('README.md')).toContain('includeForgotten: false')
     await expect(p.getByRole('status')).toContainText(
-      /Saved obsybrain-growth-readable-\d{8}T\d{6}Z\.zip \(\d+(\.\d)? (bytes|kB)\)\./,
+      /Guardado obsybrain-growth-readable-\d{8}T\d{6}Z\.zip \(\d+(\.\d)? (bytes|kB)\)\./,
     )
     await audit(page, 'export saved')
   })
@@ -58,9 +58,9 @@ test.describe('exporting a brain', () => {
     const p = part(page)
     // The screen's own arrival puts the keyboard on the first heading; only then does the person move on.
     await expect(page.locator('#export-title')).toBeFocused()
-    await p.getByRole('radio', { name: /Readable/ }).focus()
+    await p.getByRole('radio', { name: /Legible/ }).focus()
     await page.keyboard.press('ArrowDown')
-    await expect(p.getByRole('radio', { name: /Faithful/ })).toBeChecked()
+    await expect(p.getByRole('radio', { name: /Fiel/ })).toBeChecked()
     await page.keyboard.press('Tab')
     await expect(p.getByRole('checkbox', { name: 'Incluir las entradas olvidadas' })).toBeFocused()
     await page.keyboard.press('Space')
@@ -71,7 +71,7 @@ test.describe('exporting a brain', () => {
     expect(file.suggestedFilename()).toMatch(/^obsybrain-growth-faithful-/)
     const saved = filesOf(readFileSync(await file.path()))
     expect(saved.get('README.md')).toContain('includeForgotten: true')
-    await expect(p.getByRole('status')).toContainText('Saved obsybrain-growth-faithful-')
+    await expect(p.getByRole('status')).toContainText('Guardado obsybrain-growth-faithful-')
   })
 
   test('while the server makes it, the screen says so and the button waits', async ({
@@ -85,9 +85,9 @@ test.describe('exporting a brain', () => {
     const downloading = page.waitForEvent('download')
     await p.getByRole('button', { name: 'Descargar la exportación' }).click()
     await expect(p.getByRole('status')).toContainText('Preparando la exportación')
-    await expect(p.getByRole('button', { name: /Preparing/ })).toBeDisabled()
+    await expect(p.getByRole('button', { name: /Preparando/ })).toBeDisabled()
     await downloading
-    await expect(p.getByRole('status')).toContainText('Guardada')
+    await expect(p.getByRole('status')).toContainText('Guardado')
     await expect(p.getByRole('button', { name: 'Descargar la exportación' })).toBeEnabled()
   })
 
@@ -119,7 +119,7 @@ test.describe('exporting a brain', () => {
     await expect(part(page).getByRole('button', { name: 'Descargar la exportación' })).toBeEnabled()
     await context.setOffline(true)
     await expect(part(page).getByRole('button', { name: 'Descargar la exportación' })).toBeDisabled()
-    await expect(part(page)).toContainText(/offline|connection/i)
+    await expect(part(page)).toContainText(/sin conexión/)
     await context.setOffline(false)
     await expect(part(page).getByRole('button', { name: 'Descargar la exportación' })).toBeEnabled()
   })

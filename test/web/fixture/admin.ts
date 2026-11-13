@@ -406,7 +406,12 @@ function updateAsk(c: AdminCtx, retry: boolean): Answer {
       u.rollbackFailed.restore,
     )
   if (u.requested || u.running)
-    return err(409, 'update_running', 'An update is already running.', 'Wait for it to finish.')
+    return err(
+      409,
+      'update_running',
+      'Ya se está ejecutando una actualización.',
+      'Espera a que termine; esta página muestra cómo va.',
+    )
   const latest = f.release.latest
   const newer = latest !== null && latest !== 'v0.1.0' && latest !== 'v0.0.9'
   if (!newer)
@@ -434,9 +439,9 @@ function reauthOf(c: AdminCtx): Answer | null {
       401,
       'reauth_failed',
       c.body.code
-        ? 'The code is not right, or was already used.'
+        ? 'El código no es correcto o ya se usó.'
         : 'This account has a second factor: the code of the authenticator app is asked too.',
-      'Type the 6 digits your app shows now in "code".',
+      'Escribe los 6 dígitos que tu app muestra ahora en "code".',
     )
   return null
 }
@@ -931,8 +936,8 @@ export const ADMIN_OPS: Record<string, Op> = {
           return err(
             409,
             'provider_in_use',
-            `Meaning search is on with ${name}: without its ${name === 'openai' ? 'key' : 'address'} it would stop.`,
-            'Turn meaning search off first, or set a new one in its place.',
+            `La búsqueda por significado está encendida con ${name}: sin su ${name === 'openai' ? 'clave' : 'dirección'} se detendría.`,
+            'Apaga primero la búsqueda por significado, o configura uno nuevo en su lugar.',
           )
         if (name === 'openai') f.openai = null
         else f.ollama = null
@@ -1052,8 +1057,8 @@ export const ADMIN_OPS: Record<string, Op> = {
           return err(
             409,
             'backup_running',
-            'A copy is being made right now.',
-            'Wait for it to finish (obsybrain backups list shows it when it is done), then try again.',
+            'Se está haciendo una copia ahora mismo.',
+            'Vuelve a intentarlo cuando termine (obsybrain backups list la muestra cuando está lista), después prueba otra vez.',
           )
         const id = copyName(new Date().toISOString().replace(/\.\d{3}Z$/, '.000Z'), 'manual')
         f.running = { id, doneAt: Date.now() + 700 }

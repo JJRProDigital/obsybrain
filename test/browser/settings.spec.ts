@@ -41,10 +41,10 @@ test.describe('settings of a brain', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Ajustes' })).toBeVisible()
     await expect(tab(page, 'Miembros')).toHaveAttribute('aria-current', 'page')
     const parts: Record<string, string[]> = {
-      Members: ['Miembros'],
-      Agents: ['Repositories', 'Nota de uso', 'Guía de compilación', 'Búsqueda por significado'],
+      Miembros: ['Miembros'],
+      Agentes: ['Repositorios', 'Nota de uso', 'Guía de compilación', 'Búsqueda por significado'],
       'Umbrales de salud': ['Umbrales de salud'],
-      Archive: ['Exportar', 'Archivar', 'Eliminar este brain'],
+      Archivar: ['Exportar', 'Archivar', 'Eliminar este brain'],
     }
     for (const [name, regions] of Object.entries(parts)) {
       await tab(page, name).click()
@@ -83,13 +83,13 @@ test.describe('settings of a brain', () => {
     const select = eric.getByRole('combobox')
     // Off but still reachable, so its reason is heard: moving through it changes nothing.
     await expect(select).toHaveAttribute('aria-disabled', 'true')
-    await expect(select).toHaveAccessibleDescription(/A brain always keeps a curator/)
+    await expect(select).toHaveAccessibleDescription(/Un brain siempre conserva un curador/)
     await select.focus()
     await expect(select).toBeFocused()
     await page.keyboard.press('ArrowDown')
     await expect(select).toHaveValue('curator')
     await expect(eric.getByRole('button', { name: /Guardar rol/ })).toHaveCount(0)
-    await expect(eric.getByRole('button', { name: /Remove/ })).toHaveCount(0)
+    await expect(eric.getByRole('button', { name: /Eliminar/ })).toHaveCount(0)
   })
 
   test('a role is saved with its own button (moving through the list saves nothing), then the list is read again', async ({
@@ -127,13 +127,13 @@ test.describe('settings of a brain', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/settings')
-    await member(page, 'Ana').getByLabel('Rol de Ana').selectOption('curator')
+    await member(page, 'Ana').getByLabel('Rol de Ana').selectOption('curador')
     await member(page, 'Ana').getByRole('button', { name: 'Guardar el rol de Ana' }).click()
     await expect(page.getByRole('status').filter({ hasText: 'Ana ahora es curador.' })).toBeVisible()
     await member(page, 'Eric').getByLabel('Rol de Eric').selectOption('contributor')
     await member(page, 'Eric').getByRole('button', { name: 'Guardar el rol de Eric' }).click()
     const dialog = page.getByRole('dialog', { name: '¿Renunciar al rol de curador?' })
-    await expect(dialog).toContainText('can no longer change its settings')
+    await expect(dialog).toContainText('ya no podrás cambiar sus ajustes')
     await dialog.getByRole('button', { name: 'Renunciar' }).click()
     await expect(page.locator('[data-state="forbidden"]')).toContainText(
       'Solo los curadores de Growth cambian sus ajustes',
@@ -169,7 +169,7 @@ test.describe('settings of a brain', () => {
   test('leaving a brain speaks to you, by your row', async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/settings')
-    await member(page, 'Ana').getByLabel('Rol de Ana').selectOption('curator')
+    await member(page, 'Ana').getByLabel('Rol de Ana').selectOption('curador')
     await member(page, 'Ana').getByRole('button', { name: 'Guardar el rol de Ana' }).click()
     // Leaving needs another curator: the role is saved (and said) before Eric asks to leave. Without this wait, a
     // slow save left the leave button refusing, and the test hung until its timeout (B7 debt, fixed in PR35).
@@ -206,10 +206,10 @@ test.describe('settings of a brain', () => {
     const members = region(page, 'Miembros')
     await members.getByLabel('Email o id de cuenta').fill('nobody@example.test')
     await members.getByRole('button', { name: 'Añadir miembro' }).click()
-    await expect(members.getByRole('alert')).toContainText('There is no account with that id or email')
+    await expect(members.getByRole('alert')).toContainText('No hay ninguna cuenta con ese id o correo.')
     await expect(members.getByLabel('Email o id de cuenta')).toHaveValue('nobody@example.test')
     await members.getByLabel('Email o id de cuenta').fill('ana@example.test')
-    await members.getByLabel('Rol del nuevo miembro').selectOption('curator')
+    await members.getByLabel('Rol del nuevo miembro').selectOption('curador')
     await expect(members).toContainText('Las cuentas de servicio entran como colaborador o lector')
     await members.getByRole('button', { name: 'Añadir miembro' }).click()
     await expect(members).toContainText('Ana ya es colaborador — cambia su rol en la lista.')
@@ -232,20 +232,20 @@ test.describe('settings of a brain', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/settings/agents')
-    const repos = region(page, 'Repositories')
+    const repos = region(page, 'Repositorios')
     await expect(repos.getByRole('listitem').filter({ hasText: 'github.com/acme/growth-site' })).toBeVisible()
     const field = repos.getByLabel('Dirección del repositorio')
     await field.fill('~/code/app')
     await expect(repos).toContainText('Esa es una carpeta de tu máquina')
     await field.fill('acme/app')
-    await expect(repos).toContainText('use the full address, e.g. github.com/org/repo')
+    await expect(repos).toContainText('usa la dirección completa, p. ej. github.com/org/repo')
     await field.fill('git@github.com:Acme/App.git')
-    await expect(repos).toContainText('Matches github.com/acme/app')
+    await expect(repos).toContainText('Coincide con github.com/acme/app')
     await repos.getByRole('button', { name: 'Vincular repositorio' }).click()
     await expect(repos.getByRole('listitem').filter({ hasText: 'github.com/acme/app' })).toBeVisible()
     await expect(field).toHaveValue('')
     const row = repos.getByRole('listitem').filter({ hasText: 'github.com/acme/app' })
-    await row.getByRole('button', { name: 'Unlink github.com/acme/app' }).click()
+    await row.getByRole('button', { name: 'Desvincular github.com/acme/app' }).click()
     await expect(row.getByRole('button', { name: 'Desvincularlo' })).toBeFocused()
     await row.getByRole('button', { name: 'Desvincularlo' }).click()
     await expect(repos.getByRole('listitem').filter({ hasText: 'github.com/acme/app' })).toHaveCount(0)
@@ -259,23 +259,23 @@ test.describe('settings of a brain', () => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/b/growth/settings/agents')
     const guide = region(page, 'Guía de compilación')
-    await expect(guide).toContainText('Default')
+    await expect(guide).toContainText('Por defecto')
     await expect(guide.getByLabel('Guía de compilación')).toHaveCount(0)
     await guide.getByRole('button', { name: 'Editar la guía' }).click()
     const text = guide.getByLabel('Guía de compilación')
     await expect(text).toBeFocused()
-    await expect(text).toHaveValue(/How to compile this brain's journal/)
+    await expect(text).toHaveValue(/Cómo compilar el diario de este brain en su wiki/)
     await text.fill('')
     await expect(guide).toContainText('Una guía vacía es la guía por defecto.')
     await text.fill('Keep pages short. Cite every entry.')
     await guide.getByRole('button', { name: 'Guardar la guía' }).click()
     await expect(guide.getByRole('status')).toContainText('Guardado.')
-    await expect(guide).toContainText('Custom')
+    await expect(guide).toContainText('Personalizada')
     await guide.getByRole('button', { name: 'Volver a la de por defecto' }).click()
-    await expect(text).toHaveValue(/How to compile this brain's journal/)
+    await expect(text).toHaveValue(/Cómo compilar el diario de este brain en su wiki/)
     await guide.getByRole('button', { name: 'Guardar la guía' }).click()
     await expect(guide.getByRole('status')).toContainText('Guardado.')
-    await expect(guide).toContainText('Default')
+    await expect(guide).toContainText('Por defecto')
   })
 
   test('two curators, same field: the save is refused, their text shown, mine kept to save again', async ({
@@ -306,14 +306,18 @@ test.describe('settings of a brain', () => {
     await page.goto('/b/growth/settings/agents')
     const guide = region(page, 'Guía de compilación')
     await guide.getByRole('button', { name: 'Editar la guía' }).click()
-    await expect(guide.getByLabel('Guía de compilación')).toHaveValue(/How to compile this brain's journal/)
+    await expect(guide.getByLabel('Guía de compilación')).toHaveValue(
+      /Cómo compilar el diario de este brain en su wiki/,
+    )
     // Cora saves a guide of her own; Carla, who still sees the default, «resets» it.
     await s.settingsEdit('growth', { guide: 'Cora wrote this guide.' })
     await guide.getByRole('button', { name: 'Volver a la de por defecto' }).click()
     await guide.getByRole('button', { name: 'Guardar la guía' }).click()
     await expect(guide.getByRole('alert')).toContainText('Alguien cambió esto')
     await expect(guide).toContainText('Cora wrote this guide.')
-    await expect(guide.getByLabel('Guía de compilación')).toHaveValue(/How to compile this brain's journal/)
+    await expect(guide.getByLabel('Guía de compilación')).toHaveValue(
+      /Cómo compilar el diario de este brain en su wiki/,
+    )
   })
 
   test('saving with nothing changed asks the server and says so', async ({ page, context, baseURL }) => {
@@ -384,7 +388,7 @@ test.describe('settings of a brain', () => {
     await page.goto('/b/growth/settings/health')
     await expect(page.getByRole('heading', { level: 2, name: 'Umbrales de salud' })).toBeFocused()
     await tab(page, 'Agentes').click()
-    await expect(page.getByRole('heading', { level: 2, name: 'Repositories' })).toBeFocused()
+    await expect(page.getByRole('heading', { level: 2, name: 'Repositorios' })).toBeFocused()
   })
 
   test('another curator’s note is never erased by a save of another part (the reviewer’s first case)', async ({
@@ -428,7 +432,7 @@ test.describe('settings of a brain', () => {
     await health.getByLabel('Desactualizada tras (días)').fill('25')
     await health.getByRole('button', { name: 'Guardar' }).click()
     await expect(health.getByRole('alert')).toContainText('Alguien cambió esto')
-    await expect(health.getByLabel('Long after (characters)')).toHaveValue('30000')
+    await expect(health.getByLabel('Larga tras (caracteres)')).toHaveValue('30000')
     await expect(health.getByLabel('Desactualizada tras (días)')).toHaveValue('25')
     await health.getByRole('button', { name: 'Guardar' }).click()
     await expect(health.getByRole('status')).toContainText('Guardado.')
@@ -442,7 +446,7 @@ test.describe('settings of a brain', () => {
     await health.getByRole('button', { name: 'Guardar' }).click()
     await expect(health.getByRole('status')).toContainText('Guardado.')
     await page.reload()
-    await expect(health.getByLabel('Long after (characters)')).toHaveValue('30000')
+    await expect(health.getByLabel('Larga tras (caracteres)')).toHaveValue('30000')
     await expect(health.getByLabel('Desactualizada tras (días)')).toHaveValue('45')
   })
 
@@ -505,20 +509,20 @@ test.describe('settings of a brain', () => {
     await region(page, 'Archivar').getByRole('button', { name: 'Archivar este brain' }).click()
     const dialog = page.getByRole('dialog', { name: '¿Archivar Growth?' })
     await expect(dialog).toContainText('Lo que se detiene')
-    await expect(dialog).toContainText('no repository can be linked')
+    await expect(dialog).toContainText('no se puede vincular ningún repositorio')
     await expect(dialog).toContainText('Lo que sigue funcionando: leer, buscar')
-    await expect(dialog).toContainText('who is a member')
+    await expect(dialog).toContainText('quién es miembro')
     await dialog.getByRole('button', { name: 'Archivar Growth' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Growth is archived.' })).toBeFocused()
+    await expect(page.getByRole('status').filter({ hasText: 'Growth quedó archivado.' })).toBeFocused()
     await tab(page, 'Agentes').click()
     await expect(
-      region(page, 'Repositories').getByRole('button', { name: 'Vincular repositorio' }),
+      region(page, 'Repositorios').getByRole('button', { name: 'Vincular repositorio' }),
     ).toHaveAttribute('aria-disabled', 'true')
     await region(page, 'Guía de compilación').getByRole('button', { name: 'Editar la guía' }).click()
     await expect(
       region(page, 'Guía de compilación').getByRole('button', { name: 'Guardar la guía' }),
     ).toHaveAttribute('aria-disabled', 'true')
-    await expect(region(page, 'Guía de compilación')).toContainText('archived')
+    await expect(region(page, 'Guía de compilación')).toContainText('archivado')
     // Members still change on an archived brain.
     await tab(page, 'Miembros').click()
     await member(page, 'Ana').getByLabel('Rol de Ana').selectOption('reader')
@@ -526,7 +530,7 @@ test.describe('settings of a brain', () => {
     await expect(page.getByRole('status').filter({ hasText: 'Ana ahora es lector.' })).toBeVisible()
     await tab(page, 'Archivar').click()
     await region(page, 'Archivar').getByRole('button', { name: 'Desarchivar este brain' }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Growth is active again.' })).toBeVisible()
+    await expect(page.getByRole('status').filter({ hasText: 'Growth volvió a estar activo.' })).toBeVisible()
   })
 
   test('the administration deletes a brain by typing its name', async ({ page, context, baseURL }) => {
@@ -540,7 +544,7 @@ test.describe('settings of a brain', () => {
     await dialog.getByLabel('Escribe growth para confirmar').fill('growth')
     await confirm.click()
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByRole('status').filter({ hasText: 'Growth was deleted.' })).toBeVisible()
+    await expect(page.getByRole('status').filter({ hasText: 'Growth fue eliminado.' })).toBeVisible()
   })
 
   test('someone who is not a curator is told who to ask, and is not offered the page', async ({
@@ -588,7 +592,7 @@ test.describe('settings of a brain', () => {
         await page.goto(`/b/growth/settings${path}`)
         await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible()
         if (path === '/agents')
-          await region(page, 'Repositories')
+          await region(page, 'Repositorios')
             .getByLabel('Dirección del repositorio')
             .fill('ssh://git@gitlab.example.com:2222/a-very-long-group/a-very-long-project-name.git')
         await noSideScroll(page)

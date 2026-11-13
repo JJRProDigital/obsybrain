@@ -156,7 +156,7 @@ describe('the API client', () => {
     const err = (await api.call('brains').catch((e: unknown) => e)) as ApiError
     assert.equal(err.status, 0)
     assert.equal(err.code, 'offline')
-    assert.match(err.howToProceed, /connection/i)
+    assert.match(err.howToProceed, /conexión/i)
   })
 
   it('a 401 on a private operation signs the person out and returns them where they were', async () => {

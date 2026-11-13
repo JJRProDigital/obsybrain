@@ -74,7 +74,7 @@ export function thresholdProblems(v: Record<ThresholdName, string>): Partial<Rec
     const { min, max } = THRESHOLDS[k]
     const t = v[k].trim()
     const n = /^\d+$/.test(t) ? Number(t) : Number.NaN
-    if (!(n >= min && n <= max)) out[k] = `A whole number from ${min} to ${max}.`
+    if (!(n >= min && n <= max)) out[k] = `Un número entero de ${min} a ${max}.`
   }
   return out
 }

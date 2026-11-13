@@ -18,7 +18,7 @@ test.describe('audit: times and days where the person is', () => {
     await scenario(context, baseURL as string, 'signed-in', { 'admin-audit': 'much-data' })
     await page.goto('/admin/audit')
     await expect(page.getByText('Días y horas están en tu zona horaria (Europe/Madrid).')).toBeVisible()
-    await expect(rows(page).filter({ hasText: 'line 11' })).toContainText('29 Oct 2026, 00:30')
+    await expect(rows(page).filter({ hasText: 'line 11' })).toContainText('29 oct 2026, 00:30')
     await page.getByLabel('Desde').fill('2026-10-29')
     await page.getByLabel('Hasta').fill('2026-10-29')
     await page.getByRole('button', { name: 'Aplicar filtros' }).click()
@@ -36,7 +36,7 @@ test.describe('audit: at UTC+14', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', { 'admin-audit': 'much-data' })
     await page.goto('/admin/audit')
-    await expect(rows(page).filter({ hasText: 'line 11' })).toContainText('29 Oct 2026, 13:30')
+    await expect(rows(page).filter({ hasText: 'line 11' })).toContainText('29 oct 2026, 13:30')
     await page.getByLabel('Desde').fill('2026-10-29')
     await page.getByLabel('Hasta').fill('2026-10-29')
     await page.getByRole('button', { name: 'Aplicar filtros' }).click()
@@ -99,7 +99,9 @@ test.describe('mail: a new server needs its password again', () => {
     // The final review of B6: mail not sent because it was not set up is not a send failure; it is said
     // apart, once, by how many.
     await expect(failures.getByRole('listitem').filter({ hasText: 'dan@example.test' })).toHaveCount(0)
-    await expect(failures).toContainText('1 mail was not sent because mail was not set up then.')
+    await expect(failures).toContainText(
+      '1 correo no se envió porque el correo no estaba configurado entonces.',
+    )
   })
 })
 
@@ -114,7 +116,7 @@ test.describe('limits: lowering asks first', () => {
     await page.getByLabel('Peticiones por minuto, por clave').fill('300')
     await page.getByRole('button', { name: 'Guardar el límite' }).click()
     const dialog = page.getByRole('dialog', { name: '¿Bajar el límite para todas las claves?' })
-    await expect(dialog).toContainText('300 requests a minute instead of 600')
+    await expect(dialog).toContainText('300 peticiones por minuto en lugar de 600')
     await dialog.getByRole('button', { name: 'Conservar el límite actual' }).click()
     // Nothing was saved; what was typed is still there.
     expect(
@@ -144,15 +146,15 @@ test.describe('meaning search: a new destination, a new acceptance', () => {
     await expect(ollama).toContainText('Dirección: http://localhost:11434')
     const on = page.getByRole('region', { name: 'Activar la búsqueda por significado' })
     await on.getByRole('radio', { name: /OpenAI/ }).check()
-    await on.getByRole('checkbox', { name: /I understand/ }).check()
+    await on.getByRole('checkbox', { name: /Entiendo/ }).check()
     await on.getByRole('radio', { name: /Ollama/ }).check()
-    await expect(on.getByRole('checkbox', { name: /I understand/ })).not.toBeChecked()
+    await expect(on.getByRole('checkbox', { name: /Entiendo/ })).not.toBeChecked()
     await expect(on.getByRole('button', { name: 'Activar la búsqueda por significado' })).toHaveAttribute(
       'aria-disabled',
       'true',
     )
     await on.getByRole('radio', { name: /OpenAI/ }).check()
-    await on.getByRole('checkbox', { name: /I understand/ }).check()
+    await on.getByRole('checkbox', { name: /Entiendo/ }).check()
     await on.getByRole('button', { name: 'Activar la búsqueda por significado' }).click()
     await expect(page.getByText('Activada con OpenAI (')).toBeVisible()
     await expect(page.getByRole('region', { name: 'Cambiar de proveedor' })).toContainText('en uso')
@@ -163,7 +165,7 @@ test.describe('meaning search: a new destination, a new acceptance', () => {
         .getByRole('status')
         .filter({ hasText: 'La búsqueda por significado está desactivada: OpenAI cambió' }),
     ).toBeFocused()
-    await expect(page.getByText('Off: searches use words only.')).toBeVisible()
+    await expect(page.getByText('Desactivada: las búsquedas usan solo palabras.')).toBeVisible()
   })
 })
 
@@ -200,7 +202,7 @@ test.describe('second review: an empty view, and why meaning search went off', (
     await openai.getByRole('button', { name: 'Guardar la clave' }).click()
     const on = page.getByRole('region', { name: 'Activar la búsqueda por significado' })
     await on.getByRole('radio', { name: /OpenAI/ }).check()
-    await on.getByRole('checkbox', { name: /I understand/ }).check()
+    await on.getByRole('checkbox', { name: /Entiendo/ }).check()
     await on.getByRole('button', { name: 'Activar la búsqueda por significado' }).click()
     await openai.getByLabel('Clave de API de OpenAI').fill('sk-another-account-9876543210')
     await openai.getByRole('button', { name: 'Guardar la clave' }).click()

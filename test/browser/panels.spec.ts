@@ -9,7 +9,7 @@ const SCREENS = [
   {
     name: 'overview',
     path: '/b/growth',
-    ready: (p: Page) => p.getByRole('heading', { name: "Today's sessions" }),
+    ready: (p: Page) => p.getByRole('heading', { name: 'Sesiones de hoy' }),
   },
   { name: 'wiki', path: '/b/growth/wiki', ready: (p: Page) => p.locator('.map') },
   {

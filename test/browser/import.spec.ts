@@ -44,7 +44,7 @@ test.describe('importing a documentation folder', () => {
     const third = steps.getByRole('listitem').nth(2)
     await expect(steps.getByRole('listitem')).toHaveCount(3)
     await expect(
-      third.getByRole('heading', { level: 3, name: '3. Import a documentation folder' }),
+      third.getByRole('heading', { level: 3, name: '3. Importa una carpeta de documentación' }),
     ).toBeVisible()
     await expect(third).toContainText('Por hacer')
     await third.getByRole('link', { name: 'Importar una carpeta' }).click()
@@ -67,18 +67,18 @@ test.describe('importing a documentation folder', () => {
     await expect(report.getByRole('heading', { name: 'Qué entró' })).toBeFocused()
     await expect(report).toContainText('Importadas 5 páginas, 4 entradas y 5 enlaces de docs-sample.zip.')
     await report.getByText('Quedó fuera (7)').click()
-    await expect(report).toContainText('raw/keys/admin.totp — named like a key or a secret: never read')
+    await expect(report).toContainText('raw/keys/admin.totp — con nombre de clave o secreto: nunca se lee')
     await report.getByText('Enlaces que no llevan a ninguna parte (3)').click()
-    await expect(report).toContainText('missing-page from topics/retention')
+    await expect(report).toContainText('missing-page desde topics/retention')
     // A link to a file that was left out says so (review of PR32).
     await expect(report).toContainText(
-      'wiki/diagram.png from topics/retention points to a file that was left out',
+      'wiki/diagram.png desde topics/retention apunta a un archivo que quedó fuera',
     )
     // A file that was not UTF-8 was read as Windows-1252, and the report says which.
     await report.getByText('Leídos como Windows-1252 (1)').click()
     await expect(report).toContainText('wiki/latin.md')
     await report.getByText('Nombres convertidos en direcciones (1)').click()
-    await expect(report).toContainText('wiki/topics/Audience Notes.md becomes topics/audience-notes')
+    await expect(report).toContainText('wiki/topics/Audience Notes.md se convierte en topics/audience-notes')
     await expect(report.getByRole('link', { name: 'Abrir el wiki' })).toHaveAttribute(
       'href',
       '/b/onboarding/wiki',
@@ -134,8 +134,10 @@ test.describe('importing a documentation folder', () => {
     await expect(input).not.toHaveAttribute('aria-invalid', 'true')
     await p.getByRole('button', { name: 'Importar la carpeta' }).click()
     const alert = p.getByRole('alert')
-    await expect(alert).toContainText('Esto no es un .zip')
-    await expect(alert).toContainText('Comprime la carpeta en un .zip de nuevo')
+    await expect(alert).toContainText('This is not a zip obsybrain can read: its end record is missing')
+    await expect(alert).toContainText(
+      'Make the zip again from the folder (with no links in it) and import it.',
+    )
     await expect(alert).toBeFocused()
     await expect(p.getByRole('region', { name: 'Qué entró' })).toHaveCount(0)
     await audit(page, 'import refused')
@@ -189,7 +191,7 @@ test.describe('importing a documentation folder', () => {
     await page.keyboard.press('Tab')
     await page.keyboard.press('Tab')
     await page.keyboard.press('Enter')
-    await expect(report).toContainText('Quedó fuera (1.234)')
+    await expect(report).toContainText('Quedó fuera (1234)')
     await expect(report).toContainText('Y 734 más, sin listar aquí.')
   })
 

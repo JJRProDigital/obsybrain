@@ -63,7 +63,7 @@ test('a lumpy wiki: loose pages beside the groups, many gathered as "Other pages
   await expect(page).toHaveURL(/loose=1/)
   await expect(page.locator('#graph-place')).toHaveText('Otras páginas en eng')
   await expect(page.getByRole('table', { name: /Páginas del wiki/ }).getByRole('caption')).toContainText(
-    'of 60 pages',
+    'de 60 páginas',
   )
   // In the graph, the same group draws its 60 pages.
   await page.getByRole('button', { name: 'Grafo', exact: true }).click()
@@ -80,8 +80,8 @@ test('1440 × 900: the graph starts above the fold, the filters fold into a summ
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto(`${GRAPH}?type=topic`)
   await settled(page)
-  await expect(page.getByLabel('Words', { exact: true })).toBeHidden()
-  await expect(page.locator('.graph-filters summary')).toContainText('Type: Topic')
+  await expect(page.getByLabel('Palabras', { exact: true })).toBeHidden()
+  await expect(page.locator('.graph-filters summary')).toContainText('Tipo: Tema')
   const canvas = page.locator('canvas.graph-canvas')
   const box = await canvas.boundingBox()
   expect(box?.y ?? 999).toBeLessThan(330)
@@ -90,7 +90,7 @@ test('1440 × 900: the graph starts above the fold, the filters fold into a summ
   await canvas.focus()
   await page.keyboard.press('Enter')
   await inspectorOf(page).getByRole('button', { name: 'Foco: 2 saltos' }).click()
-  await expect(page.locator('#graph-place')).toHaveText(/^Focus: .+ · 2 hops · \d+ pages?$/)
+  await expect(page.locator('#graph-place')).toHaveText(/^Foco: .+ · 2 saltos · \d+ páginas?$/)
   await expect(canvas).toBeInViewport({ ratio: 0.9 })
   expect(await page.evaluate(() => window.scrollY)).toBeLessThan(200)
 })
@@ -131,10 +131,10 @@ test('focus in the list: two-hop rows say which neighbour they come through; one
   await scenario(context, baseURL as string, 'signed-in')
   await page.goto(`${GRAPH}?view=list&focus=audience%2Fretention&hops=2`)
   await expect(page.getByRole('heading', { level: 1, name: 'Grafo' })).toBeVisible()
-  await expect(page.locator('#graph-place')).toHaveText(/^Focus: Retention · 2 hops · \d+ pages$/)
-  const table = page.getByRole('table', { name: 'Retention and its neighbours' })
-  const two = table.locator('tbody tr', { hasText: '2 hops' }).first()
-  await expect(two).toContainText('via ')
+  await expect(page.locator('#graph-place')).toHaveText(/^Foco: Retention · 2 saltos · \d+ páginas$/)
+  const table = page.getByRole('table', { name: 'Retention y sus vecinas' })
+  const two = table.locator('tbody tr', { hasText: '2 saltos' }).first()
+  await expect(two).toContainText('vía ')
   // The row's actions take one Tab stop; the arrow keys move between them.
   const first = table.locator('tbody tr').nth(1)
   const actions = first.locator('.row-actions button')

@@ -91,7 +91,7 @@ describe('health thresholds', () => {
     assert.deepEqual(thresholdProblems({ staleDays: '3650', longChars: '100000' }), {})
     assert.deepEqual(thresholdProblems({ staleDays: '1', longChars: '1000' }), {})
     assert.deepEqual(Object.keys(thresholdProblems({ staleDays: '3651', longChars: '100001' })).length, 2)
-    assert.match(String(p.staleDays), /1 to 3650/)
+    assert.match(String(p.staleDays), /Un número entero de 1 a 3650/)
     assert.deepEqual(Object.keys(thresholdProblems({ staleDays: '1.5', longChars: 'x' })).sort(), [
       'longChars',
       'staleDays',

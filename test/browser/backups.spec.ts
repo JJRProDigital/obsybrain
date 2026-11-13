@@ -1,7 +1,7 @@
 // Admin › Backups & system and the wizard's step «Installation key» (spec B7 «Copias y restauración», plan T018, T019;
 // CA10 web) against the fixture API: the copies with their key id and «Needs the older key», a copy by hand that says
 // when it ends, a download, a restore that says what it loses and asks the name and the password before anything,
-// then «Restored. Everyone signs in again» on the sign-in page; the key only after the password, gone when hidden;
+// then «Restaurado. Todo el mundo vuelve a iniciar sesión» on the sign-in page; the key only after the password, gone when hidden;
 // the band at the top of the administration while the last copy failed, until a good one; the new release with what
 // it changes; every state (loading, error, empty, off, too many), the keyboard, 320 px and axe.
 import AxeBuilder from '@axe-core/playwright'
@@ -41,13 +41,13 @@ test.describe('Admin › Backups & system: the copies', () => {
     await expect(part).toContainText('38.2 GB')
     const rows = part.locator('.copies > li')
     await expect(rows).toHaveCount(3)
-    await expect(rows.nth(0)).toContainText('Daily')
-    await expect(rows.nth(0)).toContainText('key fx12ab34cd56')
-    await expect(rows.nth(2)).toContainText('By hand')
+    await expect(rows.nth(0)).toContainText('Diaria')
+    await expect(rows.nth(0)).toContainText('clave fx12ab34cd56')
+    await expect(rows.nth(2)).toContainText('A mano')
     await expect(rows.nth(2)).toContainText('Necesita la clave más vieja')
     const old = rows.nth(2).getByRole('button', { name: /Restaurar la copia de/ })
     await expect(old).toHaveAttribute('aria-disabled', 'true')
-    await expect(rows.nth(2)).toContainText('restore it on the machine with that key')
+    await expect(rows.nth(2)).toContainText('restáurala en la máquina con esa clave')
     await audit(page, 'backups')
   })
 
@@ -65,7 +65,7 @@ test.describe('Admin › Backups & system: the copies', () => {
     await expect(part.getByRole('button', { name: 'Haciendo una copia…' })).toBeVisible()
     await expect(part.getByRole('status').filter({ hasText: 'Copia hecha:' })).toBeFocused()
     await expect(part.locator('.copies > li')).toHaveCount(4)
-    await expect(part.locator('.copies > li').first()).toContainText('By hand')
+    await expect(part.locator('.copies > li').first()).toContainText('A mano')
   })
 
   test('CA10: a copy that fails shows a band on every page of the administration until a good copy', async ({
@@ -77,7 +77,7 @@ test.describe('Admin › Backups & system: the copies', () => {
     await behind(baseURL as string, s.id, { backupFailure: 'disk_full', nextCopy: 'disk_full' })
     await page.goto('/admin/people')
     const band = page.getByRole('alert').filter({ hasText: 'La última copia falló' })
-    await expect(band).toContainText('the disk of the copies is full')
+    await expect(band).toContainText('el disco de las copias está lleno')
     await expect(band.getByRole('link', { name: 'Ver Copias y sistema' })).toBeVisible()
     await page.goto('/admin/email')
     await expect(band).toBeVisible()
@@ -100,7 +100,7 @@ test.describe('Admin › Backups & system: the copies', () => {
     await behind(baseURL as string, s.id, { backupWarning: 'status_not_saved' })
     await page.goto('/admin/system')
     await expect(page.getByRole('note').filter({ hasText: 'Copia conservada con un aviso' })).toContainText(
-      'its status could not be saved',
+      'no se pudo guardar su estado junto a las copias',
     )
   })
 
@@ -203,7 +203,7 @@ test.describe('Admin › Backups & system: the copies', () => {
 })
 
 test.describe('Admin › Backups & system: restoring', () => {
-  test('risk 9: says what is lost, asks the name and the password, then «Restored. Everyone signs in again»', async ({
+  test('risk 9: says what is lost, asks the name and the password, then «Restaurado. Todo el mundo vuelve a iniciar sesión»', async ({
     page,
     context,
     baseURL,
@@ -219,7 +219,7 @@ test.describe('Admin › Backups & system: restoring', () => {
     await expect(dialog).toContainText('Todo lo que hay aquí se reemplaza por esta copia')
     await expect(dialog).toContainText('Lo que se escribió después se pierde: la última escritura aquí fue')
     await expect(dialog).toContainText('Primero, obsybrain hace una copia de lo que hay ahora')
-    await expect(dialog).toContainText('everyone signs in again')
+    await expect(dialog).toContainText('todo el mundo vuelve a iniciar sesión')
     await audit(page, 'restore')
     // Nothing goes until the name and the password are there.
     let sent = 0
@@ -288,13 +288,13 @@ test.describe('Admin › Backups & system: restoring', () => {
     await dialog.getByLabel('Nombre de esta instalación').fill('obsybrain')
     await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
     await dialog.getByRole('button', { name: 'Restaurar esta copia' }).click()
-    await expect(dialog.getByRole('button', { name: /Restoring/ })).toBeVisible()
+    await expect(dialog.getByRole('button', { name: /Restaurando/ })).toBeVisible()
     // Twice: the browser lets a second Esc close a dialog whose first was refused (close watchers).
     await page.keyboard.press('Escape')
     await page.keyboard.press('Escape')
     await page.keyboard.press('Escape')
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByRole('button', { name: /Restoring/ })).toBeVisible()
+    await expect(dialog.getByRole('button', { name: /Restaurando/ })).toBeVisible()
     await expect(dialog.getByRole('button', { name: 'Cerrar' })).toHaveAttribute('aria-disabled', 'true')
     await dialog.getByRole('button', { name: 'Cerrar' }).click({ force: true })
     await page.mouse.click(5, 5)
@@ -439,7 +439,7 @@ test.describe('Admin › Backups & system: the version', () => {
       release: { latest: 'v0.0.9', notes: '', checkedAt: new Date().toISOString() },
     })
     await page.reload()
-    await expect(service).toContainText('ahead of the newest published version (v0.0.9)')
+    await expect(service).toContainText('va por delante de la versión publicada más nueva (v0.0.9)')
     await expect(service).not.toContainText('Esta es la más nueva')
   })
 
@@ -467,7 +467,7 @@ test.describe('Admin › Backups & system: the version', () => {
     await page.reload()
     await expect(service).toContainText('No se pudo comprobar si hay una versión nueva')
     await expect(service).not.toContainText('Esta es la más nueva')
-    await expect(service).toContainText('Tried 5 min ago.')
+    await expect(service).toContainText('Intentado hace 5 min.')
     await expect(service).not.toContainText(/\b3 days ago/)
   })
 
@@ -528,7 +528,7 @@ test.describe('first-time setup: the step «Installation key»', () => {
     await expect(go).toHaveAttribute('aria-disabled', 'true')
     await go.click({ force: true })
     await expect(
-      page.getByLabel('I saved the installation key somewhere safe, outside this machine'),
+      page.getByLabel('Guardé la clave de instalación en un lugar seguro, fuera de esta máquina'),
     ).toBeFocused()
     await page.keyboard.press('Space')
     await go.click()

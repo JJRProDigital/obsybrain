@@ -69,7 +69,7 @@ test('the last curator of a brain stays: the screen says why, and the server ref
   expect(leave.status()).toBe(409)
   await page.reload()
   await expect(region(page, 'Miembros').getByRole('listitem').filter({ hasText: 'Eric' })).toContainText(
-    'curator',
+    'curador',
   )
 })
 
@@ -81,7 +81,7 @@ test('the last administrator stays: the screen says why, and the server refuses'
   const accounts = (await (await page.request.get('/v1/admin/accounts')).json()) as {
     accounts: Array<{ id: string; kind: string; isAdmin: boolean; status: string; email: string | null }>
   }
-  const admins = accounts.accounts.filter((a) => a.kind === 'person' && a.isAdmin && a.status === 'active')
+  const admins = accounts.accounts.filter((a) => a.kind === 'person' && a.isAdmin && a.status === 'activo')
   test.skip(admins.length !== 1, 'another e2e file made a second administrator')
   const me = admins[0]?.id as string
   await page.goto('/admin/people')
@@ -168,7 +168,7 @@ test('archiving: the brain refuses an agent write until it is unarchived', async
   ).toBeVisible()
   const refused = await write('While archived')
   expect(refused.status()).toBe(403)
-  expect(await refused.text()).toContain('archived')
+  expect(await refused.text()).toContain('archivado')
   await region(page, 'Archivar').getByRole('button', { name: 'Desarchivar este brain' }).click()
   await expect(
     page.getByRole('status').filter({ hasText: 'Settings archive volvió a estar activo.' }),

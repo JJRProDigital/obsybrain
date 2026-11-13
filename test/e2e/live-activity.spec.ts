@@ -131,10 +131,10 @@ test('CA8: an agent’s write shows in under 2 seconds; pause holds the list unt
     headers: agent,
     data: { type: 'note', title: 'Written while paused', content: 'x' },
   })
-  await expect(admin.getByRole('button', { name: 'Reanudar (1 nuevo)' })).toBeVisible({ timeout: 3_000 })
+  await expect(admin.getByRole('button', { name: 'Reanudar (1 nuevos)' })).toBeVisible({ timeout: 3_000 })
   await expect(feed(admin)).toHaveCount(before)
   await expect(feed(admin).first()).toContainText(title)
-  await admin.getByRole('button', { name: 'Reanudar (1 nuevo)' }).click()
+  await admin.getByRole('button', { name: 'Reanudar (1 nuevos)' }).click()
   await expect(feed(admin).first()).toContainText('Written while paused')
 })
 
@@ -171,7 +171,7 @@ test('the reference filter finds the writes of a session by its reference', asyn
   await admin.goto(A)
   await expect(feed(admin).filter({ hasText: 'Done in ticket 77' })).toHaveCount(1)
   await admin.locator('summary').filter({ hasText: 'Filtrar la actividad' }).click()
-  await admin.getByLabel('Reference').fill('ticket-77')
+  await admin.getByLabel('Referencia').fill('ticket-77')
   await expect(feed(admin).filter({ hasText: 'Done in ticket 77' })).toHaveCount(1)
   await expect(feed(admin).filter({ hasText: 'Live write' })).toHaveCount(0)
 })

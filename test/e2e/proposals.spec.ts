@@ -130,7 +130,7 @@ test('an agent proposes; CA17: a reader sees the inbox read-only, with whom to a
   await expect(r.getByRole('list', { name: 'Propuestas pendientes' }).getByRole('listitem')).toHaveCount(3)
   await expect(r.getByText('pide el rol de curador a un curador de Inbox e2e (Eric)')).toBeVisible()
   await r.getByRole('link', { name: 'Three pages about intros' }).click()
-  await expect(r.getByRole('article', { name: /^Change 1:/ })).toContainText('Página nueva intros/short')
+  await expect(r.getByRole('article', { name: /^Cambio 1:/ })).toContainText('Página nueva intros/short')
   await expect(r.getByRole('button', { name: 'Aprobar todo' })).toHaveCount(0)
   await expect(r.getByRole('checkbox')).toHaveCount(0)
   // The server refuses her the same.
@@ -157,7 +157,7 @@ test('CA2: at 375 px a curator approves two of three changes and returns the thi
   // The counter of the top bar leads to the inbox.
   await page
     .getByRole('banner')
-    .getByRole('link', { name: /3 proposals to review/ })
+    .getByRole('link', { name: /3 propuestas para revisar/ })
     .click()
   await expect(page).toHaveURL(new RegExp(`${INBOX}$`))
   await page.getByRole('link', { name: 'Three pages about intros' }).click()
@@ -204,7 +204,7 @@ test('CA2b: at 375 px a curator returns a proposal with a comment; nothing appli
   const p = (await (
     await request.get(`/v1/proposals/${ids.back}`, { headers: { authorization: `Bearer ${agent}` } })
   ).json()) as { proposal: { status: string } }
-  expect(p.proposal.status).toBe('returned')
+  expect(p.proposal.status).toBe('devuelto')
 })
 
 test('another curator approves it while I look: «approved by … just now», read-only', async ({
@@ -213,7 +213,7 @@ test('another curator approves it while I look: «approved by … just now», re
   baseURL,
 }) => {
   await signedInAdmin(page, baseURL as string)
-  const eva = await person(browser, page, 'Eva', 'curator')
+  const eva = await person(browser, page, 'Eva', 'curador')
   const e = await eva.newPage()
   await e.goto(`${INBOX}/${ids.live}`)
   await expect(e.getByRole('button', { name: 'Aprobar todo' })).toBeVisible()

@@ -188,7 +188,7 @@ function Card({ b, n }: { b: BrainRow; n: number }) {
         <a class="name" href={`/b/${encodeURIComponent(b.slug)}`}>
           {b.name}
         </a>
-        <span class="tag">{b.role}</span>
+        <span class="tag">{T.shell.roleWord(b.role)}</span>
         {b.status === 'archived' ? <span class="tag">{T.home.archived}</span> : null}
       </div>
       <p class="purpose">{b.purpose || <span class="muted">{T.brain.noPurpose}</span>}</p>

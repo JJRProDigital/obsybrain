@@ -2,6 +2,7 @@
 // filters of the map and the decisions, links grouped by kind, the words that changed between two
 // revisions, the `[[` autocomplete of the editor, and what an edit sends.
 import { diffArrays, diffWordsWithSpace } from 'diff'
+import { T } from '../text.ts'
 import { clientLabel } from './brains.ts'
 
 export const PAGE_TYPES = ['topic', 'entity', 'decision', 'guide', 'agent', 'source', 'overview'] as const
@@ -272,7 +273,7 @@ export function mergeList<T>(base: T[], mine: T[], theirs: T[], key: (x: T) => s
 export function changeLabel(r: { change?: string; status: string; restoredFrom?: number | null }): string {
   switch (r.change) {
     case 'status':
-      return `estado → ${r.status}`
+      return `estado → ${(T.wiki.statuses[r.status] ?? r.status).toLowerCase()}`
     case 'restored':
       return r.restoredFrom ? `restaurada la revisión ${r.restoredFrom}` : 'restaurada'
     case 'created':

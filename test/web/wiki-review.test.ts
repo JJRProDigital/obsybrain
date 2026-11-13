@@ -219,10 +219,10 @@ describe('who read a page', () => {
 describe('what a revision was', () => {
   it('says the change in words', () => {
     const r = { change: 'status', status: 'stale', restoredFrom: null }
-    assert.equal(changeLabel(r), 'status → stale')
-    assert.equal(changeLabel({ ...r, change: 'restored', restoredFrom: 2 }), 'restored revision 2')
-    assert.equal(changeLabel({ ...r, change: 'linked' }), 'linked')
-    assert.equal(changeLabel({ ...r, change: 'created' }), 'created')
+    assert.equal(changeLabel(r), 'estado → desactualizada')
+    assert.equal(changeLabel({ ...r, change: 'restored', restoredFrom: 2 }), 'restaurada la revisión 2')
+    assert.equal(changeLabel({ ...r, change: 'linked' }), 'vinculada')
+    assert.equal(changeLabel({ ...r, change: 'created' }), 'creada')
   })
 })
 

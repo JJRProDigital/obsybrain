@@ -6,7 +6,7 @@ test('the side bar line runs to the bottom of a long page', async ({ page, conte
   await scenario(context, baseURL as string, 'signed-in', { overview: 'much-data' })
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/b/growth')
-  await expect(page.getByRole('region', { name: "Today's sessions" }).getByRole('listitem')).toHaveCount(20)
+  await expect(page.getByRole('region', { name: 'Sesiones de hoy' }).getByRole('listitem')).toHaveCount(20)
   const tall = await page.evaluate(() => document.documentElement.scrollHeight)
   expect(tall, 'a long page').toBeGreaterThan(1800)
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
@@ -45,7 +45,7 @@ test('the line between side bar and content is as tall as the page (a full-page 
   await scenario(context, baseURL as string, 'signed-in', { overview: 'much-data' })
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/b/growth')
-  await expect(page.getByRole('region', { name: "Today's sessions" }).getByRole('listitem')).toHaveCount(20)
+  await expect(page.getByRole('region', { name: 'Sesiones de hoy' }).getByRole('listitem')).toHaveCount(20)
   const spans = await page.evaluate(() => {
     const x = (document.querySelector('.rail') as HTMLElement).getBoundingClientRect().right
     const bottom = document.documentElement.scrollHeight

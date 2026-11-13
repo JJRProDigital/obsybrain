@@ -1,6 +1,13 @@
 const fmt = (n: number) => n.toLocaleString('es')
 const plural = (n: number, one: string, many = `${one}s`) => `${fmt(n)} ${n === 1 ? one : many}`
 
+// Los roles de la API, en palabra: lector, colaborador, curador.
+const ROLE_WORDS: Record<string, string> = {
+  reader: 'lector',
+  contributor: 'colaborador',
+  curator: 'curador',
+}
+
 // Cada palabra de la web, en un solo lugar. Las screens importan de aquí; no guardan frases propias.
 export const T = {
   product: 'obsybrain',
@@ -23,7 +30,9 @@ export const T = {
     signingOut: 'Cerrando sesión…',
     signOutFailed: 'No se pudo cerrar la sesión. Revisa tu conexión y prueba otra vez.',
     brainNav: 'Secciones de este brain',
-    yourRole: (role: string) => `Eres ${role}`,
+    // Los roles llegan de la API como claves; se muestran en palabra.
+    roleWord: (role: string) => ROLE_WORDS[role] ?? role,
+    yourRole: (role: string) => `Eres ${ROLE_WORDS[role] ?? role}`,
     overview: 'Resumen',
     wiki: 'Wiki',
     decisions: 'Decisiones',
@@ -250,7 +259,7 @@ export const T = {
     setUp: 'obsybrain está configurado.',
     welcome: (brains: ReadonlyArray<{ name: string; role: string }>) => {
       if (!brains.length) return 'Bienvenido — tu cuenta está lista.'
-      const parts = brains.map((b) => `${b.name} como ${b.role}`)
+      const parts = brains.map((b) => `${b.name} como ${ROLE_WORDS[b.role] ?? b.role}`)
       const last = parts.pop() as string
       return `Bienvenido — te uniste a ${parts.length ? `${parts.join(', ')} y ${last}` : last}.`
     },
@@ -519,7 +528,7 @@ export const T = {
     numbers: 'En números',
     numbersAbout: 'este brain de un vistazo',
     todayAbout: 'lo que hicieron los agentes',
-    sessionsMeta: (n: number) => plural(n, 'sesión'),
+    sessionsMeta: (n: number) => plural(n, 'sesión', 'sesiones'),
     waitingAbout: 'propuestas para el wiki',
     waitingMeta: (n: number) => `${fmt(n)} esperando`,
     healthAbout: 'lo que el wiki necesita',
@@ -551,13 +560,14 @@ export const T = {
     healthTitle: 'Salud',
     healthy: 'Nada que corregir.',
     health: {
-      broken: (n: number) => plural(n, 'enlace roto'),
-      orphans: (n: number) => plural(n, 'página huérfana'),
+      broken: (n: number) => plural(n, 'enlace roto', 'enlaces rotos'),
+      orphans: (n: number) => plural(n, 'página huérfana', 'páginas huérfanas'),
       conflicts: (n: number) =>
         n === 1 ? '1 par de páginas que se contradicen' : `${n} pares de páginas que se contradicen`,
-      stale: (n: number) => plural(n, 'página desactualizada'),
-      unavailableSources: (n: number) => plural(n, 'fuente ya no disponible'),
-      long: (n: number) => plural(n, 'página por encima del límite de longitud'),
+      stale: (n: number) => plural(n, 'página desactualizada', 'páginas desactualizadas'),
+      unavailableSources: (n: number) => plural(n, 'fuente ya no disponible', 'fuentes ya no disponibles'),
+      long: (n: number) =>
+        plural(n, 'página por encima del límite de longitud', 'páginas por encima del límite de longitud'),
       similarTitles: (n: number) =>
         n === 1 ? '1 par de títulos casi iguales' : `${n} pares de títulos casi iguales`,
     } as Record<string, (n: number) => string>,
@@ -615,7 +625,7 @@ export const T = {
       string,
       string
     >,
-    asRole: (brain: string, role: string) => `${brain} como ${role}`,
+    asRole: (brain: string, role: string) => `${brain} como ${ROLE_WORDS[role] ?? role}`,
     noBrain: 'aún sin brain',
     admin: 'administrador',
     invitedBy: (who: string) => `Invitado por ${who}`,
@@ -679,7 +689,8 @@ export const T = {
     remove: (name: string) => `Eliminar a ${name}`,
     saveRole: 'Guardar rol',
     saveRoleOf: (name: string) => `Guardar el rol de ${name}`,
-    already: (name: string, role: string) => `${name} ya es ${role} — cambia su rol en la lista.`,
+    already: (name: string, role: string) =>
+      `${name} ya es ${ROLE_WORDS[role] ?? role} — cambia su rol en la lista.`,
     curatorNotService: 'Las cuentas de servicio entran como colaborador o lector, nunca como curador.',
     nothing: 'Nada cambió: no hay nada que guardar.',
     theirsOut: 'Este brain queda fuera de la búsqueda por significado.',
@@ -883,7 +894,7 @@ export const T = {
     deactivated: 'desactivado',
     makeAdmin: (name: string) => `Nombrar administrador: ${name}`,
     makeAdminShort: 'Nombrar administrador',
-    unAdmin: (name: string) => `Quitar los derechos de administrador a ${name}`,
+    unAdmin: (name: string) => `Quitar administrador: ${name}`,
     unAdminShort: 'Quitar administrador',
     nowAdmin: (name: string) => `${name} ahora es administrador.`,
     noLongerAdmin: (name: string) => `${name} ya no es administrador.`,
@@ -1446,7 +1457,7 @@ export const T = {
     readTimes: (n: number) => (n === 1 ? 'una vez' : `${fmt(n)} veces`),
     lastRead: (d: string) => `última ${d}`,
     recent: 'Cambios recientes',
-    allHistory: (n: number) => `Todas las ${plural(n, 'revisión')} y sus diferencias`,
+    allHistory: (n: number) => `Todas las ${plural(n, 'revisión', 'revisiones')} y sus diferencias`,
     // Página que no existe.
     noPageTitle: (address: string) => `No hay página en ${address}`,
     noPageLead:
@@ -1588,7 +1599,7 @@ export const T = {
     // Decisiones y registro.
     decisionsTitle: 'Decisiones',
     decisionsLead: 'Las páginas de decisión de este wiki, de la más nueva a la más vieja.',
-    decisions: (n: number) => plural(n, 'decisión'),
+    decisions: (n: number) => plural(n, 'decisión', 'decisiones'),
     decided: (d: string) => `decidida ${d}`,
     noDecisionsTitle: 'Aún sin decisiones',
     noDecisionsLead:
@@ -1823,7 +1834,7 @@ export const T = {
     uncompiled: 'Solo con entradas aún sin pasar al wiki',
     apply: 'Aplicar filtros',
     clear: 'Quitar los filtros',
-    sessionsCount: (n: number) => plural(n, 'sesión'),
+    sessionsCount: (n: number) => plural(n, 'sesión', 'sesiones'),
     sessionsList: 'Sesiones',
     noSessionsTitle: 'Todavía no se escribió nada en este diario',
     noSessionsLead:
@@ -1878,8 +1889,9 @@ export const T = {
     supersededTag: 'Reemplazada',
     expiredTag: 'Vencida',
     conflictTag: 'Con conflicto',
-    forgottenIn: (n: number) => `${fmt(n)} olvidadas`,
-    forgottenSee: (n: number) => `${fmt(n)} olvidadas — ver Olvidadas`,
+    forgottenIn: (n: number) => (n === 1 ? '1 olvidada' : `${fmt(n)} olvidadas`),
+    forgottenSee: (n: number) =>
+      n === 1 ? '1 olvidada — ver Olvidadas' : `${fmt(n)} olvidadas — ver Olvidadas`,
     forgottenCuratorsOnly: 'solo las ven los curadores',
     purgedTag: 'Purgada',
     correctionNote: 'La corrección de una persona: los agentes la reciben primero en su contexto.',
@@ -2041,7 +2053,7 @@ export const T = {
     // Olvidadas
     forgottenLead:
       'Entradas olvidadas por su autor o por un curador, con quién lo hizo y por qué. Recupera cualquiera de ellas.',
-    forgottenCount: (n: number) => plural(n, 'entrada olvidada'),
+    forgottenCount: (n: number) => plural(n, 'entrada olvidada', 'entradas olvidadas'),
     noForgottenTitle: 'Nada olvidado',
     noForgottenLead: 'Una entrada que alguien olvida aparece aquí, con quién la olvidó y por qué.',
     forgottenBy: (who: string, d: string) => `Olvidada por ${who} el ${d}`,
@@ -2050,7 +2062,7 @@ export const T = {
     // Para revisar
     toReviewLead:
       'Entradas cuya fecha de revisión pasó. Lee cada una; corrígela, olvídala, o quítale la fecha.',
-    toReviewCount: (n: number) => plural(n, 'entrada para revisar'),
+    toReviewCount: (n: number) => plural(n, 'entrada para revisar', 'entradas para revisar'),
     noReviewTitle: 'Nada para revisar',
     noReviewLead: 'Una entrada con fecha de revisión aparece aquí en cuanto esa fecha pasa.',
     reviewDue: (d: string) => `la revisión venció ${d}`,
@@ -2081,7 +2093,17 @@ export const T = {
       superseded: 'reemplazada',
     } as Record<string, string>,
     count: (n: number) => plural(n, 'propuesta'),
-    list: (status: string) => `Lista de propuestas: ${status.toLowerCase()}`,
+    list: (status: string) => {
+      const plural: Record<string, string> = {
+        pendiente: 'pendientes',
+        aprobada: 'aprobadas',
+        'aprobada en parte': 'aprobadas en parte',
+        devuelta: 'devueltas',
+        retirada: 'retiradas',
+        reemplazada: 'reemplazadas',
+      }
+      return `Propuestas ${plural[status.toLowerCase()] ?? status.toLowerCase()}`
+    },
     old: 'antigua',
     oldTitle: 'Esperando desde hace más de 30 días',
     changes: (n: number) => plural(n, 'cambio'),
@@ -2480,5 +2502,5 @@ export const T = {
     }),
 
   dateTime: (iso: string) =>
-    new Date(iso).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }) + ' UTC',
+    `${new Date(iso).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' })} UTC`,
 } as const

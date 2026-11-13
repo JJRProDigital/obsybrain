@@ -179,26 +179,32 @@ describe('activity, review of PR23', () => {
       'editó',
     )
     const created = describeEvent(
-      ev('wiki.changed', { target: { id: null, label: 'Direct create: eng/deploys' } }),
+      ev('wiki.changed', { target: { id: null, label: 'Directo: create: eng/deploys' } }),
     )
     assert.equal(created.did, 'creó la página')
     assert.equal(created.what, 'eng/deploys')
     assert.equal(
-      describeEvent(ev('wiki.changed', { target: { id: null, label: 'Direct edit: a/b' } })).did,
+      describeEvent(ev('wiki.changed', { target: { id: null, label: 'Directo: edit: a/b' } })).did,
       'editó la página',
     )
     assert.equal(
-      describeEvent(ev('wiki.changed', { target: { id: null, label: 'Direct status → retired: a/b' } })).did,
+      describeEvent(ev('wiki.changed', { target: { id: null, label: 'Estado directo → retired: a/b' } })).did,
       'marcó la página retired',
     )
     assert.equal(
-      describeEvent(ev('wiki.changed', { target: { id: null, label: 'Back to revision 3: a/b' } })).did,
+      describeEvent(ev('wiki.changed', { target: { id: null, label: 'De vuelta a la revisión 3: a/b' } }))
+        .did,
       'volvió a la revisión 3 de la página',
     )
-    for (const label of ['Direct create: x', 'Direct edit: x', 'Direct merge: x', 'Direct status → stale: x'])
+    for (const label of [
+      'Directo: create: x',
+      'Directo: edit: x',
+      'Directo: merge: x',
+      'Estado directo → stale: x',
+    ])
       assert.doesNotMatch(
         JSON.stringify(describeEvent(ev('wiki.changed', { target: { id: null, label } }))),
-        /Direct/,
+        /Directo:/,
       )
     assert.doesNotMatch(
       JSON.stringify(describeEvent(ev('entry.changed', { target: { id: 'e', label: 'forgotten' } }))),

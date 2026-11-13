@@ -72,7 +72,7 @@ test('a curator saves both exports from Settings, and they hold the brain', asyn
   const files = filesOf(readFileSync(await readable.path()))
   expect(files.get('wiki/audience/retention.md')).toContain('[[wiki/audience/intros|audience/intros]]')
   expect(files.has('index.md')).toBe(true)
-  await expect(part.getByRole('status')).toContainText('Saved obsybrain-')
+  await expect(part.getByRole('status')).toContainText('Guardado obsybrain-')
 
   await part.getByLabel('Faithful').check()
   const [faithful] = await Promise.all([

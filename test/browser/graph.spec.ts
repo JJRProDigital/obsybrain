@@ -28,7 +28,7 @@ test.describe('the graph', () => {
     await expect(page).toHaveURL(new RegExp(`${GRAPH}$`))
     await expect(page.getByRole('heading', { level: 1, name: 'Grafo' })).toBeFocused()
     await settled(page)
-    const canvas = page.getByRole('application', { name: /^Graph of \d+ items$/ })
+    const canvas = page.getByRole('application', { name: /^Grafo de \d+ elementos$/ })
     await canvas.focus()
     // The keyboard starts on a page and says which.
     const said = page.locator('[aria-live="polite"]').filter({ hasText: /Enter para inspeccionar/ })
@@ -64,8 +64,8 @@ test.describe('the graph', () => {
     await inspector.getByRole('button', { name: 'Foco: 2 saltos' }).click()
     await expect(page).toHaveURL(/focus=audience%2Fretention/)
     await expect(page).toHaveURL(/hops=2/)
-    await expect(page.getByRole('table', { name: 'Retention and its neighbours' })).toBeVisible()
-    await page.getByRole('button', { name: '1 hop', exact: true }).click()
+    await expect(page.getByRole('table', { name: 'Retention y sus vecinas' })).toBeVisible()
+    await page.getByRole('button', { name: '1 salto', exact: true }).click()
     await expect(page).not.toHaveURL(/hops=2/)
     await page.getByRole('button', { name: 'Grafo' }).click()
     await settled(page)
@@ -88,9 +88,9 @@ test.describe('the graph', () => {
     await expect(page).toHaveURL(/type=decision/)
     await expect(count).not.toHaveText(all ?? '')
     await page.getByLabel('Tipo de enlace', { exact: true }).selectOption('contradicts')
-    await page.getByLabel('Words', { exact: true }).fill('zzzz-nothing')
+    await page.getByLabel('Palabras', { exact: true }).fill('zzzz-nothing')
     await expect(page.getByText('No hay resultados para estos filtros.')).toBeVisible()
-    await page.getByRole('button', { name: 'Quitar los filtros' }).first().click()
+    await page.getByRole('button', { name: 'Quitar los filtros' }).first().first().click()
     await expect(page).not.toHaveURL(/type=|q=|linkKind=/)
     await settled(page)
   })
@@ -138,7 +138,7 @@ test.describe('the list (CA5: everything the graph does, by keyboard)', () => {
     await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 300 })
     await page.goto(`${GRAPH}?view=list`)
     const table = page.getByRole('table', { name: /Páginas del wiki/ })
-    await expect(table.getByRole('caption')).toContainText('1–50 of 282 pages')
+    await expect(table.getByRole('caption')).toContainText('1–50 de 282 páginas')
     await expect(table.locator('tbody tr')).toHaveCount(50)
     // Sort by links in, the most first: by keyboard.
     await table.getByRole('button', { name: 'Ordenar por Enlaces hacia dentro, ascendente' }).focus()
@@ -155,24 +155,24 @@ test.describe('the list (CA5: everything the graph does, by keyboard)', () => {
     expect([...nums].sort((a, b) => b - a)).toEqual(nums)
     // The next page, and back.
     await page.getByRole('button', { name: 'Siguiente' }).click()
-    await expect(table.getByRole('caption')).toContainText('51–100 of 282 pages')
+    await expect(table.getByRole('caption')).toContainText('51–100 de 282 páginas')
     await page.getByRole('button', { name: 'Anterior' }).click()
-    await expect(table.getByRole('caption')).toContainText('1–50 of 282 pages')
+    await expect(table.getByRole('caption')).toContainText('1–50 de 282 páginas')
     // Filtered the same way as the graph.
     await openFilters(page)
     await page.getByLabel('Tipo', { exact: true }).selectOption('decision')
-    await expect(table.getByRole('caption')).not.toContainText('of 282 pages')
+    await expect(table.getByRole('caption')).not.toContainText('de 282 páginas')
     for (const cell of await table.locator('tbody tr td:nth-of-type(2)').allTextContents())
-      expect(cell).toBe('Decision')
+      expect(cell).toBe('Decisión')
     // Every action of the inspector is on the row: inspect, open the page, focus.
     const row = table.locator('tbody tr').first()
     await expect(row.getByRole('link')).toHaveAttribute('href', /\/b\/growth\/pages\//)
-    await row.getByRole('button', { name: /^Inspect / }).click()
+    await row.getByRole('button', { name: /^Inspeccionar / }).click()
     const inspector = page.getByRole('complementary', { name: /^Inspector \S/ })
     await expect(inspector.getByRole('link', { name: 'Abrir página' })).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(inspector).toHaveCount(0)
-    await expect(row.getByRole('button', { name: /^Inspect / })).toBeFocused()
+    await expect(row.getByRole('button', { name: /^Inspeccionar / })).toBeFocused()
   })
 
   test('5 000 pages: the groups open one by one from the list too; the list stays whole', async ({
@@ -185,9 +185,9 @@ test.describe('the list (CA5: everything the graph does, by keyboard)', () => {
     const groups = page.getByRole('table', { name: 'Grupos del wiki' })
     await expect(groups.locator('tbody tr')).toHaveCount(12)
     await expect(page.getByRole('table', { name: /Páginas del wiki/ }).getByRole('caption')).toContainText(
-      'of 4,728 pages',
+      'de 4728 páginas',
     )
-    const open = groups.getByRole('button', { name: /^Open group / }).first()
+    const open = groups.getByRole('button', { name: /^Abrir el grupo / }).first()
     const name = ((await open.getAttribute('aria-label')) ?? '').replace('Abrir el grupo ', '')
     await open.focus()
     await page.keyboard.press('Enter')
@@ -230,7 +230,7 @@ test.describe('states', () => {
   }) => {
     await scenario(context, baseURL as string, 'signed-in', {}, { seeded: 5000 })
     await page.goto(GRAPH)
-    await expect(page.getByText(/This wiki has [\d,]+ pages, so it is drawn by groups/)).toBeVisible()
+    await expect(page.getByText(/Este wiki tiene [\d.]+ páginas, así que se dibuja por grupos/)).toBeVisible()
     await settled(page)
     await page.locator('canvas.graph-canvas').focus()
     await page.keyboard.press('Enter')
@@ -238,7 +238,7 @@ test.describe('states', () => {
     await inspector.getByRole('button', { name: 'Abrir grupo' }).click()
     await expect(page).toHaveURL(/group=/)
     await settled(page)
-    await expect(page.getByRole('application', { name: /^Graph of \d+ items$/ })).toBeVisible()
+    await expect(page.getByRole('application', { name: /^Grafo de \d+ elementos$/ })).toBeVisible()
   })
 
   for (const width of [320, 375]) {

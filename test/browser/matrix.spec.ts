@@ -78,8 +78,12 @@ const muchOf = (r: Row, page: Page) =>
     ? r.muchShows(page)
     : page
         .getByRole('main')
-        .getByRole('button', { name: /more|show all|next/i })
-        .or(page.getByRole('main').getByRole('link', { name: /more|show all|next/i }))
+        .getByRole('button', { name: /^(más\b|mostrar\b.*\b(más|todas|todos|los)\b|siguiente\b)/i })
+        .or(
+          page
+            .getByRole('main')
+            .getByRole('link', { name: /^(más\b|mostrar\b.*\b(más|todas|todos|los)\b|siguiente\b)/i }),
+        )
 
 const keyOf = (r: Row) => (isNa(r.key) ? null : r.key)
 
@@ -122,7 +126,7 @@ for (const r of ROWS) {
         await expect(w).toHaveAttribute('aria-disabled', 'true')
         const why = await w.getAttribute('aria-describedby')
         expect(why, 'the button names its reason').toBeTruthy()
-        await expect(page.locator(`[id="${why}"]`)).toContainText('offline')
+        await expect(page.locator(`[id="${why}"]`)).toContainText('sin conexión')
       }
       await nothingCut(page, `${r.name} offline`)
       await context.setOffline(false)
@@ -173,7 +177,7 @@ for (const r of ROWS) {
         await open(page, context, baseURL as string, r, { [key]: 'forbidden' })
         const alert = page.locator('[role="alert"][data-state="forbidden"]').first()
         await expect(alert).toContainText('No puedes abrir esto')
-        await expect(alert).toContainText(/ask|curator|administrator/i)
+        await expect(alert).toContainText(/pide|curador|administrador/i)
         await expect(alert.getByRole('button', { name: 'Probar otra vez' })).toHaveCount(0)
         // The web's words, with a way out: never an API route.
         await expect(alert.getByRole('link', { name: 'Ir a tus brains' })).toBeVisible()
@@ -201,7 +205,7 @@ for (const r of ROWS) {
         const none = page.locator('[data-state="filtered-empty"]').first()
         await expect(none).toBeVisible()
         await nothingCut(page, `${r.name} filtered empty`)
-        await none.getByRole('button', { name: /clear|show all/i }).click()
+        await none.getByRole('button', { name: /quitar|mostrar/i }).click()
         await expect(r.ready(page)).toBeVisible()
       })
 
