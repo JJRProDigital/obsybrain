@@ -1,16 +1,17 @@
-# The obsybrain web
+# La web de obsybrain
 
-The web is how people use obsybrain: they read the wiki and its graph, follow what agents do, approve or
-return proposals, correct the journal, connect their agents and run the installation. Agents use the
-same server over MCP and HTTP; the web is for the people around them.
+La web es como las personas usan obsybrain: leen el wiki y su grafo, siguen lo que hacen los agentes,
+aprueban o devuelven propuestas, corrigen el diario, conectan sus agentes y administran la instalación. Los
+agentes usan el mismo servidor por MCP y HTTP; la web es para las personas que los rodean.
 
-It is one page application (Preact, Vite) that the obsybrain process serves on the same address as the
-API. It calls only the public API at `/v1` and the live events, with the same permissions a program has:
-there are no private routes. Anything the web can do, a program with the same role can do.
+Es una aplicación de una sola página (Preact, Vite) que el proceso de obsybrain sirve en la misma dirección
+que la API. Solo llama a la API pública en `/v1` y a los eventos en vivo, con los mismos permisos que tiene
+un programa: no hay rutas privadas. Todo lo que la web puede hacer, un programa con el mismo rol puede
+hacerlo.
 
-The text of the web is in English and lives in `src/text.ts`, so it can be translated later.
+El texto de la web está en español y vive en `src/text.ts`.
 
-## Run it in development
+## Córralo en desarrollo
 
 ```sh
 npm install
@@ -19,76 +20,85 @@ OBSY_BRAIN_PORT=4100 node dist/cli/main.js serve   # with OBSY_BRAIN_PG_URL set
 npm run web:dev                     # Vite on port 5173; it forwards /v1, /mcp, /oauth and /.well-known to 4100
 ```
 
-Open <http://localhost:5173>. The first visit runs the first-time setup.
+Abre <http://localhost:5173>. La primera visita hace la configuración inicial.
 
-Without a database, walk the web against the fixture of the API instead:
+Sin base de datos, recorre la web contra el fixture de la API:
 
 ```sh
 npm run build
 node test/web/fixture/main.ts       # the fixture and the built web on port 4173
 ```
 
-Open <http://127.0.0.1:4173/__fixture/use?preset=signed-in> (or `fresh`, `signed-out`, `member`,
-`alone`, `insecure`). Each preset is a scenario of its own: sign-ins, data and forced states.
+Abre <http://127.0.0.1:4173/__fixture/use?preset=signed-in> (o `fresh`, `signed-out`, `member`,
+`alone`, `insecure`). Cada preset es un escenario propio: inicios de sesión, datos y estados forzados.
 
-### Pick a port browsers accept
+### Elige un puerto que los navegadores acepten
 
-Browsers and `fetch` refuse some ports outright (the «bad ports» of the Fetch standard), whatever the
-server says. Among them: 4190, 5060, 5061, 6000, 6566, 6665–6669, 6697 and 10080. An installation on one of
-those ports answers `curl` but not the web, the bridge or the Claude Code hooks. Use another port, such as
-the default 8090, or put obsybrain behind a reverse proxy on 443.
+Los navegadores y `fetch` se niegan a algunos puertos sin más (los «bad ports» del estándar Fetch), diga lo
+que diga el servidor. Entre ellos: 4190, 5060, 5061, 6000, 6566, 6665–6669, 6697 y 10080. Una instalación en
+uno de esos puertos responde `curl` pero no la web, el puente ni los hooks de Claude Code. Usa otro puerto,
+como el 8090 por defecto, o pon obsybrain detrás de un proxy inverso en el 443.
 
-## How the code is laid out
+## Cómo está organizado el código
 
-- `src/screens/` paints the screens. A screen holds no logic it can avoid: what decides goes in `src/lib/`.
-- `src/lib/` holds the logic of the screens (filters, the live check, settings, the shortcuts), without
-  the DOM, so node tests reach it.
-- `src/api/` is the client of the API: one call per operation, a cache with `useFresh`, and drafts.
-- `src/live/` follows a brain's events (reconnects, catches up from the last id, lets go when the tab hides).
-- `src/graph/` lays the graph out in a worker and paints it on a canvas, so no task blocks the page.
-- `src/ui/` holds the shared parts: buttons that say why they are off, fields, dialogs and the states of a
-  screen (`states.tsx`: loading, empty, filtered empty, error, offline, no access).
+- `src/screens/` pinta las pantallas. Una pantalla no guarda la lógica que puede evitar: lo que decide va en
+  `src/lib/`.
+- `src/lib/` guarda la lógica de las pantallas (filtros, la comprobación en vivo, configuración, atajos), sin
+  el DOM, para que los tests de node la alcancen.
+- `src/api/` es el cliente de la API: una llamada por operación, una caché con `useFresh` y borradores.
+- `src/live/` sigue los eventos de un brain (reconexiones, puesta al día desde el último id, suelta cuando la
+  pestaña se esconde).
+- `src/graph/` distribuye el grafo en un worker y lo pinta en un canvas, así ninguna tarea bloquea la página.
+- `src/ui/` guarda las piezas compartidas: botones que dicen por qué están desactivados, campos, diálogos y
+  los estados de una pantalla (`states.tsx`: cargando, vacío, vacío por filtro, error, sin conexión, sin
+  acceso).
 
-Rules every screen follows:
+Reglas que sigue cada pantalla:
 
-- Every screen has all its states (spec B6 «Estados en todas las pantallas»). `test/browser/matrix.spec.ts`
-  holds the list of screens and states; a new route without a row fails it.
-- Writes are off while offline or while sending, and say why next to the button (`Button` with `blocked`).
-- The keyboard never falls to the page body after an action: `src/lib/landing.ts` decides where it lands.
-- No editable empty box while a saved value is still loading.
-- Drafts stay in memory, or are keyed by account; passwords, codes, tokens and keys are never stored.
-- The server decides who may do what. The web hides what a role cannot do, but never relies on that.
+- Cada pantalla tiene todos sus estados (spec B6 «Estados en todas las pantallas»).
+  `test/browser/matrix.spec.ts` guarda la lista de pantallas y estados; una ruta nueva sin su fila la hace
+  fallar.
+- Las escrituras están desactivadas sin conexión o mientras se envían, y dicen por qué junto al botón
+  (`Button` con `blocked`).
+- El teclado nunca cae en el body de la página después de una acción: `src/lib/landing.ts` decide dónde
+  aterriza.
+- Ninguna caja editable vacía mientras un valor guardado todavía carga.
+- Los borradores se quedan en memoria, o se indexan por cuenta; contraseñas, códigos, tokens y claves nunca
+  se guardan.
+- El servidor decide quién puede hacer qué. La web esconde lo que un rol no puede hacer, pero nunca confía en
+  eso.
 
-## How it is tested
+## Cómo se testa
 
-Three layers, from fast to real:
+Tres capas, de la más rápida a la más real:
 
-1. **Node tests** (`test/web/*.test.ts`, run by `npm test`): the logic in `src/lib/`, the graph's layout
-   and model, the API client and the conformance of the fixture.
-2. **Browser tests against the fixture** (`test/browser/*.spec.ts`, `npm run test:web`): the built web in
-   Chromium against a fixture of the API (`test/web/fixture/`), with no database. CI runs these. They
-   cover every screen and state at 320 px (`matrix.spec.ts`), the accessibility audit with axe in the
-   light and dark themes (`axe.spec.ts` and the audits in each screen's spec), the keyboard, and the
-   timing of the graph (CA5, CA6; CI is the judge for timing).
-3. **End-to-end tests** (`test/e2e/*.spec.ts`, `npm run test:e2e`): the built web against the real server
-   and PostgreSQL (`OBSY_BRAIN_PG_URL`), one worker, mail captured. They run locally in `scripts/verify.sh`
-   when PostgreSQL answers; CI has no PostgreSQL and says so. CA1 (from the invitation to a connected
-   agent) is counted here and printed by `verify.sh`.
+1. **Tests de node** (`test/web/*.test.ts`, corridos por `npm test`): la lógica en `src/lib/`, la
+   distribución y el modelo del grafo, el cliente de la API y la conformidad del fixture.
+2. **Tests de navegador contra el fixture** (`test/browser/*.spec.ts`, `npm run test:web`): la web
+   construida en Chromium contra un fixture de la API (`test/web/fixture/`), sin base de datos. CI los corre.
+   Cubren cada pantalla y estado a 320 px (`matrix.spec.ts`), la auditoría de accesibilidad con axe en los
+   temas claro y oscuro (`axe.spec.ts` y las auditorías en el spec de cada pantalla), el teclado y el timing
+   del grafo (CA5, CA6; CI es el juez del timing).
+3. **Tests de extremo a extremo** (`test/e2e/*.spec.ts`, `npm run test:e2e`): la web construida contra el
+   servidor real y PostgreSQL (`OBSY_BRAIN_PG_URL`), un worker, correo capturado. Corren localmente en
+   `scripts/verify.sh` cuando PostgreSQL responde; CI no tiene PostgreSQL y lo dice. CA1 (de la invitación a
+   un agente conectado) se cuenta aquí y la imprime `verify.sh`.
 
-`npm run verify` runs them all, with lint, types, the build and the dependency audit.
+`npm run verify` los corre todos, con lint, tipos, build y auditoría de dependencias.
 
-### The fixture and the contract
+### El fixture y el contrato
 
-The fixture lets CI test the web without a database, so it must not drift from the server:
+El fixture deja a CI testear la web sin base de datos, así que no puede separarse del servidor:
 
-- Every answer the fixture gives is checked against the description of `/v1` that the server generates
-  from its own route table (`test/web/fixture.test.ts`). A field the server does not describe fails.
-- The main answers of `/v1` are pinned in `test/api/contract.test.ts`, which also calls the real server.
-  A new field is added to the server, its description and the pin, then to the fixture.
-- A state of a screen is forced per scenario (`scenario(context, url, preset, { screen: state })`):
-  `loading`, `empty`, `filtered-empty`, `error`, `forbidden` and `much-data`. A screen's operations name
-  their screen in the fixture's table, so the state reaches every answer the screen reads.
-- The graph's data comes from a seeded generator (`web/test/data/generate.ts`): the same seed gives the
-  same 300 or 5 000 pages to the fixture and to the real server.
-- Tests wait for the requests in flight before they assert, and never rely on the time a request takes.
-  Linux fonts are wider than macOS ones: a test of fit measures, it does not assume widths.
+- Cada respuesta que da el fixture se comprueba contra la descripción de `/v1` que el servidor genera de su
+  propia tabla de rutas (`test/web/fixture.test.ts`). Un campo que el servidor no describe hace fallar el
+  test.
+- Las respuestas principales de `/v1` están fijadas en `test/api/contract.test.ts`, que también llama al
+  servidor real. Un campo nuevo se agrega al servidor, a su descripción y al pin, y después al fixture.
+- Un estado de pantalla se fuerza por escenario (`scenario(context, url, preset, { screen: state })`):
+  `loading`, `empty`, `filtered-empty`, `error`, `forbidden` y `much-data`. Las operaciones de una pantalla
+  nombran su pantalla en la tabla del fixture, así el estado llega a cada respuesta que la pantalla lee.
+- Los datos del grafo vienen de un generador con semilla (`web/test/data/generate.ts`): la misma semilla da
+  las mismas 300 o 5 000 páginas al fixture y al servidor real.
+- Los tests esperan las peticiones en vuelo antes de asertar, y nunca dependen del tiempo que tarda una
+  petición. Las fuentes de Linux son más anchas que las de macOS: un test de encaje mide, no supone anchos.

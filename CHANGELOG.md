@@ -1,159 +1,49 @@
 # Changelog
 
-What each published version of obsybrain changes. Every release carries the same notes, the launcher
-`obsybrain.sh` as a file of the release and its SHA-256. Versions follow `vX.Y.Z`; updates only move
-forward.
+Lo que cambia cada versión publicada de obsybrain. Cada release lleva las mismas notas, el lanzador
+`obsybrain.sh` como archivo del release y su SHA-256. Las versiones siguen `vX.Y.Z`; las actualizaciones solo
+avanzan.
 
 ## v0.7.0
 
-A trusted agent clears the queue of proposals without opening the web.
+Primera versión de ObsyBrain: el brain de memoria y conocimiento para tus agentes de IA, en tu propio
+servidor, con la identidad de Obsessive Solutions y el producto entero en español.
 
-- **Deciding proposals with a key.** A key a curator let write to the wiki of a brain can also decide its
-  proposals, by MCP (`brain_review`, `brain_decide`) or the API, with the same four choices as the web: approve
-  it all, approve part and send the rest back with a comment, correct an operation and approve, or send it all
-  back. It reads the same review a curator sees first, and only what it read is approved: if the proposal
-  changed, nothing applies and the current review comes back. Repeating a decision with the same request key
-  decides once.
-- **Who decided, with which key.** The log and the activity say a proposal was decided by its key's owner with
-  that key. The agent that proposed gets the comment as a correction, whoever decided.
-- **The queue to decide.** `brain_proposals` lists everyone's proposals with `"mine": false`.
-- Without the permission, a key still cannot decide, and taking the permission back counts from the next
-  request, even between reading a proposal and deciding it.
-
-## v0.6.0
-
-Trusted agents keep the wiki up to date by themselves, and search puts the right page first.
-
-- **Writing to the wiki directly.** A curator can let one key write to the wiki of their brain, on the token
-  in the profile, when making it or later. Its changes apply at once, each with a revision and a line in the
-  log that says which key wrote it, and are undone like any other. Without the permission, an agent proposes
-  as before. The curator takes it back at any time, and it counts from the next request.
-- **Warnings with every change.** Proposing, writing or just checking a change answers with what it would
-  leave incoherent: a title almost the same as another, a link to nowhere, a page left with no links, a stale
-  page or an open contradiction touched. And with the pages linked to it, for the agent to read. Warnings
-  never block.
-- **A daily cleanup.** When nobody cleaned a wiki in a day and its health has problems, the agent that starts
-  work there is asked to clean it, with the report. This replaces the reminder every so many approvals; the
-  Health screen says when the last cleanup was.
-- **Better search order.** With the optional `pg_search` extension, results are ranked by BM25: a rare word
-  counts more than a common one, and a word in the title more than in the text. With search by meaning on,
-  words and meaning are mixed so a result found both ways comes first; the optional `pgvector` extension
-  works out closeness. Without them, search works as before.
-- **Copies with the standard tools.** A copy made with `pg_dump` now restores whole with `pg_restore` into a
-  new database.
-
-## v0.5.0
-
-The graph is a flat, living picture you can take in your hands.
-
-- **Pages you can move.** The graph lies flat and settles by itself: linked pages pull together, the rest
-  spread out, and then it rests. Drag any page and its neighbours follow it; let go and it finds its place
-  again. Drag the background to move the picture; the wheel, a pinch or the buttons zoom, Fit brings it all
-  back.
-- **Coloured by community.** Pages that link a lot to each other form a community, each in a colour of its
-  own, with its most linked page as its name. The Communities panel at the right lists them, biggest first,
-  with how many pages each holds: untick one to hide it, or use Select all. The panel folds away.
-- **No words in the way.** The canvas is dots and lines only. Point at a page to see its title and address
-  beside it, with its links lit up. Click it and it stays lit with its neighbours, the rest fades, and the
-  inspector shows its summary, type, links and Open page in words big enough to read.
-- **Pages without links around the edge.** They sit evenly on a ring around everything else, in their own
-  grey, listed as No links.
-- **Calmer.** No more turning cloud, light running along the lines or cards cycling through pages. With
-  reduced motion the graph is worked out out of sight and drawn once, still.
-
-## v0.4.1
-
-Nothing sits against the left edge with half the screen empty.
-
-- **Empty, error and "nothing here" screens** fill the work area, their words in the middle, instead of a small card at the left.
-- **First steps** of a new brain use the whole width, the three steps side by side.
-- **The wiki's map** lays each folder out in as many columns as the screen holds, instead of one long column.
-
-## v0.4.0
-
-A new face for the web: a canvas you can turn, in a dark style.
-
-- **An icon rail and the full width.** The navigation is a narrow rail of icons at the left (their names on
-  hover and to screen readers), and every screen uses the whole window.
-- **A dark style.** Dark panels with numbered heads and a colour each, in one monospaced face (JetBrains Mono,
-  served by the installation itself). Light is still there: choose it in the account menu.
-- **The graph is a cloud that turns.** The wiki's pages float in three dimensions around the brain, one colour
-  and one shape for each kind of page, with a legend that counts them. It turns slowly when you leave it alone;
-  light runs along the links, and a card shows one page after another with where it comes from. At first sight
-  each page shows only its strongest links, and the pages without links lie in a row underneath.
-- **Your hands on it.** Drag to turn it, zoom past Fit and the drag moves it instead; two fingers move and
-  pinch it. A touch, a key or the pointer stops it, and it turns again after a short rest. Click a page to
-  open it in the inspector; the arrow keys walk from page to page.
-- **Still when you ask.** With reduced motion in the system nothing moves: the cloud is drawn once, from a
-  fixed angle. Nothing moves either while the tab or the canvas is out of sight.
-- **List, the same as text.** Every page of the graph is also in List, a table you can sort and filter: the
-  alternative for a screen reader or for anyone who prefers reading.
-- **The list screens redone.** Brains, the brain's overview, the wiki, its map, history and proposals take the
-  new panels: what matters first, the counts at a glance, the actions where you need them.
-
-## v0.3.0
-
-Update obsybrain from its own web, and know what version is out.
-
-- **Updating from the web, off by default.** `obsybrain.sh web-updates enable` starts a small updater in a
-  container of its own. Whoever controls it controls the server, and `enable` says so. A private repository
-  needs a read-only token or SSH key given as a file.
-- **The button.** Administration › Backups & system offers «Update to vX.Y.Z» to an administrator, who confirms
-  with their password. One update at a time, **Try again** after a failure (at most 3 times, 15 minutes apart),
-  and the page follows the update to its result. If the update cannot start, the page says what is missing and
-  how to fix it. If a way back could not restore your data, the page says so and gives the steps for the
-  server instead of offering to try again. An installation made by rsc-factory has no button: update it there.
-- **See what is new.** `obsybrain.sh update --check` shows the version running, the newest published and what
-  it changes, without stopping anything. A private repository says so instead of claiming it is up to date.
-- **Something answers during an update.** While the service restarts, a page says so (503 with `Retry-After`
-  for programs) instead of a dead port.
-- **Safer updates on Linux.** If Docker made the `update` folders for root, `update` and `web-updates enable`
-  say the exact `sudo chown` line instead of failing and rolling back.
-- **`GET /v1/health` says the version to a valid key.** Without one it still does not.
-
-## v0.2.0
-
-obsybrain as rsc-factory's memory: rsc-factory can install it, set it up and work with it.
-
-- **Installed by rsc-factory (companion mode).** `obsybrain.sh install --companion --attach-network
-  NAME --factory-url URL` joins the network rsc-factory shares as `obsybrain`, with no Caddy of its own,
-  and waits: its setup page says to finish in rsc-factory. rsc-factory's setup then calls
-  `POST /v1/setup/companion` with the one-time key from the `--json` summary (`companionToken`) and
-  gets the administration and its service account in one go. The call answers only while obsybrain is
-  not set up, only from the shared network, and only once. A main key lost afterwards is replaced with
-  `POST /v1/setup/companion/reconnect` (the one-time key and an administrator's password).
-- **What a service asks for the people it serves.** `POST /v1/access` tells a service which role a
-  person has in the brains it belongs to; a service allowed to invite brings people into the brains it
-  created (`POST /v1/brains/{slug}/invitations`). It only ever raises a role, never lowers one, takes
-  over someone else's open invitation only when the new mail goes out, and is held to an hourly
-  invitation quota (`OBSY_BRAIN_SERVICE_INVITES_PER_HOUR`). Brain listings say `createdByYou`.
-- **Context names what it gave.** The context an agent starts with now lists each entry and page it
-  included (`items`), so the program running the agent can say which correction reached it.
-- **On behalf of.** An entry an agent writes with a short key made on behalf of a person now names
-  that person; older entries are filled in on update where the key still says who it was.
-- **Fixes.** A role picker that could put the old role back under load, and the same race in
-  sessions, corrections and the wiki log; the "Get started" command wraps cleanly on a phone.
-
-## v0.1.0
-
-The first release: a knowledge server for AI agents that anyone can install.
-
-- **The journal and the wiki.** Agents write freely to a journal of entries (decisions, findings,
-  notes); people approve what goes into the wiki through proposals. Search by words, and by meaning
-  when a provider is set up.
-- **For agents.** An MCP endpoint and an HTTP API, the standard sign-in for MCP clients, short keys
-  for an agent's session, a bridge for agents that only start local programs, and a reminder hook.
-- **For people.** A web to read and curate each brain: overview, journal, wiki with its graph,
-  proposals, activity live, health, settings, people and tokens; an administration with accounts,
-  email, meaning search, the audit, and backups & system.
-- **Install in one command.** `obsybrain.sh install` on this machine or on a server with a domain
-  (HTTPS by itself), with its own PostgreSQL, an existing one, or one shared with another program.
-- **Copies and restore.** Encrypted copies every day (and by hand), restored here or on another
-  installation with the installation key; the key can be rotated (`obsybrain.sh key rotate`).
-- **Export and import.** A brain exported as a folder that opens as an Obsidian vault, or as a
-  faithful copy; a documentation folder (or a faithful export) imported into an empty brain.
-- **Update with rollback.** `obsybrain.sh update` makes a copy first, refuses writes while it
-  migrates, and goes back to the version before by itself if anything fails, Ctrl-C included. An
-  update killed halfway is taken back by the next command; a key rotation
-  killed halfway is finished by the next `key rotate`. Release candidates are ordered as semver
-  says.
+- **Todo el producto en español.** Interfaz web, correos, mensajes de error de la API y documentación, en
+  español neutral con tuteo. El sustantivo contenedor queda «brain» en minúscula.
+- **Identidad propia.** Paleta Ink/Oro/Paper y tipografías Playfair Display, Inter e IBM Plex Mono
+  autoalojadas (OFL-1.1), marca propia y branding por defecto editable desde Administración.
+- **Instalación en un comando.** El lanzador `obsybrain.sh` instala en esta máquina (`install --local`, web en
+  http://localhost:8090) o en un servidor con dominio y HTTPS por sí solo (`install --domain`, con Caddy),
+  con su propio PostgreSQL, con uno existente o compartido con otro programa. Sin preguntas con todas las
+  opciones y `--yes`; resumen `--json` para programas; reinstalar aplica solo los cambios y conserva clave,
+  contraseñas y datos.
+- **Distribución por Docker.** Imagen propia (servidor, web y migraciones en Node 25, usuario sin
+  privilegios, healthcheck en `GET /v1/health`) y lanzador descargable por release con su SHA-256.
+- **Para los agentes.** Servidor MCP en `/mcp` (Streamable HTTP; inicio de sesión estándar OAuth 2.1 con
+  PKCE) con las herramientas `mem_*` y `brain_*`; API v1 en `/v1` (OpenAPI 3.1 en `GET /v1/openapi.json`; es
+  un contrato, los cambios que rompen van a `/v2`); tokens personales con caducidad, claves cortas por
+  sesión, cuentas de servicio con rotación de clave, un puente (`obsybrain bridge`) para clientes que solo
+  arrancan programas MCP locales, y el recordatorio con hooks de Claude Code.
+- **Diario y wiki.** Los agentes guardan entradas con comprobantes, sin duplicados al reintentar y con los
+  secretos quitados antes de guardar; el wiki se compila en páginas tipadas con enlaces tipados que citan
+  sus fuentes; propuestas que un curador aprueba, corrige o devuelve; escritura directa con permiso por
+  clave y por brain; avisos de salud (títulos casi iguales, enlaces rotos, huérfanos, páginas viejas,
+  contradicciones abiertas) y limpieza diaria cuando nadie limpió en un día.
+- **Búsqueda.** Por palabras, sin distinguir acentos, en español e inglés, ordenada por BM25 con la extensión
+  opcional `pg_search`; búsqueda por significado opcional (OpenAI u Ollama local), mezclada con las palabras
+  por fusión de rango recíproco con la extensión opcional `pgvector`.
+- **Copias y restauración.** Copia cifrada cada día a las 03:00 (guarda las últimas 14) y copias a demanda,
+  restaurables aquí o en otra instalación con la clave de instalación, que se puede rotar (`key rotate`) sin
+  perder sesiones ni tokens.
+- **Actualizaciones con vuelta atrás.** `update` trae y construye la versión nueva mientras la instalada
+  sigue sirviendo, migra en mantenimiento y revierte solo si algo falla (Ctrl-C incluido); `update --check`
+  consulta sin tocar nada; `web-updates enable` arranca un actualizador en su contenedor para actualizar
+  desde la web, con confirmación por contraseña y segundo factor.
+- **Modo compañero.** Otro producto puede instalarlo y configurarlo en una red compartida
+  (`install --companion`): la configuración llega por `POST /v1/setup/companion` con una clave de un solo
+  uso, y una clave principal perdida se reemplaza con `POST /v1/setup/companion/reconnect`.
+- **Gobierno y auditoría.** Roles curator, contributor y reader con invitaciones por correo de 72 horas;
+  conexiones de apps revocables; eventos en vivo por SSE con `Last-Event-ID`; registro de auditoría que la
+  base de datos no deja cambiar; límite de peticiones configurable; exportación de un brain como vault de
+  Obsidian o copia fiel, e importación de una carpeta de documentación en un brain vacío.

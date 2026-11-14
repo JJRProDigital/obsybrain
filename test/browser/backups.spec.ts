@@ -231,7 +231,7 @@ test.describe('Admin › Backups & system: restoring', () => {
     await expect(dialog).toContainText('Escribe el nombre de esta instalación: obsybrain')
     expect(sent).toBe(0)
     // A name not exactly the installation's.
-    await dialog.getByLabel('Nombre de esta instalación').fill('RSC-brain')
+    await dialog.getByLabel('Nombre de esta instalación').fill('Otro nombre')
     await dialog.getByLabel('Tu contraseña').fill(PASSWORD)
     await dialog.getByRole('button', { name: 'Restaurar esta copia' }).click()
     await expect(dialog).toContainText('Escribe el nombre exactamente como es: obsybrain')

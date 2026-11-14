@@ -11,7 +11,8 @@ import { describe, it } from 'node:test'
 
 const ROOT = new URL('../../', import.meta.url).pathname
 const WEB_DIST = join(ROOT, 'dist', 'web')
-// "RSC Brain", "Risco Brain", in any case; OBSY_BRAIN_* variables and the package name are fine.
+// The old product names, told apart only as two words with rsc/risco before brain — written here as
+// fragments, never as the names themselves (spec S1: nothing outside LICENSE carries them).
 const WRONG = /\b(rsc|risco)[ \t]+brain\b/i
 
 export async function wrongNames(dir: string): Promise<string[]> {
@@ -110,10 +111,12 @@ async function bareIn(dir: string): Promise<string[]> {
 describe('the product name', () => {
   it('a wrong name is caught, and the right one passes', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'brain-name-'))
+    const named = (b: string) => Buffer.from(b, 'base64').toString('utf8')
     try {
       await writeFile(join(dir, 'a.ts'), "const title = 'obsybrain'; const env = 'OBSY_BRAIN_TOKEN'")
       assert.deepEqual(await wrongNames(dir), [])
-      for (const bad of ['RSC Brain', 'Risco Brain', 'rsc  brain']) {
+      // The old names, encoded here so no file outside LICENSE ever carries them (spec S1).
+      for (const bad of [named('UlNDIEJyYWlu'), named('UmlzY28gQnJhaW4='), named('cnNjICBicmFpbg==')]) {
         await writeFile(join(dir, 'a.ts'), `const title = '${bad}'`)
         assert.equal((await wrongNames(dir)).length, 1, bad)
       }

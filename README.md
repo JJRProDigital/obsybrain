@@ -1,31 +1,32 @@
 # obsybrain
 
-**The memory your AI agents are missing, and the one your company can keep.**
+**La memoria que le falta a tus agentes de IA, y la que tu empresa puede conservar.**
 
-Every AI agent you use starts from zero. It does not remember the decision you made last Tuesday, the bug it
-already fixed twice, the customer who hates being called before ten, or why the billing service is built the way
-it is. You explain it again. Then another agent, another tool or another colleague needs it, and you explain it
-again. Whatever it learned leaves with the session.
+Cada agente de IA que usas arranca de cero. No recuerda la decisión que tomaste el martes pasado, el bug que
+ya arregló dos veces, el cliente al que no hay que llamar antes de las diez ni por qué el servicio de
+facturación está construido como está. Se lo explicas otra vez. Después otro agente, otra herramienta u otro
+colega lo necesita, y se lo explicas otra vez. Lo que aprendió se va con la sesión.
 
-obsybrain is where that knowledge stays. It runs on your own server. Every agent that connects to it reads what
-the team already knows before it works, and writes down what it learned after. People decide what becomes the
-company's record.
+obsybrain es donde ese conocimiento se queda. Corre en tu propio servidor. Cada agente que se conecta lee lo
+que el equipo ya sabe antes de trabajar, y anota lo que aprendió después. Las personas deciden qué pasa a ser
+el registro de la empresa.
 
-## Why it matters
+## Por qué importa
 
-- **Agents stop relearning your business.** Context that took an hour to explain is there at the start of the next
-  session, in every tool: Claude Code, Codex, Cursor, OpenCode, or your own program.
-- **Knowledge survives the people and the tools.** When someone leaves, a vendor changes or a model is replaced,
-  what was learned is still in the brain, in plain pages anyone can read.
-- **One truth, not twenty chats.** Decisions, lessons and facts end up in one wiki with sources, instead of
-  scattered across chat histories nobody will search.
-- **People stay in charge.** Agents propose; a curator, or a key a curator trusts, decides. Every change has a
-  revision, a reason and an undo, and what agents write cites its sources.
-- **Your data stays yours.** Self-hosted, MIT licensed, on PostgreSQL. No model runs on the server and none of your
-  data is sent anywhere unless you turn it on. The only call out by default is a daily check for a new version,
-  and an empty `OBSY_BRAIN_REPO_URL` stops it.
+- **Tus agentes dejan de reaprender tu negocio.** El contexto que te llevó una hora explicar está al inicio de
+  la siguiente sesión, en cada herramienta: Claude Code, Codex, Cursor, OpenCode o tu propio programa.
+- **El conocimiento sobrevive a las personas y a las herramientas.** Cuando alguien se va, cambia un proveedor
+  o se reemplaza un modelo, lo aprendido sigue en el brain, en páginas llanas que cualquiera puede leer.
+- **Una verdad, no veinte chats.** Decisiones, lecciones y datos acaban en un wiki con fuentes, en vez de
+  dispersos en historiales de chat que nadie va a buscar.
+- **Las personas siguen al mando.** Los agentes proponen; un curador, o una clave en la que el curador confía,
+  decide. Cada cambio tiene una revisión, un motivo y una vuelta atrás, y lo que escriben los agentes cita sus
+  fuentes.
+- **Tus datos siguen siendo tuyos.** Autoalojado, licencia MIT, sobre PostgreSQL. Ningún modelo corre en el
+  servidor y ningún dato sale de él a menos que lo actives. La única llamada que hace por defecto es una
+  comprobación diaria de versión nueva, y un `OBSY_BRAIN_REPO_URL` vacío la detiene.
 
-## How it works
+## Cómo funciona
 
 ```
  agents ──write──▶  JOURNAL   ──compile──▶  PROPOSALS  ──decide──▶  WIKI   ◀──search──  every agent
@@ -33,31 +34,36 @@ company's record.
                     did and learned           become knowledge       team knows
 ```
 
-1. **The journal.** While they work, agents save decisions, lessons, attempts, facts and preferences. Free to
-   write, with receipts, no duplicates on retry, and secrets removed before anything is stored.
-2. **The wiki.** An agent compiles the journal into typed pages with typed links (depends on, part of, supersedes,
-   contradicts…), each citing the entries it came from. A curator approves all, part, corrects or returns it with a
-   comment the agent learns from. A key the curator trusts can write and decide directly, over MCP or the API.
-3. **Search before deciding.** Pages and journal searched together, accent-insensitive, in Spanish and English,
-   ranked by BM25 with the optional `pg_search` extension; optional search by meaning, mixed by rank fusion.
-   Superseded knowledge never outranks what replaced it.
-4. **A wiki that checks itself.** Orphan pages, broken links, open contradictions, stale pages, near-duplicate
-   titles. Whoever proposes is warned before sending, and agents are asked to clean up when nobody has for a day.
-5. **See it.** A full-screen graph coloured by community, pages without links around it, history for every page,
-   and a live feed of what agents are doing.
+1. **El diario.** Mientras trabajan, los agentes guardan decisiones, lecciones, intentos, datos y
+   preferencias. Escriben libres, con comprobantes, sin duplicados cuando reintentan, y con los secretos
+   quitados antes de guardar nada.
+2. **El wiki.** Un agente compila el diario en páginas tipadas con enlaces tipados (depende de, es parte de,
+   sustituye a, contradice a…), cada una citando las entradas de las que salió. Un curador lo aprueba todo,
+   aprueba una parte, corrige o lo devuelve con un comentario del que el agente aprende. Una clave en la que el
+   curador confía puede escribir y decidir directamente, por MCP o por la API.
+3. **Buscar antes de decidir.** Páginas y diario se buscan juntos, sin distinguir acentos, en español y en
+   inglés, ordenados por BM25 con la extensión opcional `pg_search`; búsqueda por significado opcional,
+   mezclada por fusión de rangos. El conocimiento sustituido nunca supera al que lo sustituyó.
+4. **Un wiki que se revisa solo.** Páginas huérfanas, enlaces rotos, contradicciones abiertas, páginas viejas,
+   títulos casi iguales. Quien propone recibe el aviso antes de enviar, y se pide a los agentes que limpien
+   cuando nadie lo hizo en un día.
+5. **Verlo.** Un grafo a pantalla completa coloreado por comunidad, las páginas sin enlaces alrededor,
+   historial de cada página y un feed en vivo de lo que hacen los agentes.
 
-## What teams use it for
+## Para qué lo usan los equipos
 
-- **Software teams:** the reasons behind the architecture, the incidents and their fixes, the conventions a new
-  agent must follow before it touches the code.
-- **Operations:** runbooks that update themselves from what actually happened, not from what someone wrote two
-  years ago.
-- **Client work:** what each client asked, decided and disliked, available to every agent and person on the account.
-- **Research:** sources read once and compiled into pages that grow with every new paper, instead of a pile of PDFs.
+- **Equipos de software:** los motivos de la arquitectura, los incidentes y sus arreglos, las convenciones que
+  un agente nuevo debe seguir antes de tocar el código.
+- **Operaciones:** runbooks que se actualizan solos con lo que pasó de verdad, no con lo que alguien escribió
+  hace dos años.
+- **Trabajo con clientes:** lo que cada cliente pidió, decidió y rechazó, al alcance de cada agente y persona
+  de la cuenta.
+- **Investigación:** fuentes leídas una vez y compiladas en páginas que crecen con cada trabajo nuevo, en vez
+  de una pila de PDF.
 
-## In one minute
+## En un minuto
 
-Install it ([Install](#install) has every option), then connect your agent:
+Instálalo ([Instalación](#instalación) tiene todas las opciones) y conecta tu agente:
 
 ```sh
 sh obsybrain.sh install --local                      # PostgreSQL included; the web opens on http://localhost:8090
@@ -65,21 +71,22 @@ claude mcp add --transport http obsybrain http://localhost:8090/mcp --scope user
 claude mcp login obsybrain
 ```
 
-Then ask your agent: *"What does this brain know about X?"* At the end of the session: *"Save what we learned."*
+Después pregúntale a tu agente: *«¿Qué sabe este brain sobre X?»* Al terminar la sesión: *«Guarda lo que
+aprendimos»*.
 
-> Status: early development.
+> Estado: desarrollo temprano.
 
-## License
+## Licencia
 
-MIT. See [LICENSE](LICENSE).
+MIT. Mira [LICENSE](LICENSE).
 
-## Install
+## Instalación
 
-obsybrain runs in containers, on macOS or Linux. You need Docker with Compose v2 and git. One
-command installs it; it checks what it needs first and changes nothing when something is missing.
+obsybrain corre en contenedores, en macOS o Linux. Necesitas Docker con Compose v2 y git. Un comando lo
+instala; primero comprueba lo que necesita y no cambia nada si falta algo.
 
-Download the launcher from a published release (replace `vX.Y.Z` with the version), and check it
-against the SHA-256 the release notes give for `obsybrain.sh` before you run it:
+Descarga el lanzador desde un release publicado (sustituye `vX.Y.Z` por la versión) y compruébalo contra el
+SHA-256 que dan las notas del release para `obsybrain.sh` antes de ejecutarlo:
 
 ```sh
 curl -fsSLO https://github.com/obsessive-solutions/obsybrain/releases/download/vX.Y.Z/obsybrain.sh
@@ -87,63 +94,63 @@ shasum -a 256 obsybrain.sh      # Linux: sha256sum obsybrain.sh; it must match t
 sh obsybrain.sh install --local
 ```
 
-While the repository is private, installing needs access to it: pass `--repo` with an address git
-can read with your access (an SSH address, or HTTPS with git's credential helper; never a token in the
-address), or `--image` with an image you already have.
+Mientras el repositorio sea privado, instalar necesita acceso a él: pasa `--repo` con una dirección que git
+pueda leer con tu acceso (una SSH, o HTTPS con el credential helper de git; nunca un token en la dirección), o
+`--image` con una imagen que ya tengas.
 
-It fetches the latest published version, builds its image, starts it with its own PostgreSQL and
-tells you the address. It only writes in its own folder: an empty folder, or one that holds only
-your `compose.override.yaml`; it refuses any other (a clone of this repository, say). Open it to finish the first-time setup, where you make the administration
-account. `sh obsybrain.sh help` lists every command and option.
+Trae la última versión publicada, construye su imagen, la arranca con su propio PostgreSQL y te dice la
+dirección. Solo escribe en su propia carpeta: una vacía, o una que contenga solo tu `compose.override.yaml`;
+rechaza cualquier otra (un clon de este repositorio, por ejemplo). Ábrela para terminar la configuración
+inicial, donde creas la cuenta de administración. `sh obsybrain.sh help` lista cada comando y opción.
 
-### On this machine
+### En esta máquina
 
-`install --local` publishes the web on `http://localhost:8090`, on this machine only (`127.0.0.1`).
-`--port N` picks another port; when the port is taken, the installer offers the next free one (or,
-with `--yes`, stops and says which to pass). The installation lives in `~/obsybrain` (`--dir` moves
-it): its settings in `.env`, the copies in `backups/`.
+`install --local` publica la web en `http://localhost:8090`, solo en esta máquina (`127.0.0.1`).
+`--port N` elige otro puerto; cuando el puerto está ocupado, el instalador ofrece el siguiente libre (o, con
+`--yes`, se detiene y dice cuál pasar). La instalación vive en `~/obsybrain` (`--dir` la mueve): su
+configuración en `.env`, las copias en `backups/`.
 
-### On a server with a domain
+### En un servidor con dominio
 
 ```sh
 sh obsybrain.sh install --domain brain.example.com
 ```
 
-Point the domain at the server first. Caddy runs in front of obsybrain on ports 80 and 443 and gets
-the HTTPS certificate by itself (Let's Encrypt), and renews it; there is no certificate step. The
-installation lives in `/opt/obsybrain`. obsybrain believes the forwarded headers only from Caddy's
-fixed address in the installation's own network.
+Apunta el dominio al servidor primero. Caddy corre delante de obsybrain en los puertos 80 y 443 y consigue el
+certificado HTTPS solo (Let's Encrypt), y lo renueva; no hay paso de certificados. La instalación vive en
+`/opt/obsybrain`. obsybrain cree en las cabeceras reenviadas solo desde la dirección fija de Caddy en la red de
+la propia instalación.
 
-### An existing PostgreSQL
+### Un PostgreSQL existente
 
-PostgreSQL 17 or newer, with the `unaccent` extension (it comes with PostgreSQL). Give the installer
-either a database that is for obsybrain alone, or an administration login it uses once to make one
-(a role that is no superuser and a database only that role may connect to). Each goes in a file, or
-on the standard input with `-`; never on the command line.
+PostgreSQL 17 o más nuevo, con la extensión `unaccent` (viene con PostgreSQL). Dale al instalador, o una base
+de datos que sea solo para obsybrain, o un login de administración que use una vez para crearla (un rol que no
+sea superusuario y una base de datos a la que solo ese rol pueda conectarse). Cada uno va en un archivo, o por
+la entrada estándar con `-`; nunca en la línea de comandos.
 
 ```sh
 sh obsybrain.sh install --local --db existing --db-url-file db-url.txt         # a database for obsybrain
 sh obsybrain.sh install --local --db existing --db-admin-url-file admin-url.txt # let it make one
 ```
 
-Inside the container, `localhost` is the container itself: a PostgreSQL on this machine is
-`host.docker.internal`. The installer refuses a PostgreSQL that is too old or lacks `unaccent`,
-before it makes anything.
+Dentro del contenedor, `localhost` es el propio contenedor: un PostgreSQL en esta máquina es
+`host.docker.internal`. El instalador rechaza un PostgreSQL demasiado viejo o sin `unaccent`, antes de crear
+nada.
 
-### Sharing PostgreSQL with rsc-factory
+### Compartiendo PostgreSQL con rsc-factory
 
 ```sh
 sh obsybrain.sh install --local --db shared --db-admin-url-file admin-url.txt --factory-db rsc_factory
 ```
 
-obsybrain gets its own database and role on the same server. Neither program can connect to the
-other's database. If rsc-factory's login is a superuser, it can still reach everything; the installer
-says so.
+obsybrain consigue su propia base de datos y rol en el mismo servidor. Ninguno de los dos programas puede
+conectarse a la base de datos del otro. Si el login de rsc-factory es superusuario, igual puede llegar a todo;
+el instalador lo dice.
 
-### Installed by rsc-factory (companion mode)
+### Instalado por rsc-factory (modo compañero)
 
-rsc-factory's installer can install obsybrain next to it. It makes a Docker network both share and
-calls:
+El instalador de rsc-factory puede instalar obsybrain a su lado. Crea una red de Docker que ambos comparten y
+llama:
 
 ```sh
 sh obsybrain.sh install --companion --attach-network rsc-shared --factory-url https://factory.example.com \
@@ -151,57 +158,57 @@ sh obsybrain.sh install --companion --attach-network rsc-shared --factory-url ht
   --db shared --db-admin-url-file admin-url.txt --factory-db rscf --yes --json
 ```
 
-- obsybrain joins the network as `obsybrain` (`http://obsybrain:8090` for rsc-factory) and runs no
-  Caddy of its own: rsc-factory's Caddy serves its address. `--trusted-proxy` is that Caddy's fixed
-  address on the network, the only proxy obsybrain believes. With `--local` instead of `--domain`,
-  the web is at `http://localhost:8090` on this machine and no proxy is believed.
-- obsybrain stays installed but not set up. Its first-time setup page says "Finish the setup in
-  rsc-factory" and links there. rsc-factory's own setup makes the administration of both, with the
-  same name, email and password, and the service account rsc-factory uses.
-- It does that with a one-time key, `companionToken` in the `--json` summary (also in `.env`, which
-  only its owner reads): `POST /v1/setup/companion` with `Authorization: Bearer <companionToken>`.
-  obsybrain answers that call only while it is not set up, only from the shared network (never
-  through a proxy or from this machine), and only once: two calls at once set it up once.
-- If rsc-factory loses its main key afterwards (an answer that never arrived, a restore), it gets a
-  new one with `POST /v1/setup/companion/reconnect`: the same one-time key plus the email and
-  password of an administrator of obsybrain (wrong passwords wait as signing in does). It reaches
-  only the account the first handshake made; the main key before, and the keys made from it, stop
-  working. If an administrator removed that account, it says so (`service_removed`): reactivate it
-  in Admin › People first.
-- The shared network is IPv4 only: one with IPv6 on is refused (exit 2).
-- It needs a PostgreSQL that is not obsybrain's own (`--db shared` by default, or `--db existing`).
-  With `--local`, also Docker Engine 28 and Docker Compose 2.33 or newer.
-- Running `install` again keeps companion mode, the network and the key. An installation made
-  without `--companion` does not become one.
+- obsybrain entra en la red como `obsybrain` (`http://obsybrain:8090` para rsc-factory) y no corre Caddy
+  propio: el Caddy de rsc-factory sirve su dirección. `--trusted-proxy` es la dirección fija de ese Caddy en la
+  red, el único proxy en el que obsybrain cree. Con `--local` en vez de `--domain`, la web queda en
+  `http://localhost:8090` en esta máquina y no se cree en ningún proxy.
+- obsybrain queda instalado pero sin configurar. Su página de configuración inicial dice «Termina la
+  configuración en rsc-factory» y enlaza allí. La configuración de rsc-factory crea la administración de ambos,
+  con el mismo nombre, correo y contraseña, y la cuenta de servicio que rsc-factory usa.
+- Lo hace con una clave de un solo uso, `companionToken` en el resumen `--json` (también en `.env`, que solo
+  lee su dueño): `POST /v1/setup/companion` con `Authorization: Bearer <companionToken>`. obsybrain responde a
+  esa llamada solo mientras no está configurado, solo desde la red compartida (nunca a través de un proxy ni
+  desde esta máquina) y solo una vez: dos llamadas a la vez lo configuran una.
+- Si rsc-factory pierde después su clave principal (una respuesta que nunca llegó, un restore), consigue una
+  nueva con `POST /v1/setup/companion/reconnect`: la misma clave de un solo uso más el correo y la contraseña
+  de un administrador de obsybrain (las contraseñas incorrectas esperan igual que al iniciar sesión). Llega
+  solo a la cuenta que creó el primer handshake; la clave principal anterior, y las claves creadas a partir de
+  ella, dejan de funcionar. Si un administrador quitó esa cuenta, lo dice (`service_removed`): reactívala
+  primero en Administración › Personas.
+- La red compartida es solo IPv4: una con IPv6 activado se rechaza (exit 2).
+- Necesita un PostgreSQL que no sea el propio de obsybrain (`--db shared` por defecto, o `--db existing`). Con
+  `--local`, además Docker Engine 28 y Docker Compose 2.33 o más nuevos.
+- Ejecutar `install` otra vez conserva el modo compañero, la red y la clave. Una instalación hecha sin
+  `--companion` no se convierte en una.
 
-Day to day, rsc-factory drives it (see rsc-factory's README, «Memory (obsybrain)»):
+El día a día lo maneja rsc-factory (mira el README de rsc-factory, «Memory (obsybrain)»):
 
-- **Update:** rsc-factory's `update.sh` runs this launcher's `update` first, with everything under
-  [Update](#update): maintenance, a copy, and the version before back if it fails. Then rsc-factory
-  is not touched and its `update.sh` exits with 4.
-- **Reconnect:** after a `restore`, rsc-factory's keys stop working. In rsc-factory, Administration ›
-  Memory takes a new main key for the `rsc-factory` service account (make it in Admin › Service
-  accounts here), or reconnects with the one-time key and your administrator's email and password.
-- **Uninstall:** `sh <dir>/.obsybrain/src/deploy/obsybrain.sh uninstall --dir <dir>` stops it and
-  keeps the data; rsc-factory's `install.sh` starts it again. With `--delete-data --confirm <name>
-  --db-admin-url-file F` its database and role in rsc-factory's PostgreSQL go too (F: a superuser
-  login of that PostgreSQL), and rsc-factory forgets it at its next `update.sh` or `install.sh`.
-- rsc-factory fetches the newest `vX.Y.Z` tag of this repository: a version is usable as a companion
-  only from the first tag that has `--companion`.
+- **Actualizar:** el `update.sh` de rsc-factory ejecuta primero el `update` de este lanzador, con todo lo de
+  [Actualización](#actualización): mantenimiento, una copia, y la versión anterior de vuelta si falla. Entonces
+  no se toca rsc-factory y su `update.sh` sale con 4.
+- **Reconectar:** después de un `restore`, las claves de rsc-factory dejan de funcionar. En rsc-factory,
+  Administración › Memoria toma una clave principal nueva para la cuenta de servicio `rsc-factory` (créala en
+  Administración › Cuentas de servicio aquí), o reconecta con la clave de un solo uso y el correo y la
+  contraseña de tu administrador.
+- **Desinstalar:** `sh <dir>/.obsybrain/src/deploy/obsybrain.sh uninstall --dir <dir>` lo detiene y conserva
+  los datos; el `install.sh` de rsc-factory lo vuelve a arrancar. Con `--delete-data --confirm <name>
+  --db-admin-url-file F` su base de datos y rol en el PostgreSQL de rsc-factory también se van (F: un login
+  superusuario de ese PostgreSQL), y rsc-factory lo olvida en su próximo `update.sh` o `install.sh`.
+- rsc-factory trae la etiqueta `vX.Y.Z` más nueva de este repositorio: una versión es utilizable como compañera
+  solo desde la primera etiqueta que tiene `--companion`.
 
-### Without questions
+### Sin preguntas
 
-With every answer as an option and `--yes`, the installer asks nothing; whatever is missing is an
-error that names the option giving it. With `--json`, standard output holds only a summary for
-programs: `url`, `mode`, `db`, `installationKey`, `keyId`, `version` and `dir` (and, in companion
-mode, `companionToken` and `internalUrl`). Exit codes: 0 done,
-2 wrong usage, 3 a requirement is missing (nothing was changed), 4 it failed and put back what was
-there, 1 anything else.
+Con cada respuesta como opción y `--yes`, el instalador no pregunta nada; lo que falte es un error que nombra
+la opción que lo da. Con `--json`, la salida estándar contiene solo un resumen para programas: `url`, `mode`,
+`db`, `installationKey`, `keyId`, `version` y `dir` (y, en modo compañero, `companionToken` e `internalUrl`).
+Códigos de salida: 0 hecho, 2 uso incorrecto, 3 falta un requisito (no se cambió nada), 4 falló y dejó lo que
+había, 1 cualquier otra cosa.
 
-Running `install` again on an installation applies only what you change (the port, the domain) and
-keeps its key, its passwords, its data and its copies.
+Ejecutar `install` otra vez sobre una instalación aplica solo lo que cambies (el puerto, el dominio) y conserva
+su clave, sus contraseñas, sus datos y sus copias.
 
-### Update
+### Actualización
 
 ```sh
 sh obsybrain.sh update                    # the latest published version
@@ -209,103 +216,106 @@ sh obsybrain.sh update --version v0.2.0   # or that one (--image I: an image you
 sh obsybrain.sh update --check            # only look: what runs, the newest published, what it changes
 ```
 
-A published version is a `vX.Y.Z` tag of the repository. `update --check` (with `--json` for programs:
-`installed`, `latest`, `newer`, `notes`) asks with this machine's own access, so it also works on a private
-repository, stops nothing and writes nothing in the installation; it exits with 3 when it cannot say. The
-web asks once a day, without credentials: on a private repository Administration › Backups & system says
-«Could not check for a new version» and gives that command. It asks `OBSY_BRAIN_REPO_URL` in `.env`, which
-`install --repo` sets without credentials; empty, the web never asks.
+Una versión publicada es una etiqueta `vX.Y.Z` del repositorio. `update --check` (con `--json` para programas:
+`installed`, `latest`, `newer`, `notes`) pregunta con el acceso de esta misma máquina, así que también funciona
+en un repositorio privado, no detiene nada y no escribe nada en la instalación; sale con 3 cuando no puede
+decirlo. La web pregunta una vez al día, sin credenciales: en un repositorio privado, Administración › Copias y
+sistema dice «No se pudo comprobar si hay una versión nueva» y da ese comando. Pregunta `OBSY_BRAIN_REPO_URL`
+en `.env`, que `install --repo` deja sin credenciales; vacío, la web nunca pregunta.
 
-The new version is fetched and built while the one installed keeps serving. Then obsybrain goes
-into maintenance: writes are refused with «obsybrain is under maintenance, retry after N seconds»
-(the web shows a band on every page), reads keep working. A copy of everything is made
-(`…-pre-update.rscb`), the data is migrated, and the new version starts; once it answers as the
-version asked, writes are taken again. If the migration or the start fails, the copy is restored, the
-version before starts again and the launcher exits with 4: nothing written before the update is lost,
-and sessions, tokens and connections keep working. Administration › Backups & system shows how the
-last update went, and `last-failure.log` keeps the service's last lines. An update needs free disk
-for twice the last copy and 1 GB more, and only moves forward (never to an older version; a release
-comes after its release candidates, and `0.2.0-rc.2` after `0.2.0-rc.1`). What each version changes
-is in [CHANGELOG.md](CHANGELOG.md) and in its release notes.
+La versión nueva se trae y se construye mientras la instalada sigue sirviendo. Después obsybrain entra en
+mantenimiento: rechaza escrituras con «obsybrain está en mantenimiento, reintenta en N segundos» (la web
+muestra una banda en cada página); las lecturas siguen. Se hace una copia de todo (`…-pre-update.rscb`), se
+migran los datos y arranca la versión nueva; cuando responde como la versión pedida, las escrituras vuelven.
+Si la migración o el arranque falla, se restaura la copia, vuelve a arrancar la versión anterior y el lanzador
+sale con 4: nada escrito antes de la actualización se pierde, y sesiones, tokens y conexiones siguen
+funcionando. Administración › Copias y sistema muestra cómo fue la última actualización, y `last-failure.log`
+guarda las últimas líneas del servicio. Una actualización necesita espacio libre en disco para el doble de la
+última copia y 1 GB más, y solo avanza (nunca a una versión más vieja; un release va después de sus release
+candidates, y `0.2.0-rc.2` después de `0.2.0-rc.1`). Lo que cambia cada versión está en
+[CHANGELOG.md](CHANGELOG.md) y en sus notas de release.
 
-While the service is stopped (the migration, the start and the whole restore of a way back), a small stand-in
-holds its port and its name: a browser sees a page with the current step, and anything else gets 503 with
-`Retry-After` and the same `under_maintenance` answer as a refused write. An installation whose `compose.yaml`
-has no stand-in yet (updated with `--image` from before) gets it with its next update from a version.
+Mientras el servicio está parado (la migración, el arranque y todo el restore de la vuelta atrás), un pequeño
+sustituto ocupa su puerto y su nombre: un navegador ve una página con el paso actual, y cualquier otra cosa
+recibe 503 con `Retry-After` y la misma respuesta `under_maintenance` que una escritura rechazada. Una
+instalación cuyo `compose.yaml` todavía no tiene sustituto (actualizada con `--image` desde antes) lo recibe
+con su próxima actualización desde una versión.
 
-Ctrl-C during an update goes back the same way (a second Ctrl-C does not stop it). If the launcher
-is killed outright once the new version has taken over (a power cut), the next `status`, or any
-command that changes something, finds the note it left in `.obsybrain/update.pending` and goes back first. If the copy is
-restored but the version before does not start, the launcher says so: the data is back, and
-`sh obsybrain.sh install` starts it again. If the copy cannot be restored, every later command says so
-(and `status` fails) until a `restore` of that copy goes well.
+Un Ctrl-C durante una actualización vuelve atrás de la misma manera (un segundo Ctrl-C no la detiene). Si
+matan al lanzador de golpe una vez la versión nueva tomó el control (un corte de luz), el próximo `status`, o
+cualquier comando que cambie algo, encuentra la nota que dejó en `.obsybrain/update.pending` y vuelve atrás
+primero. Si la copia se restauró pero la versión anterior no arranca, el lanzador lo dice: los datos están, y
+`sh obsybrain.sh install` vuelve a arrancarla. Si la copia no se puede restaurar, todo comando posterior lo
+dice (y `status` falla) hasta que un `restore` de esa copia salga bien.
 
-The way back runs in a session of its own, so a Ctrl-C at the terminal cannot cut it short: with
-`setsid`, or with `perl` where there is no `setsid` (macOS). A machine with neither runs it like any
-other step: there, do not press Ctrl-C while it goes back.
+La vuelta atrás corre en una sesión propia, así un Ctrl-C en la terminal no puede cortarla: con `setsid`, o
+con `perl` donde no hay `setsid` (macOS). Una máquina que no tiene ninguno la ejecuta como cualquier otro
+paso: ahí, no pulses Ctrl-C mientras vuelve atrás.
 
-### Updating from the web (off until you turn it on)
+### Actualizar desde la web (apagado hasta que lo actives)
 
-By default only the terminal updates. To let an administrator do it from the web:
+Por defecto solo la terminal actualiza. Para que un administrador pueda hacerlo desde la web:
 
 ```sh
 sh obsybrain.sh web-updates enable [--repo-token-file F | --repo-key F]   # then: status, disable
 ```
 
-This starts a container of its own, the updater, as a compose project apart from the service's
-(`<name>-updater`). **It has full control of Docker on this machine: whoever controls it controls the
-server**, and `enable` says so and asks (or wants `--yes`). It publishes no port and is on no network of the
-service or of rsc-factory. It mounts exactly three things: the Docker socket, the installation folder at its own
-path, and a list of users with its own in it, read only. The service never gets Docker, a credential or the
-installation key from it: it only leaves an empty mark in `update/request`, which the updater looks at without
-opening it, and reads `update/report` (read only) to learn the newest version. A private repository needs read
-access that works from this machine: `--repo-token-file` (a file with one line, for an https address) or
-`--repo-key` (an SSH private key, for an SSH one). The file is copied to `updater/credentials` (readable by its
-owner only); nothing goes on a command line. `enable` proves the repository answers with it, from a container
-like the updater's, before it starts anything.
+Esto arranca un contenedor propio, el actualizador, como proyecto de compose aparte del del servicio
+(`<name>-updater`). **Tiene control total de Docker en esta máquina: quien lo controle controla el servidor**,
+y `enable` lo dice y pregunta (o exige `--yes`). No publica ningún puerto y no está en ninguna red del
+servicio ni de rsc-factory. Monta exactamente tres cosas: el socket de Docker, la carpeta de instalación en su
+propia ruta y una lista de usuarios con el suyo dentro, de solo lectura. El servicio nunca recibe de él
+Docker, una credencial ni la clave de instalación: solo deja una marca vacía en `update/request`, que el
+actualizador mira sin abrirla, y lee `update/report` (solo lectura) para conocer la versión más nueva. Un
+repositorio privado necesita acceso de lectura que funcione desde esta máquina: `--repo-token-file` (un
+archivo con una línea, para una dirección https) o `--repo-key` (una clave privada SSH, para una SSH). El
+archivo se copia a `updater/credentials` (legible solo por su dueño); nada va en una línea de comandos.
+`enable` comprueba que el repositorio responde con ella, desde un contenedor como el del actualizador, antes
+de arrancar nada.
 
-The updater runs the same `update` as the terminal, always for the newest published version it found itself,
-whatever the mark holds. A version that failed is tried once; **Try again** allows at most 3 retries, 15 minutes
-apart, and after that only the terminal can try that version (the launcher put everything back each time). If the
-machine stops halfway, the updater finishes taking the update back when it starts. After an update it restarts
-from the new version's files; if its compose file or image changed, run `web-updates enable` again.
+El actualizador ejecuta el mismo `update` que la terminal, siempre para la versión publicada más nueva que
+encontró él mismo, sea lo que sea la marca. Una versión que falló se intenta una vez; **Reintentar** permite
+como máximo 3 reintentos, con 15 minutos de separación, y después de eso solo la terminal puede intentar esa
+versión (el lanzador lo dejó todo en su sitio cada vez). Si la máquina se para a mitad, el actualizador
+termina de deshacer la actualización cuando arranca. Después de una actualización se reinicia desde los
+archivos de la versión nueva; si cambió su compose o su imagen, ejecuta `web-updates enable` otra vez.
 
-With the updater on, Administration › Backups & system shows **Update to vX.Y.Z** when a newer version is
-published. An administrator signed in to the web confirms with their password (and the code of their
-authenticator app, with a second factor); a wrong one counts as a failed attempt and asks for nothing. The
-request is an empty file, whatever else the browser sends is ignored: the updater picks the version itself.
-Two administrators at once start one update; the other is told one is already running. The page follows it,
-says «Updated from X to Y.» at the end, or when and why it failed with **Try again** (within the limits above;
-past them it gives the command). While the service restarts the stand-in page answers. A key, an app, a token
-or a service account can never ask for it.
+Con el actualizador activado, Administración › Copias y sistema muestra **Actualizar a vX.Y.Z** cuando hay una
+versión más nueva publicada. Un administrador con sesión en la web confirma con su contraseña (y el código de
+su app de autenticación, con segundo factor); una incorrecta cuenta como intento fallido y no pide nada. La
+petición es un archivo vacío: lo demás que mande el navegador se ignora, el actualizador elige la versión él
+mismo. Dos administradores a la vez arrancan una sola actualización; al otro se le dice que ya hay una. La
+página la sigue, dice «Actualizado de X a Y.» al final, o cuándo y por qué falló con **Reintentar** (dentro de
+los límites de arriba; pasados, da el comando). Mientras el servicio se reinicia, responde la página
+sustituta. Una clave, una app, un token o una cuenta de servicio nunca pueden pedirla.
 
-`web-updates disable` removes the container, the image and the credential, and the web shows the command again.
-In an installation made by rsc-factory there is no button: `web-updates enable` exits 2 and tells you to update
-it from rsc-factory.
+`web-updates disable` quita el contenedor, la imagen y la credencial, y la web vuelve a mostrar el comando. En
+una instalación hecha por rsc-factory no hay botón: `web-updates enable` sale con 2 y te dice que la
+actualices desde rsc-factory.
 
-### The installation key
+### La clave de instalación
 
-The installer makes the installation key and keeps it in `.env`, which only its owner can read. It
-opens every copy: without it a copy cannot be restored. Save it in a password manager.
-`sh obsybrain.sh key show` prints it again (it asks first); the first-time setup and Administration ›
-Backups & system also give it to you.
+El instalador crea la clave de instalación y la guarda en `.env`, que solo su dueño puede leer. Abre cada
+copia: sin ella una copia no se puede restaurar. Guárdala en un gestor de contraseñas. `sh obsybrain.sh key
+show` la imprime otra vez (pregunta primero); la configuración inicial y Administración › Copias y sistema
+también te la dan.
 
 ```sh
 sh obsybrain.sh key rotate
 ```
 
-makes a new key: obsybrain stops for a moment, everything sealed (second factors, the mail password,
-the key of the meaning provider) is sealed again with the new key, and it starts again. Sessions,
-tokens and connections keep working. Copies made before need the previous key: it is kept in
-`installation-key-<id>.txt` next to `.env` (only its owner reads it), and the web marks those copies
-«Needs the older key». Save the new key in place of the old one. If a rotation is stopped halfway,
-the new key stays in `.obsybrain/env.rotated` (the data may already be sealed with it): run
-`key rotate` again and it finishes with that key. Until then `install`, `update`, `backup`,
-`restore` and `uninstall` refuse, and `status` warns.
+crea una clave nueva: obsybrain se para un momento, todo lo sellado (segundos factores, la contraseña del
+correo, la clave del proveedor de significado) se sella otra vez con la clave nueva, y vuelve a arrancar.
+Sesiones, tokens y conexiones siguen funcionando. Las copias hechas antes necesitan la clave anterior: se
+conserva en `installation-key-<id>.txt` junto a `.env` (solo la lee su dueño), y la web marca esas copias
+«Necesita la clave anterior». Guarda la clave nueva en lugar de la vieja. Si una rotación se para a mitad, la
+clave nueva queda en `.obsybrain/env.rotated` (los datos pueden estar ya sellados con ella): ejecuta
+`key rotate` otra vez y termina con esa clave. Hasta entonces `install`, `update`, `backup`, `restore` y
+`uninstall` se niegan, y `status` avisa.
 
-### Copies
+### Las copias
 
-obsybrain makes an encrypted copy every day at 03:00 and keeps the last 14, in `backups/`.
+obsybrain hace una copia cifrada cada día a las 03:00 y guarda las últimas 14, en `backups/`.
 
 ```sh
 sh obsybrain.sh backup                    # a copy now
@@ -313,38 +323,38 @@ sh obsybrain.sh backups                   # the list
 sh obsybrain.sh restore --file obsybrain-20261101T030000Z-manual.rscb --confirm "<installation name>"
 ```
 
-`--file` takes a name as `backups` prints it (a copy in `backups/`) or the path of a copy from
-elsewhere. Restoring replaces everything with the copy, after a copy of what is there. `--confirm` takes the
-installation's name as the web shows it. To restore on another installation, pass the key of the
-copy's installation in a file with `--key-file`. Afterwards every key, session and connection made
-before stops working: everyone signs in again, and the administration issues new keys for programs.
+`--file` toma un nombre como lo imprime `backups` (una copia en `backups/`) o la ruta de una copia traída de
+otro lado. Restaurar reemplaza todo con la copia, después de hacer una copia de lo que hay. `--confirm` toma
+el nombre de la instalación como lo muestra la web. Para restaurar en otra instalación, pasa la clave de la
+instalación de la copia en un archivo con `--key-file`. Después cada clave, sesión y conexión hecha antes
+deja de funcionar: todos inician sesión otra vez, y la administración emite claves nuevas para programas.
 
-### Uninstall
+### Desinstalar
 
 ```sh
 sh obsybrain.sh uninstall
 ```
 
-This stops obsybrain and removes its containers. The database, the copies and the key stay: running
-`install` again brings everything back as it was. To delete the data too:
+Esto para obsybrain y quita sus contenedores. La base de datos, las copias y la clave se quedan: ejecutar
+`install` otra vez lo devuelve todo como estaba. Para borrar también los datos:
 
 ```sh
 sh obsybrain.sh uninstall --delete-data --confirm obsybrain
 ```
 
-`--confirm` takes the installation's name on this machine (`--name` at install; `obsybrain` by
-default). With its own PostgreSQL, the database and the copies go. With an existing PostgreSQL, pass
-`--db-admin-url-file` to remove its database and role as well; without it, the uninstaller tells you
-what to remove. The installation key is kept in `installation-key.txt` for the copies you downloaded.
-It only removes what it made: its containers, network and volumes, and its own files.
+`--confirm` toma el nombre de la instalación en esta máquina (`--name` al instalar; `obsybrain` por defecto).
+Con PostgreSQL propio, la base de datos y las copias también se van. Con un PostgreSQL existente, pasa
+`--db-admin-url-file` para quitar también su base de datos y rol; sin él, el desinstalador te dice qué
+quitar. La clave de instalación se conserva en `installation-key.txt` para las copias que descargaste. Solo
+quita lo que él creó: sus contenedores, red y volúmenes, y sus propios archivos.
 
-Your own additions to the containers go in `compose.override.yaml` next to `compose.yaml`; the
-launcher keeps and loads it. Change settings by running `install` again, never by editing `.env` or
-`compose.yaml`: the published port and `OBSY_BRAIN_PUBLISH` must stay one value.
+Tus añadidos propios a los contenedores van en `compose.override.yaml` junto a `compose.yaml`; el lanzador lo
+conserva y lo carga. Cambia la configuración ejecutando `install` otra vez, nunca editando `.env` o
+`compose.yaml`: el puerto publicado y `OBSY_BRAIN_PUBLISH` tienen que seguir siendo un solo valor.
 
-## Development
+## Desarrollo
 
-Requirements: Node 25 and, for the full test suite, PostgreSQL 17 or newer.
+Requisitos: Node 25 y, para la suite completa de tests, PostgreSQL 17 o más nuevo.
 
 ```sh
 npm install
@@ -352,199 +362,209 @@ npx playwright install chromium   # once, for the browser tests of the web
 npm run verify      # lint, types, build, tests, the web in a browser, audit
 ```
 
-`scripts/verify.sh` runs the tests against a real PostgreSQL: the server in `OBSY_BRAIN_PG_URL`, or,
-when the PostgreSQL binaries are installed, a throwaway local cluster in `.pg-test/` (port 55432)
-that it starts for you (`npm run pg:stop` stops it). Without either, the PostgreSQL tests are
-skipped, as in CI.
+`scripts/verify.sh` corre los tests contra un PostgreSQL real: el servidor en `OBSY_BRAIN_PG_URL`, o, cuando
+los binarios de PostgreSQL están instalados, un clúster local desechable en `.pg-test/` (puerto 55432) que
+arranca por ti (`npm run pg:stop` lo para). Sin ninguno de los dos, los tests de PostgreSQL se saltan, como en
+CI.
 
-`npm run test:install` builds the container image and runs it with Docker (local only; skipped
-without `OBSY_BRAIN_INSTALL_TESTS=1`, and always in CI).
+`npm run test:install` construye la imagen del contenedor y la corre con Docker (solo local; se salta sin
+`OBSY_BRAIN_INSTALL_TESTS=1`, y siempre en CI).
 
-`node scripts/bench-search.ts` (with `OBSY_BRAIN_PG_URL`) loads 10 000 pages and 100 000 entries into a
-throwaway database and times 100 varied searches; 95 % must answer in under a second.
+`node scripts/bench-search.ts` (con `OBSY_BRAIN_PG_URL`) carga 10 000 páginas y 100 000 entradas en una base
+de datos desechable y mide 100 búsquedas variadas; el 95 % tiene que responder en menos de un segundo.
 
-## The web
+## La web
 
-`obsybrain serve` also serves the obsybrain web, on the same address as the API: open it in a browser to
-run the first-time setup, sign in, accept an invitation or reset a password. `npm run build` builds it
-into `dist/web`; without that folder the server answers the API as usual and says the web is not built.
-The web only calls the API at `/v1` (with the same permissions a program has) and never answers on
-`/v1`, `/mcp`, `/oauth` or `/.well-known`. Press `?` on any screen for the keyboard shortcuts.
+`obsybrain serve` también sirve la web de obsybrain, en la misma dirección que la API: ábrela en un navegador
+para hacer la configuración inicial, iniciar sesión, aceptar una invitación o restablecer una contraseña.
+`npm run build` la construye en `dist/web`; sin esa carpeta el servidor responde la API como siempre y dice
+que la web no está construida. La web solo llama a la API en `/v1` (con los mismos permisos que tiene un
+programa) y nunca responde en `/v1`, `/mcp`, `/oauth` o `/.well-known`. Pulsa `?` en cualquier pantalla para
+ver los atajos de teclado.
 
-For work on the web: `obsybrain serve` on port 4100, then `npm run web:dev` (Vite on port 5173, which
-forwards the API to 4100).
+Para trabajar en la web: `obsybrain serve` en el puerto 4100, y después `npm run web:dev` (Vite en el puerto
+5173, que reenvía la API a 4100).
 
-The tests of the web run in Chromium. `npm run test:web` uses a fixture of the API (no database; each of
-its answers is checked against the API description), as CI does. `npm run test:e2e` runs against the
-real server and the PostgreSQL in `OBSY_BRAIN_PG_URL`; `verify.sh` runs it when that PostgreSQL answers
-and says why it skipped it otherwise. `node test/web/fixture/main.ts` starts the fixture on port 4173 to
-walk the web by hand: open `/__fixture/use?preset=signed-in` (or `fresh`, `signed-out`, `insecure`).
+Los tests de la web corren en Chromium. `npm run test:web` usa un fixture de la API (sin base de datos; cada
+una de sus respuestas se comprueba contra la descripción de la API), como hace CI. `npm run test:e2e` corre
+contra el servidor real y el PostgreSQL en `OBSY_BRAIN_PG_URL`; `verify.sh` lo corre cuando ese PostgreSQL
+responde y dice por qué lo saltó en caso contrario. `node test/web/fixture/main.ts` arranca el fixture en el
+puerto 4173 para recorrer la web a mano: abre `/__fixture/use?preset=signed-in` (o `fresh`, `signed-out`,
+`insecure`).
 
-More on the web, its layers of tests and the rules of its fixture: [web/README.md](web/README.md).
-Browsers refuse some ports outright (4190, 6000, 6566, 10080 and the rest of the Fetch standard's «bad
-ports»): an installation on one of them answers `curl` but not the web, the bridge or the hooks.
+Más sobre la web, sus capas de tests y las reglas de su fixture: [web/README.md](web/README.md). Los
+navegadores se niegan a algunos puertos sin más (4190, 6000, 6566, 10080 y el resto de los «bad ports» del
+estándar Fetch): una instalación en uno de ellos responde `curl` pero no la web, el puente ni los hooks.
 
-## Search by meaning (optional)
+## Búsqueda por significado (opcional)
 
-Off by default; search by words works without it. The server offers a provider when its setting is
-present, and the administration turns it on in the web, accepting that text is sent to the provider:
+Apagada por defecto; la búsqueda por palabras funciona sin ella. El servidor ofrece un proveedor cuando su
+configuración está presente, y la administración la activa en la web, aceptando que el texto se envía al
+proveedor:
 
-- `OBSY_BRAIN_OPENAI_KEY` — OpenAI, model `text-embedding-3-small`;
-- `OBSY_BRAIN_OLLAMA_URL` — a local Ollama, model `nomic-embed-text`.
+- `OBSY_BRAIN_OPENAI_KEY` — OpenAI, modelo `text-embedding-3-small`;
+- `OBSY_BRAIN_OLLAMA_URL` — un Ollama local, modelo `nomic-embed-text`.
 
-A curator can exclude a brain: its vectors are deleted and nothing more of it is sent.
+Un curador puede excluir un brain: se borran sus vectores y no se envía nada más de él.
 
-## Better ranking with optional extensions
+## Mejor orden con extensiones opcionales
 
-Search works on any PostgreSQL 17 or newer with `unaccent`. Two optional extensions improve the order of
-results; obsybrain uses them when they are installed in its database and works as before when they are not:
+La búsqueda funciona en cualquier PostgreSQL 17 o más nuevo con `unaccent`. Dos extensiones opcionales mejoran
+el orden de los resultados; obsybrain las usa cuando están instaladas en su base de datos y funciona como
+siempre cuando no:
 
-- **`pg_search`**: results are ranked by BM25, so a rare word counts more than a common one repeated, and a
-  word in the title counts twice as much as the same word in the text. Words still match without accents and
-  in their Spanish and English forms, and quoted phrases and excluded words filter as always.
-- **`pgvector`**: with search by meaning on, closeness is worked out by its operator. Words and meaning are
-  mixed by reciprocal rank fusion, so a result found both ways comes before one found only one way.
+- **`pg_search`**: los resultados se ordenan por BM25, así una palabra rara pesa más que una común repetida, y
+  una palabra en el título pesa el doble que la misma palabra en el texto. Las palabras siguen coincidiendo sin
+  acentos y en sus formas española e inglesa, y las frases entre comillas y las palabras excluidas filtran como
+  siempre.
+- **`pgvector`**: con la búsqueda por significado activada, la cercanía se calcula con su operador. Palabras y
+  significado se mezclan por fusión de rango recíproco, así un resultado encontrado por las dos vías va antes
+  que uno encontrado solo por una.
 
-obsybrain never installs them (its database role is no superuser). An administrator creates them in the
-database of obsybrain, as a superuser:
+obsybrain nunca las instala (su rol de base de datos no es superusuario). Un administrador las crea en la base
+de datos de obsybrain, como superusuario:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_search;
 ```
 
-On its next start obsybrain makes the index it needs, as its own role (no other grant is needed), and says in its
-log what search uses (`"event":"search","code":"bm25"`). If the index cannot be made, the log says
-`"event":"search_index_failed"` with the database's error code, obsybrain starts anyway, and search keeps its own
-ranking.
+En su próximo arranque obsybrain crea el índice que necesita, con su propio rol (no hace falta ningún otro
+grant), y dice en su log qué usa la búsqueda (`"event":"search","code":"bm25"`). Si el índice no se puede
+crear, el log dice `"event":"search_index_failed"` con el código de error de la base de datos, obsybrain
+arranca igual y la búsqueda conserva su propio orden.
 
-## People, keys and mail
+## Personas, claves y correo
 
-- The administration invites people by email to brains, each with a role: curator, contributor or
-  reader. The link works once, for 72 hours. Without mail, the administration copies it from the web.
-- People make their own tokens for agents in their profile: read, or read + write, for 30, 90 or 365
-  days. A token is shown once. It never does more than its person's current role.
-- Service accounts (such as RSC Factory) get a main key, and may hold two at once to rotate without
-  a cut. With it they mint short keys, one per job.
-- Mail is optional. Set the sending account in the web. Its password is stored sealed with
-  `OBSY_BRAIN_SECRET`. The mail log keeps who, what kind, when and how it ended, never the content.
+- La administración invita a personas por correo a los brains, cada una con un rol: curator, contributor o
+  reader. El enlace funciona una vez, durante 72 horas. Sin correo, la administración lo copia desde la web.
+- Las personas crean sus propios tokens para agentes en su perfil: lectura, o lectura + escritura, por 30, 90
+  o 365 días. Un token se muestra una vez. Nunca hace más de lo que permite el rol actual de su persona.
+- Las cuentas de servicio (como RSC Factory) reciben una clave principal, y pueden tener dos a la vez para
+  rotar sin corte. Con ella acuñan claves cortas, una por tarea.
+- El correo es opcional. Configura la cuenta de envío en la web. Su contraseña se guarda sellada con
+  `OBSY_BRAIN_SECRET`. El log del correo guarda quién, de qué tipo, cuándo y cómo acabó, nunca el contenido.
 
-## Writing to the wiki directly
+## Escribir directamente en el wiki
 
-By default an agent proposes changes to the wiki and a curator approves them in the web. A curator can let
-one key write to the wiki of their brain directly: in the profile, on a token ("Can write to the wiki of …"),
-when making it or later. The permission is per key and per brain, only a curator of that brain gives it (in
-the web, never with a key), and any curator takes it back; it counts from the next request.
+Por defecto un agente propone cambios en el wiki y un curador los aprueba en la web. Un curador puede dejar
+que una clave escriba en el wiki de su brain directamente: en el perfil, sobre un token («Puede escribir en el
+wiki de …»), al crearlo o después. El permiso es por clave y por brain, solo lo da un curador de ese brain (en
+la web, nunca con una clave), y cualquier curador se lo quita; cuenta desde la siguiente petición.
 
-- A key with the permission sends the same operations as a proposal (`brain_write`, or
-  `POST /v1/brains/:slug/wiki/write`), checked the same way. They apply at once, all or none, each page with a
-  new revision and the change with a line in the log that says which key wrote it. It is undone like any
-  other change: go back to a revision. Repeating a write with the same `requestKey` writes nothing twice.
-- A key without it gets `403 wiki_write_not_allowed`, which says how to propose instead.
-- A short key of a service writes with the permission of the main key that made it.
+- Una clave con el permiso envía las mismas operaciones que una propuesta (`brain_write`, o
+  `POST /v1/brains/:slug/wiki/write`), comprobadas igual. Se aplican en el momento, todas o ninguna, cada
+  página con una revisión nueva y el cambio con una línea en el log que dice qué clave lo escribió. Se deshace
+  como cualquier otro cambio: vuelve a una revisión. Repetir una escritura con el mismo `requestKey` no
+  escribe nada dos veces.
+- Una clave sin el permiso recibe `403 wiki_write_not_allowed`, que dice cómo proponer en su lugar.
+- Una clave corta de un servicio escribe con el permiso de la clave principal que la creó.
 
-### Deciding proposals with a key
+### Decidir propuestas con una clave
 
-The same permission lets a key decide the proposals of that brain, as a curator does in the web. It lists them
-(`brain_proposals` with `"mine": false`), reads one as a curator sees it, with its `fingerprint`
-(`brain_review`, or `GET /v1/proposals/:id/review`), and decides it (`brain_decide`, or
-`POST /v1/proposals/:id/approve` and `POST /v1/proposals/:id/return`):
+El mismo permiso deja que una clave decida las propuestas de ese brain, como hace un curador en la web. Las
+lista (`brain_proposals` con `"mine": false`), lee una como la ve un curador, con su `fingerprint`
+(`brain_review`, o `GET /v1/proposals/:id/review`), y la decide (`brain_decide`, o
+`POST /v1/proposals/:id/approve` y `POST /v1/proposals/:id/return`):
 
-- approve it all; approve the operations in `approve` and send the rest back with a `comment`; correct an
-  operation in `corrections` and approve; or send it all back with a `comment`. What is approved applies all
-  at once or not at all, and an operation needs those it depends on.
-- Only what was read is approved: a `fingerprint` that no longer matches gets `409 proposal_changed` with the
-  current review, and nothing applies. A proposal decided already gets `409 already_decided`.
-- The log and the activity say who decided and with which key. The agent that proposed gets the comment as a
-  correction. Repeating a decision with the same `requestKey` decides once and returns the same result.
-- A key without the permission gets `403 web_only`. The permission is checked on every request, so taking it
-  back between reading and deciding refuses the decision.
+- aprobarla entera; aprobar las operaciones en `approve` y devolver el resto con un `comment`; corregir una
+  operación en `corrections` y aprobar; o devolverla entera con un `comment`. Lo aprobado se aplica todo a la
+  vez o nada, y una operación necesita aquellas de las que depende.
+- Solo se aprueba lo que se leyó: un `fingerprint` que ya no coincida recibe `409 proposal_changed` con la
+  revisión actual, y no se aplica nada. Una propuesta ya decidida recibe `409 already_decided`.
+- El log y la actividad dicen quién decidió y con qué clave. El agente que propuso recibe el comentario como
+  corrección. Repetir una decisión con el mismo `requestKey` decide una vez y devuelve el mismo resultado.
+- Una clave sin el permiso recibe `403 web_only`. El permiso se comprueba en cada petición, así que quitárselo
+  entre leer y decidir rechaza la decisión.
 
-### Warnings before and after a change
+### Avisos antes y después de un cambio
 
-A proposal, a direct write, and a check that writes nothing (`brain_check`, or
-`POST /v1/brains/:slug/wiki/check`) answer with what the change would leave incoherent, worked out on the
-wiki as it would be after it: `duplicate_title`, `broken_link`, `orphan_created`, `stale_page` and
-`open_conflict`, each with the pages it is about. They come with `neighbours`, the pages linked to what the
-change touches, so the agent can read them for contradictions. Warnings never block.
+Una propuesta, una escritura directa y una comprobación que no escribe nada (`brain_check`, o
+`POST /v1/brains/:slug/wiki/check`) responden con lo que el cambio dejaría incoherente, calculado sobre el
+wiki tal como quedaría después: `duplicate_title`, `broken_link`, `orphan_created`, `stale_page` y
+`open_conflict`, cada uno con las páginas sobre las que trata. Vienen con `neighbours`, las páginas enlazadas
+a lo que el cambio toca, para que el agente las lea buscando contradicciones. Los avisos nunca bloquean.
 
-### The daily cleanup
+### La limpieza diaria
 
-A cleanup is a proposal or a direct write marked `"maintenance": true`. When nobody cleaned a wiki in the
-last 24 hours, none waits for approval and its health has problems, an agent that starts work in the brain
-(`mem_context`) is asked to clean it, with the health report. The Health screen says when the last cleanup
-was.
+Una limpieza es una propuesta o una escritura directa marcada `"maintenance": true`. Cuando nadie limpió un
+wiki en las últimas 24 horas, ninguna espera aprobación y su salud tiene problemas, se pide a un agente que
+empiece a trabajar en el brain (`mem_context`) que lo limpie, con el informe de salud. La pantalla Salud dice
+cuándo fue la última limpieza.
 
-## Connecting agents with the standard sign-in
+## Conectar agentes con el inicio de sesión estándar
 
-Agents that support the MCP sign-in (OAuth 2.1 with PKCE) find obsybrain through
-`/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server`. They open the
-person's browser. The person signs in, chooses which brains to share (read, or read + write) and goes
-back to the agent, without copying any key.
+Los agentes que soportan el inicio de sesión MCP (OAuth 2.1 con PKCE) encuentran obsybrain por
+`/.well-known/oauth-protected-resource` y `/.well-known/oauth-authorization-server`. Abren el navegador de la
+persona. La persona inicia sesión, elige qué brains compartir (lectura, o lectura + escritura) y vuelve al
+agente, sin copiar ninguna clave.
 
-- An access key lasts an hour. The refresh token changes on every use, and using an old one again
-  ends the connection.
-- A connection ends after 90 days without use, or a year in all. Connections show in the profile
-  under "Connected apps", where they can be revoked.
-- Clients can name themselves with a metadata document (an https address that obsybrain fetches with
-  guards against reaching private networks) or register dynamically.
+- Una clave de acceso dura una hora. El refresh token cambia en cada uso, y volver a usar uno viejo termina la
+  conexión.
+- Una conexión termina después de 90 días sin uso, o un año en total. Las conexiones se ven en el perfil, en
+  «Apps conectadas», donde se pueden revocar.
+- Los clientes pueden presentarse con un documento de metadata (una dirección https que obsybrain trae con
+  protecciones contra llegar a redes privadas) o registrarse dinámicamente.
 
-## Agents over MCP
+## Agentes por MCP
 
-obsybrain serves MCP at `/mcp` (Streamable HTTP; protocol `2026-07-28`, and `2025-11-25` / `2025-06-18` for
-older clients). An agent connects with the standard sign-in or a personal token, and on connecting
-receives a short protocol: resolve its brain, read the context, search before deciding, save as it
-works, never save secrets, close with a summary.
+obsybrain sirve MCP en `/mcp` (Streamable HTTP; protocolo `2026-07-28`, y `2025-11-25` / `2025-06-18` para
+clientes más viejos). Un agente se conecta con el inicio de sesión estándar o un token personal, y al
+conectarse recibe un protocolo corto: resuelve su brain, lee el contexto, busca antes de decidir, guarda
+mientras trabaja, nunca guarda secretos, cierra con un resumen.
 
-- Tools: `brain_list`, `brain_resolve`, `mem_context`, `mem_session_start`, `mem_save`, `mem_update`,
+- Herramientas: `brain_list`, `brain_resolve`, `mem_context`, `mem_session_start`, `mem_save`, `mem_update`,
   `mem_suggest_topic`, `mem_relate`, `mem_forget`, `mem_session_summary`, `mem_session_end`,
   `mem_search`, `mem_get`, `mem_timeline`, `brain_page`, `brain_neighbors`, `brain_map`,
   `brain_health`, `brain_compile_pack`, `brain_check`, `brain_write`, `brain_propose`, `brain_proposals`,
-  `brain_review`, `brain_decide`, `brain_withdraw`, `brain_create`. A key sees only the tools it may use.
-- Each tool runs the same `/v1` route a program would, with the same key: the same checks, limits
-  and results.
-- Curators link repositories to their brain, so an agent finds it with `brain_resolve`.
+  `brain_review`, `brain_decide`, `brain_withdraw`, `brain_create`. Una clave solo ve las herramientas que
+  puede usar.
+- Cada herramienta ejecuta la misma ruta `/v1` que ejecutaría un programa, con la misma clave: las mismas
+  comprobaciones, límites y resultados.
+- Los curadores enlazan repositorios a su brain, así un agente lo encuentra con `brain_resolve`.
 
-## Connect your agent
+## Conecta tu agente
 
-`GET /v1/connect` (any key) gives, for Claude Code, Codex, OpenCode, Cursor and other agents:
+`GET /v1/connect` (cualquier clave) da, para Claude Code, Codex, OpenCode, Cursor y otros agentes:
 
-- **Standard sign-in:** only the MCP address (`<your installation>/mcp`); the agent opens the browser.
-  Claude Code: `claude mcp add --transport http obsybrain <address> --scope user`, then
-  `claude mcp login obsybrain`. Codex: `codex mcp add obsybrain --url <address>`, then
-  `codex mcp login obsybrain`. OpenCode: a `remote` server in `opencode.json`. Cursor: `{"url": …}` in
+- **Inicio de sesión estándar:** solo la dirección MCP (`<tu instalación>/mcp`); el agente abre el navegador.
+  Claude Code: `claude mcp add --transport http obsybrain <dirección> --scope user`, y después
+  `claude mcp login obsybrain`. Codex: `codex mcp add obsybrain --url <dirección>`, y después
+  `codex mcp login obsybrain`. OpenCode: un servidor `remote` en `opencode.json`. Cursor: `{"url": …}` en
   `.cursor/mcp.json`.
-- **With a token:** a config block per agent. The token is pasted at a hidden prompt into a file only you
-  can read (`~/.config/obsybrain/<agent>.token`, mode 600), never on a command line. Each agent has a
-  variable of its own, loaded from that file, so two agents never overwrite one token, and a shared
-  `.mcp.json` never holds it: Claude Code `.mcp.json`
+- **Con un token:** un bloque de configuración por agente. El token se pega en un prompt oculto dentro de un
+  archivo que solo tú puedes leer (`~/.config/obsybrain/<agent>.token`, modo 600), nunca en una línea de
+  comandos. Cada agente tiene una variable propia, cargada desde ese archivo, así dos agentes nunca se pisan
+  un token, y un `.mcp.json` compartido nunca lo contiene: Claude Code `.mcp.json`
   (`"Authorization": "Bearer ${OBSY_BRAIN_TOKEN_CLAUDE_CODE}"`), Codex `~/.codex/config.toml`
   (`url` + `bearer_token_env_var = "OBSY_BRAIN_TOKEN_CODEX"`), OpenCode `opencode.json`
   (`{env:OBSY_BRAIN_TOKEN_OPENCODE}`), Cursor `.cursor/mcp.json` (`${env:OBSY_BRAIN_TOKEN_CURSOR}`).
-  Other agents use `OBSY_BRAIN_TOKEN` and `~/.config/obsybrain/token`, the bridge's. The kit only
-  carries a placeholder (`tokenPlaceholder`); the web fills it once, when you create the token there.
-- **The optional reminder:** for Claude Code, two hooks (below). Other agents get a text for their
-  instructions file (`AGENTS.md`) and the server's `close_session` prompt.
-- **The check:** ask your agent: *"What does this brain know about X?"*
+  Otros agentes usan `OBSY_BRAIN_TOKEN` y `~/.config/obsybrain/token`, el del puente. El kit solo lleva un
+  placeholder (`tokenPlaceholder`); la web lo rellena una vez, cuando creas el token allí.
+- **El recordatorio opcional:** para Claude Code, dos hooks (más abajo). Otros agentes reciben un texto para
+  su archivo de instrucciones (`AGENTS.md`) y el prompt `close_session` del servidor.
+- **La comprobación:** pregúntale a tu agente: *«¿Qué sabe este brain sobre X?»*
 
-`?agent=codex` returns one agent; `?brain=<slug>` names the brain in the check and the start hook.
+`?agent=codex` devuelve un solo agente; `?brain=<slug>` nombra el brain en la comprobación y el hook de
+inicio.
 
-### The bridge, for agents that only start local MCP programs
+### El puente, para agentes que solo arrancan programas MCP locales
 
 ```sh
 mkdir -p ~/.config/obsybrain && (umask 077 && printf 'Token: ' && read -rs t && : > ~/.config/obsybrain/token && chmod 600 ~/.config/obsybrain/token && printf '%s\n' "$t" > ~/.config/obsybrain/token && echo saved)
 obsybrain bridge --url https://brain.example.com/mcp
 ```
 
-As a local MCP server: `{"command": "obsybrain", "args": ["bridge", "--url", "<address>", "--token-file",
-"~/.config/obsybrain/token"]}`. The bridge reads one JSON-RPC message per line on stdin and sends each to
-`/mcp` with the token and the headers the server checks; answers go to stdout, notifications get none.
-It speaks to modern clients and to older ones that start with `initialize`. The token comes from
-`--token-file`, else `OBSY_BRAIN_TOKEN`, else `~/.config/obsybrain/token`; there is no option to pass it on the
-command line, and it is never printed. Plain `http` is refused except to this machine. When obsybrain does
-not answer, the request gets a JSON-RPC error that says so and how to proceed; the bridge keeps running.
+Como servidor MCP local: `{"command": "obsybrain", "args": ["bridge", "--url", "<dirección>", "--token-file",
+"~/.config/obsybrain/token"]}`. El puente lee un mensaje JSON-RPC por línea en stdin y manda cada uno a
+`/mcp` con el token y las cabeceras que el servidor comprueba; las respuestas van a stdout, las notificaciones
+no llevan ninguna. Habla con clientes modernos y con los más viejos que arrancan con `initialize`. El token
+viene de `--token-file`, si no `OBSY_BRAIN_TOKEN`, si no `~/.config/obsybrain/token`; no hay opción para
+pasarlo en la línea de comandos, y nunca se imprime. Un `http` plano se rechaza salvo a esta máquina. Cuando
+obsybrain no responde, la petición recibe un error JSON-RPC que lo dice y cómo seguir; el puente sigue
+corriendo.
 
-### The Claude Code reminder
+### El recordatorio de Claude Code
 
 ```json
 {
@@ -556,91 +576,92 @@ not answer, the request gets a JSON-RPC error that says so and how to proceed; t
 }
 ```
 
-- `hook session-start` runs `git remote get-url origin` in the session's folder, asks obsybrain which brain
-  is linked to it (`/v1/resolve`), and adds that brain's context to the session. `--brain <slug>` is
-  used when no brain is linked to the repository.
-- `hook stop` asks `GET /v1/me/sessions` whether the token still has a brain session open (work saved
-  without a summary). If so, it asks Claude once, per brain session and Claude Code session, to close it
-  with `mem_session_summary`. It lets Claude stop when `stop_hook_active` is set.
-- Both need a token (as for the bridge) and fail open: with no token, a bad input or obsybrain down, they
-  print nothing and let the session go on.
+- `hook session-start` ejecuta `git remote get-url origin` en la carpeta de la sesión, le pregunta a obsybrain
+  qué brain está enlazado a ella (`/v1/resolve`) y añade el contexto de ese brain a la sesión.
+  `--brain <slug>` se usa cuando no hay ningún brain enlazado al repositorio.
+- `hook stop` pregunta a `GET /v1/me/sessions` si el token todavía tiene una sesión de brain abierta (trabajo
+  guardado sin resumen). Si la tiene, le pide a Claude, una vez por sesión de brain y sesión de Claude Code,
+  cerrarla con `mem_session_summary`. Deja que Claude pare cuando `stop_hook_active` está puesto.
+- Los dos necesitan un token (como para el puente) y fallan abiertos: sin token, con una entrada incorrecta u
+  obsybrain caído, no imprimen nada y dejan que la sesión siga.
 
-The `obsybrain` command comes with this package: from a clone, `npm install && npm run build && npm link`.
+El comando `obsybrain` viene con este paquete: desde un clon, `npm install && npm run build && npm link`.
 
-## The API for programs
+## La API para programas
 
-Everything a tool does is also a `/v1` route, with the same keys and permissions. The description of
-the API is at `GET /v1/openapi.json` (OpenAPI 3.1, no key needed: it describes routes and holds no
-data). Version 1 is a contract: its routes and the main fields of its answers do not change; a
-breaking change goes to `/v2`, and `/v1` keeps working alongside it.
+Todo lo que hace una herramienta es también una ruta `/v1`, con las mismas claves y permisos. La descripción
+de la API está en `GET /v1/openapi.json` (OpenAPI 3.1, sin clave: describe rutas y no contiene datos). La
+versión 1 es un contrato: sus rutas y los campos principales de sus respuestas no cambian; un cambio que rompe
+va a `/v2`, y `/v1` sigue funcionando a su lado.
 
-- **Errors** always come as `{ "error": { "code", "message", "howToProceed" } }`.
-- **Rate limit:** each key may make 600 requests per minute by default. Beyond that the answer is
-  429 `rate_limited`, with `Retry-After` and `retryAfter` in seconds; over MCP the same refusal comes
-  as a JSON-RPC error. The administration changes the limit with `PUT /v1/admin/settings`
-  (`{ "rateLimit": 1200 }`). The count lives in the memory of the server process.
-- **Bounded answers:** no answer passes 256 000 characters. Lists go by pages and say how to ask for
-  the next one. An answer that would still pass the limit is cut: it comes as
-  `{ "cut": { "message", "howToProceed", … }, "partial": "…" }` with the header `X-Brain-Cut: true`.
+- **Los errores** llegan siempre como `{ "error": { "code", "message", "howToProceed" } }`.
+- **Límite de peticiones:** cada clave puede hacer 600 peticiones por minuto por defecto. Más allá, la
+  respuesta es 429 `rate_limited`, con `Retry-After` y `retryAfter` en segundos; por MCP la misma negativa
+  llega como error JSON-RPC. La administración cambia el límite con `PUT /v1/admin/settings`
+  (`{ "rateLimit": 1200 }`). El contador vive en la memoria del proceso del servidor.
+- **Respuestas acotadas:** ninguna respuesta pasa de 256 000 caracteres. Las listas van por páginas y dicen
+  cómo pedir la siguiente. Una respuesta que aun así pasaría el límite se corta: llega como
+  `{ "cut": { "message", "howToProceed", … }, "partial": "…" }` con la cabecera `X-Brain-Cut: true`.
 
-## Following a brain live
+## Seguir un brain en vivo
 
-`GET /v1/brains/:slug/events` is a stream of Server-Sent Events: sessions opened and closed, entries
-saved and changed, searches, reads, proposals sent, withdrawn and decided, and wiki changes. Each event
-carries its id, time, brain, kind, who and with which key (and the external reference of a short key),
-and the id and title or address of what it touches; a search carries the text searched, already
-redacted. It never carries the body of an entry or a page.
+`GET /v1/brains/:slug/events` es un flujo de Server-Sent Events: sesiones abiertas y cerradas, entradas
+guardadas y cambiadas, búsquedas, lecturas, propuestas enviadas, retiradas y decididas, y cambios en el wiki.
+Cada evento lleva su id, hora, brain, tipo, quién y con qué clave (y la referencia externa de una clave
+corta), y el id y título o dirección de lo que toca; una búsqueda lleva el texto buscado, ya depurado. Nunca
+lleva el cuerpo de una entrada ni de una página.
 
-- **Who sees what:** curators see everything. Everyone else sees every change and proposal, and only
-  their own searches and reads (a service account: what any of its keys did; an agent's short key:
-  what it did itself).
-- **Ids and order:** an event's id is its place in the delivery order, which is the order events became
-  visible; ids grow along a stream. A write whose transaction takes long gets a later id, never none.
-  A session left idle for 24 hours closes itself, with a `session.closed` event that has no `who`.
-- **Resuming:** reconnect with `Last-Event-ID` (or `?lastEventId=`) to get what you missed, in order,
-  from the last 24 hours. If you missed events older than that, a `gap` event says so first: catch up
-  with the lists (pending proposals, recent sessions). An id ahead of the newest event (an installation
-  restored from a copy) also gets a `gap` event, and the stream follows from now.
-- **Liveness:** events arrive within 2 seconds; a comment line every 15 seconds keeps proxies from
-  closing the connection. The key and the role are checked every 2 seconds: a revoked key or a
-  changed role ends the stream with a `closed` event that says why.
-- One poller reads new events for every open stream and gives them their ids. An installation runs as
-  one server process.
+- **Quién ve qué:** los curadores lo ven todo. El resto ve cada cambio y propuesta, y solo sus propias
+  búsquedas y lecturas (una cuenta de servicio: lo que hicieron cualquiera de sus claves; una clave corta de
+  agente: lo que hizo ella misma).
+- **Ids y orden:** el id de un evento es su lugar en el orden de entrega, que es el orden en que los eventos
+  se hicieron visibles; los ids crecen a lo largo de un flujo. Una escritura cuya transacción tarda recibe un
+  id posterior, nunca ninguno. Una sesión sin actividad durante 24 horas se cierra sola, con un evento
+  `session.closed` sin `who`.
+- **Retomar:** reconecta con `Last-Event-ID` (o `?lastEventId=`) para recibir lo que te perdiste, en orden, de
+  las últimas 24 horas. Si te perdiste eventos más viejos, un evento `gap` lo dice primero: ponte al día con
+  las listas (propuestas pendientes, sesiones recientes). Un id por delante del evento más nuevo (una
+  instalación restaurada desde una copia) también recibe un evento `gap`, y el flujo sigue desde ahora.
+- **Vitalidad:** los eventos llegan en menos de 2 segundos; una línea de comentario cada 15 segundos evita que
+  los proxies corten la conexión. La clave y el rol se comprueban cada 2 segundos: una clave revocada o un rol
+  cambiado termina el flujo con un evento `closed` que dice por qué.
+- Un poller lee los eventos nuevos de cada flujo abierto y les da sus ids. Una instalación corre como un solo
+  proceso de servidor.
 
-## Audit
+## Auditoría
 
-Every sign-in, invitation, role change, key, connection, purge and setting change is recorded. The
-administration reads it with filters and downloads it as CSV. Curators see the part of their brain.
-The database refuses to change or delete it.
+Cada inicio de sesión, invitación, cambio de rol, clave, conexión, purga y cambio de configuración queda
+registrado. La administración lo lee con filtros y lo descarga como CSV. Los curadores ven la parte de su
+brain. La base de datos se niega a cambiarlo o borrarlo.
 
-## Behind a reverse proxy
+## Detrás de un proxy inverso
 
-obsybrain takes a password only over an encrypted connection, or from the same machine. A reverse proxy
-on the same machine must therefore send `X-Forwarded-For` and `X-Forwarded-Proto` (nginx:
-`proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` and
-`proxy_set_header X-Forwarded-Proto $scheme;`). List the proxy's own address in
-`OBSY_BRAIN_TRUSTED_PROXIES`. Without those headers, everything the proxy forwards looks local.
+obsybrain acepta una contraseña solo por una conexión cifrada, o desde la misma máquina. Un proxy inverso en
+la misma máquina tiene que enviar por eso `X-Forwarded-For` y `X-Forwarded-Proto` (nginx:
+`proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` y
+`proxy_set_header X-Forwarded-Proto $scheme;`). Lista la dirección propia del proxy en
+`OBSY_BRAIN_TRUSTED_PROXIES`. Sin esas cabeceras, todo lo que reenvía el proxy parece local.
 
-## In a container
+## En un contenedor
 
-`docker build -t obsybrain .` builds the image: the server, the web and the migrations on Node 25,
-run by an unprivileged user, healthy when `GET /v1/health` answers. `obsybrain serve` is its command;
-`docker run --rm obsybrain obsybrain version` prints the version. Copies go to `/backups`.
+`docker build -t obsybrain .` construye la imagen: el servidor, la web y las migraciones en Node 25, corridas
+por un usuario sin privilegios, sana cuando `GET /v1/health` responde. `obsybrain serve` es su comando;
+`docker run --rm obsybrain obsybrain version` imprime la versión. Las copias van a `/backups`.
 
-In a container, a browser on the same machine arrives through the container's gateway, not from
-`127.0.0.1`, so the rule above would refuse its password. When the port is published on `127.0.0.1`
-alone, set `OBSY_BRAIN_PUBLISH=127.0.0.1:<port>` and `OBSY_BRAIN_LOCAL_ONLY=1`: a request straight
-from the gateway, with no forwarded headers and addressed to `localhost`, `127.0.0.1` or `[::1]`,
-then counts as this machine. The service refuses to
-start with `OBSY_BRAIN_LOCAL_ONLY=1` and any other `OBSY_BRAIN_PUBLISH`: published to the network,
-every visitor would arrive from the gateway and a password would cross it in clear. Never publish
-the port elsewhere by hand with the flag on; for access from other machines use a domain with HTTPS.
+En un contenedor, un navegador en la misma máquina llega por la gateway del contenedor, no desde
+`127.0.0.1`, así que la regla de arriba rechazaría su contraseña. Cuando el puerto se publica solo en
+`127.0.0.1`, pon `OBSY_BRAIN_PUBLISH=127.0.0.1:<puerto>` y `OBSY_BRAIN_LOCAL_ONLY=1`: una petición directa
+de la gateway, sin cabeceras reenviadas y dirigida a `localhost`, `127.0.0.1` o `[::1]`, cuenta entonces como
+esta máquina. El servicio se niega a arrancar con `OBSY_BRAIN_LOCAL_ONLY=1` y cualquier otro
+`OBSY_BRAIN_PUBLISH`: publicado a la red, cada visitante llegaría desde la gateway y una contraseña la
+cruzaría en claro. Nunca publiques el puerto en otro sitio a mano con la opción puesta; para acceder desde
+otras máquinas usa un dominio con HTTPS.
 
-`obsybrain db check | provision | drop` prepares an existing PostgreSQL (17 or newer, with
-`unaccent`): `provision` takes an administration login (from a file or the standard input, never
-kept) and creates a role that is no superuser and cannot create databases or roles, and a database
-only it may connect to. `--isolate-from <database>` also closes another program's database to it,
-and obsybrain's to that program: every other login that could connect there is first given that
-right by name (the command lists them), then the database is closed to everyone else. `db drop`
-removes only a database and a role that `provision` made. The new connection URL goes to a new `0600` file
-(`--url-file`) or is printed once.
+`obsybrain db check | provision | drop` prepara un PostgreSQL existente (17 o más nuevo, con `unaccent`):
+`provision` toma un login de administración (de un archivo o de la entrada estándar, nunca se conserva) y crea
+un rol que no es superusuario y no puede crear bases de datos ni roles, y una base de datos a la que solo él
+puede conectarse. `--isolate-from <base de datos>` también cierra la base de datos de otro programa, y la de
+obsybrain a ese programa: cada otro login que pudiera conectarse allí recibe primero ese derecho por su
+nombre (el comando los lista), y después la base de datos se cierra a todos los demás. `db drop` quita solo
+una base de datos y un rol que `provision` creó. La nueva URL de conexión va a un archivo nuevo `0600`
+(`--url-file`) o se imprime una vez.
