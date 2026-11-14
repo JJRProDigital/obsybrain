@@ -1752,6 +1752,70 @@ select:disabled {
   border: 1px solid var(--rule);
 }
 
+/* The manual on two panes (Guia.tsx): the sections list stands beside the active section on a desk and
+   folds into a strip of chips above it on a phone. The list's items wrap, so the strip never scrolls
+   sideways, whatever the width (matrix.spec). The gold marks selection, never navigation: a current
+   section says so with weight and a ground of its own. */
+.guia-layout {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+.guia-nav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-nav a {
+  display: inline-block;
+  min-height: 36px;
+  padding: 6px 10px;
+  color: var(--nav);
+  text-decoration: none;
+  border-radius: var(--radius);
+}
+
+.guia-nav a:hover {
+  color: var(--text);
+}
+
+.guia-nav a[aria-current="page"] {
+  color: var(--text);
+  font-weight: 550;
+  background: var(--surface);
+}
+
+@media (min-width: 1100px) {
+  .guia-layout {
+    grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+    gap: 32px 40px;
+  }
+
+  .guia-nav-list {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .guia-nav a {
+    display: block;
+    padding: 6px 0;
+  }
+
+  /* The list keeps its own column while the section reads: one that outgrows the window scrolls on
+     its own, never the page, and is reachable by keyboard (the axe audit's scrollable-region rule). */
+  .guia-nav {
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+}
+
 /* The manual's own screenshots (Guia.tsx): they load as pictures at /guia-assets/ and sit as wide as the
    column they are in, never the other way round — the layout holds at 320 px (matrix.spec) whatever the
    shot's own size is. On a wiki page there is no img at all: its images stay links. */
