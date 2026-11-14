@@ -428,6 +428,10 @@ export function Rail({
             <span class="rail-label">{T.shell.people}</span>
           </a>
         ) : null}
+        <a class="rail-item" href="/guia" aria-current={path === '/guia' ? 'page' : undefined}>
+          <Icon name="book" />
+          <span class="rail-label">{T.guia.title}</span>
+        </a>
         <button
           type="button"
           class="rail-item rail-help keyboard-only"

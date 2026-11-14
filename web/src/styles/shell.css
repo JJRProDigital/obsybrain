@@ -103,6 +103,23 @@
   border-top: 1px solid var(--rail-line);
 }
 
+/* The rail's grids and their items shrink with the rail: the labels ellipsize (the Spanish ones are longer
+   than the 220px the open rail was sized for) and never paint over the work area beside the rail. */
+.rail-nav,
+.rail-tools,
+.rail-foot {
+  min-width: 0;
+}
+
+.rail-nav ul,
+.rail-nav li,
+.rail-tools li,
+.rail-tools a,
+.rail-foot li,
+.rail-foot a {
+  min-width: 0;
+}
+
 /* An item: its icon in a 40×36 box at the left, its name beside it. */
 .rail-item {
   position: relative;

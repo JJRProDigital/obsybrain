@@ -15,6 +15,7 @@ import { AdminBranding, AdminLimits, AdminSystem } from './screens/admin/Install
 import { AdminMeaning } from './screens/admin/Meaning.tsx'
 import { Brain, brainResource } from './screens/Brain.tsx'
 import { Connect } from './screens/Connect.tsx'
+import { Guia } from './screens/Guia.tsx'
 import { HealthScreen } from './screens/Health.tsx'
 import { Home } from './screens/Home.tsx'
 import { Invite } from './screens/Invite.tsx'
@@ -236,6 +237,7 @@ function SignedIn() {
           <Route path="/profile" component={Profile} />
           <Route path="/profile/tokens" component={Profile} />
           <Route path="/connect" component={Connect} />
+          <Route path="/guia" component={Guia} />
           <Route default component={NotFound} />
         </Router>
       )}

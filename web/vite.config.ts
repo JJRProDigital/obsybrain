@@ -1,13 +1,28 @@
 // Builds the Brain web into dist/web (plan §2): hashed files under /assets, no inline script or style (the
 // CSP of plan §0 forbids them), and a .br and .gz copy of each text file so the server sends them without
 // compressing on the fly.
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { cpSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib'
 import { defineConfig, type Plugin } from 'vite'
 
 const out = fileURLToPath(new URL('../dist/web/', import.meta.url))
+
+// The manual's screenshots (Guia.tsx): they are never imported by a script, they are addressed by URL
+// from the markdown (/guia-assets/x.png), so a build copies the folder into the served tree, where the
+// server finds it when it walks dist/web once (src/http/web.ts).
+function guiaAssets(): Plugin {
+  return {
+    name: 'brain-guia-assets',
+    apply: 'build',
+    closeBundle() {
+      cpSync(new URL('src/screens/guia-assets', import.meta.url), join(out, 'guia-assets'), {
+        recursive: true,
+      })
+    },
+  }
+}
 
 function precompress(): Plugin {
   return {
@@ -104,7 +119,7 @@ export default defineConfig({
   },
   // The graph's worker is a file of its own under /assets (CSP worker-src 'self'), an ES module.
   worker: { format: 'es' },
-  plugins: [licences(), precompress()],
+  plugins: [licences(), guiaAssets(), precompress()],
   server: {
     port: 5173,
     proxy: Object.fromEntries(

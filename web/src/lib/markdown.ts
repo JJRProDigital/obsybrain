@@ -2,7 +2,8 @@
 // written by agents, and the web session can approve proposals, so nothing in a body may run: raw HTML is
 // off (it shows as text), links go only to http, https, mailto or an address inside the web, a link that
 // leaves the web opens in a new tab without telling the other site where it came from, and an image is a
-// link to it (never loaded into the page). A [[mention]] links to the page it names; one that names no
+// link to it (never loaded into the page) — except the manual (/guia, renderGuide), whose screenshots
+// load themselves from /guia-assets/. A [[mention]] links to the page it names; one that names no
 // page, or a retired or superseded one, looks different and says so in words, not only in colour.
 import MarkdownIt from 'markdown-it'
 
@@ -37,40 +38,46 @@ const NOTE: Record<Exclude<MentionState, 'ok'>, string> = {
 type Env = { slug: string; states: Map<string, MentionState>; titles: Map<string, string> }
 type Parser = InstanceType<typeof MarkdownIt>
 
-function build(): Parser {
+function build(o: { guide?: boolean }): Parser {
   const md = new MarkdownIt({ html: false, linkify: false, typographer: false })
-  md.validateLink = safeHref
+  // The manual's own links go by file name («03-diario.md»): the guide's link check takes those names
+  // (the guia_links rule then rewrites them to their section's anchor), every other address as ever.
+  md.validateLink = o.guide ? (href) => /^(\d\d-[a-z-]+|indice)\.md$/.test(href) || safeHref(href) : safeHref
   const esc = md.utils.escapeHtml
 
-  // [[address]] and [[address|text]], as the server reads mentions.
-  md.inline.ruler.before('link', 'wikilink', (state, silent) => {
-    const { src, pos } = state
-    if (src.charCodeAt(pos) !== 0x5b || src.charCodeAt(pos + 1) !== 0x5b) return false
-    const end = src.indexOf(']]', pos + 2)
-    if (end < 0) return false
-    const inner = src.slice(pos + 2, end)
-    if (inner.length > 501 || /[\n\]]/.test(inner)) return false
-    const bar = inner.indexOf('|')
-    const address = (bar < 0 ? inner : inner.slice(0, bar)).trim()
-    if (!isAddress(address)) return false
-    if (!silent) {
-      const t = state.push('wikilink', 'a', 0)
-      t.meta = { address, text: bar < 0 ? '' : inner.slice(bar + 1).trim() }
+  // [[address]] and [[address|text]], as the server reads mentions. The manual's body documents the
+  // syntax instead of using it (its own links go by file name), so its parser carries no mention rule:
+  // a `[[x]]` quoted in its code spans must stay words, never a link into a wiki.
+  if (!o.guide) {
+    md.inline.ruler.before('link', 'wikilink', (state, silent) => {
+      const { src, pos } = state
+      if (src.charCodeAt(pos) !== 0x5b || src.charCodeAt(pos + 1) !== 0x5b) return false
+      const end = src.indexOf(']]', pos + 2)
+      if (end < 0) return false
+      const inner = src.slice(pos + 2, end)
+      if (inner.length > 501 || /[\n\]]/.test(inner)) return false
+      const bar = inner.indexOf('|')
+      const address = (bar < 0 ? inner : inner.slice(0, bar)).trim()
+      if (!isAddress(address)) return false
+      if (!silent) {
+        const t = state.push('wikilink', 'a', 0)
+        t.meta = { address, text: bar < 0 ? '' : inner.slice(bar + 1).trim() }
+      }
+      state.pos = end + 2
+      return true
+    })
+    md.renderer.rules.wikilink = (tokens, idx, _o, e) => {
+      const env = e as Env
+      const meta = (tokens[idx]?.meta ?? {}) as { address: string; text: string }
+      const { address, text } = meta
+      // An address the page does not list resolved to a page under its current address: it works.
+      const state = env.states.get(address) ?? 'ok'
+      const cls = state === 'ok' ? 'wikilink' : `wikilink ${state}`
+      const note = state === 'ok' ? '' : `<span class="link-note"> (${NOTE[state]})</span>`
+      // The page's title reads better than its address; the address shows on hover.
+      const shown = text || env.titles.get(address) || address
+      return `<a href="${esc(pageHref(env.slug, address))}" class="${cls}" title="${esc(address)}">${esc(shown)}${note}</a>`
     }
-    state.pos = end + 2
-    return true
-  })
-  md.renderer.rules.wikilink = (tokens, idx, _o, e) => {
-    const env = e as Env
-    const meta = (tokens[idx]?.meta ?? {}) as { address: string; text: string }
-    const { address, text } = meta
-    // An address the page does not list resolved to a page under its current address: it works.
-    const state = env.states.get(address) ?? 'ok'
-    const cls = state === 'ok' ? 'wikilink' : `wikilink ${state}`
-    const note = state === 'ok' ? '' : `<span class="link-note"> (${NOTE[state]})</span>`
-    // The page's title reads better than its address; the address shows on hover.
-    const shown = text || env.titles.get(address) || address
-    return `<a href="${esc(pageHref(env.slug, address))}" class="${cls}" title="${esc(address)}">${esc(shown)}${note}</a>`
   }
 
   // A link whose address was refused keeps its words and loses its link.
@@ -108,13 +115,61 @@ function build(): Parser {
     const out = leaves(src) ? ' target="_blank" rel="noopener noreferrer"' : ''
     return `<a href="${esc(src)}"${out}>Image: ${alt}</a>`
   }
+  if (o.guide) {
+    // A link to another part of the manual («03-diario.md») anchors to that section's block on this
+    // one page; «indice.md» anchors to the index. Run before the link drop, or these would be lost.
+    md.core.ruler.before('drop_unsafe_links', 'guia_links', (state) => {
+      for (const block of state.tokens) {
+        if (!block.children) continue
+        for (const t of block.children) {
+          if (t.type !== 'link_open') continue
+          const m = /^(\d\d-[a-z-]+|indice)\.md$/.exec(String(t.attrGet('href') ?? ''))
+          if (m?.[1]) t.attrSet('href', `#seccion-${m[1]}`)
+        }
+      }
+    })
+    // The page already has its own h1 (the screen's «Guía»); the manual's sections open one level down.
+    md.core.ruler.push('guia_headings', (state) => {
+      for (const t of state.tokens) {
+        if (t.type !== 'heading_open') continue
+        const h = /^h([1-5])$/.exec(t.tag)
+        if (h) t.tag = `h${Number(h[1]) + 1}`
+      }
+    })
+    // Its images load themselves: the manual's screenshots live beside it at /guia-assets/, and never
+    // anywhere else. A source the manual should not load stays a link, as on a wiki page.
+    md.renderer.rules.image = (tokens, idx, options, env, self) => {
+      const t = tokens[idx]
+      const alt = esc(self.renderInlineAsText(t?.children ?? [], options, env))
+      const src = String(t?.attrGet('src') ?? '')
+      if (!safeHref(src)) return alt
+      if (/^\/guia-assets\//.test(src)) return `<img src="${esc(src)}" alt="${alt}" loading="lazy">`
+      return `<a href="${esc(src)}">Image: ${alt}</a>`
+    }
+    // A block of code wider than the column scrolls; a keyboard user must be able to reach it (the axe
+    // audit's scrollable-region-focusable, axe.spec).
+    md.renderer.rules.fence = (tokens, idx) => {
+      const t = tokens[idx]
+      const info = t?.info ? md.utils.unescapeAll(t.info).trim() : ''
+      const lang = info.split(/\s+/g)[0] ?? ''
+      const cls = lang ? ` class="language-${esc(lang)}"` : ''
+      return `<pre tabindex="0"><code${cls}>${esc(t?.content ?? '')}</code></pre>\n`
+    }
+  }
   return md
 }
 
 let parser: Parser | null = null
 
+// The manual's parser: same safety, no mentions, its own links and images (see the rules above).
+let guideParser: Parser | null = null
+export function renderGuide(body: string): string {
+  guideParser ??= build({ guide: true })
+  return guideParser.render(body, { slug: 'guia', states: new Map(), titles: new Map() } satisfies Env)
+}
+
 export function renderMarkdown(body: string, o: { slug: string; links: readonly LinkLike[] }): string {
-  parser ??= build()
+  parser ??= build({})
   const states = new Map<string, MentionState>()
   const titles = new Map<string, string>()
   for (const l of o.links) {

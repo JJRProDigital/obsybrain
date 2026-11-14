@@ -365,6 +365,14 @@ export const T = {
     } as Record<string, string>,
   },
 
+  guia: {
+    title: 'Guía',
+    lead: 'El manual de ObsyBrain, sección por sección: cómo se usa cada pantalla y cada control.',
+    sections: 'Secciones',
+    backToIndex: 'Volver al índice',
+    inPreparation: 'Sección en preparación.',
+  },
+
   profile: {
     title: 'Perfil',
     sections: 'En esta página',

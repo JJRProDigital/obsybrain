@@ -1402,8 +1402,14 @@ select:disabled {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) minmax(0, 150px);
   align-items: center;
-  gap: 8px 10px;
+  gap: 8px 24px;
   min-height: 40px;
+  /* Consecutive pick rows keep their radio targets 24px apart (axe target-size). */
+  padding: 6px 0;
+}
+
+.pick + .pick {
+  margin-top: 10px;
 }
 
 .pick:not(:has(select)) {
@@ -1411,8 +1417,9 @@ select:disabled {
 }
 
 .pick input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
+  margin: 2px;
   accent-color: var(--accent);
 }
 
@@ -1743,6 +1750,30 @@ select:disabled {
 .prose td {
   padding: 4px 10px;
   border: 1px solid var(--rule);
+}
+
+/* The manual's own screenshots (Guia.tsx): they load as pictures at /guia-assets/ and sit as wide as the
+   column they are in, never the other way round — the layout holds at 320 px (matrix.spec) whatever the
+   shot's own size is. On a wiki page there is no img at all: its images stay links. */
+.guia-prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-top: 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+/* The manual reads across the page: the wiki's 72ch reading measure does not cap it. */
+.guia-prose {
+  max-width: none;
+}
+
+/* The manual's code blocks wrap instead of scrolling: the width measure (canvas-shell) counts the laid-out
+   text of the block, not the clipped box, and a member reads a wrapped command without a sideways scroll. */
+.guia-prose pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .prose .wikilink.broken {
@@ -4171,8 +4202,9 @@ dialog.search-dialog {
 }
 
 .pick input[type="radio"] {
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
+  margin: 2px;
   accent-color: var(--accent);
 }
 

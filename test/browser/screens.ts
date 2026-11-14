@@ -457,6 +457,16 @@ export const ROWS: Row[] = [
     much: { na: 'five agents, one tab each' },
   },
   {
+    name: 'guia',
+    path: '/guia',
+    route: '/guia',
+    key: { na: 'a static manual bundled in the build: it reads nothing and has no states of its own' },
+    ready: heading('Guía'),
+    empty: { na: 'the manual always shows its index and sections: nothing to load' },
+    filtered: { na: NO_FILTERS },
+    much: { na: 'eleven sections delivered whole on the page: nothing to page' },
+  },
+  {
     name: 'sign in',
     path: '/sign-in',
     route: '/sign-in',
