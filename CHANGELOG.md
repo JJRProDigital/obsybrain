@@ -11,6 +11,9 @@ La guía del producto, dentro del producto.
 - **Sección Guía en la web.** El manual completo — las 9 pantallas de administración, los ajustes, el flujo
   de propuestas, los agentes — con capturas de las pantallas reales, navegable desde la barra lateral
   (ícono libro). Nada de ir a GitHub a leer cómo se usa lo que ya tenés abierto.
+- **Sección por sección, sin scroll eterno.** La Guía se lee con una lista de secciones a la izquierda y una
+  a la vez a la derecha; los enlaces «Siguiente →» cambian de sección y un enlace profundo
+  (`/guia#seccion-07-agente`) abre la sección exacta.
 - **La barra lateral respeta su ancho.** Con nombres de sección en español, los ítems del rail se
   desbordaban y pintaban sobre el contenido; ahora encogen con puntos suspensivos.
 - **Botones y casillas al mínimo accesible.** Los radios y checkboxes de 18px quedaban bajo el mínimo de
