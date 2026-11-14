@@ -89,7 +89,7 @@ Descarga el lanzador desde un release publicado (sustituye `vX.Y.Z` por la versi
 SHA-256 que dan las notas del release para `obsybrain.sh` antes de ejecutarlo:
 
 ```sh
-curl -fsSLO https://github.com/obsessive-solutions/obsybrain/releases/download/vX.Y.Z/obsybrain.sh
+curl -fsSLO https://github.com/JJRProDigital/obsybrain/releases/download/vX.Y.Z/obsybrain.sh
 shasum -a 256 obsybrain.sh      # Linux: sha256sum obsybrain.sh; it must match the release notes
 sh obsybrain.sh install --local
 ```

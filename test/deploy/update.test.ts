@@ -1826,13 +1826,13 @@ describe('the launcher: where the versions are asked', () => {
     const plain = await installed()
     assert.equal(
       readEnv(plain.dir).OBSY_BRAIN_REPO_URL,
-      'https://github.com/obsessive-solutions/obsybrain.git',
+      'https://github.com/JJRProDigital/obsybrain.git',
     )
     const compose = readFileSync(join(plain.dir, 'compose.yaml'), 'utf8')
     assert.ok(
       compose.includes(
         // biome-ignore lint/suspicious/noTemplateCurlyInString: the syntax of compose
-        'OBSY_BRAIN_REPO_URL: ${OBSY_BRAIN_REPO_URL-https://github.com/obsessive-solutions/obsybrain}',
+        'OBSY_BRAIN_REPO_URL: ${OBSY_BRAIN_REPO_URL-https://github.com/JJRProDigital/obsybrain}',
       ),
     )
 
@@ -1873,7 +1873,7 @@ describe('the launcher: where the versions are asked', () => {
     assert.ok(up.calls.some((l) => /^git .*ls-remote .*mine\.git/.test(l)))
     const text = readFileSync(join(c.dir, '.env'), 'utf8')
     writeFileSync(join(c.dir, '.env'), text.replace(/^OBSY_BRAIN_REPO_URL=.*$/m, "OBSY_BRAIN_REPO_URL=''"))
-    assert.ok(check(c, env).calls.some((l) => /^git .*ls-remote .*obsessive-solutions\/obsybrain/.test(l)))
+    assert.ok(check(c, env).calls.some((l) => /^git .*ls-remote .*JJRProDigital\/obsybrain/.test(l)))
   })
 
   it('an address with a quote or a line break is refused', async () => {

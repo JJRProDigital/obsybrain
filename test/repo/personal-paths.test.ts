@@ -1,6 +1,6 @@
 // What ships holds no path of the machine it was made on (spec B7 «El repositorio público»): the README, the launcher
 // and its files, the source, the web, the image recipe and the migrations. The repository's own address
-// (github.com/obsessive-solutions/obsybrain, the package obsybrain) is not a personal path. Tests may use made-up
+// (github.com/JJRProDigital/obsybrain, the package obsybrain) is not a personal path. Tests may use made-up
 // paths as data; they do not ship.
 import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
@@ -21,7 +21,7 @@ const SHIPPED = [
 ]
 const PERSONAL = /\/Users\/[^/\s'"`]+|\/Volumes\/[^/\s'"`]+|\/home\/(?!node\b)[a-z][^/\s'"`]*|[A-Z]:\\Users\\/
 const REPO =
-  /(github\.com|githubusercontent\.com\/|api\.github\.com\/repos)[/:]?obsessive-solutions\/obsybrain/g
+  /(github\.com|githubusercontent\.com\/|api\.github\.com\/repos)[/:]?JJRProDigital\/obsybrain/g
 
 const ACCOUNT = Buffer.from('ZXJpY3Jpc2Nv', 'base64').toString('utf8')
 const ACCOUNT_RE = new RegExp(ACCOUNT, 'i')
@@ -54,10 +54,10 @@ describe('personal paths', () => {
     ])
       assert.equal(personalPaths(bad).length, 1, bad)
     for (const fine of [
-      'git clone https://github.com/obsessive-solutions/obsybrain.git',
-      'curl -fsSLO https://raw.githubusercontent.com/obsessive-solutions/obsybrain/main/deploy/obsybrain.sh',
+      'git clone https://github.com/JJRProDigital/obsybrain.git',
+      'curl -fsSLO https://raw.githubusercontent.com/JJRProDigital/obsybrain/main/deploy/obsybrain.sh',
       'npm i obsybrain',
-      "'https://api.github.com/repos/obsessive-solutions/obsybrain/releases'",
+      "'https://api.github.com/repos/JJRProDigital/obsybrain/releases'",
       'the image user is /home/node',
       '/opt/obsybrain and ~/obsybrain',
     ])

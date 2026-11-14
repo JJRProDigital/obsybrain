@@ -36,7 +36,7 @@ REQ=$DIR/update/request REPORT=$DIR/update/report STATE=$DIR/update/state CRED=$
 LAUNCHER=${OBSY_BRAIN_UPDATER_LAUNCHER:-$DIR/updater/obsybrain.sh}
 ONCE=${OBSY_BRAIN_UPDATER_ONCE:-0}
 BEAT=${OBSY_BRAIN_UPDATER_BEAT:-5} CHECK_EVERY=21600 RETRY_AFTER=900 MAX_RETRIES=3
-DEFAULT_REPO=https://github.com/obsessive-solutions/obsybrain
+DEFAULT_REPO=https://github.com/JJRProDigital/obsybrain
 
 # A stop may come while the output goes to a file: what is said then goes where it was going when this started.
 if (exec 4>&2); then exec 4>&2; else exec 4>/dev/null; fi

@@ -432,7 +432,7 @@ describe('the checker', () => {
     assert.equal(repoUrl({}), DEFAULT_REPO_URL)
     assert.equal(repoUrl({ OBSY_BRAIN_RELEASES_URL: 'https://example.com/list' }), DEFAULT_REPO_URL)
     assert.equal(repoUrl({ OBSY_BRAIN_REPO_URL: ` ${REPO} ` }), REPO)
-    assert.equal(DEFAULT_REPO_URL, 'https://github.com/obsessive-solutions/obsybrain')
+    assert.equal(DEFAULT_REPO_URL, 'https://github.com/JJRProDigital/obsybrain')
     const { fetch, calls } = stub({})
     const c = releaseChecker({ repo: null, version: '0.1.0', clock: at(T0), fetch })
     await c.check()

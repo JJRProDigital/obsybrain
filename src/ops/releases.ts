@@ -17,7 +17,7 @@ import { lstatSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Clock } from '../core/clock.ts'
 
-export const DEFAULT_REPO_URL = 'https://github.com/obsessive-solutions/obsybrain'
+export const DEFAULT_REPO_URL = 'https://github.com/JJRProDigital/obsybrain'
 export const NOTES_MAX = 4000
 export const MAX_BYTES = 2 * 1024 * 1024
 const TIMEOUT_MS = 10_000

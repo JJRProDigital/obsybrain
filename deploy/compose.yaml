@@ -29,7 +29,7 @@ services:
       OBSY_BRAIN_FACTORY_URL: ${OBSY_BRAIN_FACTORY_URL:-}
       OBSY_BRAIN_TIMEZONE: ${OBSY_BRAIN_TIMEZONE:-UTC}
       # Where the service asks for new versions; empty, it never asks. An installation from before has no such setting.
-      OBSY_BRAIN_REPO_URL: ${OBSY_BRAIN_REPO_URL-https://github.com/obsessive-solutions/obsybrain}
+      OBSY_BRAIN_REPO_URL: ${OBSY_BRAIN_REPO_URL-https://github.com/JJRProDigital/obsybrain}
       OBSY_BRAIN_BACKUPS: /backups
       # What the updater says (read only, from it): the service reads the newest version there while it runs.
       OBSY_BRAIN_UPDATE_REPORT: /update/report

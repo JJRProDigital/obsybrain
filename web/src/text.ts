@@ -274,7 +274,7 @@ export const T = {
     otherAgents: 'Otros agentes',
     copyCommand: 'Copiar el comando',
     readme: 'Cómo funciona, en el README',
-    readmeUrl: 'https://github.com/obsessive-solutions/obsybrain#connect-your-agent',
+    readmeUrl: 'https://github.com/JJRProDigital/obsybrain#connect-your-agent',
     count: (n: number) => (n === 1 ? '1 brain' : `${n} brains`),
     totals: 'En tus brains',
     totalsTitle: 'En números',

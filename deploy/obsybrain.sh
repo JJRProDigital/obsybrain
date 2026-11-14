@@ -17,7 +17,7 @@ set -u
 umask 077
 
 PROG=obsybrain.sh
-REPO=${OBSY_BRAIN_REPO:-https://github.com/obsessive-solutions/obsybrain.git}
+REPO=${OBSY_BRAIN_REPO:-https://github.com/JJRProDigital/obsybrain.git}
 # Whether this run was told where the repository is; if not, the installation's own address counts (OBSY_BRAIN_REPO_URL).
 REPO_GIVEN=0
 [ -n "${OBSY_BRAIN_REPO:-}" ] && REPO_GIVEN=1
