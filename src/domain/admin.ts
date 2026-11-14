@@ -326,7 +326,7 @@ const settingsChanged = (moved: string[], current: unknown) => {
   return e
 }
 
-// rateLimit: the requests per minute each key may make (spec B5). factoryUrl: where runs of RSC Factory
+// rateLimit: the requests per minute each key may make (spec B5). factoryUrl: where runs of the LaKademIA panel
 // open (plan G4). `base`: what each field was when read; a field someone changed since refuses the whole
 // save (409 with the values now); only a base, nothing to change, asks whether it is still so.
 export async function updateSettings(

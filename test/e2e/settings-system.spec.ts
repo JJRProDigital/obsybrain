@@ -1,7 +1,7 @@
 // The rest of the administration against the real server and PostgreSQL (plan T047, PR25b; local lane), with
 // mail captured, never sent. CA18: the administration uploads a logo and renames the installation; anyone
 // who arrives sees both in the header, and the invitation mail carries both (the logo inline, cid:). CA9: with
-// the address of RSC Factory set, the session a Factory run opens with a service account's short key links to
+// the address of the LaKademIA panel set, the session a Factory run opens with a service account's short key links to
 // that run in Activity, in a new tab. The audit's download holds exactly the lines its filtered view shows.
 // The test mail goes through the mail settings saved in the web, and a failure shows with its reason.
 // Files run in name order on one server: this one runs after doors.spec.ts, whose first run needs an
@@ -182,7 +182,7 @@ test('CA9: a session a Factory run opens links to that run in Activity, in a new
   await expect(row.getByRole('link', { name: /r_0a1b2c3d/ })).toHaveCount(0)
   // The administration sets where Factory is.
   await admin.goto('/admin/system')
-  await admin.getByLabel('Dirección de RSC Factory').fill('https://factory.e2e.test')
+  await admin.getByLabel('Dirección del panel de LaKademIA').fill('https://factory.e2e.test')
   await admin.getByRole('button', { name: 'Guardar la dirección' }).click()
   await expect(admin.getByRole('status').filter({ hasText: 'Guardado.' })).toBeFocused()
   // Factory itself is not running here: its page is answered by the test, and the address checked.

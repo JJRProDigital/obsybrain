@@ -1,4 +1,4 @@
-// Accounts: people (with an email) and service accounts (programs such as RSC Factory). The full
+// Accounts: people (with an email) and service accounts (programs such as the LaKademIA panel). The full
 // lifecycle (invitations, removal from the web) is spec B4; this is what the journal needs.
 import type { Clock } from '../core/clock.ts'
 import { conflict, invalid } from '../core/errors.ts'

@@ -136,7 +136,7 @@ test.describe('first run', () => {
     await expect(page.getByRole('heading', { name: 'obsybrain ya está configurado' })).toBeVisible()
   })
 
-  test('installed with rsc-factory: says to finish there, links to it, asks for nothing; then leads to sign in', async ({
+  test('installed with the LaKademIA panel: says to finish there, links to it, asks for nothing; then leads to sign in', async ({
     page,
     context,
     baseURL,
@@ -153,26 +153,30 @@ test.describe('first run', () => {
     )
     await page.goto('/b/growth')
     await expect(page).toHaveURL(/\/setup$/)
-    await expect(page.getByRole('heading', { name: 'Termina la configuración en rsc-factory' })).toBeVisible()
-    await expect(page.getByText('obsybrain se instaló con rsc-factory')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Abrir rsc-factory' })).toHaveAttribute(
+    await expect(
+      page.getByRole('heading', { name: 'Termina la configuración en el panel de LaKademIA' }),
+    ).toBeVisible()
+    await expect(page.getByText('obsybrain fue instalado por el panel de LaKademIA')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Abrir el panel de LaKademIA' })).toHaveAttribute(
       'href',
       'https://factory.example.test',
     )
     await expect(page.locator('input')).toHaveCount(0)
-    // Checking again while rsc-factory has not finished: busy while it asks, then said aloud (a live region).
+    // Checking again while the panel has not finished: busy while it asks, then said aloud (a live region).
     await s.state('setup', 'loading')
     await page.getByRole('button', { name: 'Comprobar de nuevo' }).click()
     await expect(page.getByRole('button', { name: 'Comprobando…' })).toHaveAttribute('aria-busy', 'true')
-    await expect(page.getByRole('status')).toHaveText('Seguimos esperando a rsc-factory.')
-    await expect(page.getByRole('heading', { name: 'Termina la configuración en rsc-factory' })).toBeVisible()
+    await expect(page.getByRole('status')).toHaveText('Seguimos esperando al panel de LaKademIA.')
+    await expect(
+      page.getByRole('heading', { name: 'Termina la configuración en el panel de LaKademIA' }),
+    ).toBeVisible()
     await s.state('setup', 'normal')
     // At 320 px nothing goes past the edge.
     await page.setViewportSize({ width: 320, height: 700 })
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
     ).toBe(true)
-    // rsc-factory finishes its setup meanwhile: checking again leads to signing in.
+    // The panel finishes its setup meanwhile: checking again leads to signing in.
     await s.setUpElsewhere()
     await page.getByRole('button', { name: 'Comprobar de nuevo' }).click()
     await expect(page.getByRole('heading', { name: 'obsybrain ya está configurado' })).toBeVisible()

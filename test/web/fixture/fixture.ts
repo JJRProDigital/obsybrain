@@ -143,7 +143,7 @@ type Life = { entries: number; agent: boolean; imported?: boolean }
 type Scen = {
   id: string
   setupDone: boolean
-  // Companion mode (F1-PR11): installed by rsc-factory, which sets it up; the setup of the web waits.
+  // Companion mode (F1-PR11): installed by the LaKademIA panel, which sets it up; the setup of the web waits.
   companion?: boolean
   // The installation key of the wizard's last step: ready right after the setup, given once (B7 PR30).
   setupKey?: 'ready' | 'given'
@@ -166,7 +166,7 @@ type Scen = {
   streams: Set<Follower>
   // The server is down for the live events (a lost connection): open streams were cut, new ones refused.
   streamsDown: boolean
-  // The address of RSC Factory the administration set (G4, PR25); null when none.
+  // The address of the LaKademIA panel the administration set (G4, PR25); null when none.
   factoryUrl: string | null
   seq: number
   // Every event of the scenario, so a stream that comes back with Last-Event-ID gets what it missed.
@@ -291,7 +291,7 @@ const err = (status: number, code: string, message: string, howToProceed: string
   status,
   body: { error: { code, message, howToProceed } },
 })
-// The setup of the web while rsc-factory is to set obsybrain up (companion mode, src/domain/companion.ts).
+// The setup of the web while the LaKademIA panel is to set obsybrain up (companion mode, src/domain/companion.ts).
 const companionPending = (s: Scen): Answer => {
   const factoryUrl = s.factoryUrl ?? 'https://factory.example.test'
   return {
@@ -299,8 +299,8 @@ const companionPending = (s: Scen): Answer => {
     body: {
       error: {
         code: 'companion_pending',
-        message: 'Termina la configuración en rsc-factory.',
-        howToProceed: `obsybrain se instaló con rsc-factory: abre rsc-factory en ${factoryUrl} y termina su configuración inicial. obsybrain queda configurado con la misma administración.`,
+        message: 'Termina la configuración en el panel de LaKademIA.',
+        howToProceed: `obsybrain fue instalado por el panel de LaKademIA: ábrelo en ${factoryUrl} y termina su configuración inicial. obsybrain queda configurado con la misma administración.`,
         factoryUrl,
       },
     },

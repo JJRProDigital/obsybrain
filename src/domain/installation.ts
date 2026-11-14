@@ -49,14 +49,14 @@ export async function installation(db: Db): Promise<Installation> {
   }
 }
 
-// The address of RSC Factory (plan G4, CA9): runs open there from Activity. https, or http on this machine;
+// The address of the LaKademIA panel (plan G4, CA9): runs open there from Activity. https, or http on this machine;
 // no credentials, query or fragment; only characters SAFE_URL allows, so it is plain text wherever it goes.
 export function factoryUrlOf(v: unknown): string | null {
   if (v === null) return null
   const how =
-    'Da la dirección de RSC Factory, por ejemplo https://factory.example.com, o null para no poner ninguna.'
+    'Da la dirección del panel de LaKademIA, por ejemplo https://factory.example.com, o null para no poner ninguna.'
   if (typeof v !== 'string' || !v.trim() || v.length > 300)
-    throw invalid('"factoryUrl" es la dirección de RSC Factory.', how)
+    throw invalid('"factoryUrl" es la dirección del panel de LaKademIA.', how)
   const raw = v.trim()
   let u: URL
   try {
@@ -172,7 +172,7 @@ export const setupGone = () =>
   new AppError(404, 'setup_done', 'Esta instalación ya está configurada.', 'Inicia sesión en su lugar.')
 
 // Runs once, as one transaction: the installation row is locked, so two setups at once make one admin.
-// `also`: more to do in the same transaction (companion mode creates Factory's service account), so a
+// `also`: more to do in the same transaction (companion mode creates the panel's service account), so a
 // failure there leaves nothing set up and the setup can be run again.
 async function setUp<T>(
   db: Db,
@@ -235,9 +235,9 @@ export async function runSetup(db: Db, clock: Clock, conn: ConnFacts, input: Set
   return { ...out, session: session.secret }
 }
 
-// Companion mode (CA24): the installer of Factory prepares Brain with what it already asked, and
-// Factory gets its service account. The main key is returned once, to the installer. With `factoryUrl`
-// (POST /v1/setup/companion, plan F1 §3.1) the installation links runs to rsc-factory, in the same transaction.
+// Companion mode (CA24): the installer of the LaKademIA panel prepares Brain with what it already asked, and
+// the panel gets its service account. The main key is returned once, to the installer. With `factoryUrl`
+// (POST /v1/setup/companion, plan F1 §3.1) the installation links runs to the panel, in the same transaction.
 export async function companionSetup(
   db: Db,
   clock: Clock,
@@ -250,7 +250,7 @@ export async function companionSetup(
       await tx.query('UPDATE installation SET factory_url = $1 WHERE id = 1', [factoryUrl])
     const serviceId = await createAccount(tx, clock, {
       kind: 'service',
-      name: input.serviceName?.trim() || 'RSC Factory',
+      name: input.serviceName?.trim() || 'Panel de LaKademIA',
       canCreateBrains: true,
       canInvite: true,
     })
@@ -262,7 +262,7 @@ export async function companionSetup(
   return { adminId, ...more }
 }
 
-// Which service account is rsc-factory's (plan F1 §3.1): written in the transaction that makes it, as an audit row
+// Which service account is the LaKademIA panel's (plan F1 §3.1): written in the transaction that makes it, as an audit row
 // (append-only, kept in copies; F1 adds no migration). Reconnecting reaches that account and no other.
 export const COMPANION_SERVICE = 'installation.companion.service'
 export async function markCompanionService(db: Db, at: Date, serviceId: string): Promise<void> {

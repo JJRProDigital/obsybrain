@@ -1,4 +1,4 @@
-// Companion mode (plan F1 §3.1, T047): rsc-factory sets up the obsybrain its installer left waiting, with the one-time
+// Companion mode (plan F1 §3.1, T047): the LaKademIA panel sets up the obsybrain its installer left waiting, with the one-time
 // key, and gets the main key of its service account (POST /v1/setup/companion). Afterwards, when that key is lost (an
 // answer that never arrived, a restore), it gets a new one with the same one-time key and an administrator's email and
 // password (POST /v1/setup/companion/reconnect, spec F1 C24 «Finish connecting obsybrain»). Where the handshake must
@@ -58,7 +58,7 @@ export const companionRoutes: Route[] = [
         name: b.name ?? 'obsybrain',
         publicUrl: b.publicUrl ?? c.publicUrl ?? undefined,
         admin: obj(b.admin ?? {}) as { name: unknown; email: unknown; password: unknown },
-        serviceName: typeof b.serviceName === 'string' ? b.serviceName : 'rsc-factory',
+        serviceName: typeof b.serviceName === 'string' ? b.serviceName : 'Panel de LaKademIA',
         factoryUrl: b.factoryUrl ?? c.factoryUrl,
         ip: r.conn.ip,
       })

@@ -36,7 +36,7 @@ describe('the update part of the version (what the screen offers)', () => {
     assert.deepEqual(updateView(newer, on({ mode: 'off' }), NOW), { kind: 'terminal' })
     assert.deepEqual(updateView(newest, on({ mode: 'off' }), NOW), { kind: 'terminal' })
   })
-  it('installed by rsc-factory: no button, and where to go', () => {
+  it('installed by the LaKademIA panel: no button, and where to go', () => {
     const u = on({ mode: 'companion', factoryUrl: 'https://factory.example.test' })
     assert.deepEqual(updateView(newer, u, NOW), {
       kind: 'companion',

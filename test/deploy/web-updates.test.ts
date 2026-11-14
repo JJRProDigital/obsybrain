@@ -2,7 +2,7 @@
 // `docker` of test/deploy/fake-docker.sh: no daemon, so it runs in CI. What this pins: it is off in a new installation;
 // enable warns that whoever controls the updater controls the server, takes the credential from a file and keeps it
 // in one place readable by its owner only, proves the repository answers with it before anything runs, and starts a
-// compose project of its own that the service's project never touches; in an installation made by rsc-factory it
+// compose project of its own that the service's project never touches; in an installation made by the LaKademIA panel it
 // exits 2 and says where to update; disable leaves no container and no credential; uninstall does the same. Exit codes:
 // 0 done, 2 usage, 3 something is missing (nothing changed), 4 failed and put back, 1 other.
 import assert from 'node:assert/strict'
@@ -236,7 +236,7 @@ describe('web-updates: off in a new installation (CA15)', () => {
 })
 
 describe('web-updates enable', () => {
-  it('in an installation made by rsc-factory: exit 2, says where to update, touches nothing and calls nothing', async () => {
+  it('in an installation made by the LaKademIA panel: exit 2, says where to update, touches nothing and calls nothing', async () => {
     const c = await installed()
     const env = readFileSync(join(c.dir, '.env'), 'utf8').replace(
       "OBSY_BRAIN_COMPANION='0'",
@@ -248,7 +248,7 @@ describe('web-updates enable', () => {
     for (const more of [[], ['--yes']]) {
       const r = launch(c, ['web-updates', 'enable', '--dir', c.dir, ...more, ...(more.length ? [] : [])])
       assert.equal(r.code, 2, r.stderr)
-      assert.match(r.stderr, /obsybrain was installed by rsc-factory: update it from there\./)
+      assert.match(r.stderr, /obsybrain was installed by the LaKademIA panel: update it from there\./)
       assert.deepEqual(r.calls, [], 'not even a question to docker')
     }
     assert.deepEqual(readdirSync(c.dir).sort(), before)

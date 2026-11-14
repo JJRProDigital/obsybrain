@@ -20,8 +20,7 @@ const SHIPPED = [
   'migrations',
 ]
 const PERSONAL = /\/Users\/[^/\s'"`]+|\/Volumes\/[^/\s'"`]+|\/home\/(?!node\b)[a-z][^/\s'"`]*|[A-Z]:\\Users\\/
-const REPO =
-  /(github\.com|githubusercontent\.com\/|api\.github\.com\/repos)[/:]?JJRProDigital\/obsybrain/g
+const REPO = /(github\.com|githubusercontent\.com\/|api\.github\.com\/repos)[/:]?JJRProDigital\/obsybrain/g
 
 const ACCOUNT = Buffer.from('ZXJpY3Jpc2Nv', 'base64').toString('utf8')
 const ACCOUNT_RE = new RegExp(ACCOUNT, 'i')

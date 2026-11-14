@@ -1,6 +1,6 @@
-// Companion mode (plan F1 §3.1, T047; spec F1 C24, CA1): rsc-factory's installer leaves obsybrain installed but not
-// set up, with a one-time key both share. While it waits, obsybrain's own setup says to finish in rsc-factory; when
-// rsc-factory's setup is done, it calls POST /v1/setup/companion with that key from the shared network and gets the
+// Companion mode (plan F1 §3.1, T047; spec F1 C24, CA1): the LaKademIA panel's installer leaves obsybrain installed but not
+// set up, with a one-time key both share. While it waits, obsybrain's own setup says to finish in the panel; when
+// the panel's setup is done, it calls POST /v1/setup/companion with that key from the shared network and gets the
 // main key of its service account. Once set up, the key serves nothing.
 import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
@@ -53,17 +53,17 @@ const counts = async (w: World) =>
     "SELECT count(*) FILTER (WHERE kind = 'person')::int AS people, count(*) FILTER (WHERE kind = 'service')::int AS services FROM accounts",
   )) ?? { people: -1, services: -1 }
 
-describe('companion mode: waiting for rsc-factory', { skip: skipPg }, () => {
+describe('companion mode: waiting for the LaKademIA panel', { skip: skipPg }, () => {
   let w: World
   before(async () => {
     w = await companionWorld()
   })
   after(async () => w.close())
 
-  it('the setup of obsybrain says to finish in rsc-factory, with its address, and takes no password', async () => {
+  it('the setup of obsybrain says to finish in the LaKademIA panel, with its address, and takes no password', async () => {
     const state = await w.raw('GET', '/v1/setup')
     assert.deepEqual([state.status, state.body.error?.code], [409, 'companion_pending'], state.text)
-    assert.equal(errorOf(state).message, 'Termina la configuración en rsc-factory.')
+    assert.equal(errorOf(state).message, 'Termina la configuración en el panel de LaKademIA.')
     assert.equal(errorOf(state).factoryUrl, FACTORY)
     assert.match(errorOf(state).howToProceed ?? '', /factory\.example\.com/)
     const post = await w.raw('POST', '/v1/setup', {
@@ -105,7 +105,7 @@ describe('companion mode: waiting for rsc-factory', { skip: skipPg }, () => {
     assert.equal(await setUp(w), false)
   })
 
-  it('400 with the password rule of obsybrain, or an address of rsc-factory it cannot keep; nothing set up', async () => {
+  it('400 with the password rule of obsybrain, or an address of the LaKademIA panel it cannot keep; nothing set up', async () => {
     const weak = await w.raw('POST', '/v1/setup/companion', {
       headers: auth(),
       body: { ...body, admin: { ...admin, password: 'short' } },
@@ -120,11 +120,11 @@ describe('companion mode: waiting for rsc-factory', { skip: skipPg }, () => {
     assert.equal(await setUp(w), false)
   })
 
-  it('CA1: with the key, the administration and the service account of rsc-factory, in one go; then the key serves nothing', async () => {
+  it('CA1: with the key, the administration and the service account of the LaKademIA panel, in one go; then the key serves nothing', async () => {
     const r = await w.raw('POST', '/v1/setup/companion', { headers: auth(), body })
     assert.equal(r.status, 201, r.text)
     assert.deepEqual(Object.keys(r.body).sort(), ['adminId', 'serviceId', 'serviceKey'])
-    // The main key of the service account works, and the installation links runs to rsc-factory.
+    // The main key of the service account works, and the installation links runs to the LaKademIA panel.
     const me = await meOf(w, r.body.serviceKey)
     assert.deepEqual([me.account.kind, me.account.name], ['service', 'rsc-factory'])
     assert.equal(me.installation.factoryUrl, FACTORY)
@@ -134,7 +134,7 @@ describe('companion mode: waiting for rsc-factory', { skip: skipPg }, () => {
       [r.body.serviceId],
     )
     assert.deepEqual([svc?.c, svc?.i], [true, true])
-    // The administration signs in with rsc-factory's email and password.
+    // The administration signs in with the LaKademIA panel's email and password.
     const login = await w.raw('POST', '/v1/auth/login', {
       headers: WEB,
       body: { email: admin.email, password: admin.password },
@@ -186,11 +186,11 @@ describe('companion mode: defaults from the launcher', { skip: skipPg }, () => {
   })
   after(async () => w.close())
 
-  it('without publicUrl, factoryUrl or serviceName in the body: those the launcher set, and «rsc-factory»', async () => {
+  it('without publicUrl, factoryUrl or serviceName in the body: those the launcher set, and «Panel de LaKademIA»', async () => {
     const r = await w.raw('POST', '/v1/setup/companion', { headers: auth(), body: { admin } })
     assert.equal(r.status, 201, r.text)
     const me = await meOf(w, r.body.serviceKey)
-    assert.deepEqual([me.account.name, me.installation.factoryUrl], ['rsc-factory', FACTORY])
+    assert.deepEqual([me.account.name, me.installation.factoryUrl], ['Panel de LaKademIA', FACTORY])
     const row = await w.db.one<{ public_url: string; name: string }>(
       'SELECT public_url, name FROM installation',
     )
@@ -277,9 +277,9 @@ describe('companion mode: the setup takes its row lock (deterministic)', { skip:
 })
 
 // After the setup (spec F1 C24 «Finish connecting obsybrain»): a lost answer, or a restore that killed every key,
-// leaves rsc-factory without its main key. With the one-time key and an administrator's email and password it gets a
+// leaves the LaKademIA panel without its main key. With the one-time key and an administrator's email and password it gets a
 // new one; the one before stops working.
-describe('companion mode: reconnecting rsc-factory', { skip: skipPg }, () => {
+describe('companion mode: reconnecting the LaKademIA panel', { skip: skipPg }, () => {
   let w: World
   let first = { serviceKey: '', serviceId: '', adminId: '' }
   const reconnect = (
@@ -392,7 +392,7 @@ describe('companion mode: reconnecting rsc-factory', { skip: skipPg }, () => {
     const before = await counts(w)
     const r = await reconnect()
     assert.deepEqual([r.status, r.body.error?.code], [409, 'service_removed'], r.text)
-    assert.match(errorOf(r).message ?? '', /dio de baja la cuenta de rsc-factory/)
+    assert.match(errorOf(r).message ?? '', /dio de baja la cuenta del panel de LaKademIA/)
     assert.match(errorOf(r).howToProceed ?? '', /[Rr]eactívala/)
     assert.deepEqual(await counts(w), before)
     const live = await w.db.one<{ n: number }>(
@@ -424,7 +424,7 @@ describe('companion mode: reconnecting rsc-factory', { skip: skipPg }, () => {
   })
 })
 
-// Set up without the handshake (obsybrain admin bootstrap, say): no account was ever made for rsc-factory, so
+// Set up without the handshake (obsybrain admin bootstrap, say): no account was ever made for the LaKademIA panel, so
 // reconnecting makes one, and from then on it is that one.
 describe('companion mode: reconnecting when no account was ever made', { skip: skipPg }, () => {
   let w: World
@@ -433,7 +433,7 @@ describe('companion mode: reconnecting when no account was ever made', { skip: s
   })
   after(async () => w.close())
 
-  it('makes the rsc-factory account once (may create brains and invite), then keeps to it', async () => {
+  it('makes the panel de LaKademIA account once (may create brains and invite), then keeps to it', async () => {
     const id = await w.person('Eric', { email: admin.email, isAdmin: true })
     await w.db.query('UPDATE accounts SET password_hash = $2 WHERE id = $1', [
       id.id,
@@ -451,7 +451,7 @@ describe('companion mode: reconnecting when no account was ever made', { skip: s
       'SELECT name, can_create_brains AS c, can_invite AS i FROM accounts WHERE id = $1',
       [r.body.serviceId],
     )
-    assert.deepEqual([svc?.name, svc?.c, svc?.i], ['rsc-factory', true, true])
+    assert.deepEqual([svc?.name, svc?.c, svc?.i], ['Panel de LaKademIA', true, true])
     const again = await call()
     assert.equal(again.status, 201, again.text)
     assert.equal(again.body.serviceId, r.body.serviceId)

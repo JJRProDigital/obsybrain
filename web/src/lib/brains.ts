@@ -82,7 +82,7 @@ const AGENTS: Array<[RegExp, string]> = [
   [/gemini/i, 'Gemini CLI'],
   [/opencode/i, 'OpenCode'],
   [/windsurf/i, 'Windsurf'],
-  [/rsc[\s-]?factory/i, 'RSC Factory'],
+  [/rsc[\s-]?factory/i, 'Panel de LaKademIA'],
 ]
 const PROGRAMS =
   /^(curl|wget|httpie|python|python-requests|python-urllib|aiohttp|httpx|axios|node|node-fetch|undici|go-http-client|okhttp|java|postmanruntime|insomnia|ruby|php|rust|reqwest)\b/i

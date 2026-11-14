@@ -75,7 +75,7 @@ export type SessionView = Session & {
   forgotten: number
   summary: string | null
   // Opened by a service account (its main key, or a short key of it): only then is its reference the
-  // service's own, such as an rsc-factory run (plan rsc-factory-brain §3.1).
+  // service's own, such as a run of the LaKademIA panel (plan rsc-factory-brain §3.1).
   viaService: boolean
 }
 

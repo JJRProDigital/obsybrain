@@ -1,6 +1,6 @@
 // The installation as a whole (spec B6 «Admin»: Limits, Backups & system, Branding; plan G3, G4, G14; PR25b).
 // Who: the administration. Jobs: set how many requests each key may make; see that the service is healthy
-// and which version runs; say where RSC Factory is, so a run's sessions link to it (CA9); name the
+// and which version runs; say where the LaKademIA panel is, so a run's sessions link to it (CA9); name the
 // installation and give it a logo (CA18). Done when: each save says so in words, and the header shows the
 // new name and logo at once. Risks: a limit so low the web itself stops (bounded, said beside the field);
 // a logo that is a script in disguise (SVG refused here and on the server; the server serves it inert);

@@ -257,8 +257,8 @@ function prepare(i: EntryInput): Prepared {
 
 type Writer = { onBehalfId: string | null }
 
-// An agent's own writing: a short key "on behalf of" a person signs it for that person (spec B4 CA20, «RSC
-// Factory (run r_x, step 3) on behalf of Eric»); any other key speaks for nobody else.
+// An agent's own writing: a short key "on behalf of" a person signs it for that person (spec B4 CA20, «Panel de
+// LaKademIA (run r_x, step 3) on behalf of Eric»); any other key speaks for nobody else.
 const agentWriter = (ctx: Ctx): Writer => ({ onBehalfId: ctx.who.credential.onBehalfId ?? null })
 
 // The heart of saving, shared by agents (`saveEntry`) and by the correction relay.

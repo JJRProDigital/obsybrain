@@ -6,7 +6,7 @@
 //   - the mark is an empty file made with `wx`, whatever else the request says (a version, an address, a command are
 //     ignored: nothing from the request reaches the updater);
 //   - two administrators at once: one mark, and the other is told an update is already on its way;
-//   - off (no updater alive), companion mode (update it from rsc-factory) and nothing newer refuse with a reason;
+//   - off (no updater alive), companion mode (update it from the LaKademIA panel) and nothing newer refuse with a reason;
 //   - «Try again» only for a version that failed, within the updater's own limits;
 //   - GET /v1/admin/system says what the screen needs and nothing more.
 import assert from 'node:assert/strict'
@@ -249,7 +249,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
     }
   })
 
-  it('companion mode: no button of its own, the answer sends to rsc-factory (CA28)', async () => {
+  it('companion mode: no button of its own, the answer sends to the LaKademIA panel (CA28)', async () => {
     const v = await world({
       releases: checker(NEWER),
       update: { request, report },
@@ -269,7 +269,7 @@ describe('updating from the web: the request and the screen (rsc-updates B3)', {
       const web = await v.web(a.id)
       const r = await v.callWeb(web, 'POST', '/v1/admin/update', { password: PW })
       assert.deepEqual([r.status, r.body.error?.code], [409, 'companion'], r.text)
-      assert.match(r.body.error?.message ?? '', /instalado por rsc-factory: actualízalo desde allí/)
+      assert.match(r.body.error?.message ?? '', /instalado por el panel de LaKademIA: actualízalo desde allí/)
       assert.match(r.body.error?.howToProceed ?? '', /factory\.example\.test/)
       assert.deepEqual(await marks(), [])
       const sys = await v.callWeb(web, 'GET', '/v1/admin/system')

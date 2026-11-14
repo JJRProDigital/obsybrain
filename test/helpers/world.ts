@@ -96,7 +96,7 @@ export async function world(
     exportDir?: string
     // The invitation mails a service may have sent in an hour (F1-PR2 review).
     serviceInvitesPerHour?: number
-    // Companion mode (F1-PR11): installed by rsc-factory, waiting for its setup.
+    // Companion mode (F1-PR11): installed by the LaKademIA panel, waiting for its setup.
     companion?: CompanionConfig
     // The proxies believed (default: this machine, so tests can say what a proxy saw).
     trustedProxies?: string[]

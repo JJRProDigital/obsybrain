@@ -10,7 +10,7 @@
 // nothing; two administrators' requests at once start one update. The updater takes the mark, runs the launcher's own
 // `update` (copy first, stop, build, migrate, start) and the service answers as 98.0.0 with the session from before, the
 // last update recorded, the mark gone and the audit line there. `disable` turns it off again.
-// CA28, with the real launcher: in an installation made by rsc-factory `web-updates enable` exits 2, names rsc-factory
+// CA28, with the real launcher: in an installation made by the LaKademIA panel `web-updates enable` exits 2, names the panel
 // and starts nothing.
 import assert from 'node:assert/strict'
 import { execFile, spawnSync } from 'node:child_process'
@@ -349,7 +349,7 @@ describe('updating from the web with real containers (CA27)', { skip: why ?? fal
   })
 })
 
-describe('an installation made by rsc-factory has no button of its own (CA28)', {
+describe('an installation made by the LaKademIA panel has no button of its own (CA28)', {
   skip: why ?? false,
 }, () => {
   let dir = ''
@@ -365,10 +365,10 @@ describe('an installation made by rsc-factory has no button of its own (CA28)', 
   after(() => {
     if (dir) rmSync(join(dir, '..'), { recursive: true, force: true })
   })
-  it('web-updates enable exits 2, names rsc-factory, and starts nothing', async () => {
+  it('web-updates enable exits 2, names the panel, and starts nothing', async () => {
     const r = launch(['web-updates', 'enable', '--yes', '--dir', dir])
     assert.equal(r.status, 2, r.stderr)
-    assert.match(r.stderr, /obsybrain was installed by rsc-factory: update it from there\./)
+    assert.match(r.stderr, /obsybrain was installed by the LaKademIA panel: update it from there\./)
     assert.equal(
       await docker('ps', '-aq', '--filter', `label=com.docker.compose.project=${NAME}-c-updater`),
       '',

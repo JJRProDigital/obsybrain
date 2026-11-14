@@ -27,7 +27,7 @@ type Scenario = {
   close(brain: string, reason: string, message: string): Promise<void>
   // Another curator saves the settings of a brain meanwhile (PR25a).
   settingsEdit(brain: string, change: Record<string, unknown>): Promise<void>
-  // rsc-factory sets the installation up meanwhile (companion mode, F1-PR11).
+  // the LaKademIA panel sets the installation up meanwhile (companion mode, F1-PR11).
   setUpElsewhere(): Promise<void>
 }
 

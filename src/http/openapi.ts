@@ -105,7 +105,7 @@ const INSTALLATION_SETTINGS = obj({
   rateLimitDefault: n('The limit when none was set (600).'),
   rateLimitMin: n('The lowest limit accepted.'),
   rateLimitMax: n('The highest limit accepted.'),
-  factoryUrl: nul(s('The address of RSC Factory: runs referred to by a session open there.')),
+  factoryUrl: nul(s('The address of the LaKademIA panel: runs referred to by a session open there.')),
 })
 const MAIL_LINE = obj({
   at: s('When.', { format: 'date-time' }),
@@ -309,7 +309,7 @@ const SESSION_VIEW = {
     forgotten: n('Its entries forgotten since (not counted in "entries").'),
     summary: nul(s('Its summary (the first 300 characters), once closed with one.')),
     viaService: b(
-      'A service account opened it (its main key or a short key): only then is the reference the service’s own, such as an rsc-factory run.',
+      'A service account opened it (its main key or a short key): only then is the reference the service’s own, such as a run of the LaKademIA panel.',
     ),
   },
   required: [
@@ -404,7 +404,7 @@ export const EVENT = obj(
         id: s('Credential id.'),
         ref: nul(s('The external reference of a short key.')),
         service: b(
-          'A service account did it (its main key or a short key): only then is the reference the service’s own, such as an rsc-factory run.',
+          'A service account did it (its main key or a short key): only then is the reference the service’s own, such as a run of the LaKademIA panel.',
         ),
       }),
     ),
@@ -1001,19 +1001,19 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/setup/companion': {
     summary:
-      'Companion mode (installed by rsc-factory): set up the installation with the one-time key of obsybrain.sh install --companion (Authorization: Bearer <companionToken>, not a key of obsybrain), from the network shared with rsc-factory only. Makes the administration and the service account rsc-factory uses, and links runs to rsc-factory. 401 unauthorized with a wrong key; 404 setup_done once set up (the key serves nothing then); 404 no_such_route through a proxy, from elsewhere, or without companion mode. While it waits, GET and POST /v1/setup answer 409 companion_pending with factoryUrl.',
+      'Companion mode (installed by the LaKademIA panel): set up the installation with the one-time key of obsybrain.sh install --companion (Authorization: Bearer <companionToken>, not a key of obsybrain), from the network shared with the panel only. Makes the administration and the service account the panel uses, and links runs to the panel. 401 unauthorized with a wrong key; 404 setup_done once set up (the key serves nothing then); 404 no_such_route through a proxy, from elsewhere, or without companion mode. While it waits, GET and POST /v1/setup answer 409 companion_pending with factoryUrl.',
     status: 201,
     body: obj(
       {
         name: s('The name of the installation (default obsybrain).', { maxLength: 80 }),
         publicUrl: s('The address people open (default: the one the launcher set).'),
-        factoryUrl: s('The address of rsc-factory (default: the one the launcher set).'),
+        factoryUrl: s('The address of the LaKademIA panel (default: the one the launcher set).'),
         admin: obj({
           name: s('The administrator’s name.'),
           email: s('The administrator’s email.'),
           password: s('12 to 200 characters.'),
         }),
-        serviceName: s('The name of the service account (default rsc-factory).'),
+        serviceName: s('The name of the service account (default Panel de LaKademIA).'),
       },
       ['name', 'publicUrl', 'factoryUrl', 'serviceName'],
     ),
@@ -1025,7 +1025,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/setup/companion/reconnect': {
     summary:
-      'Companion mode, after the setup: a new main key for the service account the first handshake made for rsc-factory (never another account; made once here only if obsybrain was set up without the handshake), when the one before was lost (an answer that never arrived, a restore). The one-time key (Authorization: Bearer <companionToken>) and the email and password (and code, with a second factor) of an administrator of obsybrain; wrong passwords take the brake of signing in (429 too_many_attempts). The main keys before, and the keys made from them, stop working. From the network shared with rsc-factory only (404 no_such_route elsewhere); 409 companion_pending before the setup; 401 unauthorized with a wrong one-time key; 401 bad_credentials (or code_required, bad_code); 403 forbidden for someone who is not an administrator; 409 service_removed when an administrator removed that account (reactivate it first). Audited.',
+      'Companion mode, after the setup: a new main key for the service account the first handshake made for the LaKademIA panel (never another account; made once here only if obsybrain was set up without the handshake), when the one before was lost (an answer that never arrived, a restore). The one-time key (Authorization: Bearer <companionToken>) and the email and password (and code, with a second factor) of an administrator of obsybrain; wrong passwords take the brake of signing in (429 too_many_attempts). The main keys before, and the keys made from them, stop working. From the network shared with the panel only (404 no_such_route elsewhere); 409 companion_pending before the setup; 401 unauthorized with a wrong one-time key; 401 bad_credentials (or code_required, bad_code); 403 forbidden for someone who is not an administrator; 409 service_removed when an administrator removed that account (reactivate it first). Audited.',
     status: 201,
     body: obj(
       {
@@ -1128,7 +1128,7 @@ const HAND: Record<string, Op> = {
       installation: obj(
         {
           name: s('The name of the installation.'),
-          factoryUrl: nul(s('The address of RSC Factory, when the administration set one.')),
+          factoryUrl: nul(s('The address of the LaKademIA panel, when the administration set one.')),
           admins: list(
             s('A name.'),
             'The administrators to ask about the installation (up to 5); only for a web session.',
@@ -1945,7 +1945,9 @@ const HAND: Record<string, Op> = {
         name: s('Name (1–80 characters).'),
         curatorsInvite: b('Curators may invite.'),
         rateLimit: n('Requests per minute of each key (60–10000).'),
-        factoryUrl: nul(s('The address of RSC Factory: https (or http on this machine); null for none.')),
+        factoryUrl: nul(
+          s('The address of the LaKademIA panel: https (or http on this machine); null for none.'),
+        ),
       },
       ['base', 'name', 'curatorsInvite', 'rateLimit', 'factoryUrl'],
     ),
@@ -2145,10 +2147,10 @@ const HAND: Record<string, Op> = {
       ),
       update: obj({
         mode: s(
-          'off (no updater runs: update on the server with `obsybrain.sh update`), on (the updater runs: the button works) or companion (installed by rsc-factory: update it there).',
+          'off (no updater runs: update on the server with `obsybrain.sh update`), on (the updater runs: the button works) or companion (installed by the LaKademIA panel: update it there).',
           { enum: ['off', 'on', 'companion'] },
         ),
-        factoryUrl: nul(s('companion: the address of rsc-factory.')),
+        factoryUrl: nul(s('companion: the address of the LaKademIA panel.')),
         requested: b('A request is waiting for the updater to take it.'),
         running: nul(
           obj({
@@ -2301,7 +2303,7 @@ const HAND: Record<string, Op> = {
   },
   'POST /v1/admin/update': {
     summary:
-      'Update to the newest published version (administration, in the obsybrain web, with the password again and the code). It only leaves a request for the updater, which finds the version itself: nothing else in the request is read. 202 requested. 409 updates_off (no updater runs), companion (installed by rsc-factory), rollback_failed (a way back could not restore: restore on the server first), nothing_to_update, update_failed (use /update/retry), update_running; 503 update_not_started.',
+      'Update to the newest published version (administration, in the obsybrain web, with the password again and the code). It only leaves a request for the updater, which finds the version itself: nothing else in the request is read. 202 requested. 409 updates_off (no updater runs), companion (installed by the LaKademIA panel), rollback_failed (a way back could not restore: restore on the server first), nothing_to_update, update_failed (use /update/retry), update_running; 503 update_not_started.',
     status: 202,
     body: obj(
       { password: s('Your password.'), code: s('The code of your authenticator app, with a second factor.') },

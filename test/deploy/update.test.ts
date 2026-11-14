@@ -1824,10 +1824,7 @@ describe('the launcher: update --check, the review of PR #41', () => {
 describe('the launcher: where the versions are asked', () => {
   it('install writes OBSY_BRAIN_REPO_URL, without credentials; reinstalling keeps it, off included; compose hands it over', async () => {
     const plain = await installed()
-    assert.equal(
-      readEnv(plain.dir).OBSY_BRAIN_REPO_URL,
-      'https://github.com/JJRProDigital/obsybrain.git',
-    )
+    assert.equal(readEnv(plain.dir).OBSY_BRAIN_REPO_URL, 'https://github.com/JJRProDigital/obsybrain.git')
     const compose = readFileSync(join(plain.dir, 'compose.yaml'), 'utf8')
     assert.ok(
       compose.includes(

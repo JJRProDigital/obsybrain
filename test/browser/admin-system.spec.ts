@@ -309,14 +309,14 @@ test.describe('administration: backups & system', () => {
     await expect(page.getByRole('region', { name: 'Copias' })).toContainText('Última copia buena')
   })
 
-  test('the address of RSC Factory: checked before it is sent, saved explicitly', async ({
+  test('the address of the LaKademIA panel: checked before it is sent, saved explicitly', async ({
     page,
     context,
     baseURL,
   }) => {
     await scenario(context, baseURL as string, 'signed-in')
     await page.goto('/admin/system')
-    const field = page.getByLabel('Dirección de RSC Factory')
+    const field = page.getByLabel('Dirección del panel de LaKademIA')
     await field.fill('http://factory.example.test')
     await page.getByRole('button', { name: 'Guardar la dirección' }).click()
     await expect(page.getByText(/Usa una dirección https/)).toBeVisible()

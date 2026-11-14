@@ -7,7 +7,7 @@
 // a published one, a time a time, a count a number.
 //
 // Three modes: `off` (no updater alive: the terminal command is shown), `on` (an updater beats), `companion` (obsybrain
-// was installed by rsc-factory, which updates it: this screen has no button and points there).
+// was installed by the LaKademIA panel, which updates it: this screen has no button and points there).
 import { lstatSync } from 'node:fs'
 import { open } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -174,10 +174,10 @@ export function updates(
         return new AppError(
           409,
           'companion',
-          'obsybrain fue instalado por rsc-factory: actualízalo desde allí.',
+          'obsybrain fue instalado por el panel de LaKademIA: actualízalo desde allí.',
           s.factoryUrl
-            ? `Abre rsc-factory en ${s.factoryUrl} y actualiza desde Admin › Actualizaciones.`
-            : 'Abre rsc-factory y actualiza desde Admin › Actualizaciones.',
+            ? `Abre el panel de LaKademIA en ${s.factoryUrl} y actualiza desde Admin › Actualizaciones.`
+            : 'Abre el panel de LaKademIA y actualiza desde Admin › Actualizaciones.',
         )
       }
       if (s.mode === 'off') {

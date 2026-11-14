@@ -64,12 +64,14 @@ for (const theme of ['dark', 'light'] as const) {
     await audit(page, `${theme} setup`)
   })
 
-  test(`first run installed with rsc-factory, ${theme}`, async ({ page, context, baseURL }) => {
+  test(`first run installed with the LaKademIA panel, ${theme}`, async ({ page, context, baseURL }) => {
     await scenario(context, baseURL as string, 'fresh', {}, { companion: true })
     await page.addInitScript((t) => localStorage.setItem('rscb.theme', t), theme)
     await page.goto('/setup')
-    await expect(page.getByRole('heading', { name: 'Termina la configuración en rsc-factory' })).toBeVisible()
-    await audit(page, `${theme} setup waiting for rsc-factory`)
+    await expect(
+      page.getByRole('heading', { name: 'Termina la configuración en el panel de LaKademIA' }),
+    ).toBeVisible()
+    await audit(page, `${theme} setup waiting for the LaKademIA panel`)
   })
 
   test(`signed-in screens and dialogs, ${theme}`, async ({ page, context, baseURL }) => {

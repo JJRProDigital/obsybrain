@@ -139,7 +139,7 @@ export async function whoAmI(ctx: Ctx) {
       ref: w.credential.ref,
       agent: w.credential.agent,
     },
-    // The address of RSC Factory the administration set (plan G4): a run's reference opens there (CA9).
+    // The address of the LaKademIA panel the administration set (plan G4): a run's reference opens there (CA9).
     // Who to ask about the installation (the web names them where only the administration may go).
     installation: {
       name: inst.name,

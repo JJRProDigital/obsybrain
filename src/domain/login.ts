@@ -171,7 +171,7 @@ export async function signIn(
 
 // The email, password and (with a second factor) code of an active person, behind the same brake as signing in:
 // wrong attempts count per email and wait longer each time; each failure is audited. Signing in, and reconnecting
-// rsc-factory in companion mode (domain/companion.ts), go through it.
+// the LaKademIA panel in companion mode (domain/companion.ts), go through it.
 export async function checkCredentials(
   db: Db,
   clock: Clock,

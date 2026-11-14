@@ -117,8 +117,8 @@ describe('the API client', () => {
     assert.deepEqual(plain.problems, [])
   })
 
-  // Companion mode (F1-PR11): the setup waits for rsc-factory, and the web links to it only by a plain address.
-  it('companion_pending keeps the address of rsc-factory, only when it is plain http(s)', async () => {
+  // Companion mode (F1-PR11): the setup waits for the LaKademIA panel, and the web links to it only by a plain address.
+  it('companion_pending keeps the address of the LaKademIA panel, only when it is plain http(s)', async () => {
     const pending = async (factoryUrl: unknown) => {
       const f = fake(() => ({
         status: 409,

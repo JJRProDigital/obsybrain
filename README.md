@@ -137,19 +137,19 @@ Dentro del contenedor, `localhost` es el propio contenedor: un PostgreSQL en est
 `host.docker.internal`. El instalador rechaza un PostgreSQL demasiado viejo o sin `unaccent`, antes de crear
 nada.
 
-### Compartiendo PostgreSQL con rsc-factory
+### Compartiendo PostgreSQL con el panel de LaKademIA
 
 ```sh
 sh obsybrain.sh install --local --db shared --db-admin-url-file admin-url.txt --factory-db rsc_factory
 ```
 
 obsybrain consigue su propia base de datos y rol en el mismo servidor. Ninguno de los dos programas puede
-conectarse a la base de datos del otro. Si el login de rsc-factory es superusuario, igual puede llegar a todo;
+conectarse a la base de datos del otro. Si el login del panel de LaKademIA es superusuario, igual puede llegar a todo;
 el instalador lo dice.
 
-### Instalado por rsc-factory (modo compañero)
+### Instalado por el panel de LaKademIA (modo compañero)
 
-El instalador de rsc-factory puede instalar obsybrain a su lado. Crea una red de Docker que ambos comparten y
+El instalador del panel de LaKademIA puede instalar obsybrain a su lado. Crea una red de Docker que ambos comparten y
 llama:
 
 ```sh
@@ -158,18 +158,18 @@ sh obsybrain.sh install --companion --attach-network rsc-shared --factory-url ht
   --db shared --db-admin-url-file admin-url.txt --factory-db rscf --yes --json
 ```
 
-- obsybrain entra en la red como `obsybrain` (`http://obsybrain:8090` para rsc-factory) y no corre Caddy
-  propio: el Caddy de rsc-factory sirve su dirección. `--trusted-proxy` es la dirección fija de ese Caddy en la
+- obsybrain entra en la red como `obsybrain` (`http://obsybrain:8090` para el panel de LaKademIA) y no corre Caddy
+  propio: el Caddy del panel de LaKademIA sirve su dirección. `--trusted-proxy` es la dirección fija de ese Caddy en la
   red, el único proxy en el que obsybrain cree. Con `--local` en vez de `--domain`, la web queda en
   `http://localhost:8090` en esta máquina y no se cree en ningún proxy.
 - obsybrain queda instalado pero sin configurar. Su página de configuración inicial dice «Termina la
-  configuración en rsc-factory» y enlaza allí. La configuración de rsc-factory crea la administración de ambos,
-  con el mismo nombre, correo y contraseña, y la cuenta de servicio que rsc-factory usa.
+  configuración en el panel de LaKademIA» y enlaza allí. La configuración del panel de LaKademIA crea la
+  administración de ambos, con el mismo nombre, correo y contraseña, y la cuenta de servicio que el panel usa.
 - Lo hace con una clave de un solo uso, `companionToken` en el resumen `--json` (también en `.env`, que solo
   lee su dueño): `POST /v1/setup/companion` con `Authorization: Bearer <companionToken>`. obsybrain responde a
   esa llamada solo mientras no está configurado, solo desde la red compartida (nunca a través de un proxy ni
   desde esta máquina) y solo una vez: dos llamadas a la vez lo configuran una.
-- Si rsc-factory pierde después su clave principal (una respuesta que nunca llegó, un restore), consigue una
+- Si el panel de LaKademIA pierde después su clave principal (una respuesta que nunca llegó, un restore), consigue una
   nueva con `POST /v1/setup/companion/reconnect`: la misma clave de un solo uso más el correo y la contraseña
   de un administrador de obsybrain (las contraseñas incorrectas esperan igual que al iniciar sesión). Llega
   solo a la cuenta que creó el primer handshake; la clave principal anterior, y las claves creadas a partir de
@@ -181,20 +181,20 @@ sh obsybrain.sh install --companion --attach-network rsc-shared --factory-url ht
 - Ejecutar `install` otra vez conserva el modo compañero, la red y la clave. Una instalación hecha sin
   `--companion` no se convierte en una.
 
-El día a día lo maneja rsc-factory (mira el README de rsc-factory, «Memory (obsybrain)»):
+El día a día lo maneja el panel de LaKademIA (mira su README, «Memory (obsybrain)»):
 
-- **Actualizar:** el `update.sh` de rsc-factory ejecuta primero el `update` de este lanzador, con todo lo de
+- **Actualizar:** el `update.sh` del panel de LaKademIA ejecuta primero el `update` de este lanzador, con todo lo de
   [Actualización](#actualización): mantenimiento, una copia, y la versión anterior de vuelta si falla. Entonces
-  no se toca rsc-factory y su `update.sh` sale con 4.
-- **Reconectar:** después de un `restore`, las claves de rsc-factory dejan de funcionar. En rsc-factory,
-  Administración › Memoria toma una clave principal nueva para la cuenta de servicio `rsc-factory` (créala en
+  no se toca el panel de LaKademIA y su `update.sh` sale con 4.
+- **Reconectar:** después de un `restore`, las claves del panel de LaKademIA dejan de funcionar. En el panel de
+  LaKademIA, Administración › Memoria toma una clave principal nueva para la cuenta de servicio (créala en
   Administración › Cuentas de servicio aquí), o reconecta con la clave de un solo uso y el correo y la
   contraseña de tu administrador.
 - **Desinstalar:** `sh <dir>/.obsybrain/src/deploy/obsybrain.sh uninstall --dir <dir>` lo detiene y conserva
-  los datos; el `install.sh` de rsc-factory lo vuelve a arrancar. Con `--delete-data --confirm <name>
-  --db-admin-url-file F` su base de datos y rol en el PostgreSQL de rsc-factory también se van (F: un login
-  superusuario de ese PostgreSQL), y rsc-factory lo olvida en su próximo `update.sh` o `install.sh`.
-- rsc-factory trae la etiqueta `vX.Y.Z` más nueva de este repositorio: una versión es utilizable como compañera
+  los datos; el `install.sh` del panel de LaKademIA lo vuelve a arrancar. Con `--delete-data --confirm <name>
+  --db-admin-url-file F` su base de datos y rol en el PostgreSQL del panel de LaKademIA también se van (F: un login
+  superusuario de ese PostgreSQL), y el panel lo olvida en su próximo `update.sh` o `install.sh`.
+- El panel de LaKademIA trae la etiqueta `vX.Y.Z` más nueva de este repositorio: una versión es utilizable como compañera
   solo desde la primera etiqueta que tiene `--companion`.
 
 ### Sin preguntas
@@ -263,7 +263,7 @@ sh obsybrain.sh web-updates enable [--repo-token-file F | --repo-key F]   # then
 Esto arranca un contenedor propio, el actualizador, como proyecto de compose aparte del del servicio
 (`<name>-updater`). **Tiene control total de Docker en esta máquina: quien lo controle controla el servidor**,
 y `enable` lo dice y pregunta (o exige `--yes`). No publica ningún puerto y no está en ninguna red del
-servicio ni de rsc-factory. Monta exactamente tres cosas: el socket de Docker, la carpeta de instalación en su
+servicio ni del panel de LaKademIA. Monta exactamente tres cosas: el socket de Docker, la carpeta de instalación en su
 propia ruta y una lista de usuarios con el suyo dentro, de solo lectura. El servicio nunca recibe de él
 Docker, una credencial ni la clave de instalación: solo deja una marca vacía en `update/request`, que el
 actualizador mira sin abrirla, y lee `update/report` (solo lectura) para conocer la versión más nueva. Un
@@ -290,8 +290,8 @@ los límites de arriba; pasados, da el comando). Mientras el servicio se reinici
 sustituta. Una clave, una app, un token o una cuenta de servicio nunca pueden pedirla.
 
 `web-updates disable` quita el contenedor, la imagen y la credencial, y la web vuelve a mostrar el comando. En
-una instalación hecha por rsc-factory no hay botón: `web-updates enable` sale con 2 y te dice que la
-actualices desde rsc-factory.
+una instalación hecha por el panel de LaKademIA no hay botón: `web-updates enable` sale con 2 y te dice que la
+actualices desde el panel de LaKademIA.
 
 ### La clave de instalación
 
@@ -440,7 +440,7 @@ arranca igual y la búsqueda conserva su propio orden.
   reader. El enlace funciona una vez, durante 72 horas. Sin correo, la administración lo copia desde la web.
 - Las personas crean sus propios tokens para agentes en su perfil: lectura, o lectura + escritura, por 30, 90
   o 365 días. Un token se muestra una vez. Nunca hace más de lo que permite el rol actual de su persona.
-- Las cuentas de servicio (como RSC Factory) reciben una clave principal, y pueden tener dos a la vez para
+- Las cuentas de servicio (como el panel de LaKademIA) reciben una clave principal, y pueden tener dos a la vez para
   rotar sin corte. Con ella acuñan claves cortas, una por tarea.
 - El correo es opcional. Configura la cuenta de envío en la web. Su contraseña se guarda sellada con
   `OBSY_BRAIN_SECRET`. El log del correo guarda quién, de qué tipo, cuándo y cómo acabó, nunca el contenido.

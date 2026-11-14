@@ -7,7 +7,7 @@ import { clientLabel } from './brains.ts'
 
 type Named = { id: string; name: string }
 
-// «Claude Code of Eric», «RSC Factory (run r_x, step 3) on behalf of Eric» (spec B6 «Entry»).
+// «Claude Code of Eric», «Panel de LaKademIA (run r_x, step 3) on behalf of Eric» (spec B6 «Entry»).
 export function byline(e: {
   author: Named
   onBehalf: Named | null

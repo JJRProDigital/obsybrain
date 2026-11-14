@@ -34,7 +34,7 @@ export function eventOf(e: EventRow, v: Pick<Viewer, 'curator'> = { curator: fal
     brain: e.brain,
     kind: e.kind,
     who: e.accountId ? { id: e.accountId, name: e.accountName ?? '' } : null,
-    // service: a service account's key did it, so its reference is the service's own (an rsc-factory run).
+    // service: a service account's key did it, so its reference is the service's own (a run of the LaKademIA panel).
     key: e.credentialId ? { id: e.credentialId, ref: e.ref, service: e.service } : null,
     target: e.targetId || label ? { id: e.targetId, label } : null,
     query: e.query,

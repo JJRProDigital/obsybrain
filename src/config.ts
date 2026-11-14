@@ -25,20 +25,20 @@ export type Config = {
   backupKeep: number
   // How many invitation mails one service account may make obsybrain send in an hour (F1-PR2 review).
   serviceInvitesPerHour: number
-  // Companion mode (plan F1 §3.1): installed by rsc-factory, which sets it up with the one-time key; null otherwise.
+  // Companion mode (plan F1 §3.1): installed by the LaKademIA panel, which sets it up with the one-time key; null otherwise.
   companion: CompanionConfig | null
 }
 
 export type CompanionConfig = {
   // OBSY_BRAIN_COMPANION_TOKEN: the one-time key of the handshake.
   token: string
-  // OBSY_BRAIN_COMPANION_NETWORK: the network shared with rsc-factory (IPv4 CIDR); the handshake answers only from it.
+  // OBSY_BRAIN_COMPANION_NETWORK: the network shared with the LaKademIA panel (IPv4 CIDR); the handshake answers only from it.
   network: string
   // OBSY_BRAIN_COMPANION_GATEWAY: that network's gateway, where this machine's own requests come from; never believed.
   gateway: string | null
   // OBSY_BRAIN_FACTORY_URL: where the setup is finished meanwhile; kept as the installation's factoryUrl.
   factoryUrl: string
-  // OBSY_BRAIN_SETUP_URL: the address people open, unless rsc-factory gives one.
+  // OBSY_BRAIN_SETUP_URL: the address people open, unless the LaKademIA panel gives one.
   publicUrl: string | null
 }
 
@@ -107,7 +107,7 @@ function readCompanion(env: NodeJS.ProcessEnv): CompanionConfig | null {
   const network = env.OBSY_BRAIN_COMPANION_NETWORK ?? ''
   if (!cidrOf(network)) {
     throw new Error(
-      `OBSY_BRAIN_COMPANION_NETWORK must be the IPv4 network shared with rsc-factory, such as 192.168.210.0/24 (a prefix from 8 to 30), got "${network}".`,
+      `OBSY_BRAIN_COMPANION_NETWORK must be the IPv4 network shared with the LaKademIA panel, such as 192.168.210.0/24 (a prefix from 8 to 30), got "${network}".`,
     )
   }
   const gateway = env.OBSY_BRAIN_COMPANION_GATEWAY || null
@@ -118,9 +118,11 @@ function readCompanion(env: NodeJS.ProcessEnv): CompanionConfig | null {
   try {
     factoryUrl = factoryUrlOf(env.OBSY_BRAIN_FACTORY_URL ?? '')
   } catch (e) {
-    throw new Error(`OBSY_BRAIN_FACTORY_URL: ${(e as Error).message} Give the address of rsc-factory.`)
+    throw new Error(
+      `OBSY_BRAIN_FACTORY_URL: ${(e as Error).message} Give the address of the LaKademIA panel.`,
+    )
   }
-  if (!factoryUrl) throw new Error('OBSY_BRAIN_FACTORY_URL must be the address of rsc-factory.')
+  if (!factoryUrl) throw new Error('OBSY_BRAIN_FACTORY_URL must be the address of the LaKademIA panel.')
   return { token, network, gateway, factoryUrl, publicUrl: env.OBSY_BRAIN_SETUP_URL || null }
 }
 

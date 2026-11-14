@@ -21,7 +21,7 @@ export type SessionView = {
   openedAt: string
   lastActivityAt: string
   closedAt: string | null
-  // Opened by a service account: only then does its reference link to an rsc-factory run.
+  // Opened by a service account: only then does its reference link to a run of the LaKademIA panel.
   viaService: boolean
 }
 export type SessionList = {

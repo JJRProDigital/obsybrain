@@ -59,7 +59,7 @@ Commands:
                     asked. It has full control of Docker on this machine, so whoever controls it controls this
                     server; it is off until you turn it on. F holds the read access to a private repository
                     (an SSH private key, or a token); it is copied for the updater alone. Not for an
-                    installation made by rsc-factory (exit 2): update it from there
+                    installation made by the LaKademIA panel (exit 2): update it from there
   web-updates disable
                     stop it and remove its container and the credential; the web shows the command again
   web-updates status
@@ -75,7 +75,7 @@ Commands:
 Install options:
   --local | --domain D      this machine only (http://localhost:PORT), or a server with HTTPS for the domain D
   --db bundled|existing|shared
-                            the PostgreSQL: obsybrain's own (default), an existing one, or the one rsc-factory uses
+                            the PostgreSQL: obsybrain's own (default), an existing one, or the one the LaKademIA panel uses
   --db-url-file F           existing: the URL of a database for obsybrain alone (F, or - for the standard input)
   --db-admin-url-file F     existing or shared: an administration login, used once to make obsybrain's database
                             and role; never kept
@@ -89,11 +89,11 @@ Install options:
                             build that version from the source (default: the latest), or use an image already built
   --repo URL                where the source is fetched from (default the public repository); while it is
                             private, an address git can read with your access (SSH, or git's credential helper)
-  --companion               installed by rsc-factory (needs --attach-network and --factory-url): no Caddy of its
-                            own, and the first-time setup is rsc-factory's, with a one-time key (companionToken)
-  --attach-network NAME     companion: the Docker network shared with rsc-factory; obsybrain joins it as obsybrain
-  --factory-url URL         companion: the address of rsc-factory (https, or http://localhost on this machine)
-  --trusted-proxy IP        companion with --domain: the fixed address of rsc-factory's Caddy on that network
+  --companion               installed by the LaKademIA panel (needs --attach-network and --factory-url): no Caddy of its
+                            own, and the first-time setup is the panel's, with a one-time key (companionToken)
+  --attach-network NAME     companion: the Docker network shared with the LaKademIA panel; obsybrain joins it as obsybrain
+  --factory-url URL         companion: the address of the LaKademIA panel (https, or http://localhost on this machine)
+  --trusted-proxy IP        companion with --domain: the fixed address of the panel's Caddy on that network
   --yes                     ask nothing; whatever is missing is an error that names the option giving it
   --json                    print only a JSON summary on standard output; everything else goes to the error stream
 
@@ -280,10 +280,10 @@ if [ "$CMD" = install ]; then
   [ -n "$FACTORY_DB" ] && [ "$DB" != shared ] && usage '--factory-db goes with --db shared.'
   [ "$DB" = bundled ] && { [ -n "$DB_URL_FILE" ] || [ -n "$ADMIN_URL_FILE" ]; } && usage '--db bundled takes no URL file.'
   [ -z "$DB" ] && { [ -n "$DB_URL_FILE" ] || [ -n "$ADMIN_URL_FILE" ]; } && DB=existing
-  # Companion mode (installed by rsc-factory): its options go with --companion, and are checked before anything runs.
+  # Companion mode (installed by the LaKademIA panel): its options go with --companion, and are checked before anything runs.
   if [ "$COMPANION" = 0 ]; then
     for o in "--attach-network:$SHARED_NET" "--factory-url:$FACTORY_URL" "--trusted-proxy:$TRUSTED_PROXY"; do
-      [ -z "${o#*:}" ] || usage "${o%%:*} goes with --companion (obsybrain installed by rsc-factory)."
+      [ -z "${o#*:}" ] || usage "${o%%:*} goes with --companion (obsybrain installed by the LaKademIA panel)."
     done
   else
     [ -z "$SHARED_NET" ] || matches "$SHARED_NET" '^[A-Za-z0-9][A-Za-z0-9_.-]{0,62}$' ||
@@ -297,13 +297,13 @@ if [ "$CMD" = install ]; then
       case $fu_host in *:*) fu_port=${fu_host##*:} ;; esac
       { [ ${#FACTORY_URL} -le 300 ] && { [ -z "$fu_port" ] || is_port "$fu_port"; } &&
         matches "$FACTORY_URL" '^(https://[a-z0-9.-]+|http://(localhost|127\.0\.0\.1))(:[0-9]{1,5})?(/[A-Za-z0-9._~/-]*)?$'; } ||
-        usage '--factory-url takes the address of rsc-factory: https://factory.example.com, or http://localhost:PORT on this machine (lower-case, no query).'
+        usage '--factory-url takes the address of the LaKademIA panel: https://factory.example.com, or http://localhost:PORT on this machine (lower-case, no query).'
     fi
     [ -z "$TRUSTED_PROXY" ] || is_ipv4 "$TRUSTED_PROXY" || usage '--trusted-proxy takes an IPv4 address, such as 192.168.210.2.'
     [ "$DB" = bundled ] &&
-      usage '--companion uses the PostgreSQL of rsc-factory (--db shared) or an existing one (--db existing), not --db bundled.'
+      usage '--companion uses the PostgreSQL of the LaKademIA panel (--db shared) or an existing one (--db existing), not --db bundled.'
     [ -n "$HTTP_PORT$HTTPS_PORT" ] &&
-      usage "--http-port and --https-port do not go with --companion: rsc-factory's Caddy serves obsybrain."
+      usage "--http-port and --https-port do not go with --companion: the panel's Caddy serves obsybrain."
   fi
 fi
 if [ "$CMD" = 'web-updates enable' ]; then
@@ -483,7 +483,7 @@ SHIELD=0
 DC_BOUND=0 DC_GROUP=0
 dc() {
   [ -f "$DIR/compose.override.yaml" ] && set -- -f "$DIR/compose.override.yaml" "$@"
-  # Companion mode: the app also joins the network shared with rsc-factory (written by install).
+  # Companion mode: the app also joins the network shared with the LaKademIA panel (written by install).
   [ -f "$DIR/compose.companion.yaml" ] && set -- -f "$DIR/compose.companion.yaml" "$@"
   set -- -f "$DIR/compose.yaml" "$@"
   for p in $(printf '%s' "$PROFILES" | tr ',' ' '); do
@@ -676,7 +676,7 @@ pick_subnet() {
 }
 
 # Companion mode: Docker new enough to keep the default route on the installation's own network (gw_priority), and the
-# network shared with rsc-factory, which rsc-factory's installer makes: its IPv4 subnet and gateway go to the service
+# network shared with the LaKademIA panel, which the panel's installer makes: its IPv4 subnet and gateway go to the service
 # (the handshake answers only from that subnet, never from its gateway).
 int_ip() { echo "$(($1 >> 24 & 255)).$(($1 >> 16 & 255)).$(($1 >> 8 & 255)).$(($1 & 255))"; }
 # version_at_least VERSION MAJOR MINOR: VERSION (such as v2.38.2 or 29.1.5) is MAJOR.MINOR or newer.
@@ -699,8 +699,8 @@ companion_requirements() {
       missing 'Companion mode on this machine needs Docker Engine 28 or newer (and Docker Compose 2.33 or newer). Update Docker and run this again.'
   fi
   info=$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}}|{{.Gateway}} {{end}}{{if .EnableIPv6}}ipv6{{end}}' "$SHARED_NET" 2>/dev/null </dev/null) ||
-    missing "There is no Docker network $SHARED_NET. rsc-factory's installer makes it before it installs obsybrain; pass --attach-network with the network rsc-factory uses."
-  # IPv4 only: the handshake answers by the IPv4 subnet, and over IPv6 rsc-factory could reach obsybrain from an address
+    missing "There is no Docker network $SHARED_NET. The LaKademIA panel's installer makes it before it installs obsybrain; pass --attach-network with the network the panel uses."
+  # IPv4 only: the handshake answers by the IPv4 subnet, and over IPv6 the LaKademIA panel could reach obsybrain from an address
   # it does not know.
   for e in $info; do
     case $e in ipv6 | *:*)
@@ -720,12 +720,12 @@ companion_requirements() {
   len=${SHARED_CIDR#*/}
   case $len in '' | *[!0-9]*) len=0 ;; esac
   { [ "$len" -ge 8 ] && [ "$len" -le 30 ]; } ||
-    missing "The Docker network $SHARED_NET has no IPv4 subnet from /8 to /30. rsc-factory's installer makes it with one (docker network create --subnet)."
+    missing "The Docker network $SHARED_NET has no IPv4 subnet from /8 to /30. The LaKademIA panel's installer makes it with one (docker network create --subnet)."
   net=$(($(ip_int "${SHARED_CIDR%/*}") >> (32 - len)))
   [ -n "$SHARED_GW" ] || SHARED_GW=$(int_ip $(((net << (32 - len)) + 1)))
   if [ -n "$TRUSTED_PROXY" ]; then
     if [ $(($(ip_int "$TRUSTED_PROXY") >> (32 - len))) -ne "$net" ] || [ "$TRUSTED_PROXY" = "$SHARED_GW" ]; then
-      usage "--trusted-proxy $TRUSTED_PROXY is not an address of $SHARED_NET ($SHARED_CIDR) other than its gateway: give the fixed address of rsc-factory's Caddy on that network."
+      usage "--trusted-proxy $TRUSTED_PROXY is not an address of $SHARED_NET ($SHARED_CIDR) other than its gateway: give the fixed address of the panel's Caddy on that network."
     fi
   fi
 }
@@ -734,7 +734,7 @@ companion_requirements() {
 write_companion_compose() {
   {
     echo '# Companion mode, written by obsybrain.sh install --companion (do not edit: install writes it again). The app'
-    echo "# joins the Docker network it shares with rsc-factory, which reaches it there as http://obsybrain:8090; rsc-factory's"
+    echo "# joins the Docker network it shares with the LaKademIA panel, which reaches it there as http://obsybrain:8090; the panel's"
     echo '# Caddy serves its web address. Its own network keeps the default route.'
     echo 'services:'
     echo '  app:'
@@ -895,7 +895,7 @@ save_state() {
 
 random_hex() { od -An -N"$1" -tx1 /dev/urandom | tr -d ' \n'; }
 # What is published (rsc-updates §0): a tag vX.Y.Z of the repository, exactly, in numeric order; the same definition as
-# the service's src/ops/releases.ts and rsc-factory's, pinned by test/fixtures/published-vectors.json.
+# the service's src/ops/releases.ts and the LaKademIA panel's, pinned by test/fixtures/published-vectors.json.
 # newest_of: from the lines of `git ls-remote`, the newest, or nothing.
 newest_of() {
   v=$(LC_ALL=C sed -n 's|^[0-9a-f]\{1,\}[[:space:]]\{1,\}refs/tags/\(v[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\)$|\1|p' |
@@ -977,14 +977,14 @@ install() {
       MODE=$(env_get OBSY_BRAIN_MODE)
       DOMAIN=$(env_get OBSY_BRAIN_DOMAIN)
     fi
-    # Installed by rsc-factory or not: install keeps that (and the shared network and addresses it is not given).
+    # Installed by the LaKademIA panel or not: install keeps that (and the shared network and addresses it is not given).
     if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
       COMPANION=1
       [ -n "$SHARED_NET" ] || SHARED_NET=$(env_get OBSY_BRAIN_SHARED_NETWORK)
       [ -n "$FACTORY_URL" ] || FACTORY_URL=$(env_get OBSY_BRAIN_FACTORY_URL)
       [ -n "$TRUSTED_PROXY" ] || [ "$MODE" != server ] || TRUSTED_PROXY=$(env_get OBSY_BRAIN_COMPANION_PROXY)
     elif [ "$COMPANION" = 1 ]; then
-      usage "The installation in \"$DIR\" was not installed by rsc-factory, and install keeps that (--companion). To move it: make a copy (backup), uninstall, install anew with --companion and restore the copy."
+      usage "The installation in \"$DIR\" was not installed by the LaKademIA panel, and install keeps that (--companion). To move it: make a copy (backup), uninstall, install anew with --companion and restore the copy."
     fi
     [ -n "$PORT" ] || PORT=$(env_get OBSY_BRAIN_PUBLISH | sed 's/.*://')
     [ -n "$HTTP_PORT" ] || HTTP_PORT=$(env_get OBSY_BRAIN_HTTP_PORT)
@@ -1022,11 +1022,11 @@ install() {
     fi
   fi
   if [ "$COMPANION" = 1 ]; then
-    [ -n "$SHARED_NET" ] || usage '--companion needs --attach-network NAME: the Docker network shared with rsc-factory (its installer makes it).'
-    [ -n "$FACTORY_URL" ] || usage '--companion needs --factory-url URL: the address of rsc-factory.'
+    [ -n "$SHARED_NET" ] || usage '--companion needs --attach-network NAME: the Docker network shared with the LaKademIA panel (its installer makes it).'
+    [ -n "$FACTORY_URL" ] || usage '--companion needs --factory-url URL: the address of the LaKademIA panel.'
     if [ "$MODE" = server ]; then
       [ -n "$TRUSTED_PROXY" ] ||
-        usage "--companion with --domain needs --trusted-proxy IP: the fixed address of rsc-factory's Caddy on $SHARED_NET."
+        usage "--companion with --domain needs --trusted-proxy IP: the fixed address of the panel's Caddy on $SHARED_NET."
     else
       [ -z "$TRUSTED_PROXY" ] || usage '--trusted-proxy goes with --domain: on this machine only, nothing stands in front of obsybrain.'
     fi
@@ -1035,7 +1035,7 @@ install() {
   if [ -z "$DB" ]; then
     if can_ask; then
       while [ -z "$DB" ]; do
-        ask 'Database: 1) obsybrain runs its own PostgreSQL  2) an existing PostgreSQL  3) the PostgreSQL rsc-factory uses [1]: '
+        ask 'Database: 1) obsybrain runs its own PostgreSQL  2) an existing PostgreSQL  3) the PostgreSQL the LaKademIA panel uses [1]: '
         case $ANSWER in '' | 1) DB=bundled ;; 2) DB=existing ;; 3) DB=shared ;; *) say 'Answer 1, 2 or 3.' ;; esac
       done
     else DB=bundled; fi
@@ -1056,7 +1056,7 @@ install() {
     fi
     while [ -z "$FACTORY_DB" ]; do
       can_ask || usage '--db shared needs --factory-db NAME.'
-      ask "The other program's database (rsc_factory for rsc-factory): "
+      ask "The other program's database (rsc_factory for the LaKademIA panel): "
       matches "$ANSWER" '^[a-z_][a-z0-9_]{0,62}$' && FACTORY_DB=$ANSWER
     done
   fi
@@ -1162,7 +1162,7 @@ install() {
   fi
   if [ "$MODE" = server ]; then
     SITE=https://$DOMAIN
-    # In companion mode rsc-factory's Caddy serves it, on 443.
+    # In companion mode the LaKademIA panel's Caddy serves it, on 443.
     [ "$HTTPS_PORT" = 443 ] || [ "$COMPANION" = 1 ] || SITE=$SITE:$HTTPS_PORT
   else
     SITE=http://localhost:$PORT
@@ -1204,7 +1204,7 @@ install() {
     SECRET=${REUSED:-$(random_hex 48)}
     PG_PASSWORD=$(random_hex 32)
     DATABASE_URL=$DB_URL
-    # The one-time key of the companion setup: for rsc-factory, which sets obsybrain up with it (POST
+    # The one-time key of the companion setup: for the LaKademIA panel, which sets obsybrain up with it (POST
     # /v1/setup/companion); once set up it serves nothing.
     [ "$COMPANION" = 1 ] && COMPANION_TOKEN=$(random_hex 32)
   fi
@@ -1213,7 +1213,7 @@ install() {
   [ "$DB" = bundled ] && PROFILES=bundled
   [ "$MODE" = server ] && [ "$COMPANION" = 0 ] && PROFILES=${PROFILES:+$PROFILES,}server
   if [ "$MODE" = server ]; then LOCAL_ONLY=0 TRUSTED=$PROXY_IP; else LOCAL_ONLY=1 TRUSTED=''; fi
-  # In companion mode, rsc-factory's Caddy is the only proxy believed.
+  # In companion mode, the LaKademIA panel's Caddy is the only proxy believed.
   [ "$COMPANION" = 1 ] && [ "$MODE" = server ] && TRUSTED=$TRUSTED_PROXY
 
   # From here on, a failure or a stop takes back what this run made.
@@ -1363,8 +1363,8 @@ install() {
     return 0
   fi
   if [ "$COMPANION" = 1 ]; then
-    out "It waits for rsc-factory ($FACTORY_URL): finish the first-time setup of rsc-factory, and obsybrain is set up"
-    out "with the same administration. rsc-factory reaches it as http://obsybrain:8090 on the network $SHARED_NET."
+    out "It waits for the LaKademIA panel ($FACTORY_URL): finish the first-time setup of the panel, and obsybrain is set up"
+    out "with the same administration. The panel reaches it as http://obsybrain:8090 on the network $SHARED_NET."
   else
     out 'Open it to finish the first-time setup: there you make the administration account.'
   fi
@@ -2271,7 +2271,7 @@ check_key_file() {
 web_updates_enable() {
   need_installation
   if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
-    say 'obsybrain was installed by rsc-factory: update it from there.'
+    say 'obsybrain was installed by the LaKademIA panel: update it from there.'
     say 'Nothing was changed.'
     exit 2
   fi
@@ -2465,7 +2465,7 @@ web_updates_status() {
   need_installation
   updater_names
   if [ "$(env_get OBSY_BRAIN_COMPANION)" = 1 ]; then
-    out 'Updates from the web are off. obsybrain was installed by rsc-factory: update it from there.'
+    out 'Updates from the web are off. obsybrain was installed by the LaKademIA panel: update it from there.'
     return 0
   fi
   if [ -f "$DIR/updater/disabling" ]; then

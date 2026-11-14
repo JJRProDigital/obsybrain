@@ -1,5 +1,5 @@
 // Activity in words (spec B6 «Activity: en vivo», T037): who did what, with which client, and the filters by
-// client, kind and reference. A Factory reference links to its run only when the installation has a Factory
+// client, kind and reference. A run reference links to its run only when the installation has a panel
 // address that passes the same safe-address rule as the server (plan §3.5, CA9); otherwise it is text.
 import { KEEP, type LiveEvent } from '../live/stream.ts'
 import { T } from '../text.ts'
@@ -136,12 +136,12 @@ export function clientsOf(events: readonly LiveEvent[]): string[] {
   return [...seen].sort((x, y) => x.localeCompare(y))
 }
 
-// The run id RSC Factory gives a run and stamps on its keys' references: "r_" and 8 lowercase hex characters
-// (rsc-factory src/core/engine.ts), a word of its own (not part of a longer one, nor joined by a hyphen).
+// The run id the LaKademIA panel gives a run and stamps on its keys' references: "r_" and 8 lowercase hex characters
+// (the panel's src/core/engine.ts), a word of its own (not part of a longer one, nor joined by a hyphen).
 export const RUN_ID = /(?:^|[^A-Za-z0-9_-])(r_[0-9a-f]{8})(?![A-Za-z0-9_-])/
 
-// `<factoryUrl>/runs/<runId>` for a reference that names a Factory run, written by a service account (an
-// event's key.service, a session's viaService), with a safe Factory address; null otherwise (the reference is
+// `<factoryUrl>/runs/<runId>` for a reference that names a run of the LaKademIA panel, written by a service account (an
+// event's key.service, a session's viaService), with a safe panel address; null otherwise (the reference is
 // shown as text). A person may type a run-like id into a reference of their own: that is not a run.
 export function factoryRunHref(
   factoryUrl: string | null | undefined,

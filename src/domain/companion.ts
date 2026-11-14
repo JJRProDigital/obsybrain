@@ -1,6 +1,6 @@
-// Companion mode (plan F1 §3.1, spec F1 C24): rsc-factory's installer leaves obsybrain installed but not set up, with
+// Companion mode (plan F1 §3.1, spec F1 C24): the installer of the LaKademIA panel leaves obsybrain installed but not set up, with
 // a one-time key both keep (OBSY_BRAIN_COMPANION_TOKEN). While it waits, the setup of the web says to finish in
-// rsc-factory. rsc-factory's own setup then calls POST /v1/setup/companion with that key, from the network the two
+// the LaKademIA panel. The panel's own setup then calls POST /v1/setup/companion with that key, from the network the two
 // share, and gets the main key of its service account. The handshake answers only:
 // - while the installation is not set up (the setup's own transaction makes a second call fail, so two at once make
 //   one administration);
@@ -72,19 +72,19 @@ export const companionPending = (factoryUrl: string) => {
   const e = new AppError(
     409,
     'companion_pending',
-    'Termina la configuración en rsc-factory.',
-    `obsybrain se instaló con rsc-factory: abre rsc-factory en ${factoryUrl} y termina su configuración inicial. obsybrain queda configurado con la misma administración.`,
+    'Termina la configuración en el panel de LaKademIA.',
+    `obsybrain fue instalado por el panel de LaKademIA: ábrelo en ${factoryUrl} y termina su configuración inicial. obsybrain queda configurado con la misma administración.`,
   )
   e.extra = { factoryUrl }
   return e
 }
 
-// The setup of the web, while rsc-factory is to set obsybrain up: refused, with where to finish.
+// The setup of the web, while the LaKademIA panel is to set obsybrain up: refused, with where to finish.
 export async function refuseWhileCompanion(db: Db, c: { factoryUrl: string } | null): Promise<void> {
   if (c && !(await setupDone(db))) throw companionPending(c.factoryUrl)
 }
 
-// After the setup (spec F1 C24 «Finish connecting obsybrain»): rsc-factory lost its main key (an answer that never
+// After the setup (spec F1 C24 «Finish connecting obsybrain»): the LaKademIA panel lost its main key (an answer that never
 // arrived, a restore that killed every key). With the one-time key it already holds and an administrator's email and
 // password (the brake of signing in, shared with it), it gets a new main key for the service account the first
 // handshake made (never another); the ones before, and what hangs from them, stop working. If an administrator removed
@@ -107,7 +107,7 @@ export async function companionReconnect(
       detail: `not an administrator, from ${conn.ip}`,
     })
     throw denied(
-      'Solo un administrador de obsybrain puede reconectar rsc-factory.',
+      'Solo un administrador de obsybrain puede reconectar el panel de LaKademIA.',
       'Usa el correo y la contraseña de un administrador de obsybrain.',
     )
   }
@@ -129,7 +129,7 @@ export async function companionReconnect(
       if (!marked) {
         serviceId = await createAccount(tx, clock, {
           kind: 'service',
-          name: 'rsc-factory',
+          name: 'Panel de LaKademIA',
           canCreateBrains: true,
           canInvite: true,
         })
@@ -168,7 +168,7 @@ export async function companionReconnect(
     throw new AppError(
       409,
       'service_removed',
-      'Un administrador dio de baja la cuenta de rsc-factory en obsybrain.',
+      'Un administrador dio de baja la cuenta del panel de LaKademIA en obsybrain.',
       'Reactívala allí primero (Admin › Personas) y termina de conectar de nuevo.',
     )
   }

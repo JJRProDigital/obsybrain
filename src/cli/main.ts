@@ -58,7 +58,7 @@ Usage:
   obsybrain serve                                     start the HTTP server
   obsybrain setup --from-env                          prepare the installation from OBSY_BRAIN_SETUP_URL,
                                                       OBSY_BRAIN_ADMIN_NAME/_EMAIL/_PASSWORD [OBSY_BRAIN_SETUP_NAME,
-                                                      OBSY_BRAIN_SERVICE_NAME]; prints Factory's service key once
+                                                      OBSY_BRAIN_SERVICE_NAME]; prints the LaKademIA panel's service key once
   obsybrain admin bootstrap --email E --name N        create the first administrator and print a key
   obsybrain admin reset-link --email E                print a single-use link to set a password
   obsybrain service create --name N [--can-create-brains] [--can-invite]
@@ -318,8 +318,8 @@ async function main(argv: string[]): Promise<number> {
     process.once('SIGINT', stop)
     return new Promise<number>(() => {})
   }
-  // Companion mode (spec B4 CA24): the installer of Factory prepares Brain from environment variables
-  // and gets the main key of Factory's service account, printed once as JSON.
+  // Companion mode (spec B4 CA24): the installer of the LaKademIA panel prepares Brain from environment variables
+  // and gets the main key of the panel's service account, printed once as JSON.
   if (cmd === 'setup' && sub === '--from-env') {
     const env = process.env
     const missing = [
@@ -346,7 +346,7 @@ async function main(argv: string[]): Promise<number> {
           email: env.OBSY_BRAIN_ADMIN_EMAIL,
           password: env.OBSY_BRAIN_ADMIN_PASSWORD,
         },
-        serviceName: env.OBSY_BRAIN_SERVICE_NAME ?? 'RSC Factory',
+        serviceName: env.OBSY_BRAIN_SERVICE_NAME ?? 'Panel de LaKademIA',
       })
       out(
         `${JSON.stringify({ adminId: made.adminId, serviceId: made.serviceId, serviceKey: made.serviceKey })}\n`,
@@ -434,7 +434,7 @@ async function main(argv: string[]): Promise<number> {
       },
     })
     if (!values.name) {
-      process.stderr.write('Pass --name, for example: obsybrain service create --name "RSC Factory"\n')
+      process.stderr.write('Pass --name, for example: obsybrain service create --name "Panel de LaKademIA"\n')
       return 2
     }
     return withDb(async (db) => {

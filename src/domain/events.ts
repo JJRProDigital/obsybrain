@@ -75,7 +75,7 @@ export type EventRow = {
   accountId: string | null
   accountName: string | null
   // A service account did it (with its main key or a short key): only then is a reference one of its own,
-  // such as an rsc-factory run (plan rsc-factory-brain §3.1).
+  // such as a run of the LaKademIA panel (plan rsc-factory-brain §3.1).
   service: boolean
   credentialId: string | null
   ref: string | null
@@ -87,7 +87,7 @@ export type EventRow = {
   targetState: string | null
   // The external reference of the session it happened in (or of the session it opened or closed).
   sessionRef: string | null
-  // Who a short key acted for (Factory runs agents for people).
+  // Who a short key acted for (the LaKademIA panel runs agents for people).
   onBehalf: { id: string; name: string } | null
   // A closed session: its summary entry (the label is its title), so a later forget of it can be matched.
   summaryEntryId: string | null

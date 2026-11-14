@@ -17,7 +17,7 @@ export class ApiError extends Error {
   readonly problems: Array<{ op: number | null; message: string }>
   // The operations the problems are about (an old base names its operation without a message).
   readonly problemOps: number[]
-  // Where rsc-factory is, while it is to set this installation up (companion_pending); only a plain http(s) address.
+  // Where the LaKademIA panel is, while it is to set this installation up (companion_pending); only a plain http(s) address.
   readonly factoryUrl: string | null
   constructor(
     status: number,

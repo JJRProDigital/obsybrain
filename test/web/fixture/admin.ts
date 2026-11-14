@@ -1,5 +1,5 @@
 // The rest of the administration in the fixture API (B6 PR25b): the installation's settings (name, limit
-// per key, the address of RSC Factory) saved field by field on what was read; mail with a write-only
+// per key, the address of the LaKademIA panel) saved field by field on what was read; mail with a write-only
 // password, a test mail and its failures; meaning search with a provider's key that is never given back and
 // processing that moves on each read; the audit, paged, and its download with the same rows; the health of
 // the service; the logo. In the server's own words, and checked against the description like the rest.
@@ -388,8 +388,8 @@ function updateAsk(c: AdminCtx, retry: boolean): Answer {
     return err(
       409,
       'companion',
-      'obsybrain was installed by rsc-factory: update it from there.',
-      `Open rsc-factory at ${u.factoryUrl} and update from Admin › Updates.`,
+      'obsybrain was installed by the LaKademIA panel: update it from there.',
+      `Open the LaKademIA panel at ${u.factoryUrl} and update from Admin › Updates.`,
     )
   if (u.mode === 'off')
     return err(
@@ -465,8 +465,10 @@ const settingsView = (s: AdminScen) => {
 
 function factoryOf(v: unknown): string | null | Answer {
   if (v === null) return null
-  const how = 'Give the address of RSC Factory, such as https://factory.example.com, or null for none.'
-  if (typeof v !== 'string' || !v.trim()) return invalid('"factoryUrl" is the address of RSC Factory.', how)
+  const how =
+    'Give the address of the LaKademIA panel, such as https://factory.example.com, or null for none.'
+  if (typeof v !== 'string' || !v.trim())
+    return invalid('"factoryUrl" is the address of the LaKademIA panel.', how)
   const raw = v.trim()
   let u: URL
   try {

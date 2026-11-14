@@ -2,7 +2,7 @@
 // «Version»: the button only when an updater runs and a newer version exists; the password asked again (and the code
 // with a second factor) in a dialog, a wrong one said on the field; what is sent is the password and nothing else; the
 // request, the update running, the result in the exact words, a failure with «Try again» (or the command, when only the
-// server can), and, in an installation made by rsc-factory, no button and a way to rsc-factory. By keyboard, and at
+// server can), and, in an installation made by the LaKademIA panel, no button and a way to the panel. By keyboard, and at
 // 320 px without scrolling sideways.
 import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
@@ -272,7 +272,7 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     await audit(page, 'unreadable way back')
   })
 
-  test('installed by rsc-factory: no button of its own, and the way to rsc-factory (CA28)', async ({
+  test('installed by the LaKademIA panel: no button of its own, and the way to the panel (CA28)', async ({
     page,
     context,
     baseURL,
@@ -284,8 +284,10 @@ test.describe('Admin › Backups & system: updating from the web', () => {
     })
     await page.goto('/admin/system')
     await expect(service(page)).toContainText('Corre la versión v0.1.0. La versión v0.2.0 está disponible.')
-    await expect(service(page)).toContainText('obsybrain lo instaló rsc-factory: actualízalo desde allí.')
-    await expect(service(page).getByRole('link', { name: 'Abrir rsc-factory' })).toHaveAttribute(
+    await expect(service(page)).toContainText(
+      'obsybrain lo instaló el panel de LaKademIA: actualízalo desde allí.',
+    )
+    await expect(service(page).getByRole('link', { name: 'Abrir el panel de LaKademIA' })).toHaveAttribute(
       'href',
       'https://factory.example.test',
     )

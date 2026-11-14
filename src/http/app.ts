@@ -89,7 +89,7 @@ export type AppDeps = {
   exportDir?: string
   // The invitation mails one service account may have sent in an hour (OBSY_BRAIN_SERVICE_INVITES_PER_HOUR).
   serviceInvitesPerHour?: number
-  // Companion mode (plan F1 §3.1): installed by rsc-factory and set up by it with the one-time key.
+  // Companion mode (plan F1 §3.1): installed by the LaKademIA panel and set up by it with the one-time key.
   companion?: CompanionConfig | null
 }
 

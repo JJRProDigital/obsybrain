@@ -106,7 +106,7 @@ export function Setup() {
     if (problems[f]) setProblems({ ...problems, [f]: undefined })
   }
 
-  // Installed with rsc-factory: asking again whether it set obsybrain up, and what the last ask found.
+  // Installed with the LaKademIA panel: asking again whether it set obsybrain up, and what the last ask found.
   const [checking, setChecking] = useState(false)
   const [stillWaiting, setStillWaiting] = useState(false)
   const look = async (url: string): Promise<ApiError | null> => {
@@ -199,7 +199,7 @@ export function Setup() {
     )
   }
   if (loadError?.code === 'companion_pending') {
-    // Installed with rsc-factory (F1-PR11): nothing to fill in here; its own setup makes the administration.
+    // Installed with the LaKademIA panel (F1-PR11): nothing to fill in here; its own setup makes the administration.
     return (
       <Door brand={false}>
         <h1 class="title">{T.setup.companionTitle}</h1>

@@ -1,6 +1,6 @@
 // Updating obsybrain from its own web (rsc-updates B3; spec CA27, CA28). Who: the administration. Jobs: see that a newer
 // version exists, ask for it with the password again (and the code, with a second factor), follow how it goes, try again
-// after a failure. In an installation made by rsc-factory there is no button: it points there. Done when: the result is
+// after a failure. In an installation made by the LaKademIA panel there is no button: it points there. Done when: the result is
 // said in words ("Updated from X to Y."). Risks: an update that goes wrong (it goes back by itself and says so); a
 // stolen session (the password is asked again); a request someone else made first (said, not hidden).
 // The server decides everything; this only offers what it allows, and sends the password (and the code) and nothing else.
@@ -156,7 +156,7 @@ function Refused({ why }: { why: string }) {
 }
 
 // What goes under the line that says which version runs: the button, the progress, the failure, or the way to
-// rsc-factory. `reload` asks the system again; the part follows an update until it ends.
+// the LaKademIA panel. `reload` asks the system again; the part follows an update until it ends.
 export function UpdatePart({ view, reload }: { view: UpdateView; reload: () => void }) {
   const said = useSaid()
   const [asking, setAsking] = useState<{ retry: boolean; to: string } | null>(null)

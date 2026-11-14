@@ -22,7 +22,7 @@ describe('companion mode: the settings', () => {
     assert.equal(readConfig(base).companion, null)
   })
 
-  it('on with the key, the shared network, its gateway and the address of rsc-factory', () => {
+  it('on with the key, the shared network, its gateway and the address of the LaKademIA panel', () => {
     assert.deepEqual(readConfig(companion).companion, {
       token: TOKEN,
       network: '192.168.210.0/24',
@@ -60,9 +60,9 @@ describe('companion mode: the settings', () => {
       { OBSY_BRAIN_COMPANION_GATEWAY: '10.0.0.1' },
       /OBSY_BRAIN_COMPANION_GATEWAY/,
     ],
-    ['no address of rsc-factory', { OBSY_BRAIN_FACTORY_URL: '' }, /OBSY_BRAIN_FACTORY_URL/],
+    ['no address of the LaKademIA panel', { OBSY_BRAIN_FACTORY_URL: '' }, /OBSY_BRAIN_FACTORY_URL/],
     [
-      'an address of rsc-factory in clear',
+      'an address of the LaKademIA panel in clear',
       { OBSY_BRAIN_FACTORY_URL: 'http://factory.example.com' },
       /OBSY_BRAIN_FACTORY_URL/,
     ],
