@@ -4,6 +4,18 @@ Lo que cambia cada versión publicada de obsybrain. Cada release lleva las misma
 `obsybrain.sh` como archivo del release y su SHA-256. Las versiones siguen `vX.Y.Z`; las actualizaciones solo
 avanzan.
 
+## v0.7.2
+
+La guía del producto, dentro del producto.
+
+- **Sección Guía en la web.** El manual completo — las 9 pantallas de administración, los ajustes, el flujo
+  de propuestas, los agentes — con capturas de las pantallas reales, navegable desde la barra lateral
+  (ícono libro). Nada de ir a GitHub a leer cómo se usa lo que ya tenés abierto.
+- **La barra lateral respeta su ancho.** Con nombres de sección en español, los ítems del rail se
+  desbordaban y pintaban sobre el contenido; ahora encogen con puntos suspensivos.
+- **Botones y casillas al mínimo accesible.** Los radios y checkboxes de 18px quedaban bajo el mínimo de
+  24px que exige la auditoría automática de accesibilidad; ahora miden 26px con el espaciado correcto.
+
 ## v0.7.1
 
 El brain de arranque: LaKademIA trae su starter pack y la guía de los primeros 4 pasos.
