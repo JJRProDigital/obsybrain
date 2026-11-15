@@ -1,6 +1,6 @@
 name: ci
 on:
-  push: { branches: [main] }
+  push: { branches: [main, fase1-rebrand] }
   pull_request:
 permissions: { contents: read }
 jobs:
