@@ -75,6 +75,28 @@ El overview de tu brain ya tiene el mapa de todo el material.
   con tu clave de instalación (el launcher te la muestra y te la guarda en
   `~/obsybrain/installation-key.txt`). Guardala: es la única forma de abrir tus copias.
 
+## Actualizar ObsyBrain
+
+Las versiones nuevas salen como releases en GitHub; actualizar es un comando y es
+seguro:
+
+```sh
+sh obsybrain.sh update
+```
+
+Hace todo solo: revisa si hay versión nueva, **hace una copia cifrada de todo antes
+de tocar nada**, descarga y construye la versión nueva mientras la tuya sigue
+funcionando, pasa los datos y reinicia. Si algo falla, **vuelve a la versión
+anterior solo** — tus datos y tu clave quedan como estaban. Mientras actualiza, la
+web muestra una página de mantenimiento y vuelve sola al terminar.
+
+Comandos relacionados:
+
+```sh
+sh obsybrain.sh update --check   # solo mirar: qué versión corre, cuál es la nueva, qué cambia
+sh obsybrain.sh backups          # la lista de tus copias
+```
+
 ## Preguntas rápidas
 
 - **¿Puedo usar otro idioma?** El producto está en español; los términos técnicos

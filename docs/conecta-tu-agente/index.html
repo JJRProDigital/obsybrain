@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Conectá tu agente — ObsyBrain</title>
+  <link rel="icon" type="image/svg+xml" href="./mark.svg" />
+  <style>
+    :root {
+      --ink: #1E312F;
+      --ink-2: #14201d;
+      --paper: #F1EFEA;
+      --paper-2: #FBFAF6;
+      --gold: #D5B06D;
+      --gold-dark: #7E5F1F;
+      --muted: #4A5A56;
+      --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+      --display: "Playfair Display", Georgia, serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.6; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+    header { border-bottom: 2px solid var(--gold); padding-bottom: 24px; margin-bottom: 40px; }
+    .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: var(--gold-dark); }
+    h1 { font-family: var(--display); font-weight: 900; font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1.05; margin: 10px 0 6px; }
+    .lead { font-size: 1.15rem; color: var(--muted); max-width: 60ch; }
+    h2 { font-family: var(--display); font-size: 1.7rem; margin: 48px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--gold); display: inline-block; }
+    p { margin: 12px 0; max-width: 68ch; }
+    .card { background: var(--paper-2); border: 1px solid rgba(30,49,47,.12); border-radius: 10px; padding: 20px 22px; margin: 16px 0; }
+    .card h3 { font-family: var(--display); font-size: 1.25rem; margin-bottom: 6px; }
+    .card p { margin: 6px 0; font-size: .98rem; }
+    code, pre { font-family: var(--mono); font-size: .9rem; }
+    code.inline { background: rgba(30,49,47,.08); padding: 1px 6px; border-radius: 4px; }
+    pre { background: var(--ink); color: var(--paper); padding: 14px 18px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; margin: 12px 0; }
+    pre .c { color: var(--gold); }
+    .steps { counter-reset: paso; }
+    .steps li { margin: 10px 0 10px 22px; }
+    .note { border-left: 3px solid var(--gold); padding: 10px 16px; margin: 16px 0; color: var(--muted); font-size: .95rem; }
+    a { color: var(--gold-dark); }
+    footer { margin-top: 64px; padding-top: 16px; border-top: 1px solid rgba(30,49,47,.15); font-family: var(--mono); font-size: 11px; opacity: .6; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: var(--ink); color: var(--paper); }
+      .card { background: rgba(241,239,234,.06); border-color: rgba(241,239,234,.15); }
+      h2 { border-color: var(--gold); }
+      .lead, .note, .card p { color: rgba(241,239,234,.75); }
+      code.inline { background: rgba(241,239,234,.12); }
+      footer { border-color: rgba(241,239,234,.2); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">ObsyBrain · LaKademIA</div>
+      <h1>Conectá tu agente</h1>
+      <p class="lead">Tu ObsyBrain es un servidor MCP: cualquier agente de IA que hable MCP puede leerlo, buscar en él y — si le das permiso — escribir en su diario y proponer páginas para el wiki.</p>
+    </header>
+
+    <h2>Antes de empezar</h2>
+    <p>Necesitás dos cosas:</p>
+    <p>1. Tu instalación corriendo (la web responde en <code class="inline">http://localhost:8090</code>, o en tu dominio si instalaste en un VPS).</p>
+    <p>2. Un agente de IA que soporte MCP: <strong>Claude Code, Codex, OpenCode o Cursor</strong>. Otros agentes pueden usar el puente local (<code class="inline">obsybrain bridge</code>).</p>
+    <div class="note">Si tu instalación está en un servidor con dominio, reemplazá <code class="inline">http://localhost:8090</code> por <code class="inline">https://tudominio.com</code> en todos los comandos. La página <strong>Conecta tu agente</strong> dentro de tu ObsyBrain genera estos mismos bloques con tu dirección real.</div>
+
+    <h2>Camino 1 — Conexión estándar (recomendado)</h2>
+    <p>Sin tokens ni archivos de configuración: el agente abre tu navegador una vez y vos aprobás allí.</p>
+    <div class="card">
+      <h3>Claude Code</h3>
+      <pre><span class="c"># en una terminal, en tu carpeta de trabajo:</span>
+claude mcp add --transport http obsybrain http://localhost:8090/mcp --scope user
+claude mcp login obsybrain</pre>
+      <p>El navegador abre la página de tu ObsyBrain para aprobar el acceso. Con eso, cada sesión de Claude Code arranca con tu brain en el contexto.</p>
+    </div>
+    <div class="card">
+      <h3>Codex</h3>
+      <pre>codex mcp add obsybrain --url http://localhost:8090/mcp
+codex mcp login obsybrain</pre>
+    </div>
+    <div class="card">
+      <h3>OpenCode</h3>
+      <pre><span class="c"># en opencode.json:</span>
+{ "mcp": { "obsybrain": { "type": "remote", "url": "http://localhost:8090/mcp" } } }</pre>
+    </div>
+    <div class="card">
+      <h3>Cursor</h3>
+      <pre><span class="c"># en .cursor/mcp.json:</span>
+{ "mcpServers": { "obsybrain": { "url": "http://localhost:8090/mcp" } } }</pre>
+    </div>
+
+    <h2>Camino 2 — Con un token (para agentes sin navegador)</h2>
+    <p>Si tu agente corre en un servidor, un contenedor o sin navegador, usás un token de acceso:</p>
+    <ol class="steps">
+      <li>En la web de tu ObsyBrain: <strong>Perfil › Claves › Crear un token</strong>, con permiso de <strong>lectura y escritura</strong>.</li>
+      <li>Guardalo en un archivo que solo vos puedas leer: <code class="inline">~/.config/obsybrain/token</code> (permiso 600). Nunca en la línea de comandos.</li>
+      <li>Seguí el bloque de configuración que la página <strong>Conecta tu agente</strong> genera para tu cliente — cada agente usa su propia variable (<code class="inline">OBSY_BRAIN_TOKEN_CLAUDE_CODE</code>, <code class="inline">OBSY_BRAIN_TOKEN_CODEX</code>, etc.) para que dos agentes nunca se pisen.</li>
+    </ol>
+    <div class="card">
+      <h3>El puente, para agentes que solo arrancan programas MCP locales</h3>
+      <pre>obsybrain bridge --url http://localhost:8090/mcp</pre>
+      <p>Como servidor MCP local: <code class="inline">{"command": "obsybrain", "args": ["bridge", "--url", "<dirección>"]}</code>. El token viene de <code class="inline">--token-file</code>, o de <code class="inline">OBSY_BRAIN_TOKEN</code>, o de <code class="inline">~/.config/obsybrain/token</code>.</p>
+    </div>
+
+    <h2>La prueba</h2>
+    <p>Preguntale a tu agente:</p>
+    <pre>¿Qué sabés sobre cómo armar un prompt?</pre>
+    <p>Si responde con el material de tu brain (el starter pack trae la anatomía del prompt) — y no con una respuesta genérica del modelo —, la conexión funciona. En la web, la página <strong>Conecta tu agente</strong> te muestra «Conectado» con la hora exacta.</p>
+
+    <h2>¿Qué puede hacer el agente una vez conectado?</h2>
+    <div class="card">
+      <p><strong>Con lectura:</strong> buscar en todos tus brains, leer páginas del wiki, consultar el diario.</p>
+      <p><strong>Con lectura y escritura:</strong> guardar entradas del diario mientras trabaja, y proponer cambios al wiki (las propuestas esperan la aprobación de un curador — nada entra sin pasar por tus ojos).</p>
+    </div>
+
+    <h2>¿Problemas?</h2>
+    <div class="note">
+      <p>· «Conectado» no aparece: revisá que la web responda en el navegador con la misma dirección que pusiste en el comando.</p>
+      <p>· El agente responde genérico: el brain probablemente está vacío — importá el starter pack (Paso 3 de la <a href="https://github.com/JJRProDigital/obsybrain/blob/main/deploy/GUIA-ONBOARDING.md">Guía de onboarding</a>).</p>
+      <p>· Error 403 con una clave: la clave no tiene permiso de escritura, o la importación la hace solo una persona en la web.</p>
+      <p>· Más ayuda: el manual completo vive dentro de tu ObsyBrain, sección <strong>Guía</strong> (ícono libro en la barra lateral).</p>
+    </div>
+
+    <footer>
+      <div>ObsyBrain · Obsessive Solutions © 2026</div>
+      <div>www.obsessivesolutions.es</div>
+    </footer>
+  </div>
+</body>
+</html>
