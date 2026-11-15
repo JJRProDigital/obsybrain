@@ -38,11 +38,12 @@ export function findForbidden(text: string): string | undefined {
 }
 
 // Every file under `dir` (and its name) that holds a forbidden name. Compressed copies are skipped: they
-// are made from files that are read here.
+// are made from files that are read here. Binary files are skipped too: read as text, their compressed
+// bytes hold any three-letter sequence by chance — a PNG cannot name anything.
 export async function scan(dir: string, skip = new Set<string>()): Promise<string[]> {
   const hits: string[] = []
   for await (const f of files(dir, skip)) {
-    if (f.endsWith('.br') || f.endsWith('.gz')) continue
+    if (f.endsWith('.br') || f.endsWith('.gz') || /\.(png|jpe?g|webp|ico|woff2?|ttf|otf)$/i.test(f)) continue
     const name = findForbidden(await readFile(f, 'utf8'))
     if (name || findForbidden(relative(dir, f))) hits.push(relative(dir, f))
   }
