@@ -1,7 +1,8 @@
 // Capture helper: sign in once, then walk the screens, saving a PNG each.
 // Run: node scripts/shots/run.mjs  (WSL, node 25)
-import { chromium } from 'playwright-core'
+
 import { mkdirSync } from 'node:fs'
+import { chromium } from 'playwright-core'
 
 const BASE = process.env.BASE ?? 'http://localhost:8090'
 const EMAIL = process.env.EMAIL ?? 'hola@juanjoserprofesionaldigital.com'

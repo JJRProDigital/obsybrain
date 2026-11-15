@@ -9,7 +9,9 @@
       "!**/*.md",
       "!test-results",
       "!playwright-report",
-      "!test/fixtures"
+      "!test/fixtures",
+      "!deploy/taller-pro.html",
+      "!docs/conecta-tu-agente/index.html"
     ]
   },
   "formatter": {
