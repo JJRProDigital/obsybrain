@@ -4,6 +4,17 @@ Lo que cambia cada versión publicada de obsybrain. Cada release lleva las misma
 `obsybrain.sh` como archivo del release y su SHA-256. Las versiones siguen `vX.Y.Z`; las actualizaciones solo
 avanzan.
 
+## v0.7.3
+
+La Guía se lee por secciones.
+
+- **Sección por sección, sin scroll eterno.** La Guía se lee con una lista de secciones a la izquierda y una
+  a la vez a la derecha; los enlaces «Siguiente →» cambian de sección y un enlace profundo
+  (`/guia#seccion-07-agente`) abre la sección exacta. En pantallas angostas, la lista se pliega en una tira
+  de secciones arriba.
+- **El taller PRO.** `deploy/taller-pro.html`: el deck interactivo del taller de 90 minutos — instalar,
+  conectar el agente, el ciclo diario y soberanía, con los comandos listos para copiar.
+
 ## v0.7.2
 
 La guía del producto, dentro del producto.
@@ -11,9 +22,6 @@ La guía del producto, dentro del producto.
 - **Sección Guía en la web.** El manual completo — las 9 pantallas de administración, los ajustes, el flujo
   de propuestas, los agentes — con capturas de las pantallas reales, navegable desde la barra lateral
   (ícono libro). Nada de ir a GitHub a leer cómo se usa lo que ya tenés abierto.
-- **Sección por sección, sin scroll eterno.** La Guía se lee con una lista de secciones a la izquierda y una
-  a la vez a la derecha; los enlaces «Siguiente →» cambian de sección y un enlace profundo
-  (`/guia#seccion-07-agente`) abre la sección exacta.
 - **La barra lateral respeta su ancho.** Con nombres de sección en español, los ítems del rail se
   desbordaban y pintaban sobre el contenido; ahora encogen con puntos suspensivos.
 - **Botones y casillas al mínimo accesible.** Los radios y checkboxes de 18px quedaban bajo el mínimo de
